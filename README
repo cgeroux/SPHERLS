@@ -1,0 +1,7 @@
+To build and install:
+
+./configure
+make
+make install
+
+To find out more on how to use the SPHERLS packages see user manuals in ./docs/manuals
