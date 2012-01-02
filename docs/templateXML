@@ -1,0 +1,80 @@
+<data>
+  <procDims><!-- product of these should be the number of processors specified in submit script
+    + 1 -->
+    <x0>4</x0><!--Note frist region (processor) in this dimension will be 1D-->
+    <x1>1</x1><!--Not currently used, only distribution in radial direction allowed at present-->
+    <x2>1</x2><!--Not currently used, only distribution in radial direction allowed at present-->
+  </procDims>
+  <startModel>/nqs/cgeroux/implicit_test/3D_TEOS_v0</startModel><!-- Model to start with-->
+  <outputName>/nqs/cgeroux/implicit_test/output/3D_TEOS_v0_1</outputName><!--Where to put output, 
+    and how to name it. It will append _t######## to the end for model dumps where ######## is a zero
+    padded timestep index. This is also used for watchzones, with _watchZone_r#_t%_p$.txt where # is the 
+    index of the radial zone, % is the index of the theta zone, and $ is the index of the phi zone.-->
+  <watchZones><!-- a list of zones to output information on every timestep-->
+    <watchZone x0="121" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+    <watchZone x0="122" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+    <watchZone x0="123" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+    <watchZone x0="124" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+    <watchZone x0="125" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+    <watchZone x0="126" x1="0" x2="0"></watchZone><!--15,10,6,6-->
+  </watchZones>
+  <peakKE>true</peakKE><!-- true=track peak KE, false=don't track it -->
+  <prints type="normal"><!-- aviable types are "normal" where info about the gernal progress of the code is printed
+    "timeStepInfo" where information about the timestep is printed out in column form specifically for identifying prolems
+    with timestep selection-->
+    <frequency type="timeSteps">10</frequency><!-- how often to print 1=every time step, 2=every other time step
+      etc. -->
+    <frequency type="seconds">600.00</frequency><!-- how often to print in simulation time -->
+  </prints>
+  <dumps>
+    <frequency type="timeSteps">200</frequency><!--how often to dump 1=every time step, 2=every 
+      other time step etc. -->
+    <frequency type="seconds">574.71</frequency><!-- dumps every 574.71 seconds of simulation time,
+      or the closest it can get -->
+  </dumps>
+  <eos>
+    <eosFile>./eos/eos</eosFile><!-- equation of state file in binary, used to overide location 
+      of file specified in starting model -->
+    <tolerance>5e-15</tolerance><!-- tolerance used in calculating equation of state quantities-->
+    <max-iterations>50</max-iterations><!-- maximum iterations allowed to try and achieve allowed
+      tolerance in temperature in explicit region by matching the energy-->
+  </eos>
+  <extraAlpha>0.0</extraAlpha><!--Add some extra mass at the top of the model, used in the surface 
+    boundary condition of the radial velocity. This extra mass is not included in the hydrostatic 
+    initial model.-->
+  <av>1.4</av><!-- artificual viscosity parameter, of order 1 -->
+  <av-threshold>0.01</av-threshold><!-- The amount of compression before AV is turned on.
+    It is in terms of a velocity difference between zone sides and is in fractions of the local 
+    sound speed. -->
+  <donorFrac>0.1</donorFrac><!-- fraction of upwind gradient to include in advection terms -->
+  <time>
+    <endTime>1e3</endTime><!-- time in seconds -->
+    <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time
+      step, seems like I can get away with larger values when there aren't many 1D zones, and 
+      when there are many I needs to be smaller. -->
+    <percentChangePerTimeStep>2.0e-3</percentChangePerTimeStep><!-- the percent by which the maximum
+      horizontal temperature variation and the maximum convective velocities are allowed to change 
+      by in a timestep. If the percentage change is larger than this value the timestep is reduced
+      to keep the changes within this amount. -->
+    <timeStep>8.0</timeStep><!-- if set, will use the constant time step given in seconds -->
+  </time>
+  <adiabatic>false</adiabatic><!-- Use either the adiabatic energy equation "true" or the 
+    non-adiabatic energy equation if "false" or if the node is not found. -->
+  <turbMod><!-- If this node is found a turbulance model will be used.-->
+    <type>smagorinsky</type>
+    <eddyVisc>0.17</eddyVisc>
+  </turbMod>
+  <implicit>
+    <numImplicitZones>0</numImplicitZones><!-- number of implicit zones, if 0 no implicit 
+      calculation is done -->
+    <derivativeStepFraction>5e-7</derivativeStepFraction><!-- fraction of the temperature to use as 
+      step size in numerical derivatives 5.0e-7 is usually good.-->
+    <tolerance>5.0e-14</tolerance><!-- Tolerance used in calculating the temperature implicitly. 
+      Used both for the PETSc matrix solver and the temperature iterations. To see solver error set
+      TRACKMAXSOLVERERROR to 1 in global.h -->
+    <max-iterations>100</max-iterations><!-- maximum number of iterations to try and achieve the
+      tolerance given for the implicit calculation of the temperature. As well as the maximum number
+      of iterations allowed for the PETSc matrix solver. To see number of solver interations set
+      TRACKMAXSOLVERERROR to 1 in global.h -->
+  </implicit>
+</data>
