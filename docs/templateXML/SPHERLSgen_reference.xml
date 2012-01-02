@@ -1,0 +1,139 @@
+<data>
+  <!-- The first node of a given type that is encountered in the file is the one which is used to
+    set paramters. -->
+  
+  <!-- constants -->
+  <G>6.67259e-08</G><!-- gravitational constant [cm^3 g^-1 s^-2]-->
+  <R-sun>6.958e+10</R-sun><!--[cm]-->
+  <M-sun>1.9891e+33</M-sun><!--[g]-->
+  <L-sun>3.839e33</L-sun><!--[ergs s^-1]-->
+  <sigma>5.6704e-5</sigma><!--Stefan-Boltzman constant [ergs s^-1 cm^-2 K-4]-->
+  
+  <model type="sedov">
+    
+    <output>
+      <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time step -->
+      <fileName>sedov.txt</fileName> <!-- name of the output file -->
+      <binary>false</binary> <!-- if true outputs a binary file else outputs ascii -->
+      <writeToScreen>true</writeToScreen> <!-- if true outputs to screen -->
+      <precision>16</precision> <!-- number of decimals to write on numbers-->
+    </output>
+    
+    <dimensions>
+      <radIndepVar>
+        <r-delta>10.0</r-delta> <!--shell spacing [cm]-->
+        <r-min>10.0</r-min> <!--minimum radius [cm]-->
+        <num-r>400</num-r> <!-- total number of radial zones -->
+        <num-1D>5</num-1D><!-- the number of zones to be used in the 1D portion of the grid (if
+          num-theta=num-phi=1 all zones are 1D) -->
+      </radIndepVar>
+      
+      <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->
+      <num-theta>2</num-theta><!-- number of theta zones before number of ghost cells -->
+      <delta-theta>1.0</delta-theta><!-- in degrees -->
+      <num-phi>2</num-phi><!-- number of phi zones before number of ghost cells -->
+      <delta-phi>1.0</delta-phi><!-- in degrees -->
+    </dimensions>
+    
+    <state>
+      <gamma>3.5</gamma><!--gamma to use in the adiabatic gamma law-->
+      <num-shells-center>29</num-shells-center><!-- number of shells in central region-->
+      <eng-cent>6.2775e21</eng-cent><!--central energy [ergs]-->
+      <eng>10.0e6</eng><!--energy in the rest of the test region, excluding the central region [ergs/g]-->
+      <rho>2.65</rho><!--density, uniform through out [g/cm^3]-->
+    </state>
+    
+    <!-- Periodicity -->
+    <periodic>
+      <x0>0</x0><!--periodicity in x0 direction not yet supported -->
+      <x1>1</x1><!--periodicity in x1 direction, only has an effect if 2D or 3D -->
+      <x2>1</x2><!--periodicity in x2 direction, only has an effect if 3D -->
+    </periodic>
+    
+    <velocityDist type="POLY"><!-- sets all velocities to zero -->
+      <term>
+        <c>0.0E0</c>
+        <p>0.0</p>
+      </term>
+    </velocityDist>
+  </model>
+  
+  <model type="stellar">
+    
+    <output>
+      <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time step -->
+      <fileName>3DGL_u-1e5.txt</fileName><!-- name of the output file -->
+      <binary>false</binary><!-- if true outputs a binary file else outputs ascii -->
+      <writeToScreen>false</writeToScreen><!-- if true outputs to screen -->
+      <precision>16</precision><!-- number of decimals to write on numbers-->
+    </output>
+    
+    <!-- Equation of state -->
+    <EOS type="gammaLaw"><!-- second equation of state is ignored -->
+      <R-surf>5.5916293248E+00</R-surf><!-- surface radius of model [solar radii]-->
+      <gamma>1.6666666666</gamma>
+      <E-pro>/home/cgeroux/SPHERLSgen/trunk/energy_pro/Epro_mod.dat</E-pro><!-- file with E [erg] 
+        versus log10(1-M_r/Mtotal), used to find E [erg]-->
+    </EOS>
+    <EOS type="table">
+      <T-eff>6.8e3</T-eff><!-- Effective temperature [K] -->
+      <L>30.0</L><!-- Luminosity [L_sun] -->
+      <eosTable>/home/cgeroux/SPHERLS/trunk/eos/eos</eosTable><!-- Equation of state table -->
+      <tolerance>5e-15</tolerance><!-- Error allowed when calculating -->
+    </EOS>
+    
+    <!-- Periodicity, optional, most times it isn't needed and can be ommitted since the code is 
+    smart enough to pick resonable values in nearly all cases. -->
+    <periodic>
+      <x0>0</x0><!--periodicity in x0 direction not yet supported -->
+      <x1>1</x1><!--periodicity in x1 direction, only has an effect if 2D or 3D -->
+      <x2>1</x2><!--periodicity in x2 direction, only has an effect if 3D -->
+    </periodic>
+    
+    <!-- Set dimensions -->
+    <dimensions>
+      <radIndepVar>
+        <M-total>5.75E-01</M-total><!-- total mass of the star [solar masses] -->
+        <M-delta-init>4.5E-9</M-delta-init><!-- delta M at sufrace [solar masses]-->
+        <!--There can be many M-delta-delta nodes and they can have stopType="T" or ="R" indicating 
+          that the stop value is either a temperature or a radius. It is best not ot mix "R" stop 
+          values with "T" stop values. The "R" stop values are mostly intended for the adiabatic 
+          models which lack temperatures. Using stopType="T" requires increasing stopVaules from 
+          top to bottom, while using stopType="R" requires decreasing values from top to bottom.-->
+        <M-delta-delta stopType="T" stopValue="5e6">1e-01</M-delta-delta><!-- % to increase delta M by each step-->
+        <R-stop>7.6e-01</R-stop><!-- depth to stop at [solar radii] (7.6e-01)-->
+        <alpha>0.2</alpha><!-- parameter used to indicate mass above outer most zone in fraction
+          of M-delta-init, values should be between 0 and 0.5 -->
+        <num-1D>10</num-1D><!-- the number of zones to be used in the 1D portion of the grid (if
+          num-theta=num-phi=1 all zones are 1D) -->
+      </radIndepVar>
+      <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->
+      <num-theta>2</num-theta><!-- number of theta zones before number of ghost cells -->
+      <delta-theta>1.0</delta-theta><!-- in degrees -->
+      <num-phi>2</num-phi><!-- number of phi zones before number of ghost cells -->
+      <delta-phi>1.0</delta-phi><!-- in degrees -->
+    </dimensions>
+    
+    <!-- Velocity profile -->
+    <velocityDist type="PRO">
+      <fileName>/home/cgeroux/SPHERLSgen/trunk/velocity_pro/fu_upro2.dat</fileName>
+      <uSurf>-1.0e5</uSurf>
+      <perturb type="torus"><!-- Can have multiple preturbations, only the torus type of preturbation is currently defined-->
+        <r_cen_off>2e11</r_cen_off><!-- radius in the star at which to place the toriodial pretubation-->
+        <theta_cen_off>0.0</theta_cen_off><!-- off set in center of the torus from the center of the theta coordinate -->
+        <phi_cen_off>0.0</phi_cen_off><!-- off set in center of the torus from the center of the phi coordinate -->
+        <radius_cen>1e9</radius_cen><!-- radius of the torus. This can be thought of as the spacing between the convective cells -->
+        <radius_outter>5e8</radius_outter><!-- radius of the ring of the torus, this can be thought as the size of the convective cell-->
+        <width_guassian>2.5e8</width_guassian><!-- width of the guassian distribution, Used to smoothely
+          decrease the velocity as we move away from the surface of the torus. -->
+        <amplitude>1.0e20</amplitude><!-- amplitude of the velocity preterubation [cm/s]-->
+      </perturb>
+    </velocityDist>
+    <velocityDist type="POLY"><!-- second velocity profile is ignored -->
+      <term><!--can have many terms, all added together-->
+        <c>-1.0E5</c><!-- constant for the term-->
+        <p>6.8865</p><!-- power of the term-->
+      </term>
+    </velocityDist>
+  </model>
+</data>
