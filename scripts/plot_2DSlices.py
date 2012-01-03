@@ -229,11 +229,10 @@ def parseXMLFile(fileName):
   settings['planeIndex']=int(planeElement.get("index"))
   
   #get grid
+  settings['grid']=None#use default
   if planeElement.get("grid")!=None:
-    if planeElement.get("grid").lower() in ["both","minor","major","none"]:
+    if planeElement.get("grid").lower() in ["both","major"]:
       settings['grid']=planeElement.get("grid").lower()
-    else:#use default
-      settings['grid']=None
   
   #get x-axis
   xaxisElement=root.find("xaxis")
@@ -272,11 +271,10 @@ def parseXMLFile(fileName):
     settings['xLabel']="x axis label"
   
   #get x minorTics
+  settings['xminortics']=False#use default
   if xaxisElement.get("minortics")!=None:
-    if xaxisElement.get("xminortics").lower() in ["true","1","t","yes","y"]:
+    if xaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
       settings['xminortics']=True
-  else:#use default
-    settings['xminortics']=False
   
   #get y-axis
   yaxisElement=root.find("yaxis")
@@ -315,11 +313,10 @@ def parseXMLFile(fileName):
     settings['yLabel']="y axis label"
   
   #get y minorTics
+  settings['yminortics']=False#use default
   if yaxisElement.get("minortics")!=None:
-    if yaxisElement.get("yminortics").lower() in ["true","1","t","yes","y"]:
+    if yaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
       settings['yminortics']=True
-  else:#use default
-    settings['yminortics']=False
   
   #get scalor
   scalorElement=root.find("scalor")
@@ -1066,6 +1063,18 @@ def plot_plane(fileName,nCount,fig,ax,settings):
   #set limits
   ax.set_xlim([settings['xMin'],settings['xMax']])
   ax.set_ylim([settings['yMin'],settings['yMax']])
+  
+  #set minor axis tics
+  if settings['xminortics']:
+    ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+  if settings['yminortics']:
+    ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+  
+  #set grid settings
+  if settings['grid']!=None:
+    ax.grid(True, which=settings['grid'])
+  else:
+    ax.grid(False)
   
   #set title
   title=settings['title']

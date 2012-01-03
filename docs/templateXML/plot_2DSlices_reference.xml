@@ -47,6 +47,13 @@ p^=-       sin(p)*x^+       cos(p)*y^
   <inputFileName>../output/3D_T5700_t[101000-102000]</inputFileName>
   
   <!-- RT-plane with combined u-u_0 and v vectors, transform: p=0, x->x, z->y-->
+  <!-- <plane></plane>
+    sets the type and location of plane to use for the slice
+    type : can be either "rt", "rp", and "tp" for radial-theta slice, radial-phi, and theta-phi
+           slices
+    index: sets what index in the direction perpendicular to the slice that the slices is from.
+    grid : can be either both, major, or false to set grid lines at both major and minor tic marks, 
+           just major tic marks, or no grid at all.-->
   <plane type="rt" index="0" grid="both"></plane>
   <xaxis min="3.8e1" max="5.2e1" label="[$10^4$ km]" minortics="True">$1*sin($2)/1e10</xaxis>
   <yaxis min="-4e-1" max="5e-1" label="[$10^4$ km]" minortics="True">$1*cos($2)/1e10</yaxis>
