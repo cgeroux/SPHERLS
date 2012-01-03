@@ -228,6 +228,13 @@ def parseXMLFile(fileName):
     quit()
   settings['planeIndex']=int(planeElement.get("index"))
   
+  #get grid
+  if planeElement.get("grid")!=None:
+    if planeElement.get("grid").lower() in ["both","minor","major","none"]:
+      settings['grid']=planeElement.get("grid").lower()
+    else:#use default
+      settings['grid']=None
+  
   #get x-axis
   xaxisElement=root.find("xaxis")
   if xaxisElement==None:
@@ -263,7 +270,14 @@ def parseXMLFile(fileName):
     settings['xLabel']=xaxisElement.get("label")
   else:#use default
     settings['xLabel']="x axis label"
-    
+  
+  #get x minorTics
+  if xaxisElement.get("minortics")!=None:
+    if xaxisElement.get("xminortics").lower() in ["true","1","t","yes","y"]:
+      settings['xminortics']=True
+  else:#use default
+    settings['xminortics']=False
+  
   #get y-axis
   yaxisElement=root.find("yaxis")
   if yaxisElement==None:
@@ -299,6 +313,13 @@ def parseXMLFile(fileName):
     settings['yLabel']=yaxisElement.get("label")
   else:#use default
     settings['yLabel']="y axis label"
+  
+  #get y minorTics
+  if yaxisElement.get("minortics")!=None:
+    if yaxisElement.get("yminortics").lower() in ["true","1","t","yes","y"]:
+      settings['yminortics']=True
+  else:#use default
+    settings['yminortics']=False
   
   #get scalor
   scalorElement=root.find("scalor")
