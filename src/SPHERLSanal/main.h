@@ -7,7 +7,7 @@
   
 */
 
-#include "fftw++.h"
+//#include "fftw++.h"
 #include <fftw3.h>
 #include <cstdlib>
 #include <iostream>

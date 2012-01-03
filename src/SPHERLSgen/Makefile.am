@@ -1,2 +1,2 @@
 bin_PROGRAMS = SPHERLSgen
-learning_SOURCES = 
+SPHERLSgen_SOURCES = main.cpp main.h
