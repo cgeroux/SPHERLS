@@ -4,12 +4,12 @@ AC_PROG_CXX
 AC_LANG([C++])
 #
 #common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS="/home/cgeroux/lib/fftw-3.2.2/include"
-FFTW_LIB_PATHS="/home/cgeroux/lib/fftw-3.2.2/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
+FFTW_INCLUDE_PATHS="/home/cgeroux/lib/fftw-3.2.2/include  /share/apps/fftw/include "
+FFTW_LIB_PATHS="/home/cgeroux/lib/fftw-3.2.2/lib /share/apps/fftw/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
 #
 #common places for fftw libraries and includes
-HDF_INCLUDE_PATHS="/home/cgeroux/lib/hdf4/include"
-HDF_LIB_PATHS="/home/cgeroux/lib/hdf4/lib"
+HDF_INCLUDE_PATHS="/home/cgeroux/lib/hdf4/include /share/apps/hdf4/include"
+HDF_LIB_PATHS="/home/cgeroux/lib/hdf4/lib /share/apps/hdf4/lib"
 #
 #common places for PETSc libraries and includes
 PETSC_INCLUDE_PATHS="/home/cgeroux/lib/petsc/include"
