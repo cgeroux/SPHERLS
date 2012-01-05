@@ -5,7 +5,7 @@ import sys
 import glob
 import optparse as op
 import combine_bins
-import SPHERLSanal_path
+import bin_paths
 import disect_filename
 
 def main():
@@ -59,7 +59,7 @@ def make_profiles(keep,fileName,remake,remakeBins):
         
         #make profile
         print __name__+":"+make_profiles.__name__+": creating profile from \""+file+"\" ..."
-        success=os.system(SPHERLSanal_path.SPHERLSanalPath+' -a cb '+file)
+        success=os.system(bin_paths.SPHERLSanalPath+' -a cb '+file)
         if success==0:
           pass
         else :

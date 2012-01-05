@@ -1,4 +1,10 @@
 <data>
+  <job>
+    <name>Test</name><!-- name of the job -->
+    <duration>35:00:00</duration><!-- time for job to run in the que -->
+    <totalview>False</totalview><!-- if true will luanch without the que, with the debugg option -->
+    <que>False</que><!-- if true it will run job in que, else at the command line -->
+  </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
     <x0>4</x0><!--Note frist region (processor) in this dimension will be 1D-->

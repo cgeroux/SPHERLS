@@ -5,7 +5,7 @@ import sys
 import glob
 import optparse as op
 import combine_bins
-import SPHERLSanal_path
+import bin_paths
 import disect_filename
 
 def main():
@@ -92,7 +92,6 @@ def main():
   
   #create profile files, and save list of files
   make_2DSlices(options.keep,args[0],planeID,planeIndex,options.remake)
-    
 def make_2DSlices(keep,fileName,nPlane,nPlaneIndex,remake):
   
   #get base file name
@@ -123,7 +122,7 @@ def make_2DSlices(keep,fileName,nPlane,nPlaneIndex,remake):
         
         #make 2D slice
         print __name__+":"+make_2DSlices.__name__+": creating 2D slice from \""+file+"\""
-        success=os.system(SPHERLSanal_path.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
+        success=os.system(bin_paths.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
         if success==0:
           pass
         else :

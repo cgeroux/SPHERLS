@@ -8,7 +8,6 @@ import math
 import numpy as np
 import sys
 import os
-import SPHERLSanal_path
 import disect_filename
 import average_PKE
 

@@ -4,7 +4,7 @@ import getopt
 import sys
 import glob
 import optparse as op
-import SPHERLSanal_path
+import bin_paths
 import disect_filename
 
 def main():
@@ -61,7 +61,7 @@ def combine_bin_files(keep,fileName,remakeBins):
       else:
         print __name__+":"+combine_bin_files.__name__+": combining \""+files[i][:len(files[i])-2]+"\" ..."
       
-      success=os.system(SPHERLSanal_path.SPHERLSanalPath+' -c dbcb '+files[i][:len(files[i])-2])
+      success=os.system(bin_paths.SPHERLSanalPath+' -c dbcb '+files[i][:len(files[i])-2])
       if success==0:
         if not keep:
           #remove distributed binary files
