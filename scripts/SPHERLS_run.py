@@ -200,7 +200,6 @@ def main():
   script=makeSubScript(settings)
   if script!=None:#sub the job in the que\n
     cmd="qsub "+script
-    print cmd
     os.system(cmd)
   elif settings['totalview']==True:#start in totalview debugger
     cmd="mpirun -np --debug"+settings['numProcs']+" "+settings['target']

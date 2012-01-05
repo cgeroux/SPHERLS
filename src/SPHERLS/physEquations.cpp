@@ -5685,7 +5685,7 @@ void calNewW_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         
         dEddyViscosityTerms=-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dTA1+dTS1)-dTA2-dTA3-dEddyVisc_ijkp1half_n/(dRho_ijkp1half_n*dR_i_n)*(dTS2+dTS3);
-        dEddyViscosityTerms=0.0;
+        //dEddyViscosityTerms=0.0;
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nW][i][j][k]=grid.dLocalGridOld[grid.nW][i][j][k]-time.dDeltat_n
@@ -5996,7 +5996,7 @@ void calNewW_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         
         dEddyViscosityTerms=-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dTA1+dTS1)-dTA2-dTA3-dEddyVisc_ijkp1half_n/(dRho_ijkp1half_n*dR_i_n)*(dTS2+dTS3);
-        dEddyViscosityTerms=0.0;
+        //dEddyViscosityTerms=0.0;
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nW][i][j][k]=grid.dLocalGridOld[grid.nW][i][j][k]-time.dDeltat_n
