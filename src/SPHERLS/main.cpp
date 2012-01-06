@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
     
     //Initialize program, read in starting model
     init(global.procTop,global.grid,global.output,global.time,global.parameters
-      ,global.peakKETracking,global.messPass,global.performance,global.implicit,argc,argv);
+      ,global.messPass,global.performance,global.implicit,argc,argv);
     
     //set function pointers to be used for calculations
     setMainFunctions(global.functions,global.procTop,global.parameters,global.grid,global.time
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]){
           
           global.output.nNumTimeStepsSinceLastDump=0;
           global.functions.fpModelWrite(ssFileNameOut.str(), global.procTop,global.grid,global.time
-            ,global.parameters,global.peakKETracking);
+            ,global.parameters);
         }
       }
       
@@ -249,8 +249,8 @@ int main(int argc, char* argv[]){
       , global.procTop);
     
     //finish program by deleting dynamic memory
-    fin(true,global.time, global.output, global.procTop,global.grid, global.peakKETracking
-      ,global.parameters,global.functions, global.performance, global.implicit);
+    fin(true,global.time, global.output, global.procTop,global.grid,global.parameters
+      ,global.functions, global.performance, global.implicit);
   }
   
   //error handeling

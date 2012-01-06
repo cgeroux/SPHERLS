@@ -11,7 +11,7 @@
 
 
 void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &parameters
-  ,PeakKETracking &peakKETracking,MessPass &messPass,Performance& performance,Implicit &implicit
+  ,MessPass &messPass,Performance& performance,Implicit &implicit
   ,int argc,char* argv[]);/**<
   Initializes the program. It does this by reading a number of configuration options from the config
   file "SPHERLS.xml". It also reads in the starting model, as specified in the "SPHERLS.xml" file,
@@ -23,7 +23,6 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     - the calulation timer is started, \ref Performance::dStartTimer
     - It also reads in the equation of state table if using a tabulated equation of state 
       (\ref Parameters::bEOSGammaLaw = false) by calling \ref eos::readBin
-    - Initilize the peak kenetic energy tracking
     - Initilizes the watchZones, i.e. figure out which processors have which watch zones, opens the
       files and prints headers.
   
@@ -34,7 +33,6 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   @param[out] output
   @param[out] time
   @param[out] parameters
-  @param[out] peakKETracking
   @param[out] messPass
   @param[out] performance
   @param[out] implicit
@@ -55,8 +53,8 @@ void setupLocalGrid(ProcTop &procTop, Grid &grid);/**<
   @param[in,out] grid contains information about gird
   */
 void fin(bool bWriteCurrentStateToFile,Time &time, Output &output,ProcTop &procTop
-  , Grid& grid, PeakKETracking& peakKETracking, Parameters &parameters, Functions &functions
-  , Performance& performance,Implicit& implicit);/**<
+  , Grid& grid, Parameters &parameters, Functions &functions, Performance& performance
+  ,Implicit& implicit);/**<
   Finishes program execution by writing out last grid state, closing output files, and writting out
   run time.
   
@@ -66,14 +64,13 @@ void fin(bool bWriteCurrentStateToFile,Time &time, Output &output,ProcTop &procT
   @param[in] output
   @param[in] procTop
   @param[in] grid
-  @param[in] peakKETracking
   @param[in] parameters
   @param[in] functions
   @param[in] performance
   @param[in] implicit
   */
 void modelWrite_GL(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters, PeakKETracking &peakKETracking);/**<
+  , Parameters &parameters);/**<
   Writes out a model in distrubuted model format, meaning that each processor writes it's own local
   grid to a file in binary format. They can be combined, and or converted to ascii format using 
   SPHERLSanal. This is for a gamma-law gas model.
@@ -85,7 +82,7 @@ void modelWrite_GL(std::string sFileName,ProcTop &procTop, Grid &grid, Time &tim
   @param[in] parameters
   */
 void modelWrite_TEOS(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters, PeakKETracking &peakKETracking);/**<
+  , Parameters &parameters);/**<
   Writes out a model in distrubuted model format, meaning that each processor writes it's own local
   grid to a file in binary format. They can be combined, and or converted to ascii format using 
   SPHERLSanal. This is for a tabulated equation of state model.
@@ -97,7 +94,7 @@ void modelWrite_TEOS(std::string sFileName,ProcTop &procTop, Grid &grid, Time &t
   @param[in] parameters
   */
 void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters, PeakKETracking& peakKETracking);/**<
+  , Parameters &parameters);/**<
   Reads in a collected binary file into the local grid and calls \ref setupLocalGrid to allocate
   memory and set various parameters of the model. Works for both gamma-law gas, and tabulated
   equation of state models.
@@ -107,7 +104,6 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
   @param[out] grid
   @param[out] time
   @param[out] parameters
-  @param[out] peakKETracking
   */
 void initUpdateLocalBoundaries(ProcTop &procTop, Grid &grid, MessPass &messPass
   ,Implicit &implicit);/**<

@@ -97,9 +97,6 @@ Parameters::Parameters(){
   dMaxConvectiveVelocity=6.69041282767684e-02;
   dMaxConvectiveVelocity_c=0.0;
 }
-PeakKETracking::PeakKETracking(){
-  bTrackPeakKE=true;
-}
 Output::Output(){
   nDumpFrequencyStep=1;
   bDump=false;

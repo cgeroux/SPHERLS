@@ -95,47 +95,6 @@ void finWatchZones(Output &output);/**<
   
   @param[in] output
   */
-void initPeakKE(ProcTop &procTop, Output &output, PeakKETracking &peakKETracking, Time &time);/**<
-  Opens the output file for tracking the peak kinetic energy, and writes out a header.
-  
-  @param[in] procTop
-  @param[in] output
-  @param[in,out] peakKETracking
-  @param[in] time
-  */
-void writePeakKE_R(Grid &grid, Parameters &parameters, PeakKETracking &peakKETracking
-  , ProcTop &procTop,Time &time);/**<
-  This function calculates, and tracks the peak kinetic energy of the model, and averages it over
-  three full periods. It does this by watch for 6 peaks in the kinetic energy and then averaging 
-  them. It uses 6 because there are 2 peaks every period, when during contraction, and one during
-  expansion. And writes the peak kinetic energy, the averaged peak kinetic energy. It does this in 
-  the case of a 1D model.
-  
-  @param[in] grid
-  @param[in] parameters
-  @param[in,out] peakKETracking
-  @param[in] procTop
-  @param[in] time
-  */
-void writePeakKE_RTP(Grid &grid, Parameters &parameters, PeakKETracking &peakKETracking
-  , ProcTop &procTop,Time &time);/**<
-  This function calculates, and tracks the peak kinetic energy of the model, and averages it over
-  three full periods. It does this by watch for 6 peaks in the kinetic energy and then averaging 
-  them. It uses 6 because there are 2 peaks every period, when during contraction, and one during
-  expansion. And writes the peak kinetic energy, the averaged peak kinetic energy. It does this in 
-  the case of a 2D and 3D model.
-  
-  @param[in] grid
-  @param[in] parameters
-  @param[in,out] peakKETracking
-  @param[in] procTop
-  @param[in] time
-  */
-void finPeakKE(PeakKETracking &peakKETracking);/**<
-  Finishes tracking the peak kinetic energy by flushing and closing the output files.
-  
-  @param[in,out] peakKETracking
-  */
 bool bFileExists(std::string sFilename);/**<
   Tests if the file exists by attempting to open the file for reading, if
   it fails it returns false, if it succeeds it returns true. This does not

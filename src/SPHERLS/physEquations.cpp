@@ -29,7 +29,6 @@ void setMainFunctions(Functions &functions,ProcTop &procTop,Parameters &paramete
   //rank 0 will be 1D, so always want to use 1D version of these equations
   if(procTop.nRank==0){// proc 1 always uses 1D
     
-    functions.fpWritePeakKE=&writePeakKE_R;
     functions.fpCalculateNewGridVelocities=&calNewU0_R;
     functions.fpCalculateNewRadii=&calNewR;
     functions.fpCalculateNewDensities=&calNewD_R;
@@ -94,7 +93,6 @@ void setMainFunctions(Functions &functions,ProcTop &procTop,Parameters &paramete
   }
   else{
     if(grid.nNumDims==3){//use 3D
-      functions.fpWritePeakKE=&writePeakKE_RTP;
       functions.fpCalculateNewGridVelocities=&calNewU0_RTP;
       functions.fpCalculateNewRadii=&calNewR;
       functions.fpCalculateNewDensities=&calNewD_RTP;
@@ -165,7 +163,6 @@ void setMainFunctions(Functions &functions,ProcTop &procTop,Parameters &paramete
       }
     }
     else if(grid.nNumDims==2){//use 2D
-      functions.fpWritePeakKE=&writePeakKE_RTP;
       functions.fpCalculateNewGridVelocities=&calNewU0_RT;
       functions.fpCalculateNewRadii=&calNewR;
       functions.fpCalculateNewDensities=&calNewD_RT;
@@ -236,7 +233,6 @@ void setMainFunctions(Functions &functions,ProcTop &procTop,Parameters &paramete
       }
     }
     else if(grid.nNumDims==1){//use 1D for all
-      functions.fpWritePeakKE=&writePeakKE_R;
       functions.fpCalculateNewGridVelocities=&calNewU0_R;
       functions.fpCalculateNewRadii=&calNewR;
       functions.fpCalculateNewDensities=&calNewD_R;

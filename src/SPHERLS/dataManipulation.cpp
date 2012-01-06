@@ -21,7 +21,7 @@
 #include <string>
 
 void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &parameters
-  ,PeakKETracking &peakKETracking,MessPass &messPass,Performance &performance,Implicit &implicit
+  ,MessPass &messPass,Performance &performance,Implicit &implicit
   ,int nNumArgs,char* cArgs[]){
   
   //find out number of processes
@@ -111,7 +111,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   }
   
   //read in model
-  modelRead(sStartModel,procTop,grid,time,parameters,peakKETracking);
+  modelRead(sStartModel,procTop,grid,time,parameters);
   
   //switch to model dump node
   XMLNode xDump=getXMLNodeNoThrow(xData,"dumps",0);
@@ -300,10 +300,6 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   parameters.dAlphaExtra=0.0;
   getXMLValueNoThrow(xData,"extraAlpha",0,parameters.dAlphaExtra);
   
-  //track peakKE?
-  getXMLValue(xData,"peakKE",0,peakKETracking.bTrackPeakKE);
-  XMLNode xPeakKE=getXMLNode(xData,"peakKE",0);
-  
   //get A.V. threshold value
   getXMLValue(xData,"av-threshold",0,parameters.dAVThreshold);
   
@@ -370,11 +366,6 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   
   //parse, and initialize watch zones
   initWatchZones(xData, procTop,grid,output,parameters,time);
-  
-  //initialize init peak KE write
-  if(procTop.nRank==0){
-    initPeakKE(procTop,output,peakKETracking,time);
-  }
 }
 void setupLocalGrid(ProcTop &procTop, Grid &grid){
   
@@ -616,7 +607,7 @@ void setupLocalGrid(ProcTop &procTop, Grid &grid){
   }
 }
 void fin(bool bWriteCurrentStateToFile, Time &time, Output &output,ProcTop
-  &procTop,Grid& grid,PeakKETracking& peakKETracking,Parameters &parameters,Functions &functions
+  &procTop,Grid& grid,Parameters &parameters,Functions &functions
   ,Performance& performance,Implicit& implicit){
   
   
@@ -687,14 +678,11 @@ void fin(bool bWriteCurrentStateToFile, Time &time, Output &output,ProcTop
                 <<" "<<time.dDelV_t_V_max<<std::endl;
             }
           }
-    functions.fpModelWrite(ssFileNameOut.str(),procTop,grid,time,parameters,peakKETracking);
+    functions.fpModelWrite(ssFileNameOut.str(),procTop,grid,time,parameters);
   }
   
   //finish other tasks
   finWatchZones(output);
-  if(procTop.nRank==0){
-    finPeakKE(peakKETracking);
-  }
   
   //report on performance
   if(procTop.nRank==0){
@@ -713,7 +701,7 @@ void fin(bool bWriteCurrentStateToFile, Time &time, Output &output,ProcTop
   }
 }
 void modelWrite_GL(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters, PeakKETracking &peakKETracking){
+  , Parameters &parameters){
   
   //set file name to be the sFilename-procTop.nRank, where sFileName should be the same
   // for each processor
@@ -890,7 +878,7 @@ void modelWrite_GL(std::string sFileName,ProcTop &procTop, Grid &grid, Time &tim
   }
 }
 void modelWrite_TEOS(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters,PeakKETracking &peakKETracking){
+  , Parameters &parameters){
   
   //set file name to be the sFilename-procTop.nRank, where sFileName should be the same
   // for each processor
@@ -1071,7 +1059,7 @@ void modelWrite_TEOS(std::string sFileName,ProcTop &procTop, Grid &grid, Time &t
   }
 }
 void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
-  , Parameters &parameters, PeakKETracking& peakKETracking){
+  , Parameters &parameters){
   
   //open file
   std::ifstream ifIn;

@@ -756,20 +756,6 @@ class Parameters{
 };/**@class Parameters
   This class holds parameters and constants used for calculation.
   */
-class PeakKETracking{
-  public:
-    bool bTrackPeakKE; /**<
-      Indicates if the peak kinetic energy should be tracked (true or false)
-      */
-    std::ofstream ofPeakKE; /**<
-      Handle for the file to output the peak kinetic energy.
-      */
-    PeakKETracking(); /**<
-      Constructor for the class PeakKETracking.
-      */
-};/**@class PeakKETracking
-  This class manages information form monitoring the peak kinetic energy per period.
-  */
 class Output{
   public:
     int nDumpFrequencyStep; /**<
@@ -828,8 +814,7 @@ class Output{
       Constructor for this class.
       */
 };/**@class Output
-  This class manages information pertianing to the output of information to files, other than
-  that in handled in class \ref PeakKETracking.
+  This class manages information pertianing to the output of data to files.
   */
 class Performance{
   public:
@@ -972,15 +957,11 @@ class Functions{
     void (*fpCalculateNewAV)(Grid&, Parameters&);/**<
       Function pointer to the function used to calculate new Artificial viscosity.
       */
-    void (*fpModelWrite)(std::string sFileName, ProcTop&, Grid&, Time&, Parameters&,PeakKETracking&);/**<
+    void (*fpModelWrite)(std::string sFileName, ProcTop&, Grid&, Time&, Parameters&);/**<
       Function pointer to the function used to write out models.
       */
     void (*fpWriteWatchZones)(Output&, Grid&,Parameters&,Time&,ProcTop&);/**<
       Function pointer to the function that is used to write out watch zone files
-      */
-    void (*fpWritePeakKE)(Grid&, Parameters&, PeakKETracking&, ProcTop&, Time&);/**<
-      Funciton pointer to the funcation that is used to calculate, and output the peak kinetic energy
-      per period.
       */
     void (*fpUpdateLocalBoundaryVelocitiesNewGrid)(ProcTop&, MessPass&,Grid&);/**<
       Function pointer to the fnction that is used to update velocities across boundaries.*/
@@ -1020,9 +1001,6 @@ class Global{
       */
     Parameters parameters; /**<
       An instance of the \ref Parameters class.
-      */
-    PeakKETracking peakKETracking; /**<
-      An instance of the \ref PeakKETracking class.
       */
     Output output; /**<
       An instance of the \ref Output class.
