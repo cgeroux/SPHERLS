@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-
+'''
+  Test that restarts produce the same results as calculating straight through the restart with no
+ restart.
+'''
 useArgparse=True
 try:
   import argparse

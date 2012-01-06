@@ -202,7 +202,8 @@ def main():
     cmd="qsub "+script
     os.system(cmd)
   elif settings['totalview']==True:#start in totalview debugger
-    cmd="mpirun -np --debug"+settings['numProcs']+" "+settings['target']
+    cmd="mpirun --debug -np "+settings['numProcs']+" "+settings['target']
+    print cmd
     os.system(cmd)
   elif settings['que']==None:
     cmd="mpirun -np "+settings['numProcs']+" "+settings['target']

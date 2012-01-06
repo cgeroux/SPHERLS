@@ -275,7 +275,6 @@ class Grid{
       Index of the eddy viscosity in the grid, it is defined at zone centers in the grids. This is 
       an internal grid  variable and is included in the count of \ref Grid::nNumIntVars.
     */
-    
     int nNumDims; /**<
       Number of dimensions of the grid. It is used to chose the appropriate conservation equations.
       The value of this variable is independent of processor \ref ProcTop::nRank.
