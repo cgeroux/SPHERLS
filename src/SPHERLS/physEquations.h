@@ -14,22 +14,22 @@ void setMainFunctions(Functions& functions,ProcTop &procTop,Parameters &paramete
   
   @param[out] functions is of class \ref Functions and is used to specify the functions
     called to calculate the evolution of the input model.
-  @param[in] procTop is of class \ref ProcTop, \ref ProcTop::nRank is used to set different
+  @param[in] procTop is of type \ref ProcTop. \ref ProcTop::nRank is used to set different
     functions based on processor rank. For instance processor rank 1 requires 1D 
     versions of the equations.
-  @param[in] parameters
-  @param[in] grid
-  @param[in] time
-  @param[in] implicit
+  @param[in] parameters is of class \ref Parameters. It holds various constants and runtime 
+    parameters.
+  @param[in] grid of type \ref Grid. This function requires the number of dimensions, specified by
+    \ref Grid::nNumDims.
+  @param[in] time of type \ref Time. This function requires knowledge of the type of time setp being
+    used, specified by \ref Time::bVariableTimeStep.
+  @param[in] implicit of type \ref Implicit. This function needs to know if there is an implicit
+    region, specified when Implicit::nNumImplicitZones>0.
 
   The functions are picked based on model geometry, and the physics requested or required by the 
-  input model, and the configuration file. The specific functions pointers that are set are:
-  - \ref Functions::fpCalculateDeltat: used to set the function for calculating the time step
-    used for the rest of the calculations
-  - \ref Functions::fpCalculateNewVelocities: used to set the function for calculating new
-    velocities
-  - \ref Functions::fpCalculateNewGridVelocities: used to calculate the radial grid velocities
-  - \ref Functions::fpCalculateNewRadii:
+  input model, and the configuration file. The specific functions pointers that are set are 
+  described in the \ref Functions class.
+  
   */
 void setInternalVarInf(Grid& grid, Parameters &parameters);/**<
   This function sets the information for internal variables. While external verabile information is 
