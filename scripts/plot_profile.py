@@ -595,8 +595,8 @@ def plot(dataSets,options,title):
               
               #plot the curve
               if axisMine.period!=None:#use phase instead of time if period is given
-                temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y
-                  ,curve.color+curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+                temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,color=curve.color
+                  ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
                 if curve.label!=None and curve.label!="":
                   lines.append(temp)
                   labels.append(curve.label)
@@ -610,8 +610,8 @@ def plot(dataSets,options,title):
                     yTemp[1]=plot.limits[1]
                   ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
               else:
-                temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,curve.color+curve.style
-                  ,markersize=curve.markersize,linewidth=curve.linewidth)
+                temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,color=curve.color
+                  ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
                 if curve.label!=None and curve.label!="":
                   lines.append(temp)
                   labels.append(curve.label)
@@ -630,8 +630,8 @@ def plot(dataSets,options,title):
             for curve in plot.curves:
               
               #plot the curve
-              temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i]
-                ,curve.color+curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+              temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],color=curve.color
+                ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
               if curve.label!=None and curve.label!="":
                 lines.append(temp)
                 labels.append(curve.label)

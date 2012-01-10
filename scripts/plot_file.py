@@ -386,8 +386,8 @@ def plot(dataSets,options,title):
         for curve in plot.curves:
           
           #plot the curve
-          temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y
-            ,curve.color+curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+          temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,color=curve.color,linestyle=curve.style
+            ,markersize=curve.markersize,linewidth=curve.linewidth)
           if curve.label!=None and curve.label!="":
             lines.append(temp)
             labels.append(curve.label)
