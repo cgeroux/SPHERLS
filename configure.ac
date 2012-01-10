@@ -1,5 +1,5 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX
 AC_LANG([C++])
 #
@@ -211,11 +211,5 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
 #################################################################
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([
-   Makefile\
-   src/Makefile\
-   src/SPHERLS/Makefile\
-   src/SPHERLSgen/Makefile\
-   src/SPHERLSanal/Makefile\
-  ])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
