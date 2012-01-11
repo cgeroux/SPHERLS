@@ -51,7 +51,7 @@ SPHERLSgen_SOURCES = \
   src/xmlParser.cpp
 SPHERLSgen_CPPFLAGS = -Isrc/
 
-#.PHONY:docs
+.PHONY:docs
 docs: docs/manuals/SPHERLS_manual.pdf docs/manuals/SPHERLSgen_manual.pdf \
   docs/manuals/SPHERLSanal_manual.pdf
 

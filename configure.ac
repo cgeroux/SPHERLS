@@ -1,10 +1,10 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-AC_PROG_CXX
+AC_PROG_CXX([mpic++])
 AC_LANG([C++])
 #
 #common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS="/home/cgeroux/lib/fftw-3.2.2/include  /share/apps/fftw/include "
+FFTW_INCLUDE_PATHS="/home/cgeroux/lib/fftw-3.2.2/include /share/apps/fftw/include "
 FFTW_LIB_PATHS="/home/cgeroux/lib/fftw-3.2.2/lib /share/apps/fftw/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
 #
 #common places for fftw libraries and includes
