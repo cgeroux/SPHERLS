@@ -2446,6 +2446,12 @@ else
 fi
 
 
+if test "$CXX" != "mpic++"; then
+  echo "$as_me:$LINENO: result: \"mpic++ not found! Aborting\"" >&5
+echo "${ECHO_T}\"mpic++ not found! Aborting\"" >&6
+exit;
+fi
+
 ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'

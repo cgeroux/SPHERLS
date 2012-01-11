@@ -1,6 +1,10 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX([mpic++])
+AS_IF(
+[test "$CXX" != "mpic++"],
+[AC_MSG_RESULT(["mpic++ not found! Aborting"])
+exit;])
 AC_LANG([C++])
 #
 #common places for fftw libraries and includes
