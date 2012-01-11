@@ -76,10 +76,14 @@ class Curve:
     #set curve style
     if element.get("style")!=None:
       self.style=element.get("style")
+    #else:
+      #self.style="-"
     
     #set curve color
     if element.get("color")!=None:
       self.color=element.get("color")
+    #else:
+      #self.color="k"
       
     #set curve label
     if element.get("label")!=None:
@@ -592,11 +596,11 @@ def plot(dataSets,options,title):
           if axisMine.bTime:
             curveCount=0
             for curve in plot.curves:
-              
+            
               #plot the curve
               if axisMine.period!=None:#use phase instead of time if period is given
-                temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,color=curve.color
-                  ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+                temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
+                  ,markersize=curve.markersize,linewidth=curve.linewidth)
                 if curve.label!=None and curve.label!="":
                   lines.append(temp)
                   labels.append(curve.label)
@@ -610,8 +614,8 @@ def plot(dataSets,options,title):
                     yTemp[1]=plot.limits[1]
                   ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
               else:
-                temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,color=curve.color
-                  ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+                temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,str(curve.color)+str(curve.style)
+                  ,markersize=curve.markersize,linewidth=curve.linewidth)
                 if curve.label!=None and curve.label!="":
                   lines.append(temp)
                   labels.append(curve.label)
@@ -630,8 +634,8 @@ def plot(dataSets,options,title):
             for curve in plot.curves:
               
               #plot the curve
-              temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],color=curve.color
-                ,linestyle=curve.style,markersize=curve.markersize,linewidth=curve.linewidth)
+              temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],str(curve.color)+str(curve.style)
+                ,markersize=curve.markersize,linewidth=curve.linewidth)
               if curve.label!=None and curve.label!="":
                 lines.append(temp)
                 labels.append(curve.label)
