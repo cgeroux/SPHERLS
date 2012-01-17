@@ -4541,16 +4541,16 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         //calculate dTau_tp_ijp1halfkp1half_n
         dTau_tp_ijp1halfkp1half_n=dEddyVisc_ijp1halfkp1half_n
           *(grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*(dW_SinTheta_ijp1kp1half_n
-          -dW_SinTheta_ijkp1half_n)/(dR_i_n*dDTheta_jp1half)+(dV_ijp1halfkp1half_nm1half
-          -dV_ijp1halfkp1half_nm1half)/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]
-          *dDPhi_kp1half));
+          -dW_SinTheta_ijkp1half_n)/(dR_i_n*dDTheta_jp1half)+(grid.dLocalGridOld[grid.nV][i][j][k+1]
+          -grid.dLocalGridOld[grid.nV][i][j][k])/(dR_i_n
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*dDPhi_kp1half));
         
         //calculate dTau_tp_ijp1halfmp1half_n
         dTau_tp_ijp1halfkm1half_n=dEddyVisc_ijp1halfkm1half_n
           *(grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*(dW_SinTheta_ijp1km1half_n
-          -dW_SinTheta_ijkm1half_n)/(dR_i_n*dDTheta_jp1half)+(dV_ijp1halfkm1half_nm1half
-          -dV_ijp1halfkm1half_nm1half)/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]
-          *dDPhi_km1half));
+          -dW_SinTheta_ijkm1half_n)/(dR_i_n*dDTheta_jp1half)+(grid.dLocalGridOld[grid.nV][i][j][k]
+          -grid.dLocalGridOld[grid.nV][i][j][k-1])/(dR_i_n
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*dDPhi_km1half));
         
         //calculate TA1
         dTA1=(dTau_rt_ip1halfjp1halfk_n-dTau_rt_im1halfjp1halfk_n)
@@ -4844,16 +4844,16 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         //calculate dTau_tp_ijp1halfkp1half_n
         dTau_tp_ijp1halfkp1half_n=dEddyVisc_ijp1halfkp1half_n
           *(grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*(dW_SinTheta_ijp1kp1half_n
-          -dW_SinTheta_ijkp1half_n)/(dR_i_n*dDTheta_jp1half)+(dV_ijp1halfkp1half_nm1half
-          -dV_ijp1halfkp1half_nm1half)/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]
-          *dDPhi_kp1half));
+          -dW_SinTheta_ijkp1half_n)/(dR_i_n*dDTheta_jp1half)+(grid.dLocalGridOld[grid.nV][i][j][k+1]
+          -grid.dLocalGridOld[grid.nV][i][j][k])/(dR_i_n
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*dDPhi_kp1half));
         
         //calculate dTau_tp_ijp1halfmp1half_n
         dTau_tp_ijp1halfkm1half_n=dEddyVisc_ijp1halfkm1half_n
           *(grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*(dW_SinTheta_ijp1km1half_n
-          -dW_SinTheta_ijkm1half_n)/(dR_i_n*dDTheta_jp1half)+(dV_ijp1halfkm1half_nm1half
-          -dV_ijp1halfkm1half_nm1half)/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]
-          *dDPhi_km1half));
+          -dW_SinTheta_ijkm1half_n)/(dR_i_n*dDTheta_jp1half)+(grid.dLocalGridOld[grid.nV][i][j][k]
+          -grid.dLocalGridOld[grid.nV][i][j][k-1])/(dR_i_n
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0]*dDPhi_km1half));
         
         //calculate TA1
         dTA1=(dTau_rt_ip1halfjp1halfk_n-dTau_rt_im1halfjp1halfk_n)
