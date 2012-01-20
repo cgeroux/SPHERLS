@@ -74,14 +74,14 @@ def parseXML(fileName):
     quit()
   settings['jobName']=jobNameElement.text
   
-  #get job name element
+  #get job duration element
   jobDurationElement=jobElement.find("duration")
   if jobDurationElement==None:
     print "No \"duration\" element found under \"job\" node in file \""+fileName+"\", quiting!"
     quit()
   settings['jobDuration']=jobDurationElement.text
   
-  #get job name element
+  #check if wanting to run in totalview
   jobTotalviewElement=jobElement.find("totalview")
   settings['totalview']=False
   if jobTotalviewElement==None:
@@ -96,7 +96,7 @@ def parseXML(fileName):
     settings['que']=None
   elif jobQueElement.text.lower() in ("test","te","tq"):
     settings['que']="test"
-  elif jobQueElement.text.lower() in ("m","main","","tq","yes","true","tr"):
+  elif jobQueElement.text.lower() in ("m","main","","yes","true","tr"):
     settings['que']="main"
   
   #get job email
@@ -108,6 +108,25 @@ def parseXML(fileName):
     settings['email']=None
   else :
     settings['email']=jobEmailElement.text
+  
+  #get job memory
+  jobMemoryElement=jobElement.find("memory")
+  settings['virtualMemory']="1.0G"
+  settings['stackMemory']="1.0G"
+  if jobMemoryElement==None:
+    settings['virtualMemory']="1.0G"
+    settings['stackMemory']="1.0G"
+  else :
+    settings['email']=jobMemoryElement.text
+    settings['virtualMemory']=jobMemoryElement.text
+    settings['stackMemory']=jobMemoryElement.text
+
+  
+  #get parallel environment
+  jobPEElement=jobElement.find("parallel-environment")
+  settings['parrallelEnvironment']="openmpi"#this is for lachesis
+  if not jobPEElement==None:
+    settings['parrallelEnvironment']=jobPEElement.text
   return settings
 def makeSubScript(settings):
   '''
@@ -190,9 +209,7 @@ def main():
   settings['outputFile']=settings['jobName']+".out"
   settings['errorFile']=settings['jobName']+".err"
   #settings['parrallelEnvironment']="ompi*"#this is for ace-net
-  settings['parrallelEnvironment']="openmpi"#this is for lachesis
-  settings['virtualMemory']="1.0G"
-  settings['stackMemory']="1.0G"
+  #settings['parrallelEnvironment']="openmpi"#this is for lachesis
   settings['checkPointing']=False
   settings['mpirun']="mpirun"
   settings['target']=bin_paths.SPHERLSPath
