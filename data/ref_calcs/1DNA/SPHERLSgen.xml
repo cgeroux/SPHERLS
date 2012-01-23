@@ -1,0 +1,38 @@
+
+    <data>
+      <model type="stellar">
+        
+        <output>
+          <timeStepFactor>0.25</timeStepFactor>
+          <fileName>1DNARef_t00000000</fileName>
+          <binary>true</binary>
+          <writeToScreen>false</writeToScreen>
+        </output>
+        <EOS type="table">
+          <T-eff>6.1e3</T-eff>
+          <L>50.0</L>
+          <eosTable>/home/cgeroux/SPHERLS/data/eos/eosY240Z002</eosTable>
+          <tolerance>5e-14</tolerance>
+        </EOS>
+        <dimensions>
+          <radIndepVar>
+            <M-total>5.75E-01</M-total>
+            <M-delta-init>1.2e-9</M-delta-init>
+            <M-delta-delta stopType="T" stopValue="1e4">2.5e-2</M-delta-delta>
+            <M-delta-delta stopType="T" stopValue="6e6">5e-2</M-delta-delta>
+            <alpha>0.2</alpha>
+            <num-1D>100</num-1D>
+          </radIndepVar>
+          <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->
+          <num-theta>1</num-theta><!-- number of theta zones before number of ghost cells -->
+          <delta-theta>1.0</delta-theta><!-- in degrees -->
+          <num-phi>1</num-phi><!-- number of phi zones before number of ghost cells -->
+          <delta-phi>1.0</delta-phi><!-- in degrees -->
+      </dimensions>
+      <velocityDist type="PRO">
+        <fileName>/home/cgeroux/SPHERLS/data/velocity_pro/T5700_L50_M575_fu.dat</fileName>
+        <uSurf>-2.0e5</uSurf>
+        </velocityDist>
+      </model>
+    </data>
+    
