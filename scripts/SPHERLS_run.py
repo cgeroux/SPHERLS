@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import xml.etree.ElementTree as xml
-import bin_paths
+import paths
 def parseXML(fileName):
   '''Parses the SPHERLS.xml file to figure out settings for submit script and how to run SPHERLS
   returns settings, a dictionary with entries for:
@@ -67,28 +67,6 @@ def parseXML(fileName):
     quit()
   settings['numProcs']=str(x0*x1*x2)
   
-  #get job name element
-  jobNameElement=jobElement.find("name")
-  if jobNameElement==None:
-    print "No \"name\" element found under \"job\" node in file \""+fileName+"\", quiting!"
-    quit()
-  settings['jobName']=jobNameElement.text
-  
-  #get job duration element
-  jobDurationElement=jobElement.find("duration")
-  if jobDurationElement==None:
-    print "No \"duration\" element found under \"job\" node in file \""+fileName+"\", quiting!"
-    quit()
-  settings['jobDuration']=jobDurationElement.text
-  
-  #check if wanting to run in totalview
-  jobTotalviewElement=jobElement.find("totalview")
-  settings['totalview']=False
-  if jobTotalviewElement==None:
-    settings['totalview']=False
-  elif jobTotalviewElement.text.lower() in ("t","true","y","yes","tr","tru","ye","on"):
-    settings['totalview']=True
-  
   #get job que element
   jobQueElement=jobElement.find("que")
   settings['que']=None
@@ -99,34 +77,63 @@ def parseXML(fileName):
   elif jobQueElement.text.lower() in ("m","main","","yes","true","tr"):
     settings['que']="main"
   
-  #get job email
-  jobEmailElement=jobElement.find("email")
-  settings['email']=None
-  if jobEmailElement==None:
-    settings['email']=None
-  elif jobEmailElement.text.lower() in ("false","no","f",""):
-    settings['email']=None
-  else :
-    settings['email']=jobEmailElement.text
+  #if we have a que, get job details for the que
+  if settings['que'] in ("test","main"):
   
-  #get job memory
-  jobMemoryElement=jobElement.find("memory")
-  settings['virtualMemory']="1.0G"
-  settings['stackMemory']="1.0G"
-  if jobMemoryElement==None:
+    #get job name element
+    jobNameElement=jobElement.find("name")
+    if jobNameElement==None:
+      print "No \"name\" element found under \"job\" node in file \""+fileName+"\", stopping!"
+      quit()
+    settings['jobName']=jobNameElement.text
+    
+    #get job duration element
+    jobDurationElement=jobElement.find("duration")
+    if jobDurationElement==None:
+      print "No \"duration\" element found under \"job\" node in file \""+fileName+"\", quiting!"
+      quit()
+    settings['jobDuration']=jobDurationElement.text
+    
+    #get job email
+    jobEmailElement=jobElement.find("email")
+    settings['email']=None
+    if jobEmailElement==None:
+      settings['email']=None
+    elif jobEmailElement.text.lower() in ("false","no","f",""):
+      settings['email']=None
+    else :
+      settings['email']=jobEmailElement.text
+    
+    #get job memory
+    jobMemoryElement=jobElement.find("memory")
     settings['virtualMemory']="1.0G"
     settings['stackMemory']="1.0G"
-  else :
-    settings['email']=jobMemoryElement.text
-    settings['virtualMemory']=jobMemoryElement.text
-    settings['stackMemory']=jobMemoryElement.text
-
+    if jobMemoryElement==None:
+      settings['virtualMemory']="1.0G"
+      settings['stackMemory']="1.0G"
+    else :
+      settings['email']=jobMemoryElement.text
+      settings['virtualMemory']=jobMemoryElement.text
+      settings['stackMemory']=jobMemoryElement.text
+    
+    #get parallel environment
+    jobPEElement=jobElement.find("parallel-environment")
+    settings['parrallelEnvironment']="openmpi"#this is for lachesis
+    if not jobPEElement==None:
+      settings['parrallelEnvironment']=jobPEElement.text
   
-  #get parallel environment
-  jobPEElement=jobElement.find("parallel-environment")
-  settings['parrallelEnvironment']="openmpi"#this is for lachesis
-  if not jobPEElement==None:
-    settings['parrallelEnvironment']=jobPEElement.text
+  #check if wanting to run in totalview
+  jobTotalviewElement=jobElement.find("totalview")
+  settings['totalview']=False
+  if jobTotalviewElement==None:
+    settings['totalview']=False
+  elif jobTotalviewElement.text.lower() in ("t","true","y","yes","tr","tru","ye","on"):
+    settings['totalview']=True
+  
+  if settings['totalview']==True and settings['que'] in ("test","main"):#cannot run in a que with totalview
+    print "WARNING: Cannont run in a que with totalview, que settings ignored!"
+    settings['que']=None
+  
   return settings
 def makeSubScript(settings):
   '''
@@ -204,27 +211,30 @@ def makeSubScript(settings):
 def main():
   settings=parseXML("SPHERLS.xml")
   
-  #additional hard coded settings used during job sumission and script creation
-  settings['shell']="/bin/bash"
-  settings['outputFile']=settings['jobName']+".out"
-  settings['errorFile']=settings['jobName']+".err"
-  #settings['parrallelEnvironment']="ompi*"#this is for ace-net
-  #settings['parrallelEnvironment']="openmpi"#this is for lachesis
-  settings['checkPointing']=False
+  #additional hard coded settings
   settings['mpirun']="mpirun"
-  settings['target']=bin_paths.SPHERLSPath
+  settings['target']=paths.SPHERLSPath
   
-  script=makeSubScript(settings)
-  if script!=None:#sub the job in the que\n
-    cmd="qsub "+script
+  if settings['que']==None:# if not running in que
+    cmd=settings['mpirun']+" -np "+settings['numProcs']+" "+settings['target']
     os.system(cmd)
-  elif settings['totalview']==True:#start in totalview debugger
-    cmd="mpirun --debug -np "+settings['numProcs']+" "+settings['target']
+  elif settings['totalview']==True:#if running with a debugger
+    cmd=msettings['mpirun']+" --debug -np "+settings['numProcs']+" "+settings['target']
     print cmd
     os.system(cmd)
-  elif settings['que']==None:
-    cmd="mpirun -np "+settings['numProcs']+" "+settings['target']
-    os.system(cmd)
+  else:#if submitting to a que
+    
+    #additional hard coded settings only needed when submitting to a que
+    settings['shell']="/bin/bash"
+    settings['outputFile']=settings['jobName']+".out"
+    settings['errorFile']=settings['jobName']+".err"
+    settings['checkPointing']=False
+    script=makeSubScript(settings)
+    if script!=None:#sub the job in the que\n
+      cmd="qsub "+script
+      os.system(cmd)
+
+
 if __name__ == "__main__":
   main()
   

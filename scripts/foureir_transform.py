@@ -7,7 +7,7 @@ import glob
 import math
 import numpy as np
 import sys
-import bin_paths
+import paths
 import disect_filename
 
 def parseOptions():
@@ -74,7 +74,7 @@ def main():
     f.write(line)
     
   f.close()
-  success=os.system(bin_paths.SPHERLSanalPath+' -tl tmp_period.txt')
+  success=os.system(paths.SPHERLSanalPath+' -tl tmp_period.txt')
   if success!=0:
     print "error computing fourier transform of tmp_period.txt"
   

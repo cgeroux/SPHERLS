@@ -4,7 +4,7 @@ import getopt
 import sys
 import glob
 import optparse as op
-import bin_paths
+import paths
 import disect_filename
 
 def main():
@@ -21,7 +21,8 @@ def main():
   parser.add_option("-r","--remove",action="store_false",dest="keep"
     ,help="Removes distributed binary files")
   parser.add_option("-m","--remake",action="store_true",dest="remakeBins"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
+    ,help="Will remake combined binary files from distributed binary files even if combined "
+    +"binary file already exists. [not default].",default=False)
     
   #parse command line options
   (options,args)=parser.parse_args()
@@ -61,7 +62,7 @@ def combine_bin_files(keep,fileName,remakeBins):
       else:
         print __name__+":"+combine_bin_files.__name__+": combining \""+files[i][:len(files[i])-2]+"\" ..."
       
-      success=os.system(bin_paths.SPHERLSanalPath+' -c dbcb '+files[i][:len(files[i])-2])
+      success=os.system(paths.SPHERLSanalPath+' -c dbcb '+files[i][:len(files[i])-2])
       if success==0:
         if not keep:
           #remove distributed binary files

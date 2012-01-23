@@ -23,10 +23,10 @@ def diffDumps(fileName0,fileName1,allowedRelativeDifference,thresholdValue,out):
       varsMatch=False
   
   if not varsMatch or not headersMatch:
-    out.write("files are not numerically identical")
+    out.write("files are not numerically identical\n")
     return False
   else:
-    out.write("files are numerically identical")
+    out.write("files are numerically identical\n")
     return True
 def diffHeader(dumpFile0,dumpFile1,out):
   '''Checks to see if the two file headers differ and if so tell where they differ'''

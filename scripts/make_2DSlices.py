@@ -5,7 +5,7 @@ import sys
 import glob
 import optparse as op
 import combine_bins
-import bin_paths
+import paths
 import disect_filename
 
 def main():
@@ -122,7 +122,7 @@ def make_2DSlices(keep,fileName,nPlane,nPlaneIndex,remake):
         
         #make 2D slice
         print __name__+":"+make_2DSlices.__name__+": creating 2D slice from \""+file+"\""
-        success=os.system(bin_paths.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
+        success=os.system(paths.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
         if success==0:
           pass
         else :
