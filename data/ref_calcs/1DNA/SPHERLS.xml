@@ -1,42 +1,40 @@
-
-    <data>
-      <job>
-        <que>false</que>
-      </job>
-      <procDims>
-        <x0>4</x0>
-        <x1>1</x1>
-        <x2>1</x2>
-      </procDims>
-      <startModel>1DNARef_t00000000</startModel>
-      <outputName>1DNARef</outputName>
-      <peakKE>false</peakKE>
-      <prints type="normal">
-        <frequency type="timeSteps">1</frequency>
-      </prints>
-      <dumps>
-        <frequency type="timeSteps">1</frequency>
-      </dumps>
-      <eos>
-        <tolerance>5e-14</tolerance>
-        <max-iterations>50</max-iterations>
-      </eos>
-      <av>1.4</av>
-      <av-threshold>0.01</av-threshold>
-      <time>
-        <endTime>69.0</endTime>
-        <timeStep>7.0</timeStep>
-      </time>
-      <adiabatic>false</adiabatic>
-      <turbMod>
-        <type>smagorinsky</type>
-        <eddyVisc>0.17</eddyVisc>
-      </turbMod>
-      <implicit>
-        <numImplicitZones>150</numImplicitZones>
-        <derivativeStepFraction>5e-7</derivativeStepFraction>
-        <tolerance>5.0e-14</tolerance>
-        <max-iterations>100</max-iterations>
-      </implicit>
-    </data>
-    
+<data>
+  <job>
+    <que>false</que>
+  </job>
+  <procDims>
+    <x0>4</x0>
+    <x1>1</x1>
+    <x2>1</x2>
+  </procDims>
+  <startModel>1DNARef_t00000000</startModel>
+  <outputName>1DNARef</outputName>
+  <peakKE>false</peakKE>
+  <prints type="normal">
+    <frequency type="timeSteps">1</frequency>
+  </prints>
+  <dumps>
+    <frequency type="timeSteps">1</frequency>
+  </dumps>
+  <eos>
+    <tolerance>5e-14</tolerance>
+    <max-iterations>50</max-iterations>
+  </eos>
+  <av>1.4</av>
+  <av-threshold>0.01</av-threshold>
+  <time>
+    <endTime>69.0</endTime>
+    <timeStep>7.0</timeStep>
+  </time>
+  <adiabatic>false</adiabatic>
+  <turbMod>
+    <type>smagorinsky</type>
+    <eddyVisc>0.17</eddyVisc>
+  </turbMod>
+  <implicit>
+    <numImplicitZones>150</numImplicitZones>
+    <derivativeStepFraction>5e-7</derivativeStepFraction>
+    <tolerance>5.0e-14</tolerance>
+    <max-iterations>100</max-iterations>
+  </implicit>
+</data>

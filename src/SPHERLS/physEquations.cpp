@@ -2673,19 +2673,16 @@ void calNewU_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         dTA3=(dTau_rp_ip1halfjkp1half_n-dTau_rp_ip1halfjkm1half_n)/(dRho_ip1halfjk_n
           *grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
-        //dTA3=0.0;
         
         //calculate dTS3
         dTS3=2.0*(dW_ip1halfjkp1half_nm1half-dW_ip1halfjkm1half_nm1half)
           /(grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
-        //dTS3=0.0;
         
         //cal dTS4
         dTS4=(4.0*(grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0])
           +2.0*grid.dLocalGridOld[grid.nCotThetaIJK][0][j][0]*dV_ip1halfjk_nm1half)
           /grid.dLocalGridOld[grid.nR][i][0][0];
-        //dTS4=0.0;
         
         dEddyViscosityTerms=-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dTA1+dTS1)-dTA2
           -dTA3+dEddyVisc_ip1halfjk_n/dRhoR_ip1halfjk_n*(dTS2+dTS3+dTS4);

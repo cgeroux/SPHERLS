@@ -15,6 +15,52 @@ import shutil
 import diffDumps
 import paths
 import datetime
+import xml.etree.ElementTree as xml
+
+#set number of processors to use
+numProcs=4
+
+#set paths
+refCalcs={
+  '1DNA':
+  [paths.ref_calcs+"1DNA/1DNARef_t00000000"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000001"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000002"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000003"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000004"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000005"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000006"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000007"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000008"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000009"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000010"]
+  ,'2DNA':
+  [paths.ref_calcs+"2DNA/2DNARef_t00000000"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000001"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000002"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000003"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000004"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000005"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000006"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000007"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000008"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000009"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00000010"]
+  ,'3DNA':
+  [paths.ref_calcs+"3DNA/3DNARef_t00222559"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222560"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222561"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222562"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222563"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222564"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222565"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222566"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222567"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222568"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222569"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222570"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00222571"]
+  }
 def main():
   
   #if argparse is availble
@@ -25,6 +71,8 @@ def main():
     parser.add_argument('-f',action="store_true",default=False,help="Force removal of"\
       +" pre-existing temporary data automatically.")
     parser.add_argument('-m',action="store_true",default=False,help="Force remaking of"\
+      +" all reference calculations.")
+    parser.add_argument('-r',action="store_true",default=False,help="Remake if missing"\
       +" reference calculations.")
     parser.add_argument('-k',action="store_true",default=False,help="Keep temporary directories.")
     parser.add_argument('-p',default=5e-14,type=float,help="Sets the amount of relative"\
@@ -81,9 +129,11 @@ def main():
             if result!=0:
               print "  unable to remove temporary directory \""+tmpDir+"\""
               return False
+          
           print "SUCCESS"
         else:
-          print "  see \"./"+haveRef+"CalculationTest_tmp/log.txt\" for details of failure ..."
+          #print "FAILED"
+          print "  see \"./"+haveRef+"CalculationTest_tmp/log.txt\" for details of failure"
       else:
         print "FAILED"
         print "  \""+haveRef+"\" didn't have pre-calculated reference calculations, can't check"\
@@ -102,6 +152,7 @@ def checkCalAgainstRef(subDir,options):
   
   #create Test calculation to compare to reference calculations
   numProcs=4
+  cwd=os.getcwd()
   if not createTestCalcNA(subDir,numProcs,options):
     return False
   os.chdir("./"+subDir+"CalculationTest_tmp")
@@ -109,9 +160,11 @@ def checkCalAgainstRef(subDir,options):
   #compare model calculations
   log=open("./log.txt",'a')
   log.write("\nDIFFING MODEL DUMPS ...\n")
-  for i in range(0,10):
-    file1="./"+subDir+"Test_t0000000"+str(i)
-    file2=paths.ref_calcs+subDir+"/"+subDir+"Ref_t0000000"+str(i)
+  calculationsAreTheSame=True
+  for i in range(1,len(refCalcs[subDir])):
+    refFileNameParts=refCalcs[subDir][i].split('_t')
+    file1="./"+subDir+"Test_t"+str(refFileNameParts[1])
+    file2=refCalcs[subDir][i]
     log.close()
     log=open("./log.txt",'a')
     log.write("diffing model files \""+file1+"\" and "+"\""+file2+"\" ... \n  ")
@@ -119,11 +172,9 @@ def checkCalAgainstRef(subDir,options):
     log.close()
     log=open("./log.txt",'a')
     if not result:
-      #leave temporary directory so the failure can be inspected
-      os.chdir("../")
-      return False
-  os.chdir("../")
-  return True
+      calculationsAreTheSame=False
+  os.chdir(cwd)
+  return calculationsAreTheSame
 def createTestCalcNA(subDir,numProcs,options):
   '''
   1) create starting model
@@ -158,12 +209,12 @@ def createTestCalcNA(subDir,numProcs,options):
       os.mkdir(tmpDir)
     else:
       print "FAILED"
-      print "  \""+tmpDir+"\" already exists, not removing it and stopping! Use \"-f\" to force"\
-        +" removal."
+      print "  \""+tmpDir+"\" already exists, not removing it and skipping this comparison! Use"\
+        +" \"-f\" to force removal."
       return False
   else:
     os.mkdir(tmpDir)
-  
+  cwd=os.getcwd()
   os.chdir(tmpDir)
   log=open("log.txt",'w')
   now=datetime.datetime.now()
@@ -173,145 +224,18 @@ def createTestCalcNA(subDir,numProcs,options):
       +"\" only calcuation of directories "+str(subDirsAllowed)+" is supported")
     log.close()
     return False
-  log.write("GENERATING STARTING MODEL ...\n")
-  SPHERLSgen_xml=\
-    '''
-    <data>
-      <model type="stellar">
-        
-        <output>
-          <timeStepFactor>0.25</timeStepFactor>
-          <fileName>'''+subDir+'''Test_t00000000</fileName>
-          <binary>true</binary>
-          <writeToScreen>false</writeToScreen>
-        </output>
-        <EOS type="table">
-          <T-eff>6.1e3</T-eff>
-          <L>50.0</L>
-          <eosTable>'''+paths.EOSPath+'''</eosTable>
-          <tolerance>5e-14</tolerance>
-        </EOS>
-        <dimensions>
-          <radIndepVar>
-            <M-total>5.75E-01</M-total>
-            <M-delta-init>1.2e-9</M-delta-init>
-            <M-delta-delta stopType="T" stopValue="1e4">2.5e-2</M-delta-delta>
-            <M-delta-delta stopType="T" stopValue="6e6">5e-2</M-delta-delta>
-            <alpha>0.2</alpha>
-            <num-1D>100</num-1D>
-          </radIndepVar>
-          <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->'''
-  if subDir=="3DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>3</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>3</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  elif subDir=="2DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>3</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>1</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  else:
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>1</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>1</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  SPHERLSgen_xml=SPHERLSgen_xml+'''
-      </dimensions>
-      <velocityDist type="PRO">
-        <fileName>'''+paths.velocityProfilePath+'''</fileName>
-        <uSurf>-2.0e5</uSurf>'''
-  if subDir=="3DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <perturb type="torus">
-            <r_cen_off>2e11</r_cen_off>
-            <theta_cen_off>0.0</theta_cen_off>
-            <phi_cen_off>0.0</phi_cen_off>
-            <radius_cen>1e9</radius_cen>
-            <radius_outter>5e8</radius_outter>
-            <width_guassian>2.5e8</width_guassian>
-            <amplitude>1.0e20</amplitude>
-          </perturb>'''
-  elif subDir=="2DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+''''''
-  else :
-    SPHERLSgen_xml=SPHERLSgen_xml+''''''
-  SPHERLSgen_xml=SPHERLSgen_xml+'''
-        </velocityDist>
-      </model>
-    </data>
-    '''
-  SPHERLS_xml=\
-    '''
-    <data>
-      <job>
-        <que>false</que>
-      </job>
-      <procDims>
-        <x0>'''+str(numProcs)+'''</x0>
-        <x1>1</x1>
-        <x2>1</x2>
-      </procDims>
-      <startModel>'''+subDir+'''Test_t00000000</startModel>
-      <outputName>'''+subDir+'''Test</outputName>
-      <peakKE>false</peakKE>
-      <prints type="normal">
-        <frequency type="timeSteps">1</frequency>
-      </prints>
-      <dumps>
-        <frequency type="timeSteps">1</frequency>
-      </dumps>
-      <eos>
-        <tolerance>5e-14</tolerance>
-        <max-iterations>50</max-iterations>
-      </eos>
-      <av>1.4</av>
-      <av-threshold>0.01</av-threshold>
-      <time>
-        <endTime>69.0</endTime>
-        <timeStep>7.0</timeStep>
-      </time>
-      <adiabatic>false</adiabatic>
-      <turbMod>
-        <type>smagorinsky</type>
-        <eddyVisc>0.17</eddyVisc>
-      </turbMod>
-      <implicit>
-        <numImplicitZones>150</numImplicitZones>
-        <derivativeStepFraction>5e-7</derivativeStepFraction>
-        <tolerance>5.0e-14</tolerance>
-        <max-iterations>100</max-iterations>
-      </implicit>
-    </data>
-    '''
   
-  #make SPHERLSgen.xml file
-  log.write("making \"SPHERLSgen.xml\" ... ")
-  f=open("SPHERLSgen.xml",'w')
-  f.write(SPHERLSgen_xml)
-  f.close()
+  
+  #make SPHERLS.xml file
+  log.write("making \"SPHERLS.xml\" ...")
+  configFile=os.path.dirname(refCalcs[subDir][0])+"/SPHERLS.xml"
+  cmd=["cp",configFile,"./SPHERLS.xml"]
+  result=subprocess.call(cmd,stdout=log,stderr=log)
+  setSPHERLSStartAndOutputModel("./SPHERLS.xml",refCalcs[subDir][0],subDir+"Test")
   log.write("SUCCESS\n")
-  
-  #run SPHERLSgen
-  log.write("running \""+paths.SPHERLSgenPath+"\" ...\n",)
-  log.close()
-  log=open("log.txt",'a')
-  result=subprocess.call(paths.SPHERLSgenPath,stdout=log,stderr=log)
-  if result!=0:
-    os.chdir("../")
-    return False
   
   #run 10 steps with SPHERLS
   log.write("\nEVOLVING FOR 10 TIME STEPS ...\n")
-  #make SPHERLS.xml file
-  log.write("making \"SPHERLS.xml\" ...")
-  f=open("SPHERLS.xml",'w')
-  f.write(SPHERLS_xml)
-  f.close()
-  log.write("SUCCESS\n")
   log.write( "running \""+paths.scriptPaths+"SPHERLS_run.py"+"\" for 10 time steps ...\n",)
   log.close()
   log=open("log.txt",'a')
@@ -328,58 +252,15 @@ def createTestCalcNA(subDir,numProcs,options):
   if result!=0:
     os.chdir("../")
     return False
-  os.chdir("../")
+  os.chdir(cwd)
   return True
 def checkForRefCalcsAndRemake(options):
-  
-  #set number of processors to use
-  numProcs=4
-  
-  #set paths
-  refCalcs={
-    '1DNA':
-    [paths.ref_calcs+"/1DNA/1DNARef_t00000000"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000001"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000002"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000003"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000004"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000005"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000006"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000007"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000008"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000009"
-    ,paths.ref_calcs+"/1DNA/1DNARef_t00000010"]
-    ,'2DNA':
-    [paths.ref_calcs+"/2DNA/2DNARef_t00000000"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000001"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000002"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000003"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000004"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000005"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000006"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000007"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000008"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000009"
-    ,paths.ref_calcs+"/2DNA/2DNARef_t00000010"]
-    ,'3DNA':
-    [paths.ref_calcs+"/3DNA/3DNARef_t00000000"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000001"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000002"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000003"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000004"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000005"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000006"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000007"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000008"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000009"
-    ,paths.ref_calcs+"/3DNA/3DNARef_t00000010"]
-    }
   
   #check for calculations
   haveRefCalcs={}
   for key in refCalcs.keys():
     
-    #check that all files are there
+    #check that all model files are there
     haveRefCalc=True
     if not options.m:
       print "checking for reference calculations for \""+key+"\" calculation ... ",
@@ -388,35 +269,111 @@ def checkForRefCalcsAndRemake(options):
           haveRefCalc=False
     else:
       haveRefCalc=False
+    
+    #check to see if there is a SPHERLS.xml file in the test directory
+    configFile=os.path.dirname(refCalcs[key][0])+"/SPHERLS.xml"
+    if not os.access(configFile,os.F_OK):
+      haveRefCalc=False
     haveRefCalcs[key]=haveRefCalc
     
-    #if a file is missing recreate reference calculations
+    #if a file is missing recreate reference calculations if possible
     if not haveRefCalc:
-      if not options.m:
+      if options.r or options.m:
+        if not options.m :
+          print "FAILED"
+          print "  remaking \""+key+"\" reference calculations ... ",
+        else:
+          print "remaking \""+key+"\" reference calculations ... ",
+        if key=='1DNA':
+          if createRefCalcNA("1DNA",numProcs,options):
+            print "SUCCESS"
+        elif key=='2DNA':
+          if createRefCalcNA("2DNA",numProcs,options):
+            print "SUCCESS"
+        elif key=='3DNA':
+          if createRefCalcNA("3DNA",numProcs,options):
+            print "SUCCESS"
+        else:
+          print "FAILED"
+          print "unknown reference calculation \""+key+"\", can not remake"
+      else:
         print "FAILED"
-        print "  remaking \""+key+"\" reference calculations ... ",
-      else:
-        print "remaking \""+key+"\" reference calculations ... ",
-      if key=='1DNA':
-        if createRefCalcNA("1DNA",numProcs,options):
-          print "SUCCESS"
-        else:
-          print "FAILED"
-      elif key=='2DNA':
-        if createRefCalcNA("2DNA",numProcs,options):
-          print "SUCCESS"
-        else:
-          print "FAILED"
-      elif key=='3DNA':
-        if createRefCalcNA("3DNA",numProcs,options):
-          print "SUCCESS"
-        else:
-          print "FAILED"
-      else:
-        print "unknown reference calculation \""+key+"\", can not remake"
+        print "  not making \""+key+"\" reference calculation, use -r option to remake reference"\
+          +" calculations automatically as needed."
     else:
       print "SUCCESS"
   return haveRefCalcs
+def getSPHERLSStartModel(pathToSPHERLSXML):
+  '''Returns the text in the \"startModel\" node found in the \"SPHERLS.xml\" file pointed to by
+  pathToSPHERLSXML.'''
+  
+  #open xml file, and get root node
+  tree=xml.parse(pathToSPHERLSXML)
+  root=tree.getroot()
+  
+  #get output node
+  startModelElement=root.find("startModel")
+  if startModelElement==None:
+    return None
+  elif startModelElement.text!="":
+    return startModelElement.text
+  else :
+    return None
+def getSPHERLSgenOutputModel(pathToSPHERLSgenXML):
+  '''Returns the text in the \"startModel\" node found in the \"SPHERLS.xml\" file pointed to by
+  pathToSPHERLSXML.'''
+  
+  #open xml file, and get root node
+  tree=xml.parse(pathToSPHERLSgenXML)
+  root=tree.getroot()
+  
+  #get output node
+  outputElement=root.find("output")
+  if outputElement==None:
+    return None
+  
+  #get output fileName
+  fileNameElement=output.find("fileName")
+  if fileNameElement==None:
+    return None
+  elif fileNameElement.text!="":
+    return fileNameElement.text
+  else :
+    return None
+def setSPHERLSStartAndOutputModel(pathToSPHERLSxml,startModel,outputModel):
+  '''modifies the file pathToSPHERLSxml to have a new output model, outputModel'''
+  
+  #open xml file, and get root node
+  tree=xml.parse(pathToSPHERLSxml)
+  root=tree.getroot()
+  
+  #get and set outputName node
+  outputElement=root.find("outputName")
+  if outputElement==None:
+    return False
+  outputElement.text=outputModel
+  
+  #get and set startModel node
+  startModelElement=root.find("startModel")
+  if startModelElement==None:
+    return False
+  startModelElement.text=startModel
+  
+  #write out new SPHERLS.xml file
+  out=open(pathToSPHERLSxml,'w')
+  out.write(xml.tostring(root))
+  out.close()
+  return True
+def remakeSPHERLSXMLWithNewStartModel(pathToSPHERLSXML):
+  
+  #open xml file, and get root node
+  tree=xml.parse(pathToSPHERLSXML)
+  root=tree.getroot()
+  
+  xml.dump(tree)
+  #include reference to new starting model
+  #adjust end time/timestep as needed for new starting model
+  return True
 def createRefCalcNA(subDir,numProcs,options):
   '''
   1) create starting model
@@ -428,179 +385,97 @@ def createRefCalcNA(subDir,numProcs,options):
     b) call SPHERLS_run.py to run the code for 10 time steps
     c) remove any models not needed for comparison
   '''
+  
   tmpDir=paths.ref_calcs+subDir
-  if not os.access(tmpDir,os.F_OK):
-    os.mkdir(tmpDir)
-  else:
-    shutil.rmtree(tmpDir)
-    os.mkdir(tmpDir)
+  cwd=os.getcwd()#keep cwd to return to it afterwards
   
-  #change into directory
-  os.chdir(tmpDir)
-  
-  log=open("log.txt",'w')
-  now=datetime.datetime.now()
-  log.write("These reference models were created on "+str(now)+"\n\n")
-  subDirsAllowed=["1DNA","2DNA","3DNA"]
-  if subDir not in subDirsAllowed:
-    log.write(createRefCalcDNA.__name__+": doesn't know how to handle calculation of subDir \""+subDir\
-      +"\" only calcuation of directories "+str(subDirsAllowed)+" is supported")
-    log.close()
-    return False
-  log.write("GENERATING STARTING MODEL ...\n")
-  SPHERLSgen_xml=\
-    '''
-    <data>
-      <model type="stellar">
+  #establish that all required files to run SPHERLS are present, if not remake as needed keep as 
+  #many pre-existing settings as is feasible
+  if os.access(tmpDir,os.F_OK):#if subDir already there
+    
+    #change into directory
+    os.chdir(tmpDir)
+    log=open("log.txt",'w')
+    
+    log.write("found \""+tmpDir+"\"\n")
+    if os.access(tmpDir+"/SPHERLS.xml",os.F_OK):#if SPHERLS.xml is already there
+      
+      log.write("found \""+tmpDir+"/SPHERLS.xml\"\n")
+      
+      #get model referenced by SPHERLS.xml
+      modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
+      
+      if os.access(modelPath,os.F_OK):#if model referenced by SPHERLS.xml already there
+        log.write("start model \""+modelPath+"\" found\n")
+        pass#nothing to be done here, except run SPHERLS
+      elif os.access(tmpDir+"/SPHERLSgen.xml",os.F_OK):#elif SPHERLSgen.xml is already there
+        print "FAILED"
+        print "    Building reference calculations from scratch isn't yet supported, and probalby "
+        print "    not as good as manually setting them up."
+        return False
+        print "start model not found, but \""+tmpDir+"/SPHERLSgen.xml\" found, using it to generate starting model"
+        #remake starting model by running SPHERLSgen, and get output file name
+        result=subprocess.call(paths.SPHERLSgenPath,stdout=log,stderr=log)
+        startModel=getSPHERLSgenOutputModel(tmpDir+"/SPHERLSgen.xml")
         
-        <output>
-          <timeStepFactor>0.25</timeStepFactor>
-          <fileName>'''+subDir+'''Ref_t00000000</fileName>
-          <binary>true</binary>
-          <writeToScreen>false</writeToScreen>
-        </output>
-        <EOS type="table">
-          <T-eff>6.1e3</T-eff>
-          <L>50.0</L>
-          <eosTable>'''+paths.EOSPath+'''</eosTable>
-          <tolerance>5e-14</tolerance>
-        </EOS>
-        <dimensions>
-          <radIndepVar>
-            <M-total>5.75E-01</M-total>
-            <M-delta-init>1.2e-9</M-delta-init>
-            <M-delta-delta stopType="T" stopValue="1e4">2.5e-2</M-delta-delta>
-            <M-delta-delta stopType="T" stopValue="6e6">5e-2</M-delta-delta>
-            <alpha>0.2</alpha>
-            <num-1D>100</num-1D>
-          </radIndepVar>
-          <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->'''
-  if subDir=="3DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>3</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>3</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  elif subDir=="2DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>3</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>1</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  else:
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <num-theta>1</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>1</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->'''
-  SPHERLSgen_xml=SPHERLSgen_xml+'''
-      </dimensions>
-      <velocityDist type="PRO">
-        <fileName>'''+paths.velocityProfilePath+'''</fileName>
-        <uSurf>-2.0e5</uSurf>'''
-  if subDir=="3DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+'''
-          <perturb type="torus">
-            <r_cen_off>2e11</r_cen_off>
-            <theta_cen_off>0.0</theta_cen_off>
-            <phi_cen_off>0.0</phi_cen_off>
-            <radius_cen>1e9</radius_cen>
-            <radius_outter>5e8</radius_outter>
-            <width_guassian>2.5e8</width_guassian>
-            <amplitude>1.0e20</amplitude>
-          </perturb>'''
-  elif subDir=="2DNAD":
-    SPHERLSgen_xml=SPHERLSgen_xml+''''''
-  else :
-    SPHERLSgen_xml=SPHERLSgen_xml+''''''
-  SPHERLSgen_xml=SPHERLSgen_xml+'''
-        </velocityDist>
-      </model>
-    </data>
-    '''
-  SPHERLS_xml=\
-    '''
-    <data>
-      <job>
-        <que>false</que>
-      </job>
-      <procDims>
-        <x0>'''+str(numProcs)+'''</x0>
-        <x1>1</x1>
-        <x2>1</x2>
-      </procDims>
-      <startModel>'''+subDir+'''Ref_t00000000</startModel>
-      <outputName>'''+subDir+'''Ref</outputName>
-      <peakKE>false</peakKE>
-      <prints type="normal">
-        <frequency type="timeSteps">1</frequency>
-      </prints>
-      <dumps>
-        <frequency type="timeSteps">1</frequency>
-      </dumps>
-      <eos>
-        <tolerance>5e-14</tolerance>
-        <max-iterations>50</max-iterations>
-      </eos>
-      <av>1.4</av>
-      <av-threshold>0.01</av-threshold>
-      <time>
-        <endTime>69.0</endTime>
-        <timeStep>7.0</timeStep>
-      </time>
-      <adiabatic>false</adiabatic>
-      <turbMod>
-        <type>smagorinsky</type>
-        <eddyVisc>0.17</eddyVisc>
-      </turbMod>
-      <implicit>
-        <numImplicitZones>150</numImplicitZones>
-        <derivativeStepFraction>5e-7</derivativeStepFraction>
-        <tolerance>5.0e-14</tolerance>
-        <max-iterations>100</max-iterations>
-      </implicit>
-    </data>
-    '''
-  
-  #make SPHERLSgen.xml file
-  log.write("making \"SPHERLSgen.xml\" ... ")
-  f=open("SPHERLSgen.xml",'w')
-  f.write(SPHERLSgen_xml)
-  f.close()
-  log.write("SUCCESS\n")
-  
-  #run SPHERLSgen
-  log.write("running \""+paths.SPHERLSgenPath+"\" ...\n",)
-  log.close()
-  log=open("log.txt",'a')
-  result=subprocess.call(paths.SPHERLSgenPath,stdout=log,stderr=log)
-  if result!=0:
-    os.chdir("../")
+        #remake SPHERLS.xml but keep as many settings as possible
+        remakeSPHERLSXMLWithNewStartModel(tmpDir+"/SPHERLS.xml",startModel)
+        
+      else:#else no starting model and no SPHERLSgen.xml
+        #remake SPHERLSgen.xml, starting model
+        #remake SPHERLS.xml but keep as many settings as possible
+          #include reference to new starting model
+          #adjust end time/timestep as needed for new starting model
+        print "FAILED"
+        print "    Building reference calculations from scratch isn't yet supported, and probalby "
+        print "    not as good as manually setting them up."
+        return False
+    else:#else no SPHERLS.xml
+      if os.access(tmpDir+"/SPHERLSgen.xml",os.F_OK):#if SPHERLSgen.xml is already there
+        #make starting model
+        #make SPHERLS.xml
+        print "FAILED"
+        print "    Building reference calculations from scratch isn't yet supported, and probalby "
+        print "    not as good as manually setting them up."
+        return False
+      else:#else no SPHERLSgen.xml
+        #remake all (SPHERLS.xml, SPHERLSgen.xml, starting model)
+        print "FAILED"
+        print "    Building reference calculations from scratch isn't yet supported, and probalby "
+        print "    not as good as manually setting them up."
+        return False
+  else:#else
+    #make SPHERLS.xml, SPHERLSgen.xml, and starting model
+    print "FAILED"
+    print "    Building reference calculations from scratch isn't yet supported, and probalby "
+    print "    not as good as manually setting them up."
     return False
-  
-  #run 10 steps with SPHERLS
-  log.write("\nEVOLVING FOR 10 TIME STEPS ...\n")
-  #make SPHERLS.xml file
-  log.write("making \"SPHERLS.xml\" ...")
-  f=open("SPHERLS.xml",'w')
-  f.write(SPHERLS_xml)
-  f.close()
-  log.write("SUCCESS\n")
-  log.write( "running \""+paths.scriptPaths+"SPHERLS_run.py"+"\" for 10 time steps ...\n",)
-  log.close()
-  log=open("log.txt",'a')
+    
+    '''below is a starting of the implementation required here, much more is needed though.'''
+    #make directory
+    os.mkdir(tmpDir)
+    
+    #change into directory
+    os.chdir(tmpDir)
+    log=open("log.txt",'w')
+  #run SPHERLS_run.py
   result=subprocess.call(paths.scriptPaths+"SPHERLS_run.py",stdout=log,stderr=log)
   if result!=0:
-    os.chdir("../")
+    os.chdir(cwd)
     return False
   
   #combine bins and remove distributed bins
   log.write("\ncombining binary dumps \"./3DNARef_t[0-*]\" and removing distributed binary files ...\n")
   log.close()
   log=open("log.txt",'a')
-  result=subprocess.call([paths.scriptPaths+"combine_bins.py","-r","./"+subDir+"Ref_t[0-*]"],stdout=log,stderr=log)
+  modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
+  fileName=os.path.basename(modelPath)
+  fileNameParts=fileName.split('_t')
+  cmd=[paths.scriptPaths+"combine_bins.py","-r","./"+fileNameParts[0]+"_t["\
+    +str(int(fileNameParts[1]))+"-*]"]
+  result=subprocess.call(cmd,stdout=log,stderr=log)
   if result!=0:
-    os.chdir("../")
+    os.chdir(cwd)
     return False
   return True
 if __name__ == "__main__":
