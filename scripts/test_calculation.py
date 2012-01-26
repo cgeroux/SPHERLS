@@ -35,17 +35,17 @@ refCalcs={
   ,paths.ref_calcs+"1DNA/1DNARef_t00000009"
   ,paths.ref_calcs+"1DNA/1DNARef_t00000010"]
   ,'2DNA':
-  [paths.ref_calcs+"2DNA/2DNARef_t00000000"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000001"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000002"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000003"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000004"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000005"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000006"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000007"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000008"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000009"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00000010"]
+  [paths.ref_calcs+"2DNA/2DNARef_t00137886"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137887"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137888"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137889"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137890"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137891"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137892"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137893"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137894"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137895"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137896"]
   ,'3DNA':
   [paths.ref_calcs+"3DNA/3DNARef_t00222559"
   ,paths.ref_calcs+"3DNA/3DNARef_t00222560"
@@ -94,6 +94,10 @@ def main():
     parser.add_option("-f",action="store_true",dest="f"
       ,help="Force removal of pre-existing temporary data automatically."
       ,default=False)
+    parser.add_option('-m',action="store_true",dest="m",default=False,help="Force remaking of"\
+      +" all reference calculations.")
+    parser.add_option('-r',action="store_true",dest="r",default=False,help="Remake if missing"\
+      +" reference calculations.")
     parser.add_option('-k',action="store_true",dest="k",default=False,help="Keep temporary directories.")
     parser.add_option('-p',default=5e-14,type=float,dest="p",help="Sets the amount of relative"\
       +" absolute difference allowed between numerical values of the two dump files."\
@@ -413,13 +417,13 @@ def createRefCalcNA(subDir,numProcs,options):
         print "    Building reference calculations from scratch isn't yet supported, and probalby "
         print "    not as good as manually setting them up."
         return False
-        print "start model not found, but \""+tmpDir+"/SPHERLSgen.xml\" found, using it to generate starting model"
+        '''print "start model not found, but \""+tmpDir+"/SPHERLSgen.xml\" found, using it to generate starting model"
         #remake starting model by running SPHERLSgen, and get output file name
         result=subprocess.call(paths.SPHERLSgenPath,stdout=log,stderr=log)
         startModel=getSPHERLSgenOutputModel(tmpDir+"/SPHERLSgen.xml")
         
         #remake SPHERLS.xml but keep as many settings as possible
-        remakeSPHERLSXMLWithNewStartModel(tmpDir+"/SPHERLS.xml",startModel)
+        remakeSPHERLSXMLWithNewStartModel(tmpDir+"/SPHERLS.xml",startModel)'''
         
       else:#else no starting model and no SPHERLSgen.xml
         #remake SPHERLSgen.xml, starting model
@@ -451,13 +455,15 @@ def createRefCalcNA(subDir,numProcs,options):
     print "    not as good as manually setting them up."
     return False
     
-    '''below is a starting of the implementation required here, much more is needed though.'''
+    '''
+    #below is a starting of the implementation required here, much more is needed though.
     #make directory
     os.mkdir(tmpDir)
     
     #change into directory
     os.chdir(tmpDir)
-    log=open("log.txt",'w')
+    log=open("log.txt",'w')'''
+  
   #run SPHERLS_run.py
   result=subprocess.call(paths.scriptPaths+"SPHERLS_run.py",stdout=log,stderr=log)
   if result!=0:
@@ -471,7 +477,7 @@ def createRefCalcNA(subDir,numProcs,options):
   modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
   fileName=os.path.basename(modelPath)
   fileNameParts=fileName.split('_t')
-  cmd=[paths.scriptPaths+"combine_bins.py","-r","./"+fileNameParts[0]+"_t["\
+  cmd=[paths.scriptPaths+"combine_bins.py","-r","-m","./"+fileNameParts[0]+"_t["\
     +str(int(fileNameParts[1]))+"-*]"]
   result=subprocess.call(cmd,stdout=log,stderr=log)
   if result!=0:

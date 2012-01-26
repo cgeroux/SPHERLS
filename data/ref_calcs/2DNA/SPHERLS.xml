@@ -7,7 +7,7 @@
     <x1>1</x1>
     <x2>1</x2>
   </procDims>
-  <startModel>2DNARef_t00000000</startModel>
+  <startModel>2DNARef_t00137886</startModel>
   <outputName>2DNARef</outputName>
   <peakKE>false</peakKE>
   <prints type="normal">
@@ -23,8 +23,8 @@
   <av>1.4</av>
   <av-threshold>0.01</av-threshold>
   <time>
-    <endTime>69.0</endTime>
-    <timeStep>7.0</timeStep>
+    <endTime>977996.868276651</endTime>
+    <timeStepFactor>0.25</timeStepFactor>
   </time>
   <adiabatic>false</adiabatic>
   <turbMod>

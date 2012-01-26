@@ -2,6 +2,9 @@
 '''
   Test that restarts produce the same results as calculating straight through the restart with no
  restart.
+ 
+ TODO: I should probalby use the reference calculations as a starting point, that way I can test
+ all the terms not just the spherically symmetric ones.
 '''
 useArgparse=True
 try:
