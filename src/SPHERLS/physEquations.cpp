@@ -8667,7 +8667,9 @@ void calNewE_RT_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &proc
   }
 }
 void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &procTop){
-  int i,j,k;
+  int i;
+  int j;
+  int k;
   int nIInt;
   int nJInt;
   double dU_ijk_np1half;
@@ -8693,6 +8695,9 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dR4_ip1half_np1half;
   double dRSq_im1half_np1half;
   double dR4_im1half_np1half;
+  double dUmU0_ijk_np1half;
+  double dVSinTheta_ijp1halfk_np1half;
+  double dVSinTheta_ijm1halfk_np1half;
   double dRhoAve_ip1half_n;
   double dRhoAve_im1half_n;
   double dRho_ip1halfjk_n;
@@ -8715,14 +8720,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dKappa_ijm1halfk_n;
   double dUR2_im1halfjk_np1half;
   double dUR2_ip1halfjk_np1half;
-  double dVSinTheta_ijp1halfk_np1half;
-  double dVSinTheta_ijm1halfk_np1half;
   double dA1CenGrad;
   double dA1UpWindGrad;
   double dA2CenGrad;
   double dA2UpWindGrad;
   double dA2;
-  double dUmU0_ijk_np1half;
   double dA1;
   double dP_ijk_n;
   double dS1;
@@ -8778,7 +8780,7 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
     
     for(j=grid.nStartUpdateExplicit[grid.nE][1];j<grid.nEndUpdateExplicit[grid.nE][1];j++){
       
-      //calculate i for interface centered quantities
+      //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       
       for(k=grid.nStartUpdateExplicit[grid.nE][2];k<grid.nEndUpdateExplicit[grid.nE][2];k++){
@@ -8912,11 +8914,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dTGrad_jm1half=(dT4_ijk_n-dT4_ijm1k_n)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
           +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;;
         dGrad_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-          /(dKappa_ijp1halfk_n*dRho_ijp1halfk_n*dR_i_np1half)*dTGrad_jp1half;
+          /(dKappa_ijp1halfk_n*dRho_ijp1halfk_n)*dTGrad_jp1half;
         dGrad_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n*dR_i_np1half)*dTGrad_jm1half;
+          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;
         dS5=(dGrad_jp1half-dGrad_jm1half)/(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-          *dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+          *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
         //calculate DUDM_ijk_np1half
         dDUDM_ijk_np1half=4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -8958,22 +8960,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           *dDVDTheta_ijk_np1half+dTau_rt_ijk_np1half*(dDUDTheta_ijk_np1half+dDVDM_ijk_np1half))
           /grid.dLocalGridOld[grid.nD][i][j][k];
         
-        /*if(dEddyViscosityTerms<0.0){
-          
-          std::stringstream ssTemp;
-          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
-            <<": negative eddy viscosity contribution ("<<dEddyViscosityTerms<<") to energy , ("<<i
-            <<","<<j<<","<<k<<")\n";
-          //throw exception2(ssTemp.str(),CALCULATION);
-          std::cout<<ssTemp.str();
-          
-        }*/
-        
         //calculate new energy
-        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
-          -time.dDeltat_n*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
-          *(dA1+dS1)+dA2+dS2-4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])
-          *(dS4+dS5)-dEddyViscosityTerms);
+        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]-time.dDeltat_n
+          *(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
+          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
+          -dEddyViscosityTerms);
         
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
@@ -9019,14 +9010,14 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
     
-    for(j=grid.nStartGhostUpdateExplicit[grid.nE][0][1]
-      ;j<grid.nEndGhostUpdateExplicit[grid.nE][0][1];j++){
+    for(j=grid.nStartGhostUpdateExplicit[grid.nE][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nE][0][1];j++){
       
       //calculate i for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       
-      for(k=grid.nStartGhostUpdateExplicit[grid.nE][0][2]
-        ;k<grid.nEndGhostUpdateExplicit[grid.nE][0][2];k++){
+      for(k=grid.nStartGhostUpdateExplicit[grid.nE][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nE][0][2];k++){
         
         //Calculate interpolated quantities
         dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
@@ -9039,20 +9030,18 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.25;
         dV_ijk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.5;
-        dV_ip1halfjk_np1half=0.0;
+        dV_ip1halfjk_np1half=dV_ijk_np1half;
         dV_im1halfjk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k]+grid.dLocalGridNew[grid.nV][i-1][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i-1][nJInt-1][k])*0.25;
         dE_ip1halfjk_n=grid.dLocalGridOld[grid.nE][i][j][k];/**\BC Setting energy at surface equal 
           to energy in last zone.*/
-        dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]
-          +grid.dLocalGridOld[grid.nE][i-1][j][k])*0.5;
-        dE_ijp1halfk_n=(grid.dLocalGridOld[grid.nE][i][j+1][k]
-          +grid.dLocalGridOld[grid.nE][i][j][k])*0.5;
-        dE_ijm1halfk_n=(grid.dLocalGridOld[grid.nE][i][j][k]
-          +grid.dLocalGridOld[grid.nE][i][j-1][k])*0.5;
-        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i+1][j][k]
-          +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+        dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]+grid.dLocalGridOld[grid.nE][i-1][j][k])
+          *0.5;
+        dE_ijp1halfk_n=(grid.dLocalGridOld[grid.nE][i][j+1][k]+grid.dLocalGridOld[grid.nE][i][j][k])
+          *0.5;
+        dE_ijm1halfk_n=(grid.dLocalGridOld[grid.nE][i][j][k]+grid.dLocalGridOld[grid.nE][i][j-1][k])
+          *0.5;
         dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
         dRho_ijp1halfk_n=(grid.dLocalGridOld[grid.nD][i][j+1][k]
@@ -9147,26 +9136,28 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dTGrad_jm1half=(dT4_ijk_n-dT4_ijm1k_n)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
           +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;;
         dGrad_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-          /(dKappa_ijp1halfk_n*dRho_ijp1halfk_n*dR_i_np1half)*dTGrad_jp1half;
+          /(dKappa_ijp1halfk_n*dRho_ijp1halfk_n)*dTGrad_jp1half;
         dGrad_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n*dR_i_np1half)*dTGrad_jm1half;;
+          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;
         dS5=(dGrad_jp1half-dGrad_jm1half)/(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-          *dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+          *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
-        //calculate a bunch of velocity derivatives
+        //calculate DUDM_ijk_np1half
         dDUDM_ijk_np1half=4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *dRSq_i_np1half*((grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0])-(grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
-          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))
-          /grid.dLocalGridOld[grid.nDM][i][0][0];
+          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))/grid.dLocalGridOld[grid.nDM][i][0][0];
         
+        //calculate DVDM_ijk_np1half
         dDVDM_ijk_np1half=4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *dRSq_i_np1half*(dV_ip1halfjk_np1half-dV_im1halfjk_np1half)
           /grid.dLocalGridOld[grid.nDM][i][0][0];
         
-        dDUDTheta_ijk_np1half=(dU_ijp1halfk_np1half-dU_ijm1halfk_np1half)/(dR_i_np1half
-          *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+        //calculate DUDTheta_ijk_np1half
+        dDUDTheta_ijk_np1half=((dU_ijp1halfk_np1half-dU0_i_np1half)-(dU_ijm1halfk_np1half
+          -dU0_i_np1half))/(dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
+        //calculate DVDTheta_ijk_np1half
         dDVDTheta_ijk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           -grid.dLocalGridNew[grid.nV][i][nJInt-1][k])/(dR_i_np1half
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
@@ -9174,11 +9165,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         //cal DivU_ijk_np1half
         dDivU_ijk_np1half=dDUDM_ijk_np1half+dDVDTheta_ijk_np1half;
         
-        //cal Tau_rr_ijk_n
+        //cal Tau_rr_ijk_np1half
         dTau_rr_ijk_np1half=2.0*grid.dLocalGridNew[grid.nEddyVisc][i][j][k]*(dDUDM_ijk_np1half
           -0.3333333333333333*dDivU_ijk_np1half);
         
-        //calculate Tau_tt_ijp1halfk_n
+        //calculate Tau_tt_ijp1halfk_np1half
         dTau_tt_ijk_np1half=2.0*grid.dLocalGridNew[grid.nEddyVisc][i][j][k]*(dDVDTheta_ijk_np1half
           -0.333333333333333*dDivU_ijk_np1half);
         
@@ -9190,22 +9181,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           *dDVDTheta_ijk_np1half+dTau_rt_ijk_np1half*(dDUDTheta_ijk_np1half+dDVDM_ijk_np1half))
           /grid.dLocalGridOld[grid.nD][i][j][k];
         
-        /*if(dEddyViscosityTerms<0.0){
-          
-          std::stringstream ssTemp;
-          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
-            <<": negative eddy viscosity contribution ("<<dEddyViscosityTerms<<") to energy , ("<<i
-            <<","<<j<<","<<k<<")\n";
-          //throw exception2(ssTemp.str(),CALCULATION);
-          std::cout<<ssTemp.str();
-          
-        }*/
-        
         //calculate new energy
-        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
-          -time.dDeltat_n*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
-          *(dA1+dS1)+dA2+dS2-4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])
-          *(dS4+dS5)-dEddyViscosityTerms);
+        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]-time.dDeltat_n
+          *(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
+          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
+          -dEddyViscosityTerms);
         
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
