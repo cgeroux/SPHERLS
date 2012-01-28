@@ -1,3 +1,10 @@
+2012-01-28 18:55:18.937856
+directory "/home/cgeroux/SPHERLS/data/ref_calcs/2DNA" found
+checking for needed files ...
+found "/home/cgeroux/SPHERLS/data/ref_calcs/2DNA/SPHERLS.xml"
+found start model "2DNARef_t00137886"
+
+RUNNING SPHERLS
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 2DNARef_t00137886
 src/SPHERLS/main.cpp:main:131:0:
@@ -45,7 +52,7 @@ src/SPHERLS/main.cpp:main:131:0:
     * max(convective velocity) =1.62599e+01 [km/s]
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     3.76601e-14
+    * Largest relative error in calculation of temperature was     3.76603e-14
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 2DNARef_t00137890
 src/SPHERLS/main.cpp:main:131:0:
@@ -128,10 +135,7 @@ src/SPHERLS/dataManipulation.cpp:fin:633:0:
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.61489e-15
-Run time for proc 0 is 3.6359906197e-01 [s]
-found "/home/cgeroux/SPHERLS/data/ref_calcs/2DNA"
-found "/home/cgeroux/SPHERLS/data/ref_calcs/2DNA/SPHERLS.xml"
-start model "2DNARef_t00137886" found
+Run time for proc 0 is 3.1174111366e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./2DNARef_t00137886" and removing distributed binaries ...

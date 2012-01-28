@@ -400,8 +400,9 @@ def createRefCalcNA(subDir,numProcs,options):
     #change into directory
     os.chdir(tmpDir)
     log=open("log.txt",'w')
-    
-    log.write("found \""+tmpDir+"\"\n")
+    log.write(str(datetime.datetime.now())+"\n")
+    log.write("directory \""+tmpDir+"\" found\n")
+    log.write("checking for needed files ...\n")
     if os.access(tmpDir+"/SPHERLS.xml",os.F_OK):#if SPHERLS.xml is already there
       
       log.write("found \""+tmpDir+"/SPHERLS.xml\"\n")
@@ -410,7 +411,7 @@ def createRefCalcNA(subDir,numProcs,options):
       modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
       
       if os.access(modelPath,os.F_OK):#if model referenced by SPHERLS.xml already there
-        log.write("start model \""+modelPath+"\" found\n")
+        log.write("found start model \""+modelPath+"\"\n")
         pass#nothing to be done here, except run SPHERLS
       elif os.access(tmpDir+"/SPHERLSgen.xml",os.F_OK):#elif SPHERLSgen.xml is already there
         print "FAILED"
@@ -465,6 +466,9 @@ def createRefCalcNA(subDir,numProcs,options):
     log=open("log.txt",'w')'''
   
   #run SPHERLS_run.py
+  log.write("\nRUNNING SPHERLS\n")
+  log.close()
+  log=open("log.txt",'a')
   result=subprocess.call(paths.scriptPaths+"SPHERLS_run.py",stdout=log,stderr=log)
   if result!=0:
     os.chdir(cwd)
