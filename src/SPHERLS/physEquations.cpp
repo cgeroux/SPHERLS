@@ -10380,7 +10380,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         
         //calculate DWDPhi_ijk_np1half
         dDWDPhi_ijk_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
-          -grid.dLocalGridNew[grid.nV][i][j][nKInt-1])/(dR_i_np1half
+          -grid.dLocalGridNew[grid.nW][i][j][nKInt-1])/(dR_i_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
         
         //cal DivU_ijk_np1half
@@ -10718,7 +10718,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         
         //calculate DWDPhi_ijk_np1half
         dDWDPhi_ijk_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
-          -grid.dLocalGridNew[grid.nV][i][j][nKInt-1])/(dR_i_np1half
+          -grid.dLocalGridNew[grid.nW][i][j][nKInt-1])/(dR_i_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
         
         //cal DivU_ijk_np1half
