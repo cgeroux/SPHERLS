@@ -163,6 +163,19 @@ class eos{
       @param[out] dKappa opacity at dT and dRho.
       @param[out] dGamma adiabatic index at dT and dRho.
       */
+    void getPEKappaGammaCp(double dT,double dRho,double &dP,double &dE,double &dKappa
+      ,double &dGamma,double &dCp);/**<
+      This function linearly interpolates the energy and opacity to a given temperature and 
+      density. Note that both \c dT and \c dRho are not in log space.
+      
+      @param[in] dT temperature to interpolate to.
+      @param[in] dRho density to interpolate to.
+      @param[out] dP pressure at dT and dRho.
+      @param[out] dE energy at dT and dRho.
+      @param[out] dKappa opacity at dT and dRho.
+      @param[out] dGamma adiabatic index at dT and dRho.
+      @param[out] dCp specific heat at constant pressure at dT and dRho.
+      */
     void getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma);/**<
       This function linearly interpolates the energy and opacity to a given temperature and 
       density. Note that both \c dT and \c dRho are not in log space.

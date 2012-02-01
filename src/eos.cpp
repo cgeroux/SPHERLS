@@ -955,6 +955,121 @@ void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double
   //calculate Gamma1
   dGamma=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
 }
+void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, double &dKappa
+  ,double &dGamma, double &dC_p){
+  
+  //calculate logs of dT and dRho
+  double dLogRho=log10(dRho);
+  double dLogT=log10(dT);
+  
+  //if density too low
+  if(dLogRho<dLogRhoMin){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": the log density to interpolate to, \""<<dLogRho
+      <<"\" is lower than the minimum density in the table, \""<<dLogRhoMin<<"\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //if temperature too low
+  if(dLogT<dLogTMin){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": the log temperature to interpolate to, \""<<dLogT
+      <<"\" is lower than the minimum log temperature in the table, \""<<dLogTMin<<"\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //calculate maximum values of grid
+  double dLogRhoMax=dLogRhoMin+double(nNumRho)*dLogRhoDelta;
+  double dLogTMax=dLogTMin+double(nNumT)*dLogTDelta;
+  
+  //calculate independent quantities at bracketing i's
+  int nILower=int((dLogRho-dLogRhoMin)/dLogRhoDelta);
+  int nIUpper=nILower+1;
+  double dLogRhoLower=dLogRhoMin+double(nILower)*dLogRhoDelta;
+  double dLogRhoUpper=dLogRhoMin+double(nIUpper)*dLogRhoDelta;
+  
+  //if density too high
+  if(dLogRho>dLogRhoMax||nIUpper>(nNumRho-1)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": the log density to interpolate to, \""<<dLogRho
+      <<"\"("<<nIUpper<<") is higher than the maximum density in the table, \""<<dLogRhoMax
+      <<"\"("<<nNumRho-1<<")\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //calculate independent quantities at bracketing j's
+  int nJLower=int((dLogT-dLogTMin)/dLogTDelta);
+  int nJUpper=nJLower+1;
+  double dLogTLower=dLogTMin+double(nJLower)*dLogTDelta;
+  double dLogTUpper=dLogTMin+double(nJUpper)*dLogTDelta;
+  
+  //if temperature too high
+  if(dLogT>dLogTMax||nJUpper>(nNumT-1)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": the log temperature to interpolate to, \""<<dLogT
+      <<"\"("<<nJUpper<<") is higher than the maximum temperature in the table, \""<<dLogTMax
+      <<"\"("<<nNumT-1<<")\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //calculate fractional distance between nILower and nIUpper
+  double dRhoFrac=(dLogRho-dLogRhoLower)/(dLogRhoUpper-dLogRhoLower);
+  
+  //calculate fractional distance between nJLower and nJUpper
+  double dTFrac=(dLogT-dLogTLower)/(dLogTUpper-dLogTLower);
+  
+  //calculate interpolated log10 pressure at upper and lower temperatures
+  double dP_j  =(dLogP[nIUpper][nJLower]-dLogP[nILower][nJLower])*dRhoFrac+dLogP[nILower][nJLower];
+  double dP_jp1=(dLogP[nIUpper][nJUpper]-dLogP[nILower][nJUpper])*dRhoFrac+dLogP[nILower][nJUpper];
+  
+  //calculate interpolated log10 energy at upper and lower temperatures
+  double dE_j  =(dLogE[nIUpper][nJLower]-dLogE[nILower][nJLower])*dRhoFrac+dLogE[nILower][nJLower];
+  double dE_jp1=(dLogE[nIUpper][nJUpper]-dLogE[nILower][nJUpper])*dRhoFrac+dLogE[nILower][nJUpper];
+  
+  //calculate interpolated log10 opacity at upper and lower temperatures
+  double dKappa_j  =(dLogKappa[nIUpper][nJLower]-dLogKappa[nILower][nJLower])*dRhoFrac
+    +dLogKappa[nILower][nJLower];
+  double dKappa_jp1=(dLogKappa[nIUpper][nJUpper]-dLogKappa[nILower][nJUpper])*dRhoFrac
+    +dLogKappa[nILower][nJUpper];
+  
+  //calculate interpolated log pressures at upper and lower densities
+  double dP_i  =(dLogP[nILower][nJUpper]-dLogP[nILower][nJLower])*dTFrac+dLogP[nILower][nJLower];
+  double dP_ip1=(dLogP[nIUpper][nJUpper]-dLogP[nIUpper][nJLower])*dTFrac+dLogP[nIUpper][nJLower];
+  
+  //calculate dlnP/dlnT at constant density
+  double dDlnPDlnT=(dP_jp1-dP_j)/(dLogTUpper-dLogTLower);
+  
+  //calculate dlnP/dlnRho at constant temperature
+  double dDlnPDlnRho=(dP_ip1-dP_i)/(dLogRhoUpper-dLogRhoLower);
+  
+  //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
+  double dDEDT=(pow(10.0,dE_jp1)-pow(10.0,dE_j))/(pow(10.0,dLogTUpper)-pow(10.0,dLogTLower));
+  
+  //calculate interpolated energy
+  dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  
+  //calculate interpolated pressure
+  dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  
+  //calculate interpolated opacity
+  dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  
+  //calculate Gamma3 - 1
+  double dGamma3m1=dP/(dRho*dT*dDEDT)*dDlnPDlnT;
+  
+  //calculate Gamma1
+  dGamma=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
+  
+  //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
+  double dC_v=dE/dT*(dE_jp1-dE_j)/(dLogTUpper-dLogTLower);
+  
+  //calculate dE/dT at constant pressure, equal to C_p (specific heat at constant pressure)
+  dC_p=dGamma*dC_v/dDlnPDlnRho;
+}
 void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma){
   
   //calculate logs of dT and dRho

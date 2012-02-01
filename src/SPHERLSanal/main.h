@@ -83,8 +83,11 @@ int nKappa;/**<
 int nGamma;/**<
   Index of the adiabatic gamma. 
   */
-int nL;/**<
-  Index of the Luminosity.
+int nL_rad;/**<
+  Index of the Radiative Luminosity.
+  */
+int nL_con;/**<
+  Index of the Convective Luminosity.
   */
 int nKE;/**<
   Index of the Kinetic energy.
