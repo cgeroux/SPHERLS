@@ -31,7 +31,6 @@ def main():
     
   #create profile files, and save list of files
   move_files(args[0],args[1],options)
-    
 def move_files(fileName,newBaseFileName,options):
   
   #get base file name

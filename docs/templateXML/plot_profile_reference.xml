@@ -16,7 +16,7 @@ E_max_j(41) E_max_k(42)         E_min[erg/g](43)  E_min_j(44) E_min_k(45)       
   P_max[dynes/cm^2](60)           Gam_ave[?](61)           Gam_min[?](62)           Gam_max[?](63)
 -->
 <figure title="Measuring Overshooting in Pressure Scale Heights \time0 \index0 \phase0" outputfile="./grid_velocity.pdf">
-  <dataSet baseFileName="/globalscratch/cgeroux/test/2D/T6100_L50_Y24_Z002_100_dt01/output/2D_T6100_L50_Y24_Z002_t[2047596-*]">
+  <dataSet fileRange="/globalscratch/cgeroux/test/2D/T6100_L50_Y24_Z002_100_dt01/output/2D_T6100_L50_Y24_Z002_t[2047596-*]">
     <axis type="profile" xlabel="r/H_p" xmin="100" xmax="112" column="$5/4e9" xminortics="True">
       <plot ylabel="(u_max-u_0)(T_max-T_min)" ymin="0" ymax="1.65e5" grid="both" legendloc="2">
         <curve style="-o" color="b" >($15-$21)*($47-$50)/1e5</curve>

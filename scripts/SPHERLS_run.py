@@ -106,11 +106,11 @@ def parseXML(fileName):
     
     #get job memory
     jobMemoryElement=jobElement.find("memory")
-    settings['virtualMemory']="1.0G"
-    settings['stackMemory']="1.0G"
+    settings['virtualMemory']=None
+    settings['stackMemory']=None
     if jobMemoryElement==None:
-      settings['virtualMemory']="1.0G"
-      settings['stackMemory']="1.0G"
+      settings['virtualMemory']=None
+      settings['stackMemory']=None
     else :
       settings['email']=jobMemoryElement.text
       settings['virtualMemory']=jobMemoryElement.text
@@ -175,12 +175,14 @@ def makeSubScript(settings):
     +"## Run time\n"\
     +"#$ -l h_rt="+settings['jobDuration']+"\n"\
     +"##\n"\
-    +"## Amount of virtual memory\n"\
-    +"#$ -l h_vmem="+settings['virtualMemory']+"\n"\
-    +"##\n"\
-    +"## Amount of stack memory\n"\
-    +"#$ -l h_stack="+settings['stackMemory']+"\n"\
-    +"##\n"\
+    +"## Amount of virtual memory\n"
+  if settings['virtualMemory']!=None:
+    script=script+"#$ -l h_vmem="+settings['virtualMemory']+"\n"
+  script=script+"##\n"\
+    +"## Amount of stack memory\n"
+  if settings['stackMemory']!=None:
+    script=script+"#$ -l h_stack="+settings['stackMemory']+"\n"
+  script=script+"##\n"\
     +"## Transfer all environment variables when job is submitted\n"\
     +"#$ -V\n"
   if settings['que']=="test":
@@ -233,8 +235,6 @@ def main():
     if script!=None:#sub the job in the que\n
       cmd="qsub "+script
       os.system(cmd)
-
-
 if __name__ == "__main__":
   main()
   

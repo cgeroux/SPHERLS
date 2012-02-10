@@ -556,116 +556,118 @@ def plot(dataSets,options,title):
               tempTitle=tempTitle.replace("\phase"+str(count),phaseStr)
               break
         indexStr="\index"+str(count)
-        tempTitle=tempTitle.replace(indexStr,str(dataSet.fileIndices[fileCount]))
+        if fileCount<len(dataSet.fileIndices):
+          tempTitle=tempTitle.replace(indexStr,str(dataSet.fileIndices[fileCount]))
         count+=1
         
       #find out if we have any time plots
       fig.suptitle(tempTitle)
     
     for dataSet in dataSets:
-      for axisMine in dataSet.axes:
-        gs.append(GridSpec(len(axisMine.plots),1))
-        bottom=top-heightPlot*(len(axisMine.plots))
-        if options.spaceAxisEvenly:
-          top=figTop-axisCount*(heightAxis+axisSpacing)
-          bottom=figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+axisSpacing)
-        gs[axisCount].update(top=top,bottom=bottom,hspace=0.0)
-        
-        #for each plot
-        nPlotCount=0
-        for plot in axisMine.plots:
+      if i<dataSet.nNumFiles:
+        for axisMine in dataSet.axes:
+          gs.append(GridSpec(len(axisMine.plots),1))
+          bottom=top-heightPlot*(len(axisMine.plots))
+          if options.spaceAxisEvenly:
+            top=figTop-axisCount*(heightAxis+axisSpacing)
+            bottom=figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+axisSpacing)
+          gs[axisCount].update(top=top,bottom=bottom,hspace=0.0)
           
-          #create a subplot
-          ax.append(plt.subplot(gs[axisCount][nPlotCount,0]))
-          
-          #set minor axis tics
-          if axisMine.bMinorTics:
-            ax[nTotalPlotCount-1].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-          if plot.bMinorTics:
-            ax[nTotalPlotCount-1].yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-          
-          #set grid settings
-          if plot.grid!=None:
-            ax[nTotalPlotCount-1].grid(True, which=plot.grid)
-          else:
-            ax[nTotalPlotCount-1].grid(False)
-          
-          #for each curve in the plot
-          lines=[]
-          labels=[]
-          if axisMine.bTime:
-            curveCount=0
-            for curve in plot.curves:
+          #for each plot
+          nPlotCount=0
+          for plot in axisMine.plots:
             
-              #plot the curve
-              if axisMine.period!=None:#use phase instead of time if period is given
-                temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
-                  ,markersize=curve.markersize,linewidth=curve.linewidth)
-                if curve.label!=None and curve.label!="":
-                  lines.append(temp)
-                  labels.append(curve.label)
-                if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
-                  limits=ax[nTotalPlotCount-1].axis()
-                  xTemp=[axisMine.phase[fileCount],axisMine.phase[fileCount]]
-                  yTemp=[limits[2],limits[3]]
-                  if plot.limits[0]!=None:
-                    yTemp[0]=plot.limits[0]
-                  if plot.limits[1]!=None:
-                    yTemp[1]=plot.limits[1]
-                  ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
-              else:
-                temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,str(curve.color)+str(curve.style)
-                  ,markersize=curve.markersize,linewidth=curve.linewidth)
-                if curve.label!=None and curve.label!="":
-                  lines.append(temp)
-                  labels.append(curve.label)
-                if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
-                  limits=ax[nTotalPlotCount-1].axis()
-                  xTemp=[axisMine.x[fileCount],axisMine.x[fileCount]]
-                  yTemp=[limits[0],limits[1]]
-                  if plot.limits[0]!=None:
-                    yTemp[0]=plot.limits[0]
-                  if plot.limits[1]!=None:
-                    yTemp[1]=plot.limits[1]
-                  ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
-              curveCount=curveCount+1
-          else:
-            curveCount=0
-            for curve in plot.curves:
+            #create a subplot
+            ax.append(plt.subplot(gs[axisCount][nPlotCount,0]))
+            
+            #set minor axis tics
+            if axisMine.bMinorTics:
+              ax[nTotalPlotCount-1].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            if plot.bMinorTics:
+              ax[nTotalPlotCount-1].yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            
+            #set grid settings
+            if plot.grid!=None:
+              ax[nTotalPlotCount-1].grid(True, which=plot.grid)
+            else:
+              ax[nTotalPlotCount-1].grid(False)
+            
+            #for each curve in the plot
+            lines=[]
+            labels=[]
+            if axisMine.bTime:
+              curveCount=0
+              for curve in plot.curves:
               
-              #plot the curve
-              temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],str(curve.color)+str(curve.style)
-                ,markersize=curve.markersize,linewidth=curve.linewidth)
-              if curve.label!=None and curve.label!="":
-                lines.append(temp)
-                labels.append(curve.label)
-              curveCount=curveCount+1
-          ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
-          ax[nTotalPlotCount-1].set_ylim(plot.limits)
+                #plot the curve
+                if axisMine.period!=None:#use phase instead of time if period is given
+                  temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
+                    ,markersize=curve.markersize,linewidth=curve.linewidth)
+                  if curve.label!=None and curve.label!="":
+                    lines.append(temp)
+                    labels.append(curve.label)
+                  if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
+                    limits=ax[nTotalPlotCount-1].axis()
+                    xTemp=[axisMine.phase[fileCount],axisMine.phase[fileCount]]
+                    yTemp=[limits[2],limits[3]]
+                    if plot.limits[0]!=None:
+                      yTemp[0]=plot.limits[0]
+                    if plot.limits[1]!=None:
+                      yTemp[1]=plot.limits[1]
+                    ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
+                else:
+                  temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,str(curve.color)+str(curve.style)
+                    ,markersize=curve.markersize,linewidth=curve.linewidth)
+                  if curve.label!=None and curve.label!="":
+                    lines.append(temp)
+                    labels.append(curve.label)
+                  if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
+                    limits=ax[nTotalPlotCount-1].axis()
+                    xTemp=[axisMine.x[fileCount],axisMine.x[fileCount]]
+                    yTemp=[limits[0],limits[1]]
+                    if plot.limits[0]!=None:
+                      yTemp[0]=plot.limits[0]
+                    if plot.limits[1]!=None:
+                      yTemp[1]=plot.limits[1]
+                    ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
+                curveCount=curveCount+1
+            else:
+              curveCount=0
+              for curve in plot.curves:
+                
+                #plot the curve
+                temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],str(curve.color)+str(curve.style)
+                  ,markersize=curve.markersize,linewidth=curve.linewidth)
+                if curve.label!=None and curve.label!="":
+                  lines.append(temp)
+                  labels.append(curve.label)
+                curveCount=curveCount+1
+            ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
+            ax[nTotalPlotCount-1].set_ylim(plot.limits)
+            
+            #set legend
+            if len(lines)>0:
+              ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
+            
+            #remove x-axis labels
+            if nPlotCount!=len(axisMine.plots)-1:
+              plt.setp(plt.gca(), 'xticklabels', [])
+            else:
+              ax[nTotalPlotCount-1].set_xlabel(axisMine.xlabel)
+            
+            #set y-axis labels
+            ax[nTotalPlotCount-1].set_ylabel(plot.ylabel)
+            
+            #remove top and bottom y-axis tic labels
+            ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
+            
+            #adjust hspace to be 0 so plots for the same x-axis will be tight
+            nPlotCount=nPlotCount+1#resets every axis
+            nTotalPlotCount=nTotalPlotCount+1#continues to increase for all plots
           
-          #set legend
-          if len(lines)>0:
-            ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
-          
-          #remove x-axis labels
-          if nPlotCount!=len(axisMine.plots)-1:
-            plt.setp(plt.gca(), 'xticklabels', [])
-          else:
-            ax[nTotalPlotCount-1].set_xlabel(axisMine.xlabel)
-          
-          #set y-axis labels
-          ax[nTotalPlotCount-1].set_ylabel(plot.ylabel)
-          
-          #remove top and bottom y-axis tic labels
-          ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
-          
-          #adjust hspace to be 0 so plots for the same x-axis will be tight
-          nPlotCount=nPlotCount+1#resets every axis
-          nTotalPlotCount=nTotalPlotCount+1#continues to increase for all plots
-        
-        top=bottom-axisSpacing
-        axisCount=axisCount+1
-    
+          top=bottom-axisSpacing
+          axisCount=axisCount+1
+      
     #done making plot
     if options.show:
       print "ploting file ",i," to screen, close for next plot"

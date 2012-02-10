@@ -16,10 +16,11 @@ import re
 import matplotlib
 matplotlib.use('Agg')#prevents a window from poping up
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 #from mpl_toolkits.mplot3d import axes3d
 
 nNumCoords=4
-
+colors=['r','g','b','c','m','y']
 class File2DSlice:
   def load(self,fileName):
     '''sets:
@@ -207,258 +208,269 @@ def parseXMLFile(fileName):
     quit()
   settings['inputFileName']=root.findtext("inputFileName")
   
-  # get plane element
-  planeElement=root.find("plane")
-  if planeElement==None:
-    print "Requires a plane node"
+  # get plane elements
+  planeElements=root.findall("plane")
+  if planeElements==None:
+    print "Requires at least one plane node"
     quit()
-  
-  #get plane type
-  allowedPlaneTypes=["rt","rp","tp"]
-  if planeElement.get("type") not in allowedPlaneTypes:
-    print "Requires a plane \"type\" attribute from one of the following",allowedPlaneTypes
-    quit()
-  settings['planeType']=planeElement.get("type")
-  
-  #get plane index
-  if not isInt(planeElement.get("index")):
-    print "Requires a plane \"index\" attribute that indicates the location of the plane in the "\
-      +"model, should be an integer indicating the zone in the direction perpendicular to the"\
-      +" plane."
-    quit()
-  settings['planeIndex']=int(planeElement.get("index"))
-  
-  #get grid
-  settings['grid']=None#use default
-  if planeElement.get("grid")!=None:
-    if planeElement.get("grid").lower() in ["both","major"]:
-      settings['grid']=planeElement.get("grid").lower()
-  
-  #get x-axis
-  xaxisElement=root.find("xaxis")
-  if xaxisElement==None:
-    print "Requires an \"xaxis\" node"
-    quit()
- 
- #get xmin
-  if xaxisElement.get("min")!=None:
-    if not isFloat(xaxisElement.get("min")):
-      print "Expecting a float for xaxis \"min\" attribute"
-      quit()
-    settings['xMin']=float(xaxisElement.get("min"))
-  else:#use default
-    settings['xMin']=None
-  
-  #get xmax
-  if xaxisElement.get("max")!=None:
-    if not isFloat(xaxisElement.get("max")):
-      print "Expecting a float for xaxis \"max\" attribute"
-      quit()
-    settings['xMax']=float(xaxisElement.get("max"))
-  else:#use default
-    settings['xMax']=None
+  planes=[]
+  for planeElement in planeElements:
     
-  #get xaxis formula
-  if xaxisElement.text==None or xaxisElement.text=="":
-    print "Must specify an xaxis varible"
-    quit()
-  settings['xFormula']=xaxisElement.text
-  
-  #get xlabel
-  if xaxisElement.get("label")!=None:
-    settings['xLabel']=xaxisElement.get("label")
-  else:#use default
-    settings['xLabel']="x axis label"
-  
-  #get x minorTics
-  settings['xminortics']=False#use default
-  if xaxisElement.get("minortics")!=None:
-    if xaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
-      settings['xminortics']=True
-  
-  #get y-axis
-  yaxisElement=root.find("yaxis")
-  if yaxisElement==None:
-    print "Requires an \"yaxis\" node"
-    quit()
- 
- #get ymin
-  if yaxisElement.get("min")!=None:
-    if not isFloat(yaxisElement.get("min")):
-      print "Expecting a float for yaxis \"min\" attribute"
+    plane={}
+    #get plane type
+    allowedPlaneTypes=["rt","rp","tp"]
+    if planeElement.get("type") not in allowedPlaneTypes:
+      print "Requires a plane \"type\" attribute from one of the following",allowedPlaneTypes
       quit()
-    settings['yMin']=float(yaxisElement.get("min"))
-  else:#use default
-    settings['yMin']=None
-  
-  #get xmax
-  if yaxisElement.get("max")!=None:
-    if not isFloat(yaxisElement.get("max")):
-      print "Expecting a float for yaxis \"max\" attribute"
+    plane['planeType']=planeElement.get("type")
+    
+    #get plane index
+    if not isInt(planeElement.get("index")):
+      print "Requires a plane \"index\" attribute that indicates the location of the plane in the "\
+        +"model, should be an integer indicating the zone in the direction perpendicular to the"\
+        +" plane."
       quit()
-    settings['yMax']=float(yaxisElement.get("max"))
-  else:#use default
-    settings['yMax']=None
+    plane['planeIndex']=int(planeElement.get("index"))
     
-  #get xaxis formula
-  if yaxisElement.text==None or yaxisElement.text=="":
-    print "Must specify an yaxis varible"
-    quit()
-  settings['yFormula']=yaxisElement.text
-  
-  #get ylabel
-  if yaxisElement.get("label")!=None:
-    settings['yLabel']=yaxisElement.get("label")
-  else:#use default
-    settings['yLabel']="y axis label"
-  
-  #get y minorTics
-  settings['yminortics']=False#use default
-  if yaxisElement.get("minortics")!=None:
-    if yaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
-      settings['yminortics']=True
-  
-  #get scalor
-  scalorElement=root.find("scalor")
-  if scalorElement==None:
-    settings['scalorFormula']=None
-    settings['scalorMin']=sys.float_info.min
-    settings['scalorMax']=sys.float_info.max
-    settings['scalorPallet']="jet"
-    settings['scalorLabel']=None
-  else:
+    #get grid
+    plane['grid']=None#use default
+    if planeElement.get("grid")!=None:
+      if planeElement.get("grid").lower() in ["both","major"]:
+        plane['grid']=planeElement.get("grid").lower()
     
-    #get scalorMin
-    if scalorElement.get("min")!=None:
-      if not isFloat(scalorElement.get("min")):
-        print "Expecting a float for scalor \"min\" attribute"
+    #get x-axis
+    xaxisElement=planeElement.find("xaxis")
+    if xaxisElement==None:
+      print "Requires an \"xaxis\" node"
+      quit()
+   
+   #get xmin
+    if xaxisElement.get("min")!=None:
+      if not isFloat(xaxisElement.get("min")):
+        print "Expecting a float for xaxis \"min\" attribute"
         quit()
-      settings['scalorMin']=float(scalorElement.get("min"))
+      plane['xMin']=float(xaxisElement.get("min"))
     else:#use default
-      settings['scalorMin']=None
+      plane['xMin']=None
     
-    #get scalorMax
-    if scalorElement.get("max")!=None:
-      if not isFloat(scalorElement.get("max")):
-        print "Expecting a float for scalor \"max\" attribute"
+    #get xmax
+    if xaxisElement.get("max")!=None:
+      if not isFloat(xaxisElement.get("max")):
+        print "Expecting a float for xaxis \"max\" attribute"
         quit()
-      settings['scalorMax']=float(scalorElement.get("max"))
+      plane['xMax']=float(xaxisElement.get("max"))
     else:#use default
-      settings['scalorMax']=None
-    
-    #get scalor formula
-    if scalorElement.text==None or scalorElement.text=="":
-      print "Must specify an scalor varible"
-      quit()
-    settings['scalorFormula']=scalorElement.text
-    
-    #get scalor label
-    if scalorElement.get("label")!=None:
-      settings['scalorLabel']=scalorElement.get("label")
-    else:#use default
-      settings['scalorLabel']="scalor label"
-    
-    #get scalor pallet
-    if scalorElement.get("pallet")!=None:
-      settings['scalorPallet']=scalorElement.get("pallet")
-      if settings['scalorPallet']=="stellar":
-        if scalorElement.get("palletFocus")!=None:
-          if not isFloat(scalorElement.get("palletFocus")):
-            print "Expecting a float for scalor \"palletFocus\" attribute"
-            quit()
-          settings['palletFocus']=float(scalorElement.get("palletFocus"))
-        else:#use default
-          print "Scalor pallet \"stellar\" also needs the attribute \"palletFocus\" to be set."\
-            " This indicates which value of the scale the pallet should set to white."
-    else:#use default
-      settings['scalorPallet']="jet"
-  
-  #read in vectors
-  vectorElements=root.findall("vector")
-  nCount=0
-  settings['numVectors']=len(vectorElements)
-  for vectorElement in vectorElements:
-    
-    vector={}
-    
-    #get xfrequency
-    vector['xfrequency']=1
-    if isInt(vectorElement.get("xfrequency")):
-      vector['xfrequency']=int(vectorElement.get("xfrequency"))
-    
-    #get yfrequency
-    vector['yfrequency']=1
-    if isInt(vectorElement.get("yfrequency")):
-      vector['yfrequency']=int(vectorElement.get("yfrequency"))
-    
-    #get scale
-    vector['scale']=1.0
-    if isFloat(vectorElement.get("scale")):
-      vector['scale']=float(vectorElement.get("scale"))
-    
-    #get color
-    vector['color']='k'
-    if vectorElement.get("color")!=None and vectorElement.get("color")!="":
-      vector['color']=vectorElement.get("color")
-    
-    #get label
-    labelElement=vectorElement.find("label")
-    if labelElement!=None:
+      plane['xMax']=None
       
-      #get label xposition
-      if labelElement.get("xpos")!=None:
-        if isFloat(labelElement.get("xpos")):
-          vector['labelXPos']=labelElement.get("xpos")
-        else:
-          print "Expecting a float for \"xPos\" in vector label of vector",nCount
-      else:#default
-        vector['labelXPos']=0.1
-        
-      #get label yposition
-      if labelElement.get("ypos")!=None:
-        if isFloat(labelElement.get("ypos")):
-          vector['labelYPos']=labelElement.get("ypos")
-        else:
-          print "Expecting a float for \"ypos\" in vector label of vector",nCount
-      else:#default
-        vector['labelYPos']=0.92
+    #get xaxis formula
+    if xaxisElement.text==None or xaxisElement.text=="":
+      print "Must specify an xaxis varible"
+      quit()
+    plane['xFormula']=xaxisElement.text
     
-      #get text
-      if labelElement.text!=None:
-        vector['label']=labelElement.text
-      else:#use default
-        vector['label']=""
+    #get xlabel
+    if xaxisElement.get("label")!=None:
+      plane['xLabel']=xaxisElement.get("label")
+    else:#use default
+      plane['xLabel']="x axis label"
+    
+    #get x minorTics
+    plane['xminortics']=False#use default
+    if xaxisElement.get("minortics")!=None:
+      if xaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
+        plane['xminortics']=True
+    
+    #get y-axis
+    yaxisElement=planeElement.find("yaxis")
+    if yaxisElement==None:
+      print "Requires an \"yaxis\" node"
+      quit()
+   
+   #get ymin
+    if yaxisElement.get("min")!=None:
+      if not isFloat(yaxisElement.get("min")):
+        print "Expecting a float for yaxis \"min\" attribute"
+        quit()
+      plane['yMin']=float(yaxisElement.get("min"))
+    else:#use default
+      plane['yMin']=None
+    
+    #get xmax
+    if yaxisElement.get("max")!=None:
+      if not isFloat(yaxisElement.get("max")):
+        print "Expecting a float for yaxis \"max\" attribute"
+        quit()
+      plane['yMax']=float(yaxisElement.get("max"))
+    else:#use default
+      plane['yMax']=None
+      
+    #get xaxis formula
+    if yaxisElement.text==None or yaxisElement.text=="":
+      print "Must specify an yaxis varible"
+      quit()
+    plane['yFormula']=yaxisElement.text
+    
+    #get ylabel
+    if yaxisElement.get("label")!=None:
+      plane['yLabel']=yaxisElement.get("label")
+    else:#use default
+      plane['yLabel']="y axis label"
+    
+    #get y minorTics
+    plane['yminortics']=False#use default
+    if yaxisElement.get("minortics")!=None:
+      if yaxisElement.get("minortics").lower() in ["true","1","t","yes","y"]:
+        plane['yminortics']=True
+    
+    #get scalor
+    scalorElement=planeElement.find("scalor")
+    if scalorElement==None:
+      plane['scalorFormula']=None
+      plane['scalorMin']=sys.float_info.min
+      plane['scalorMax']=sys.float_info.max
+      plane['scalorPallet']="jet"
+      plane['scalorLabel']=None
     else:
-      vector['label']=""
-      vector['labelYPos']=0.0
-      vector['labelXPos']=0.0
-    
-    #get xposition formula
-    if vectorElement.findtext("xposition")==None or vectorElement.findtext("xposition")=="":
-      print "Must specify an xposition varible for vector"
-      quit()
-    vector['xposition']=vectorElement.findtext("xposition")
       
-    #get yposition formula
-    if vectorElement.findtext("yposition")==None or vectorElement.findtext("yposition")=="":
-      print "Must specify an yposition varible for vector"
-      quit()
-    vector['yposition']=vectorElement.findtext("yposition")
+      #get scalorMin
+      if scalorElement.get("min")!=None:
+        if not isFloat(scalorElement.get("min")):
+          print "Expecting a float for scalor \"min\" attribute"
+          quit()
+        plane['scalorMin']=float(scalorElement.get("min"))
+      else:#use default
+        plane['scalorMin']=None
+      
+      #get scalorMax
+      if scalorElement.get("max")!=None:
+        if not isFloat(scalorElement.get("max")):
+          print "Expecting a float for scalor \"max\" attribute"
+          quit()
+        plane['scalorMax']=float(scalorElement.get("max"))
+      else:#use default
+        plane['scalorMax']=None
+      
+      #get scalor formula
+      if scalorElement.text==None or scalorElement.text=="":
+        print "Must specify an scalor varible"
+        quit()
+      plane['scalorFormula']=scalorElement.text
+      
+      #get scalor label
+      if scalorElement.get("label")!=None:
+        plane['scalorLabel']=scalorElement.get("label")
+      else:#use default
+        plane['scalorLabel']="scalor label"
+      
+      #get scalor pallet
+      if scalorElement.get("pallet")!=None:
+        plane['scalorPallet']=scalorElement.get("pallet")
+        if plane['scalorPallet']=="stellar":
+          if scalorElement.get("palletFocus")!=None:
+            if not isFloat(scalorElement.get("palletFocus")):
+              print "Expecting a float for scalor \"palletFocus\" attribute"
+              quit()
+            plane['palletFocus']=float(scalorElement.get("palletFocus"))
+          else:#use default
+            print "Scalor pallet \"stellar\" also needs the attribute \"palletFocus\" to be set."\
+              " This indicates which value of the scale the pallet should set to white."
+      else:#use default
+        plane['scalorPallet']="jet"
     
-    #get xcomponent formula
-    if vectorElement.findtext("xcomponent")==None or vectorElement.findtext("xcomponent")=="":
-      print "Must specify an xcomponent varible for vector"
-      quit()
-    vector['xcomponent']=vectorElement.findtext("xcomponent")
+    #read in vectors
+    vectorElements=planeElement.findall("vector")
+    vectors=[]
+    for vectorElement in vectorElements:
+      
+      vector={}
+      
+      #get xfrequency
+      vector['xfrequency']=1
+      if isInt(vectorElement.get("xfrequency")):
+        vector['xfrequency']=int(vectorElement.get("xfrequency"))
+      
+      #get yfrequency
+      vector['yfrequency']=1
+      if isInt(vectorElement.get("yfrequency")):
+        vector['yfrequency']=int(vectorElement.get("yfrequency"))
+      
+      #get scale
+      vector['scale']=1.0
+      if isFloat(vectorElement.get("scale")):
+        vector['scale']=float(vectorElement.get("scale"))
+      
+      #get color
+      vector['color']='k'
+      if vectorElement.get("color")!=None and vectorElement.get("color")!="":
+        vector['color']=vectorElement.get("color")
+      
+      #get label
+      labelElement=vectorElement.find("label")
+      if labelElement!=None:
+        
+        #get label xposition
+        if labelElement.get("xpos")!=None:
+          if isFloat(labelElement.get("xpos")):
+            vector['labelXPos']=labelElement.get("xpos")
+          else:
+            print "Expecting a float for \"xPos\" in vector label of vector",nCount
+        else:#default
+          vector['labelXPos']=0.1
+          
+        #get label yposition
+        if labelElement.get("ypos")!=None:
+          if isFloat(labelElement.get("ypos")):
+            vector['labelYPos']=labelElement.get("ypos")
+          else:
+            print "Expecting a float for \"ypos\" in vector label of vector",nCount
+        else:#default
+          vector['labelYPos']=0.92
+      
+        #get text
+        if labelElement.text!=None:
+          vector['label']=labelElement.text
+        else:#use default
+          vector['label']=""
+      else:
+        vector['label']=""
+        vector['labelYPos']=0.0
+        vector['labelXPos']=0.0
+      
+      #get xposition formula
+      if vectorElement.findtext("xposition")==None or vectorElement.findtext("xposition")=="":
+        print "Must specify an xposition varible for vector"
+        quit()
+      vector['xposition']=vectorElement.findtext("xposition")
+        
+      #get yposition formula
+      if vectorElement.findtext("yposition")==None or vectorElement.findtext("yposition")=="":
+        print "Must specify an yposition varible for vector"
+        quit()
+      vector['yposition']=vectorElement.findtext("yposition")
+      
+      #get xcomponent formula
+      if vectorElement.findtext("xcomponent")==None or vectorElement.findtext("xcomponent")=="":
+        print "Must specify an xcomponent varible for vector"
+        quit()
+      vector['xcomponent']=vectorElement.findtext("xcomponent")
+      
+      #get ycomponent formula
+      if vectorElement.findtext("ycomponent")==None or vectorElement.findtext("ycomponent")=="":
+        print "Must specify an ycomponent varible for vector"
+        quit()
+      vector['ycomponent']=vectorElement.findtext("ycomponent")
+      
+      #add vector settings to list of vectors
+      vectors.append(vector)
     
-    #get ycomponent formula
-    if vectorElement.findtext("ycomponent")==None or vectorElement.findtext("ycomponent")=="":
-      print "Must specify an ycomponent varible for vector"
-      quit()
-    vector['ycomponent']=vectorElement.findtext("ycomponent")
-    key='vector'+str(nCount)
-    settings[key]=vector
-    nCount+=1
+    #add list of vectors to plane
+    plane['vectors']=vectors
+    
+    #add plan to list of planes
+    planes.append(plane)
+  
+  #add list of planes to settings
+  settings['planes']=planes
   return settings
 def setCodes(settings,parsed):
   '''
@@ -468,552 +480,587 @@ def setCodes(settings,parsed):
   the case of vectors). It does this in a way that allows the greatest amount of freedom while still
   allowing as much freedom as possilbe in plotting combinations.
   '''
-  
-  #set allowed coordinates,vectors, and scalors. This makes sure that the zoning always works out 
-  #correctly
-  if settings['planeType']=="rt":
-    allowedCoordinate1=[0,1]
-    allowedCoordinate2=[2]
-    allowedVectors1=[4,5]
-    allowedVectors2=[6]
-    allowedScalors=[7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-  if settings['planeType']=="rp":
-    allowedCoordinate1=[0,1]
-    allowedCoordinate2=[3]
-    allowedVectors1=[4,5]
-    allowedVectors2=[7]
-    allowedScalors=[6,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-  if settings['planeType']=="tp":
-    allowedCoordinate1=[2]
-    allowedCoordinate2=[3]
-    allowedVectors1=[6]
-    allowedVectors2=[7]
-    allowedScalors=[4,5,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-  
-  #get all coordinate references
-  coordRefs=[]
-  xCoordRefs=[]
-  yCoordRefs=[]
-  [temp,tokens]=splitStrAtList(settings['xFormula'],['$','#'])
-  for i in range(1,len(temp)):
-    xCoordRefs.append(splitFirstInt(temp[i])[0])
-  [temp,tokens]=splitStrAtList(settings['yFormula'],['$','#'])
-  for i in range(1,len(temp)):
-    yCoordRefs.append(splitFirstInt(temp[i])[0])
-  coordRefs=xCoordRefs+yCoordRefs
-  
-  #check to make sure we have one coordinate for each direction at least
-  coordinate1=None
-  coordinate2=None
-  for coordinate in allowedCoordinate1:
-    if coordinate in coordRefs:
-      coordinate1=coordinate
-  for coordinate in allowedCoordinate2:
-    if coordinate in coordRefs:
-      coordinate2=coordinate
-  if coordinate1==None:
-    print "Need to have a refernece to one of the following coordinates", allowedCoordinate1\
-      ," in one or both of the axis nodes"
-    quit()
-  if coordinate2==None:
-    print "Need to have a refernece to one of the following coordinates", allowedCoordinate2\
-      ," in one or both of the axis nodes"
-    quit()
-  settings['coordinate1']=coordinate1
-  settings['coordinate2']=coordinate2
-  
-  #set xCode
-  [temp,tokens]=splitStrAtList(settings['xFormula'],['$','#'])
-  string=temp[0]
-  gotCoordinateInX=False
-  for i in range(1,len(temp)):
-    splits=splitFirstInt(temp[i])
-    if splits[0]==coordinate1:
-      if tokens[i]=="#":#add as average
-        print "In caculation of x-coordinate can not average the independent coordinate \""\
-          +str(splits[0])+"\" to a zone center, must be at interfaces."
-        quit()
-      gotCoordinateInX=True
-      string+="slice2D.coordinates["+str(coordinate1)+"][i]"
-    elif splits[0]==coordinate2:
-      if tokens[i]=="#":#add as average
-        print "In caculation of x-coordinate can not average the independent coordinate \""\
-          +str(splits[0])+"\" to a zone center, must be at interfaces."
-        quit()
-      gotCoordinateInX=True
-      string+="slice2D.coordinates["+str(coordinate2)+"][j]"
-    elif not splits[0]<nNumCoords:
-      print "Need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
-      quit()
-    elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
-      if tokens[i]=="$":#add as is
-        print "The coordinate reference",splits[0]," in yaxis is not in the plane, and thus it"\
-          +" must be averaged by replacing \"$\" with a \"#\"."
-        quit()
-      if tokens[i]=="#":#add as average
-        string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
-        +str(splits[0])+"][1])*0.5"
-    string+=splits[1]
-  if not gotCoordinateInX:
-    print "Need a reference to at least one independent coordinate for x-axis formula, should be "\
-      +"one or more of ",allowedCoordinate1+allowedCoordinate2
-    quit()
-  if parsed.c:
-    print "xCode=",string
-  settings['xCode']=parser.expr(string).compile()
-  
-  #set yCode
-  [temp,tokens]=splitStrAtList(settings['yFormula'],['$','#'])
-  string=temp[0]
-  gotCoordinateInY=False
-  for i in range(1,len(temp)):
-    splits=splitFirstInt(temp[i])
-    if splits[0]==coordinate1:#if it is coordinate 1
-      if tokens[i]=="#":#add as average
-        print "In caculation of x-coordinate can not average the independent coordinate \""\
-          +str(splits[0])+"\" to a zone center, must be at interfaces."
-        quit()
-      gotCoordinateInY=True
-      string+="slice2D.coordinates["+str(coordinate1)+"][i]"
-    elif splits[0]==coordinate2:#if it is coordinate 2
-      if tokens[i]=="#":#add as average
-        print "In caculation of x-coordinate can not average the independent coordinate \""\
-          +str(splits[0])+"\" to a zone center, must be at interfaces."
-        quit()
-      gotCoordinateInY=True 
-      string+="slice2D.coordinates["+str(coordinate2)+"][j]"
-    elif splits[0]>=nNumCoords:#if it is not a coordinate
-      print "Need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
-      quit()
-    elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
-      if tokens[i]=="$":#must be averaged
-        print "The coordinate reference",splits[0]," in yaxis is not in the plane, and thus it"\
-          +" must be averaged by replacing \"$\" with a \"#\"."
-        quit()
-      if tokens[i]=="#":#add as average
-        string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
-        +str(splits[0])+"][1])*0.5"
-    string+=splits[1]
-  if not gotCoordinateInY:
-    print "Need a reference to at least one independent coordinate for y-axis formula, should be "\
-      +"one or more of ",allowedCoordinate1+allowedCoordinate2
-    quit()
-  if parsed.c:
-    print "yCode=",string
-  settings['yCode']=parser.expr(string).compile()
-  
-  #set scalorCode
-  if settings['scalorFormula']!=None:
-    [temp,tokens]=splitStrAtList(settings['scalorFormula'],['$','#'])
-    string=temp[0]
-    for i in range(1,len(temp)):
-      splits=splitFirstInt(temp[i])
-      if splits[0]>=nNumCoords:
-        ref=splits[0]-nNumCoords
-        if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
-          if tokens[i]=="#":
-            string+="(slice2D.data["+str(ref)\
-              +"][j+i*shape[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape[1]])*0.5"
-          else:
-            print "The reference to vector",splits[0],"should be averaged by using \"#\" in place "\
-              +"of \"$\" so that it is at zone centers where other scalors are defined."
-            quit()
-        elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
-          if tokens[i]=="#":
-            string+="(slice2D.data["+str(ref)\
-              +"][j+i*shape[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape[1]])*0.5"
-          else:
-            print "The reference to vector",splits[0],"should be averaged by using \"#\" in place "\
-              +"of \"$\" so that it is at zone centers where other scalors are defined."
-            quit()
-        else:#it is a scalor
-          string+="slice2D.data["+str(ref)+"][j+i*shape[1]]"
-      else:#it is a coordinate
-        if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
-          if tokens[i]=="#":
-            string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
-              +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
-          else:
-            print "The reference to coordinate",splits[0],"in scalor formula should be averaged"\
-              +" by using \"#\" in place of \"$\" so that it is at zone centers where other"\
-              +" scalors are defined."
-            quit()
-        if splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
-          if tokens[i]=="#":
-            string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
-              +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
-          else:
-            print "The reference to coordinate",splits[0],"in scalor formula should be averaged"\
-              +" by using \"#\" in place of \"$\" so that it is at zone centers where other"\
-              +" scalors are defined."
-            quit()
-      string+=splits[1]
-    if parsed.c:
-      print "scalorCode=",string
-    settings['scalorCode']=parser.expr(string).compile()
-  
-  #for each vector, make code
-  for j in range(settings['numVectors']):
+  for plane in settings['planes']:
     
-    #make xposition code
-    key='vector'+str(j)
-    [temp,tokens]=splitStrAtList(settings[key]['xposition'],['$','#'])
+    #set allowed coordinates,vectors, and scalors. This makes sure that the zoning always works out 
+    #correctly
+    if plane['planeType']=="rt":
+      allowedCoordinate1=[0,1]
+      allowedCoordinate2=[2]
+      allowedVectors1=[4,5]
+      allowedVectors2=[6]
+      allowedScalors=[7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+    if plane['planeType']=="rp":
+      allowedCoordinate1=[0,1]
+      allowedCoordinate2=[3]
+      allowedVectors1=[4,5]
+      allowedVectors2=[7]
+      allowedScalors=[6,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+    if plane['planeType']=="tp":
+      allowedCoordinate1=[2]
+      allowedCoordinate2=[3]
+      allowedVectors1=[6]
+      allowedVectors2=[7]
+      allowedScalors=[4,5,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+    
+    #get all coordinate references
+    coordRefs=[]
+    xCoordRefs=[]
+    yCoordRefs=[]
+    [temp,tokens]=splitStrAtList(plane['xFormula'],['$','#'])
+    for i in range(1,len(temp)):
+      xCoordRefs.append(splitFirstInt(temp[i])[0])
+    [temp,tokens]=splitStrAtList(plane['yFormula'],['$','#'])
+    for i in range(1,len(temp)):
+      yCoordRefs.append(splitFirstInt(temp[i])[0])
+    coordRefs=xCoordRefs+yCoordRefs
+    
+    #check to make sure we have one coordinate for each direction at least
+    coordinate1=None
+    coordinate2=None
+    for coordinate in allowedCoordinate1:
+      if coordinate in coordRefs:
+        coordinate1=coordinate
+    for coordinate in allowedCoordinate2:
+      if coordinate in coordRefs:
+        coordinate2=coordinate
+    if coordinate1==None:
+      print "Need to have a refernece to one of the following coordinates", allowedCoordinate1\
+        ," in one or both of the axis nodes"
+      quit()
+    if coordinate2==None:
+      print "Need to have a refernece to one of the following coordinates", allowedCoordinate2\
+        ," in one or both of the axis nodes"
+      quit()
+    plane['coordinate1']=coordinate1
+    plane['coordinate2']=coordinate2
+    
+    #set xCode
+    [temp,tokens]=splitStrAtList(plane['xFormula'],['$','#'])
     string=temp[0]
-    coordinate1Averaged=None
-    coordinate2Averaged=None
+    gotCoordinateInX=False
     for i in range(1,len(temp)):
       splits=splitFirstInt(temp[i])
       if splits[0]==coordinate1:
         if tokens[i]=="#":#add as average
-          coordinate1Averaged=True
-          string+="(slice2D.coordinates["+str(coordinate1)+"][i]"\
-            +"+slice2D.coordinates["+str(coordinate1)+"][i+1])*0.5"
-        else:
-          coordinate1Averaged=False
-          string+="slice2D.coordinates["+str(coordinate1)+"][i]"
+          print "In caculation of x-coordinate can not average the independent coordinate \""\
+            +str(splits[0])+"\" to a zone center, must be at interfaces."
+          quit()
+        gotCoordinateInX=True
+        string+="slice2D.coordinates["+str(coordinate1)+"][i]"
       elif splits[0]==coordinate2:
         if tokens[i]=="#":#add as average
-          coordinate2Averaged=True
-          string+="(slice2D.coordinates["+str(coordinate2)+"][j]"\
-            +"+slice2D.coordinates["+str(coordinate2)+"][j+1])*0.5"
-        else:
-          coordinate2Averaged=False
-          string+="slice2D.coordinates["+str(coordinate2)+"][j]"
-      elif splits[0]>=nNumCoords:
-        print "In vector",j,"need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
+          print "In caculation of x-coordinate can not average the independent coordinate \""\
+            +str(splits[0])+"\" to a zone center, must be at interfaces."
+          quit()
+        gotCoordinateInX=True
+        string+="slice2D.coordinates["+str(coordinate2)+"][j]"
+      elif not splits[0]<nNumCoords:
+        print "Need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
         quit()
       elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
         if tokens[i]=="$":#add as is
-          print "The coordinate reference",splits[0]," in xcomponent of vector",j," is not in the "\
-            +"plane, and thus it must be averaged by replacing \"$\" with a \"#\"."
+          print "The coordinate reference",splits[0]," in yaxis is not in the plane, and thus it"\
+            +" must be averaged by replacing \"$\" with a \"#\"."
           quit()
         if tokens[i]=="#":#add as average
           string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
           +str(splits[0])+"][1])*0.5"
       string+=splits[1]
-    if coordinate1Averaged==None and coordinate2Averaged==None:
-      print "In vector",j,"need a reference to at least one independent coordinate "\
-        +"for xposition formula, should be one or more of ",allowedCoordinate1+allowedCoordinate2
+    if not gotCoordinateInX:
+      print "Need a reference to at least one independent coordinate for x-axis formula, should be "\
+        +"one or more of ",allowedCoordinate1+allowedCoordinate2
       quit()
     if parsed.c:
-      print "vector ",j,"'s xCode=",string
-    settings[key]['xCode']=parser.expr(string).compile()
+      print "xCode=",string
+    plane['xCode']=parser.expr(string).compile()
     
-    #make yposition code
-    [temp,tokens]=splitStrAtList(settings[key]['yposition'],['$','#'])
+    #set yCode
+    [temp,tokens]=splitStrAtList(plane['yFormula'],['$','#'])
     string=temp[0]
+    gotCoordinateInY=False
     for i in range(1,len(temp)):
       splits=splitFirstInt(temp[i])
-      if splits[0]==coordinate1:
+      if splits[0]==coordinate1:#if it is coordinate 1
         if tokens[i]=="#":#add as average
-          if coordinate1Averaged!=None:#means we have gotten coordinate 1 already
-            if not coordinate1Averaged:# check for consistancy of averaging
-              print "In vector",j,"coordinate \""+str(coordinate1)\
-                +"\" not averaged in xposition, must also not be averaged in yposition"
+          print "In caculation of x-coordinate can not average the independent coordinate \""\
+            +str(splits[0])+"\" to a zone center, must be at interfaces."
+          quit()
+        gotCoordinateInY=True
+        string+="slice2D.coordinates["+str(coordinate1)+"][i]"
+      elif splits[0]==coordinate2:#if it is coordinate 2
+        if tokens[i]=="#":#add as average
+          print "In caculation of x-coordinate can not average the independent coordinate \""\
+            +str(splits[0])+"\" to a zone center, must be at interfaces."
+          quit()
+        gotCoordinateInY=True 
+        string+="slice2D.coordinates["+str(coordinate2)+"][j]"
+      elif splits[0]>=nNumCoords:#if it is not a coordinate
+        print "Need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
+        quit()
+      elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
+        if tokens[i]=="$":#must be averaged
+          print "The coordinate reference",splits[0]," in yaxis is not in the plane, and thus it"\
+            +" must be averaged by replacing \"$\" with a \"#\"."
+          quit()
+        if tokens[i]=="#":#add as average
+          string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
+          +str(splits[0])+"][1])*0.5"
+      string+=splits[1]
+    if not gotCoordinateInY:
+      print "Need a reference to at least one independent coordinate for y-axis formula, should be "\
+        +"one or more of ",allowedCoordinate1+allowedCoordinate2
+      quit()
+    if parsed.c:
+      print "yCode=",string
+    plane['yCode']=parser.expr(string).compile()
+    
+    #set scalorCode
+    if plane['scalorFormula']!=None:
+      [temp,tokens]=splitStrAtList(plane['scalorFormula'],['$','#'])
+      string=temp[0]
+      for i in range(1,len(temp)):
+        splits=splitFirstInt(temp[i])
+        if splits[0]>=nNumCoords:
+          ref=splits[0]-nNumCoords
+          if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
+            if tokens[i]=="#":
+              string+="(slice2D.data["+str(ref)\
+                +"][j+i*shape[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape[1]])*0.5"
+            else:
+              print "The reference to vector",splits[0],"should be averaged by using \"#\" in place "\
+                +"of \"$\" so that it is at zone centers where other scalors are defined."
               quit()
-          else:
+          elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
+            if tokens[i]=="#":
+              string+="(slice2D.data["+str(ref)\
+                +"][j+i*shape[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape[1]])*0.5"
+            else:
+              print "The reference to vector",splits[0],"should be averaged by using \"#\" in place "\
+                +"of \"$\" so that it is at zone centers where other scalors are defined."
+              quit()
+          else:#it is a scalor
+            string+="slice2D.data["+str(ref)+"][j+i*shape[1]]"
+        else:#it is a coordinate
+          if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
+            if tokens[i]=="#":
+              string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
+                +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
+            else:
+              print "The reference to coordinate",splits[0],"in scalor formula should be averaged"\
+                +" by using \"#\" in place of \"$\" so that it is at zone centers where other"\
+                +" scalors are defined."
+              quit()
+          if splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
+            if tokens[i]=="#":
+              string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
+                +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
+            else:
+              print "The reference to coordinate",splits[0],"in scalor formula should be averaged"\
+                +" by using \"#\" in place of \"$\" so that it is at zone centers where other"\
+                +" scalors are defined."
+              quit()
+        string+=splits[1]
+      if parsed.c:
+        print "scalorCode=",string
+      plane['scalorCode']=parser.expr(string).compile()
+    
+    #for each vector, make code
+    for vector in plane['vectors']:
+      
+      #make xposition code
+      [temp,tokens]=splitStrAtList(vector['xposition'],['$','#'])
+      string=temp[0]
+      coordinate1Averaged=None
+      coordinate2Averaged=None
+      for i in range(1,len(temp)):
+        splits=splitFirstInt(temp[i])
+        if splits[0]==coordinate1:
+          if tokens[i]=="#":#add as average
             coordinate1Averaged=True
-          string+="(slice2D.coordinates["+str(settings['coordinate1'])+"][i]"\
-            +"+slice2D.coordinates["+str(settings['coordinate1'])+"][i+1])*0.5"
-        else:#add as interface
-          if coordinate1Averaged!=None:#means we have gotten coordinate 1 already
-            if coordinate1Averaged:#check for consistancy of averaging
-              print "In vector ",j," coordinate \""+str(coordinate1)\
-                +"\" averaged in xposition, must also be averaged in yposition"
-              quit()
+            string+="(slice2D.coordinates["+str(coordinate1)+"][i]"\
+              +"+slice2D.coordinates["+str(coordinate1)+"][i+1])*0.5"
           else:
             coordinate1Averaged=False
-          string+="slice2D.coordinates["+str(settings['coordinate1'])+"][i]"
-      elif splits[0]==coordinate2:
-        if tokens[i]=="#":#add as average
-          if coordinate2Averaged!=None:#means we have gotten coordinate 2 already
-            if not coordinate2Averaged:#check for consistancy of averaging
-              print "In vector",j,"coordinate \""+str(coordinate2)\
-                +"\" not averaged in xposition, must also not be averaged in yposition"
-              quit()
-          else:
+            string+="slice2D.coordinates["+str(coordinate1)+"][i]"
+        elif splits[0]==coordinate2:
+          if tokens[i]=="#":#add as average
             coordinate2Averaged=True
-          string+="(slice2D.coordinates["+str(settings['coordinate2'])+"][j]"\
-            +"+slice2D.coordinates["+str(settings['coordinate2'])+"][j+1])*0.5"
-        else:
-          if coordinate2Averaged!=None:#means we have gotten coordinate 2 already
-            if coordinate2Averaged:#check for consistancy of averaging
-              print "In vector",j,"Coordinate \""+str(coordinate2)\
-                +"\" averaged in xposition, must also be averaged in yposition"
-              quit()
+            string+="(slice2D.coordinates["+str(coordinate2)+"][j]"\
+              +"+slice2D.coordinates["+str(coordinate2)+"][j+1])*0.5"
           else:
             coordinate2Averaged=False
-          string+="slice2D.coordinates["+str(settings['coordinate2'])+"][j]"
-      elif splits[0]>=nNumCoords:
-        print "In vector",j,"need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
-        quit()
-      elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
-        if tokens[i]=="$":#add as is
-          print "The coordinate reference",splits[0]," in ycomponent of vector",j," is not in the "\
-            +"plane, and thus it must be averaged by replacing \"$\" with a \"#\"."
+            string+="slice2D.coordinates["+str(coordinate2)+"][j]"
+        elif splits[0]>=nNumCoords:
+          print "In vector",j,"need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
           quit()
-        if tokens[i]=="#":#add as average
-          string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
-          +str(splits[0])+"][1])*0.5"
-      string+=splits[1]
-    if coordinate1Averaged==None or coordinate2Averaged==None:
-      print "In vector",j,"need a reference to at least one independent coordinate for "\
-        +"yposition formula, should be one or more of ",allowedCoordinate1+allowedCoordinate2
-      quit()
-    if parsed.c:
-      print "vector ",j,"'s yCode=",string
-    settings[key]['yCode']=parser.expr(string).compile()
-    settings[key]['coordinate1Averaged']=coordinate1Averaged
-    settings[key]['coordinate2Averaged']=coordinate2Averaged
-    
-    #make xcomponent code
-    [temp,tokens]=splitStrAtList(settings[key]['xcomponent'],['$','#'])
-    string=temp[0]
-    for i in range(1,len(temp)):
-      splits=splitFirstInt(temp[i])
-      if splits[0]>=nNumCoords:
-        ref=splits[0]-nNumCoords
-        if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
-          if tokens[i]=="#":
-            if not coordinate1Averaged:#coordinate not averaged so vector cannot be averaged
-              print "Vector",splits[0],"in xcomponent can not be averaged unless the xposition"\
-                " cooridnate",coordinate1,"is also averaged."
-              quit()
-            elif not coordinate2Averaged:
-              print "Vector",splits[0],"in xcomponent must have yposition"\
-                " cooridnate",coordinate2," averaged."
-              quit()
-            else:#coordinate is averaged so the vector can be also
-              string+="(slice2D.data["+str(ref)\
-                +"][j+i*shape1[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape1[1]])*0.5"
-          else:
-            if coordinate1Averaged:
-              print "Vector",splits[0],"in xcomponent must be averaged since the coorisponding"\
-                " cooridnate",coordinate1,"is also averaged."
-              quit()
-            elif not coordinate2Averaged:
-              print "Vector",splits[0],"in xcomponent must have yposition"\
-                " cooridnate",coordinate2," averaged."
-              quit()
-            if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
-              print "Vector",splits[0],"in xcomponent must have yposition"\
-                " cooridnate",coordinate2," averaged."
-              quit()
-            else:
-              string+="slice2D.data["+str(ref)+"][j+i*shape1[1]]"
-        elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
-          if tokens[i]=="#":
-            if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
-              print "Vector",splits[0],"in xcomponent can not be averaged unless the coorisponding"\
-                " cooridnate",coordinate2,"is also averaged."
-              quit()
-            elif not coordinate1Averaged:
-              print "Vector",splits[0],"in xcomponent must have xposition"\
-                " cooridnate",coordinate1," averaged."
-              quit()
-            else:#coordinate is averaged so the vector can be also
-              string+="(slice2D.data["+str(ref)\
-                +"][j+i*shape2[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape2[1]])*0.5"
-          else:
-            if coordinate2Averaged:
-              print "Vector",splits[0],"in xcomponent must be averaged since the coorisponding"\
-                " cooridnate",coordinate2,"is also averaged."
-              quit()
-            elif not coordinate1Averaged:
-              print "Vector",splits[0],"in xcomponent must have xposition"\
-                " cooridnate",coordinate1," averaged."
-              quit()
-            else:
-              string+="slice2D.data["+str(ref)+"][j+i*shape2[1]]"
-      else:#it is a coordinate
-        if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
-          if tokens[i]=="#":
-            if not coordinate1Averaged:
-              print "Coordinate ",splits[0],"in xcomponent can not be averaged unless the"\
-                +" coorisponding cooridnate",coordinate1,"is also averaged."
-              quit()
-            else:
-              string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
-                +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
-          else:
-            if coordinate1Averaged:
-              print "Coordinate ",splits[0],"in xcomponent must be averaged if the"\
-                +" coorisponding cooridnate",coordinate1,"is also averaged."
-              quit()
-            else:
-              string+="slice2D.coordinates["+str(splits[0])+"][i]"
-        elif splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
-          if tokens[i]=="#":
-            if not coordinate2Averaged:
-              print "Coordinate ",splits[0],"in xcomponent can not be averaged unless the"\
-                +" coorisponding cooridnate",coordinate2,"is also averaged."
-              quit()
-            else:
-              string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
-                +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
-          else:
-            if coordinate2Averaged:
-              print "Coordinate ",splits[0],"in xcomponent must be averaged if the"\
-                +" coorisponding cooridnate",coordinate2,"is also averaged."
-              quit()
-            else:
-              string+="slice2D.coordinates["+str(splits[0])+"][j]"
-        else:
-          if tokens[i]!="#":
-            print "Coordinate ",splits[0],"in xcomponent must be averaged since it isn't an "\
-              +"allowed coordinate (",allowedCoordinate1+allowedCoordinate2,") for this plane type."
+        elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
+          if tokens[i]=="$":#add as is
+            print "The coordinate reference",splits[0]," in xcomponent of vector",j," is not in the "\
+              +"plane, and thus it must be averaged by replacing \"$\" with a \"#\"."
             quit()
+          if tokens[i]=="#":#add as average
+            string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
+            +str(splits[0])+"][1])*0.5"
+        string+=splits[1]
+      if coordinate1Averaged==None and coordinate2Averaged==None:
+        print "In vector",j,"need a reference to at least one independent coordinate "\
+          +"for xposition formula, should be one or more of ",allowedCoordinate1+allowedCoordinate2
+        quit()
+      if parsed.c:
+        print "vector ",j,"'s xCode=",string
+      vector['xCode']=parser.expr(string).compile()
+      
+      #make yposition code
+      [temp,tokens]=splitStrAtList(vector['yposition'],['$','#'])
+      string=temp[0]
+      for i in range(1,len(temp)):
+        splits=splitFirstInt(temp[i])
+        if splits[0]==coordinate1:
+          if tokens[i]=="#":#add as average
+            if coordinate1Averaged!=None:#means we have gotten coordinate 1 already
+              if not coordinate1Averaged:# check for consistancy of averaging
+                print "In vector",j,"coordinate \""+str(coordinate1)\
+                  +"\" not averaged in xposition, must also not be averaged in yposition"
+                quit()
+            else:
+              coordinate1Averaged=True
+            string+="(slice2D.coordinates["+str(plane['coordinate1'])+"][i]"\
+              +"+slice2D.coordinates["+str(plane['coordinate1'])+"][i+1])*0.5"
+          else:#add as interface
+            if coordinate1Averaged!=None:#means we have gotten coordinate 1 already
+              if coordinate1Averaged:#check for consistancy of averaging
+                print "In vector ",j," coordinate \""+str(coordinate1)\
+                  +"\" averaged in xposition, must also be averaged in yposition"
+                quit()
+            else:
+              coordinate1Averaged=False
+            string+="slice2D.coordinates["+str(plane['coordinate1'])+"][i]"
+        elif splits[0]==coordinate2:
+          if tokens[i]=="#":#add as average
+            if coordinate2Averaged!=None:#means we have gotten coordinate 2 already
+              if not coordinate2Averaged:#check for consistancy of averaging
+                print "In vector",j,"coordinate \""+str(coordinate2)\
+                  +"\" not averaged in xposition, must also not be averaged in yposition"
+                quit()
+            else:
+              coordinate2Averaged=True
+            string+="(slice2D.coordinates["+str(plane['coordinate2'])+"][j]"\
+              +"+slice2D.coordinates["+str(plane['coordinate2'])+"][j+1])*0.5"
           else:
-            string+="(slice2D.coordinates["+str(splits[0])+"][0]"\
-              +"+slice2D.coordinates["+str(splits[0])+"][1])*0.5"
-      string+=splits[1]
-    if parsed.c:
-      print "vector ",j,"'s uCode=",string
-    settings[key]['uCode']=parser.expr(string).compile()
-    
-    #make ycomponent code
-    [temp,tokens]=splitStrAtList(settings[key]['ycomponent'],['$','#'])
-    string=temp[0]
-    for i in range(1,len(temp)):
-      splits=splitFirstInt(temp[i])
-      if splits[0]>=nNumCoords:
-        ref=splits[0]-nNumCoords
-        if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
-          if tokens[i]=="#":
-            if not coordinate1Averaged:#coordinate not averaged so vector cannot be averaged
-              print "Vector",splits[0],"in ycomponent can not be averaged unless the coorisponding"\
-                " cooridnate",coordinate1,"is also averaged."
-              quit()
-            elif not coordinate2Averaged:
-              print "Vector",splits[0],"in ycomponent must have yposition"\
-                " cooridnate",coordinate2," averaged."
-              quit()
-            else:#coordinate is averaged so the vector can be also
-              string+="(slice2D.data["+str(ref)\
-                +"][j+i*shape1[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape1[1]])*0.5"
-          else:
-            if coordinate1Averaged:
-              print "Vector",splits[0],"in ycomponent must be averaged since the coorisponding"\
-                " cooridnate",coordinate1,"is also averaged."
-              quit()
-            elif not coordinate2Averaged:
-              print "Vector",splits[0],"in ycomponent must have yposition"\
-                " cooridnate",coordinate2," averaged."
-              quit()
+            if coordinate2Averaged!=None:#means we have gotten coordinate 2 already
+              if coordinate2Averaged:#check for consistancy of averaging
+                print "In vector",j,"Coordinate \""+str(coordinate2)\
+                  +"\" averaged in xposition, must also be averaged in yposition"
+                quit()
             else:
-              string+="slice2D.data["+str(ref)+"][j+i*shape1[1]]"
-        elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
-          if tokens[i]=="#":
-            if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
-              print "Vector",splits[0],"in ycomponent can not be averaged unless the coorisponding"\
-                " cooridnate",coordinate2,"is also averaged."
-              quit()
-            elif not coordinate1Averaged:
-              print "Vector",splits[0],"in ycomponent must have xposition"\
-                " cooridnate",coordinate1," averaged."
-              quit()
-            else:#coordinate is averaged so the vector can be also
-              string+="(slice2D.data["+str(ref)\
-                +"][j+i*shape2[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape2[1]])*0.5"
-          else:
-            if coordinate2Averaged:
-              print "Vector",splits[0],"in ycomponent must be averaged since the coorisponding"\
-                " cooridnate",coordinate2,"is also averaged."
-              quit()
-            elif not coordinate1Averaged:
-              print "Vector",splits[0],"in ycomponent must have xposition"\
-                " cooridnate",coordinate1," averaged."
-              quit()
-            else:
-              string+="slice2D.data["+str(ref)+"][j+i*shape2[1]]"
-      else:#it is a coordinate
-        if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
-          if tokens[i]=="#":
-            if not coordinate1Averaged:
-              print "Coordinate ",splits[0],"in ycomponent can not be averaged unless the"\
-                +" coorisponding cooridnate",coordinate1,"is also averaged."
-              quit()
-            else:
-              string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
-                +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
-          else:
-            if coordinate1Averaged:
-              print "Coordinate ",splits[0],"in ycomponent must be averaged if the"\
-                +" coorisponding cooridnate",coordinate1,"is also averaged."
-              quit()
-            else:
-              string+="slice2D.coordinates["+str(splits[0])+"][i]"
-        elif splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
-          if tokens[i]=="#":
-            if not coordinate2Averaged:
-              print "Coordinate ",splits[0],"in ycomponent can not be averaged unless the"\
-                +" coorisponding cooridnate",coordinate2,"is also averaged."
-              quit()
-            else:
-              string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
-                +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
-          else:
-            if coordinate2Averaged:
-              print "Coordinate ",splits[0],"in ycomponent must be averaged if the"\
-                +" coorisponding cooridnate",coordinate2,"is also averaged."
-              quit()
-            else:
-              string+="slice2D.coordinates["+str(splits[0])+"][j]"
-        else:
-          if tokens[i]!="#":
-            print "Coordinate ",splits[0],"in xcomponent must be averaged since it isn't an "\
-              +"allowed coordinate (",allowedCoordinate1+allowedCoordinate2,") for this plane type."
+              coordinate2Averaged=False
+            string+="slice2D.coordinates["+str(plane['coordinate2'])+"][j]"
+        elif splits[0]>=nNumCoords:
+          print "In vector",j,"need to pick from the coordinate rows (0-"+str(nNumCoords)+")"
+          quit()
+        elif splits[0] not in allowedCoordinate1 or splits[0] not in allowedCoordinate2:#assume it is a constant
+          if tokens[i]=="$":#add as is
+            print "The coordinate reference",splits[0]," in ycomponent of vector",j," is not in the "\
+              +"plane, and thus it must be averaged by replacing \"$\" with a \"#\"."
             quit()
+          if tokens[i]=="#":#add as average
+            string+="(slice2D.coordinates["+str(splits[0])+"][0]+slice2D.coordinates["\
+            +str(splits[0])+"][1])*0.5"
+        string+=splits[1]
+      if coordinate1Averaged==None or coordinate2Averaged==None:
+        print "In vector",j,"need a reference to at least one independent coordinate for "\
+          +"yposition formula, should be one or more of ",allowedCoordinate1+allowedCoordinate2
+        quit()
+      if parsed.c:
+        print "vector ",j,"'s yCode=",string
+      vector['yCode']=parser.expr(string).compile()
+      vector['coordinate1Averaged']=coordinate1Averaged
+      vector['coordinate2Averaged']=coordinate2Averaged
+      
+      #make xcomponent code
+      [temp,tokens]=splitStrAtList(vector['xcomponent'],['$','#'])
+      string=temp[0]
+      for i in range(1,len(temp)):
+        splits=splitFirstInt(temp[i])
+        if splits[0]>=nNumCoords:
+          ref=splits[0]-nNumCoords
+          if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
+            if tokens[i]=="#":
+              if not coordinate1Averaged:#coordinate not averaged so vector cannot be averaged
+                print "Vector",splits[0],"in xcomponent can not be averaged unless the xposition"\
+                  " cooridnate",coordinate1,"is also averaged."
+                quit()
+              elif not coordinate2Averaged:
+                print "Vector",splits[0],"in xcomponent must have yposition"\
+                  " cooridnate",coordinate2," averaged."
+                quit()
+              else:#coordinate is averaged so the vector can be also
+                string+="(slice2D.data["+str(ref)\
+                  +"][j+i*shape1[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape1[1]])*0.5"
+            else:
+              if coordinate1Averaged:
+                print "Vector",splits[0],"in xcomponent must be averaged since the coorisponding"\
+                  " cooridnate",coordinate1,"is also averaged."
+                quit()
+              elif not coordinate2Averaged:
+                print "Vector",splits[0],"in xcomponent must have yposition"\
+                  " cooridnate",coordinate2," averaged."
+                quit()
+              if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
+                print "Vector",splits[0],"in xcomponent must have yposition"\
+                  " cooridnate",coordinate2," averaged."
+                quit()
+              else:
+                string+="slice2D.data["+str(ref)+"][j+i*shape1[1]]"
+          elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
+            if tokens[i]=="#":
+              if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
+                print "Vector",splits[0],"in xcomponent can not be averaged unless the coorisponding"\
+                  " cooridnate",coordinate2,"is also averaged."
+                quit()
+              elif not coordinate1Averaged:
+                print "Vector",splits[0],"in xcomponent must have xposition"\
+                  " cooridnate",coordinate1," averaged."
+                quit()
+              else:#coordinate is averaged so the vector can be also
+                string+="(slice2D.data["+str(ref)\
+                  +"][j+i*shape2[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape2[1]])*0.5"
+            else:
+              if coordinate2Averaged:
+                print "Vector",splits[0],"in xcomponent must be averaged since the coorisponding"\
+                  " cooridnate",coordinate2,"is also averaged."
+                quit()
+              elif not coordinate1Averaged:
+                print "Vector",splits[0],"in xcomponent must have xposition"\
+                  " cooridnate",coordinate1," averaged."
+                quit()
+              else:
+                string+="slice2D.data["+str(ref)+"][j+i*shape2[1]]"
+        else:#it is a coordinate
+          if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
+            if tokens[i]=="#":
+              if not coordinate1Averaged:
+                print "Coordinate ",splits[0],"in xcomponent can not be averaged unless the"\
+                  +" coorisponding cooridnate",coordinate1,"is also averaged."
+                quit()
+              else:
+                string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
+                  +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
+            else:
+              if coordinate1Averaged:
+                print "Coordinate ",splits[0],"in xcomponent must be averaged if the"\
+                  +" coorisponding cooridnate",coordinate1,"is also averaged."
+                quit()
+              else:
+                string+="slice2D.coordinates["+str(splits[0])+"][i]"
+          elif splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
+            if tokens[i]=="#":
+              if not coordinate2Averaged:
+                print "Coordinate ",splits[0],"in xcomponent can not be averaged unless the"\
+                  +" coorisponding cooridnate",coordinate2,"is also averaged."
+                quit()
+              else:
+                string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
+                  +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
+            else:
+              if coordinate2Averaged:
+                print "Coordinate ",splits[0],"in xcomponent must be averaged if the"\
+                  +" coorisponding cooridnate",coordinate2,"is also averaged."
+                quit()
+              else:
+                string+="slice2D.coordinates["+str(splits[0])+"][j]"
           else:
-            string+="(slice2D.coordinates["+str(splits[0])+"][0]"\
-              +"+slice2D.coordinates["+str(splits[0])+"][1])*0.5"
-      string+=splits[1]
-    if parsed.c:
-      print "vector ",j,"'s vCode=",string
-    settings[key]['vCode']=parser.expr(string).compile()
+            if tokens[i]!="#":
+              print "Coordinate ",splits[0],"in xcomponent must be averaged since it isn't an "\
+                +"allowed coordinate (",allowedCoordinate1+allowedCoordinate2,") for this plane type."
+              quit()
+            else:
+              string+="(slice2D.coordinates["+str(splits[0])+"][0]"\
+                +"+slice2D.coordinates["+str(splits[0])+"][1])*0.5"
+        string+=splits[1]
+      if parsed.c:
+        print "vector ",j,"'s uCode=",string
+      vector['uCode']=parser.expr(string).compile()
+      
+      #make ycomponent code
+      [temp,tokens]=splitStrAtList(vector['ycomponent'],['$','#'])
+      string=temp[0]
+      for i in range(1,len(temp)):
+        splits=splitFirstInt(temp[i])
+        if splits[0]>=nNumCoords:
+          ref=splits[0]-nNumCoords
+          if splits[0] in allowedVectors1:#it is a vector at coordinate1 interfaces
+            if tokens[i]=="#":
+              if not coordinate1Averaged:#coordinate not averaged so vector cannot be averaged
+                print "Vector",splits[0],"in ycomponent can not be averaged unless the coorisponding"\
+                  " cooridnate",coordinate1,"is also averaged."
+                quit()
+              elif not coordinate2Averaged:
+                print "Vector",splits[0],"in ycomponent must have yposition"\
+                  " cooridnate",coordinate2," averaged."
+                quit()
+              else:#coordinate is averaged so the vector can be also
+                string+="(slice2D.data["+str(ref)\
+                  +"][j+i*shape1[1]]+slice2D.data["+str(ref)+"][j+(i+1)*shape1[1]])*0.5"
+            else:
+              if coordinate1Averaged:
+                print "Vector",splits[0],"in ycomponent must be averaged since the coorisponding"\
+                  " cooridnate",coordinate1,"is also averaged."
+                quit()
+              elif not coordinate2Averaged:
+                print "Vector",splits[0],"in ycomponent must have yposition"\
+                  " cooridnate",coordinate2," averaged."
+                quit()
+              else:
+                string+="slice2D.data["+str(ref)+"][j+i*shape1[1]]"
+          elif splits[0] in allowedVectors2:#it is a vector at coordinate2 interfaces
+            if tokens[i]=="#":
+              if not coordinate2Averaged:#coordinate not averaged so vector cannot be averaged
+                print "Vector",splits[0],"in ycomponent can not be averaged unless the coorisponding"\
+                  " cooridnate",coordinate2,"is also averaged."
+                quit()
+              elif not coordinate1Averaged:
+                print "Vector",splits[0],"in ycomponent must have xposition"\
+                  " cooridnate",coordinate1," averaged."
+                quit()
+              else:#coordinate is averaged so the vector can be also
+                string+="(slice2D.data["+str(ref)\
+                  +"][j+i*shape2[1]]+slice2D.data["+str(ref)+"][(j+1)+i*shape2[1]])*0.5"
+            else:
+              if coordinate2Averaged:
+                print "Vector",splits[0],"in ycomponent must be averaged since the coorisponding"\
+                  " cooridnate",coordinate2,"is also averaged."
+                quit()
+              elif not coordinate1Averaged:
+                print "Vector",splits[0],"in ycomponent must have xposition"\
+                  " cooridnate",coordinate1," averaged."
+                quit()
+              else:
+                string+="slice2D.data["+str(ref)+"][j+i*shape2[1]]"
+        else:#it is a coordinate
+          if splits[0] in allowedCoordinate1:#it is a coordinate at coordinate1 interfaces
+            if tokens[i]=="#":
+              if not coordinate1Averaged:
+                print "Coordinate ",splits[0],"in ycomponent can not be averaged unless the"\
+                  +" coorisponding cooridnate",coordinate1,"is also averaged."
+                quit()
+              else:
+                string+="(slice2D.coordinates["+str(splits[0])+"][i]"\
+                  +"+slice2D.coordinates["+str(splits[0])+"][i+1])*0.5"
+            else:
+              if coordinate1Averaged:
+                print "Coordinate ",splits[0],"in ycomponent must be averaged if the"\
+                  +" coorisponding cooridnate",coordinate1,"is also averaged."
+                quit()
+              else:
+                string+="slice2D.coordinates["+str(splits[0])+"][i]"
+          elif splits[0] in allowedCoordinate2:#it is a coordinate at coordinate2 interfaces
+            if tokens[i]=="#":
+              if not coordinate2Averaged:
+                print "Coordinate ",splits[0],"in ycomponent can not be averaged unless the"\
+                  +" coorisponding cooridnate",coordinate2,"is also averaged."
+                quit()
+              else:
+                string+="(slice2D.coordinates["+str(splits[0])+"][j]"\
+                  +"+slice2D.coordinates["+str(splits[0])+"][j+1])*0.5"
+            else:
+              if coordinate2Averaged:
+                print "Coordinate ",splits[0],"in ycomponent must be averaged if the"\
+                  +" coorisponding cooridnate",coordinate2,"is also averaged."
+                quit()
+              else:
+                string+="slice2D.coordinates["+str(splits[0])+"][j]"
+          else:
+            if tokens[i]!="#":
+              print "Coordinate ",splits[0],"in xcomponent must be averaged since it isn't an "\
+                +"allowed coordinate (",allowedCoordinate1+allowedCoordinate2,") for this plane type."
+              quit()
+            else:
+              string+="(slice2D.coordinates["+str(splits[0])+"][0]"\
+                +"+slice2D.coordinates["+str(splits[0])+"][1])*0.5"
+        string+=splits[1]
+      if parsed.c:
+        print "vector ",j,"'s vCode=",string
+      vector['vCode']=parser.expr(string).compile()
 def createPlots(settings,parsed):
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(settings['inputFileName'])
   
-  #make sure that all combined binary files have 2D slices made
-  if settings['planeType']=="rt":
-    nPlaneID=0
-    planeID="k"
-  if settings['planeType']=="tp":
-    nPlaneID=1
-    planeID="i"
-  if settings['planeType']=="rp":
-    nPlaneID=2
-    planeID="j"
-  make_2DSlices.make_2DSlices(not(parsed.r),settings['inputFileName'],nPlaneID,settings['planeIndex']
-    ,parsed.m)
+  nCount=0
+  for plane in settings['planes']:
     
-  #get and sort files
-  extension="_2D"+planeID+"="+str(settings['planeIndex'])+".txt"
-  filesExistSlices=glob.glob(baseFileName+"*"+extension)
-  files=[]
-  for file in filesExistSlices:
-    intOfFile=int(file[len(baseFileName):len(file)-len(extension)])
-    if intOfFile>=start and intOfFile<end:
-      files.append(file)
-  files.sort()
+    #make sure that all combined binary files have 2D slices made
+    if plane['planeType']=="rt":
+      nPlaneID=0
+      planeID="k"
+    if plane['planeType']=="tp":
+      nPlaneID=1
+      planeID="i"
+    if plane['planeType']=="rp":
+      nPlaneID=2
+      planeID="j"
+    make_2DSlices.make_2DSlices(not(parsed.r),settings['inputFileName'],nPlaneID,plane['planeIndex']
+      ,parsed.m)
+    
+    #get and sort files
+    extension="_2D"+planeID+"="+str(plane['planeIndex'])+".txt"
+    filesExistSlices=glob.glob(baseFileName+"*"+extension)
+    files=[]
+    for file in filesExistSlices:
+      intOfFile=int(file[len(baseFileName):len(file)-len(extension)])
+      if intOfFile>=start and intOfFile<end:
+        files.append(file)
+    files.sort()
+    
+    #check to see if we have enough files
+    if len(files)==0:
+      print "no files found in range for plane "+str(nCount)
+      quit()
+    
+    plane['files']=files
+    nCount=nCount+1
   
-  if len(files)==0:
-    print "no files found in range"
-    quit()
+  #check that all planes have the same number of files
+  plane0=settings['planes'][0]
+  nCount=0
+  for plane in settings['planes']:
+    if len(plane0['files'])!=len(plane['files']):
+      print "plane "+str(nCount)+" has "+str(len(plane['files']))+"files while plane 0 has "\
+        +str(len(plane0['files']))+" files, they must have the same number of files."
+      quit()
   
   #set stellar pallet only once if both max/min are set, otherwise will have to reset for each plot
-  if settings['scalorPallet']=="stellar" and (settings['scalorMin']!=None and settings['scalorMax']!=None):
-    setStellarPallet(settings['scalorMax'],settings['scalorMin'],settings['palletFocus'])
+  if plane['scalorPallet']=="stellar" and (plane['scalorMin']!=None and plane['scalorMax']!=None):
+    setStellarPallet(plane['scalorMax'],plane['scalorMin'],plane['palletFocus'])
   
   nCount=settings['startIndex']
-  for file in files:
-    fig=plt.figure(figsize=(settings['figWidth'],settings['figHeight']),frameon=False)
-    ax=fig.add_subplot(111)
-    plot_plane(file,nCount,fig,ax,settings)
-    nCount+=1
+  fileNames=[]
+  for i in range(len(plane0['files'])):
+    
+    fig=plt.figure(figsize=(settings['figWidth'],settings['figHeight']))
+    nPlaneCount=0
+    ax=[]
+    for plane in settings['planes']:
+      ax.append(plt.subplot(len(settings['planes']),1,nPlaneCount))
+      [time,index]=plot_plane(plane['files'][i],nCount,fig,ax[nPlaneCount],plane,settings['planes'])
+      fileNames.append(plane['files'][i])
+      nPlaneCount+=1
+    
+    #set title
+    title=settings['title']
+    timeStr=format(time,"0.4e")
+    title=title.replace("\\time",timeStr)
+    title=title.replace("\index",str(index))
+    fig.suptitle(title)
+    
+    #save figure
+    fname=settings['outputFile']+"_"+str(nCount)+"."+settings['fileFormat']
+    print "saving figure \""+fname+"\" made from 2D slice \""+str(fileNames)+"\" ..."
+    fig.savefig(fname,format=settings['fileFormat'],transparent=False,dpi=settings['figDpi'])
     plt.close(fig)
+    nCount+=1
 def splitFirstInt(str):
   '''Returns the integer which starts at the very first character of str, and drops everything else 
   from str'''
@@ -1026,67 +1073,124 @@ def splitFirstInt(str):
     if i>=len(str):#check that we haven't passed the end of the string
       break
   return [int(strInt),str[i:]]
-def plot_plane(fileName,nCount,fig,ax,settings):
+def plot_plane(fileName,nCount,fig,ax,plane,planes):
   
   #load data
   slice2D=File2DSlice()
   slice2D.load(fileName)
   
   #plot scalor data if it is set
-  if settings['scalorFormula']!=None:
-    [X,Y,C,max,min]=makeScalorPlotData(slice2D,settings)
-    cmap=settings['scalorPallet']
+  if plane['scalorFormula']!=None:
+    [X,Y,C,max,min]=makeScalorPlotData(slice2D,plane)
+    cmap=plane['scalorPallet']
     if cmap==None:
       cmap="jet"
     scalerMap=ax.pcolor(X,Y,C,cmap=cmap,edgecolors='none',antialiased=False
       ,vmin=min,vmax=max)
     cb=fig.colorbar(scalerMap,pad=0.01,fraction=0.07)
-    cb.set_label(settings['scalorLabel'])
-    ax.set_xlabel(settings['xLabel'])
-    ax.set_ylabel(settings['yLabel'])
+    cb.set_label(plane['scalorLabel'])
+    ax.set_xlabel(plane['xLabel'])
+    ax.set_ylabel(plane['yLabel'])
+    
+    
+    #plot boundary line
+    curve=getBoundarCurve(X,Y,plane)
+    ax.plot(curve[0],curve[1],'w-',linewidth=0.1,zorder=1)
+    
+    #plot interesection lines
+    colorCount=0
+    for planeTemp in planes:
+      intersectionCurve=getIntersectCurve(X,Y,plane,planeTemp)
+      ax.plot(intersectionCurve[0],intersectionCurve[1],colors[colorCount]+'-',linewidth=0.1,zorder=1)
+      colorCount+=1
     
   #plot vectors
-  for i in range(settings['numVectors']):
-    key='vector'+str(i)
-    [X,Y,U,V,scale,maxMag,diag]=makeVectorPlotData(slice2D,settings,i)
+  for vector in plane['vectors']:
+    
+    [X,Y,U,V,scale,maxMag,diag]=makeVectorPlotData(slice2D,plane,vector)
     scaleString=format(maxMag,"0.1e")
     scaleNumber=float(scaleString)
-    label=settings[key]['label']
+    label=vector['label']
     labelScale=format(scaleNumber,"0.1e")
     
     label=label.replace("\scale",labelScale)
     uvec=ax.quiver(X,Y,U,V,pivot='middle',scale=scale,units='xy',angles='xy'
-      ,width=diag*0.03*settings[key]['scale'],color=settings[key]['color'])
-    qk=ax.quiverkey(uvec,settings[key]['labelXPos'],settings[key]['labelYPos']
+      ,width=diag*0.03*vector['scale'],color=vector['color'])
+    qk=ax.quiverkey(uvec,vector['labelXPos'],vector['labelYPos']
       ,scaleNumber,label)
   
   #set limits
-  ax.set_xlim([settings['xMin'],settings['xMax']])
-  ax.set_ylim([settings['yMin'],settings['yMax']])
+  ax.set_xlim([plane['xMin'],plane['xMax']])
+  ax.set_ylim([plane['yMin'],plane['yMax']])
   
   #set minor axis tics
-  if settings['xminortics']:
+  if plane['xminortics']:
     ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-  if settings['yminortics']:
+  if plane['yminortics']:
     ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
   
   #set grid settings
-  if settings['grid']!=None:
-    ax.grid(True, which=settings['grid'])
+  if plane['grid']!=None:
+    ax.grid(True, which=plane['grid'])
   else:
     ax.grid(False)
   
-  #set title
-  title=settings['title']
-  timeStr=format(slice2D.time,"0.4e")
-  title=title.replace("\\time",timeStr)
-  title=title.replace("\index",str(slice2D.index))
-  fig.suptitle(title)
+  return [slice2D.time,slice2D.index]
+def getBoundarCurve(X,Y,settings):
+  curve=[]
+  curve.append([])#x-component
+  curve.append([])#y-component
   
-  #save figure
-  fname=settings['outputFile']+"_"+str(nCount)+"."+settings['fileFormat']
-  print "saving figure \""+fname+"\" made from 2D slice \""+fileName+"\" ..."
-  fig.savefig(fname,format=settings['fileFormat'],transparent=False,dpi=settings['figDpi'])
+  shape=X.shape
+  
+  #bottom edge
+  for i in range(shape[0]-1,2,-1):
+    curve[0].append(X[i][shape[1]-3])
+    curve[1].append(Y[i][shape[1]-3])
+  
+  #left edge
+  for i in range(shape[1]-3,2,-1):
+    curve[0].append(X[2][i])
+    curve[1].append(Y[2][i])
+  
+  #bottom edge
+  for i in range(2,shape[0]):
+    curve[0].append(X[i][2])
+    curve[1].append(Y[i][2])
+  return curve
+def getIntersectCurve(X,Y,plane0,plane1):
+  
+  #determine which coordinate to loop over
+  coordinate=-1
+  if plane0['planeType']=="rt":
+    if plane1['planeType']=="rp":
+      coordinate=0
+    elif plane1['planeType']=="tp":
+      coordinate=1
+  elif plane0['planeType']=="rp":
+    if plane1['planeType']=="rt":
+      coordinate=0
+    elif plane1['planeType']=="tp":
+      coordinate=1
+  elif plane0['planeType']=="tp":
+    if plane1['planeType']=="rt":
+      coordinate=0
+    elif plane1['planeType']=="rp":
+      coordinate=1
+  
+  #set curve
+  curve=[]
+  curve.append([])
+  curve.append([])
+  if coordinate==0:
+    for i in range(X.shape[0]):
+      curve[0].append(X[i][plane1['planeIndex']])
+      curve[1].append(Y[i][plane1['planeIndex']])
+  elif coordinate==1:
+    for i in range(X.shape[1]):
+      curve[0].append(X[plane1['planeIndex']][i])
+      curve[1].append(Y[plane1['planeIndex']][i])
+  return curve
 def makeScalorPlotData(slice2D,settings):
   
   #calculate grid coordinates
@@ -1138,7 +1242,7 @@ def makeScalorPlotData(slice2D,settings):
   if settings['scalorMax']!=None:
     max=settings['scalorMax']
   
-  #if both scalorMin and scalorMax are set, then can just define the colormap once
+  #set color map
   if settings['scalorPallet']=="stellar":
     setStellarPallet(max,min,settings['palletFocus'])
   return [X,Y,C,max,min]
@@ -1170,17 +1274,16 @@ def setStellarPallet(max,min,focus):
     ),}
   stellar = matplotlib.colors.LinearSegmentedColormap('stellar', cdict)
   plt.register_cmap(cmap=stellar)
-def makeVectorPlotData(slice2D,settings,vectorNumber):
+def makeVectorPlotData(slice2D,plane,vector):
   
   #calculate grid coordinates
-  key='vector'+str(vectorNumber)
-  xSize=len(slice2D.coordinates[settings['coordinate1']])
-  ySize=len(slice2D.coordinates[settings['coordinate2']])
+  xSize=len(slice2D.coordinates[plane['coordinate1']])
+  ySize=len(slice2D.coordinates[plane['coordinate2']])
   shape1=(xSize,ySize-1)
   shape2=(xSize-1,ySize)
-  if settings[key]['coordinate1Averaged']:
+  if vector['coordinate1Averaged']:
     xSize-=1
-  if settings[key]['coordinate2Averaged']:
+  if vector['coordinate2Averaged']:
     ySize-=1
   shapeSmaller=(xSize,ySize)
   X=np.zeros(shapeSmaller)
@@ -1192,17 +1295,17 @@ def makeVectorPlotData(slice2D,settings,vectorNumber):
   mag=-1.0*sys.float_info.max
   
   #calcuate position and components
-  for i in range(0,shapeSmaller[0],settings[key]['xfrequency']):
-    for j in range(0,shapeSmaller[1],settings[key]['yfrequency']):
-      X[i][j]=eval(settings[key]['xCode'])
-      Y[i][j]=eval(settings[key]['yCode'])
-      U[i][j]=eval(settings[key]['uCode'])
-      V[i][j]=eval(settings[key]['vCode'])
+  for i in range(0,shapeSmaller[0],vector['xfrequency']):
+    for j in range(0,shapeSmaller[1],vector['yfrequency']):
+      X[i][j]=eval(vector['xCode'])
+      Y[i][j]=eval(vector['yCode'])
+      U[i][j]=eval(vector['uCode'])
+      V[i][j]=eval(vector['vCode'])
   #if max/min not set, set them to something reasonable
-  xMin=settings['xMin']
-  xMax=settings['xMax']
-  yMin=settings['yMin']
-  yMax=settings['yMax']
+  xMin=plane['xMin']
+  xMax=plane['xMax']
+  yMin=plane['yMin']
+  yMax=plane['yMax']
   if xMin==None:
     xMin=-1.0*sys.float_info.max
   if xMax==None:
@@ -1214,14 +1317,14 @@ def makeVectorPlotData(slice2D,settings,vectorNumber):
   
   #find smallest diagonal
   bVectorsInRange=False
-  for i in range(settings[key]['xfrequency'],shapeSmaller[0],settings[key]['xfrequency']):
-    for j in range(settings[key]['yfrequency'],shapeSmaller[1],settings[key]['yfrequency']):
+  for i in range(vector['xfrequency'],shapeSmaller[0],vector['xfrequency']):
+    for j in range(vector['yfrequency'],shapeSmaller[1],vector['yfrequency']):
       if xMin<=X[i][j]<=xMax and yMin<=Y[i][j]<=yMax:
         bVectorsInRange=True
-        delX0=X[i][j]-X[i-settings[key]['xfrequency']][j]
-        delX1=X[i][j]-X[i][j-settings[key]['yfrequency']]
-        delY0=Y[i][j]-Y[i][j-settings[key]['yfrequency']]
-        delY1=Y[i][j]-Y[i-settings[key]['xfrequency']][j]
+        delX0=X[i][j]-X[i-vector['xfrequency']][j]
+        delX1=X[i][j]-X[i][j-vector['yfrequency']]
+        delY0=Y[i][j]-Y[i][j-vector['yfrequency']]
+        delY1=Y[i][j]-Y[i-vector['xfrequency']][j]
         delX0Sq=delX0**2
         delX1Sq=delX1**2
         delY0Sq=delY0**2
@@ -1240,14 +1343,14 @@ def makeVectorPlotData(slice2D,settings,vectorNumber):
     quit()
   
   #find largest magnitude
-  for i in range(0,shapeSmaller[0],settings[key]['xfrequency']):
-    for j in range(0,shapeSmaller[1],settings[key]['yfrequency']):
+  for i in range(0,shapeSmaller[0],vector['xfrequency']):
+    for j in range(0,shapeSmaller[1],vector['yfrequency']):
       if xMin<=X[i][j]<=xMax and yMin<=Y[i][j]<=yMax:
         temp=sqrt((U[i][j]**2+V[i][j]**2))
         if temp>mag:
           mag=temp
-  if mag>0.0 and diag!=0.0 and settings[key]['scale']!=0.0:
-    scale=mag/diag/settings[key]['scale']
+  if mag>0.0 and diag!=0.0 and vector['scale']!=0.0:
+    scale=mag/diag/vector['scale']
   else:
     scale=1.0
     mag=0.0

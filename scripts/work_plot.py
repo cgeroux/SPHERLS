@@ -50,7 +50,7 @@ def parseOptions():
   return parser.parse_args()
 def main():
   deltaMColumn=2#the column number for delta M in the profile file, start at 0 for the first column
-  pColumn=57#the column number for P_ave in the profile file, starting at 0 for first column
+  pColumn=58#the column number for P_ave in the profile file, starting at 0 for first column
   rhoColumn=6#the column number for Rho_ave in the profile file
   tColumn=45#the column number for T_ave in the profile file
   QColumn=35
@@ -117,8 +117,9 @@ def main():
   fileData.readFile(firstFile)
   Log10T=fileData.fColumnValues[0:len(fileData.fColumnValues)-1,tColumn]
   Log10T=np.array(Log10T,dtype=np.float64)#force double precision
-  Log10T=np.log10(Log10T)    
+  Log10T=np.log10(Log10T)
   
+  print "len(periodRange)=",len(periodRange)
   for n in range(len(periodRange)):
     
     #get and sort files
@@ -134,7 +135,7 @@ def main():
     
     #for first model dump
     fileData=datafile.DataFile()
-    #print "reading file ",files[0]," ..."
+    print "reading file ",files[0]," ..."
     fileData.readFile(files[0])
     
     #get temperature profile from first model, may want to change this
@@ -153,7 +154,7 @@ def main():
     
     #read all files in
     for i in range(1,len(files)):#for each dump
-      #print "reading file ",files[i]," ..."
+      print "reading file ",files[i]," ..."
       fileData.readFile(files[i])
       for j in range(len(fileData.fColumnValues)-1):#for each zone
         p[j][i]=fileData.fColumnValues[j][pColumn]#+fileData.fColumnValues[j][QColumn]
@@ -182,6 +183,7 @@ def main():
   #print out total work done by model
   f=open(options.outputFile+"_work_per_period.txt",'w')
   f.write("time[s]      work[ergs]\n")
+  print "len(dWSum)=",len(dWSum)
   for i in range(len(dWSum)):
     f.write(str(time[i])+" "+str(dWSum[i])+"\n")
   f.close()
