@@ -34,6 +34,11 @@ def parseOptions():
     ,help="Turns off grid [default].",default=False)
   parser.add_option("--points",action="store_true",dest="points",help="If set, will use points when"
     +" plotting in addition to lines [default: %default]",default=False)
+  parser.add_option("--without-mass",action="store_false",dest="withMass",help="If set, will "
+    +"include the zone mass in the calculations to give PKE in [ergs] rather than [ergs/g] [default]"
+    ,default=True)
+  parser.add_option("-a",action="store_true",dest="withAV",help="If set, will include the "
+    +"artificial viscosity in the pressure [default: %default]",default=False)
   parser.add_option("--no-lines",action="store_true",dest="noLines",help="If set, will not use "
     +"lines when plotting, and only points [default: %default]",default=False)
   parser.add_option("--plot-curves",action="store_true",dest="plotCurves",help="If set, plot PdV "
@@ -108,7 +113,8 @@ def main():
   firstFile=baseFileName+"00000000"
   failedFiles2=make_profiles.make_profiles(options.keep,firstFile,options.remake,False)
   if not os.path.isfile(firstFile+extension):
-    print "didn't find static model at ",firstFile+extension," using first model found in range given, ",filesExistProfiles[0]," instead"
+    print "didn't find static model at ",firstFile+extension\
+      ," using first model found in range given, ",filesExistProfiles[0]," instead"
     firstFile=filesExistProfiles[0]
   else:
     firstFile+=extension
@@ -119,7 +125,6 @@ def main():
   Log10T=np.array(Log10T,dtype=np.float64)#force double precision
   Log10T=np.log10(Log10T)
   
-  print "len(periodRange)=",len(periodRange)
   for n in range(len(periodRange)):
     
     #get and sort files
@@ -144,13 +149,23 @@ def main():
     Log10T=np.log10(Log10T)
     
     #read in p, and 1/rho for first file
-    p=np.zeros( (len(fileData.fColumnValues)-1,len(files)) )
-    rhoInvert=np.zeros( (len(fileData.fColumnValues)-1,len(files)) )
-    deltaM=np.zeros( (len(fileData.fColumnValues)-1,len(files)) )
+    p=np.zeros( (len(fileData.fColumnValues)-1,len(files)+1) )
+    rhoInvert=np.zeros( (len(fileData.fColumnValues)-1,len(files)+1) )
+    deltaM=np.zeros( (len(fileData.fColumnValues)-1,len(files)+1) )
     for i in range(len(fileData.fColumnValues)-1):
-      p[i][0]=fileData.fColumnValues[i][pColumn]#+fileData.fColumnValues[i][QColumn]
-      deltaM[i][0]=fileData.fColumnValues[i][deltaMColumn]
+      p[i][0]=fileData.fColumnValues[i][pColumn]
+      p[i][len(files)]=fileData.fColumnValues[i][pColumn]+fileData.fColumnValues[i][QColumn]
+      if options.withAV:
+        p[i][0]+=fileData.fColumnValues[i][QColumn]
+        p[i][len(files)]+=fileData.fColumnValues[i][QColumn]
       rhoInvert[i][0]=1.0/fileData.fColumnValues[i][rhoColumn]
+      rhoInvert[i][len(files)]=1.0/fileData.fColumnValues[i][rhoColumn]
+      if options.withMass:
+        deltaM[i][0]=fileData.fColumnValues[i][deltaMColumn]
+        deltaM[i][len(files)]=fileData.fColumnValues[i][deltaMColumn]
+      else:
+        deltaM[i][0]=1.0
+        deltaM[i][len(files)]=1.0
     
     #read all files in
     for i in range(1,len(files)):#for each dump
@@ -158,16 +173,22 @@ def main():
       fileData.readFile(files[i])
       for j in range(len(fileData.fColumnValues)-1):#for each zone
         p[j][i]=fileData.fColumnValues[j][pColumn]#+fileData.fColumnValues[j][QColumn]
-        deltaM[j][i]=fileData.fColumnValues[i][deltaMColumn]
+        if options.withAV:
+          p[j][i]+=fileData.fColumnValues[j][QColumn]
+        if options.withMass:
+          deltaM[j][i]=fileData.fColumnValues[j][deltaMColumn]
+        else:
+          deltaM[j][i]=1.0
         rhoInvert[j][i]=1.0/fileData.fColumnValues[j][rhoColumn]
-    
+      
     #compute work
     dW=np.zeros(len(fileData.fColumnValues)-1)
     dWSum.append(0.0)
-    for i in range(1,len(files)):
+    for i in range(1,len(files)+1):
       for j in range(len(fileData.fColumnValues)-1):
-        dW[j]=dW[j]+(0.5*(rhoInvert[j][i]-rhoInvert[j][i-1])*(p[j][i]+p[j][i-1]))*deltaM[j][i]
-        dWSum[n]+=dW[j]
+        dW[j]+=(0.5*(rhoInvert[j][i]-rhoInvert[j][i-1])*(p[j][i]+p[j][i-1]))*deltaM[j][i]
+    for j in range(len(fileData.fColumnValues)-1):
+      dWSum[n]+=dW[j]
     
     #make plots of P and 1/rho for each zone
     fig=plt.figure(figsize=(13,8))
@@ -178,12 +199,11 @@ def main():
     
     #make work plot
     make_plot2(Log10T,dW,options,fig,ax1,"work_plot_"+str(n),"Log10(T)")
-    #make_plot2(range(len(fileData.fColumnValues)-1),dW,options,fig,ax1,"work_plot2_"+str(n),"zone #")
+    make_plot2(range(len(fileData.fColumnValues)-1),dW,options,fig,ax1,"work_plot2_"+str(n),"zone #")
     
   #print out total work done by model
   f=open(options.outputFile+"_work_per_period.txt",'w')
   f.write("time[s]      work[ergs]\n")
-  print "len(dWSum)=",len(dWSum)
   for i in range(len(dWSum)):
     f.write(str(time[i])+" "+str(dWSum[i])+"\n")
   f.close()
@@ -203,7 +223,7 @@ def make_plot(x,y,options,i,fig,ax1):
     plt.show()
   else:
     sOutFileName=options.outputFile+"_"+str(i)+"."+options.format
-    print __name__+":"+main.__name__+": creating plot \""+sOutFileName+" ..."
+    print __name__+":"+main.__name__+": creating plot \""+sOutFileName+"\" ..."
     fig.savefig(sOutFileName,format=options.format,transparent=False)#save to file
   
   ax1.cla()#clear plot
@@ -219,7 +239,10 @@ def make_plot2(x,y,options,fig,ax1,name,xlabel):
   #line1=ax1.plot(x,y,plotString,markersize=5)
   line1=ax1.plot(x,y,plotString,markersize=5)
   ax1.set_xlabel(xlabel)
-  ax1.set_ylabel("Work [ergs]")
+  if options.withMass:
+    ax1.set_ylabel("Work [ergs]")
+  else:
+    ax1.set_ylabel("Work [ergs/g]")
   if options.show:
     plt.show()
   else:
