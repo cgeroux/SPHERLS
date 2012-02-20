@@ -1036,12 +1036,12 @@ def createPlots(settings,parsed):
     setStellarPallet(plane['scalorMax'],plane['scalorMin'],plane['palletFocus'])
   
   nCount=settings['startIndex']
-  fileNames=[]
   for i in range(len(plane0['files'])):
     
     fig=plt.figure(figsize=(settings['figWidth'],settings['figHeight']))
     nPlaneCount=0
     ax=[]
+    fileNames=[]
     for plane in settings['planes']:
       ax.append(plt.subplot(len(settings['planes']),1,nPlaneCount))
       [time,index]=plot_plane(plane['files'][i],nCount,fig,ax[nPlaneCount],plane,settings['planes'])
@@ -1057,7 +1057,7 @@ def createPlots(settings,parsed):
     
     #save figure
     fname=settings['outputFile']+"_"+str(nCount)+"."+settings['fileFormat']
-    print "saving figure \""+fname+"\" made from 2D slice \""+str(fileNames)+"\" ..."
+    print "saving figure \""+fname+"\" made from 2D slice(s) \""+str(fileNames)+"\" ..."
     fig.savefig(fname,format=settings['fileFormat'],transparent=False,dpi=settings['figDpi'])
     plt.close(fig)
     nCount+=1
@@ -1095,13 +1095,13 @@ def plot_plane(fileName,nCount,fig,ax,plane,planes):
     
     #plot boundary line
     curve=getBoundarCurve(X,Y,plane)
-    ax.plot(curve[0],curve[1],'w-',linewidth=0.1,zorder=1)
+    ax.plot(curve[0],curve[1],'w-',linewidth=2.0,zorder=1)
     
     #plot interesection lines
     colorCount=0
     for planeTemp in planes:
       intersectionCurve=getIntersectCurve(X,Y,plane,planeTemp)
-      ax.plot(intersectionCurve[0],intersectionCurve[1],colors[colorCount]+'-',linewidth=0.1,zorder=1)
+      ax.plot(intersectionCurve[0],intersectionCurve[1],'w-',linewidth=2.0,zorder=1)
       colorCount+=1
     
   #plot vectors
