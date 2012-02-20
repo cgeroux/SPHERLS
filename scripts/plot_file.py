@@ -284,7 +284,7 @@ class DataSet:
       fileData=datafile.DataFile()
       fileData.readFile(fileElement.text)
       self.files[fileElement.get("name")]=fileData
-    
+      
     #add axes to dataset
     axisElements=element.findall("axis")
     for axisElement in axisElements:
@@ -325,9 +325,12 @@ def plot(dataSets,options,title):
     fig.suptitle(title)
   
   #basic plot spacing options
+  #axisSpacing=0.05
+  #figBottom=0.05
+  #figTop=0.95
   axisSpacing=0.05
-  figBottom=0.05
-  figTop=0.95
+  figBottom=0.1
+  figTop=0.93
   
   #count number of axes in all plots, this number will be the same for all plots.
   nNumAxes=0

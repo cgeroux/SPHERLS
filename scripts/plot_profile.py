@@ -495,23 +495,18 @@ def plot(dataSets,options,title):
   
   from matplotlib.gridspec import GridSpec
   
-  #basic plot spacing options
-  axisSpacing=0.05
-  figBottom=0.05
-  figTop=0.95
-  
   #count number of axes in all plots, this number will be the same for all plots.
   nNumAxes=0
   for dataSet in dataSets:
     nNumAxes=nNumAxes+len(dataSet.axes)
-  heightAxis=((figTop-figBottom)-axisSpacing*(nNumAxes-1.0))/nNumAxes
+  heightAxis=((options.figTop-options.figBottom)-options.axisSpacing*(nNumAxes-1.0))/nNumAxes
   
   #count number of plots
   nNumPlots=0
   for dataSet in dataSets:
     for axis in dataSet.axes:
       nNumPlots=nNumPlots+len(axis.plots)
-  heightPlot=((figTop-figBottom)-axisSpacing*(nNumAxes-1.0))/nNumPlots
+  heightPlot=((options.figTop-options.figBottom)-options.axisSpacing*(nNumAxes-1.0))/nNumPlots
   
   #figure out how many output files will be made, will match the largest number of files read in of
   #all dataSets
@@ -536,7 +531,7 @@ def plot(dataSets,options,title):
     dataSetCount=0
     ax=[]
     gs=[]
-    top=figTop
+    top=options.figTop
     
     #add title
     if title!="":
@@ -560,7 +555,7 @@ def plot(dataSets,options,title):
           tempTitle=tempTitle.replace(indexStr,str(dataSet.fileIndices[fileCount]))
         count+=1
         
-      #find out if we have any time plots
+      #
       fig.suptitle(tempTitle)
     
     for dataSet in dataSets:
@@ -569,8 +564,8 @@ def plot(dataSets,options,title):
           gs.append(GridSpec(len(axisMine.plots),1))
           bottom=top-heightPlot*(len(axisMine.plots))
           if options.spaceAxisEvenly:
-            top=figTop-axisCount*(heightAxis+axisSpacing)
-            bottom=figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+axisSpacing)
+            top=options.figTop-axisCount*(heightAxis+options.axisSpacing)
+            bottom=options.figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+options.axisSpacing)
           gs[axisCount].update(top=top,bottom=bottom,hspace=0.0)
           
           #for each plot
@@ -624,7 +619,7 @@ def plot(dataSets,options,title):
                   if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
                     limits=ax[nTotalPlotCount-1].axis()
                     xTemp=[axisMine.x[fileCount],axisMine.x[fileCount]]
-                    yTemp=[limits[0],limits[1]]
+                    yTemp=[limits[2],limits[3]]
                     if plot.limits[0]!=None:
                       yTemp[0]=plot.limits[0]
                     if plot.limits[1]!=None:
@@ -665,7 +660,7 @@ def plot(dataSets,options,title):
             nPlotCount=nPlotCount+1#resets every axis
             nTotalPlotCount=nTotalPlotCount+1#continues to increase for all plots
           
-          top=bottom-axisSpacing
+          top=bottom-options.axisSpacing
           axisCount=axisCount+1
       
     #done making plot
@@ -742,6 +737,33 @@ def main():
   title=""
   if root.get("title")!=None and root.get("title")!="":
     title=root.get("title")
+    
+  #set spacing between axies
+  options.axisSpacing=0.05
+  if root.get("axisSpacing")!=None and root.get("axisSpacing")!="":
+    options.axisSpacing=float(root.get("axisSpacing"))
+  
+  #set location of top of the plot area
+  options.figTop=0.95
+  if root.get("figTop")!=None and root.get("figTop")!="":
+    options.figTop=float(root.get("figTop"))
+  
+  #set location of bottom of the plot area
+  options.figBottom=0.05
+  if root.get("figBottom")!=None and root.get("figBottom")!="":
+    options.figBottom=float(root.get("figBottom"))
+  
+  #set figure height
+  if root.get("figHeight")!=None and root.get("figHeight")!="":
+    options.figHeight=float(root.get("figHeight"))
+  
+  #set figure width
+  if root.get("figWidth")!=None and root.get("figWidth")!="":
+    options.figWidth=float(root.get("figWidth"))
+    
+  #set figure dpi
+  if root.get("dpi")!=None and root.get("dpi")!="":
+    options.dpi=int(root.get("dpi"))
   
   #set plot output
   if root.get("outputfile")!=None and root.get("outputfile")!="":
