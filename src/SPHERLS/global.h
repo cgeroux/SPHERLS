@@ -750,6 +750,11 @@ class Parameters{
       \ref calDelt_RT_GL, \ref calDelt_RT_TEOS, \ref calDelt_RTP_GL, \ref calDelt_RTP_TEOS,
       \ref calDelt_CONST).
       */
+    double dPrt;/**<
+      This is the value of the Prandtl number, a value of 0.7 is what is suggested by Lawrence D. 
+      Cloutman in "The LUVD11 Large Eddy Simulation Model" April 15, 1991 a Lawrence Livermore 
+      National Labratory report.
+      */
     Parameters(); /**<
       Constructor for the class \ref Parameters
       */
