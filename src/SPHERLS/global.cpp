@@ -96,6 +96,7 @@ Parameters::Parameters(){
   dEddyViscosity=10.0;
   dMaxConvectiveVelocity=6.69041282767684e-02;
   dMaxConvectiveVelocity_c=0.0;
+  dPrt=0.7;
 }
 Output::Output(){
   nDumpFrequencyStep=1;

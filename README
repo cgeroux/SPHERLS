@@ -1,3 +1,11 @@
+If this is just the raw source:
+
+autoreconf --install
+./configure
+make
+
+If this is a package:
+
 To build and install:
 
 ./configure
