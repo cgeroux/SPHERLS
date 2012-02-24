@@ -3,8 +3,7 @@ import os
 
 SPHERLSanalPath="/home/cgeroux/SPHERLS/SPHERLSanal"
 SPHERLSgenPath="/home/cgeroux/SPHERLS/SPHERLSgen"
-#SPHERLSPath="/home/cgeroux/SPHERLS/SPHERLS"
-SPHERLSPath="/home/cgeroux/SPHERLS_new_energy_ev/SPHERLS"
+SPHERLSPath="/home/cgeroux/SPHERLS/SPHERLS"
 scriptPaths="/home/cgeroux/SPHERLS/scripts/"
 EOSPath="/home/cgeroux/SPHERLS/data/eos/eosY240Z002"
 velocityProfilePath="/home/cgeroux/SPHERLS/data/velocity_pro/T5700_L50_M575_fu.dat"
