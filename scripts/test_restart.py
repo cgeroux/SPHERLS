@@ -66,20 +66,27 @@ def main():
   failedTests=[]
   failedTestDirs=[]
   
+  #caution, start model names may change, should perhaps have a more robust mechanism to determine 
+  #them, may want to add this if this becomes a problem in the future
+  
   #3D Non-Adiabatic Restart
-  if not test3DNARestarts("./test3DNARestarts",[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
+  if not testRestarts("./test3DNARestarts",(paths.ref_calcs+"3DNA/3DNARef_t00222559")
+    ,1.54729759434051e+06
+    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
     ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
     failedTests.append("3D Non-Adiabatic Restart")
     failedTestDirs.append("./test3DNARestarts")
     
   #2D Non-Adiabatic Restart
-  if not test2DNARestarts("./test2DNARestarts",[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
+  if not testRestarts("./test2DNARestarts",(paths.ref_calcs+"2DNA/2DNARef_t00137886"),0.0
+    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
     ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
     failedTests.append("2D Non-Adiabatic Restart")
     failedTestDirs.append("./test2DNARestarts")
     
   #1D Non-Adiabatic Restart
-  if not test1DNARestarts("./test1DNARestarts",[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
+  if not testRestarts("./test1DNARestarts",(paths.ref_calcs+"1DNA/1DNARef_t00000000"),0.0
+    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
     ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
     failedTests.append("1D Non-Adiabatic Restart")
     failedTestDirs.append("./test1DNARestarts")
@@ -90,7 +97,7 @@ def main():
     for failedTest in failedTests:
       print "  "+failedTest+" : see \""+failedTestDirs[i]+"/log.txt\" for details on why the test failed"
       i=i+1
-def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
+def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProcs,options):
   '''
   input:     path to SPHERLS and SPHERLSgen executables, number of processors to run test with
   output:    sucess of the test
@@ -111,7 +118,7 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
         
         <output>
           <timeStepFactor>0.25</timeStepFactor>
-          <fileName>3DNARestartTest_t00000000</fileName>
+          <fileName>RestartTest_t00000000</fileName>
           <binary>true</binary>
           <writeToScreen>false</writeToScreen>
         </output>
@@ -163,8 +170,8 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
         <x1>1</x1>
         <x2>1</x2>
       </procDims>
-      <startModel>3DNARestartTest_t00000000</startModel>
-      <outputName>3DNARestartTest2</outputName>
+      <startModel>'''+startModel+'''</startModel>
+      <outputName>RestartTest2</outputName>
       <peakKE>false</peakKE>
       <prints type="normal">
         <frequency type="timeSteps">1</frequency>
@@ -179,8 +186,8 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
       <av>1.4</av>
       <av-threshold>0.01</av-threshold>
       <time>
-        <endTime>13.0</endTime>
-        <timeStep>7.0</timeStep>
+        <endTime>'''+str(time+1.5*5.0)+'''</endTime>
+        <timeStep>5.0</timeStep>
       </time>
       <adiabatic>false</adiabatic>
       <turbMod>
@@ -206,8 +213,8 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
         <x1>1</x1>
         <x2>1</x2>
       </procDims>
-      <startModel>3DNARestartTest2_t00000001</startModel>
-      <outputName>3DNARestartTest3</outputName>
+      <startModel>RestartTest2_t00000001</startModel>
+      <outputName>RestartTest3</outputName>
       <peakKE>false</peakKE>
       <prints type="normal">
         <frequency type="timeSteps">1</frequency>
@@ -276,10 +283,11 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   os.chdir(tmpDir)
   
   #make SPHERLSgen.xml file
+  '''
   print "making \"SPHERLSgen.xml\" ..."
   f=open("SPHERLSgen.xml",'w')
   f.write(SPHERLSgen_xml)
-  f.close()
+  f.close()'''
   
   #make SPHERLS.xml file
   print "making \"SPHERLS.xml\" ..."
@@ -288,6 +296,7 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   f.close()
   
   #run SPHERLSgen
+  '''
   print "running \""+exePaths[1]+"\" ...",
   log=open("log.txt",'w')
   log.write("GENERATING STARTING MODEL ...\n")
@@ -300,8 +309,9 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
     return False
   else:
     print "SUCCESS"
-  
+  '''
   #run 2 steps with SPHERLS
+  log=open("log.txt",'w')
   print "running \""+exePaths[0]+"\" for 2 time steps ...",
   log.write("\nEVOLVING FOR 2 TIME STEPS ...\n")
   log.close()
@@ -321,8 +331,8 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   f.close()
   
   #combine binary files
-  print "combining binary dump \"./3DNARestartTest2_t00000001\" for restart ...",
-  result=subprocess.call([exePaths[2],"-c","dbcb","./3DNARestartTest2_t00000001"])
+  print "combining binary dump \"./RestartTest2_t00000001\" for restart ...",
+  result=subprocess.call([exePaths[2],"-c","dbcb","./RestartTest2_t00000001"])
   if result!=0:
     print "FAILED"
     os.chdir("../")
@@ -331,7 +341,7 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
     print "SUCCESS"
   
   #run 1 step with SPHERLS
-  print "restarting \""+exePaths[0]+"\" for 1 time step from dump \"3DNARestartTest2_t00000001\""\
+  print "restarting \""+exePaths[0]+"\" for 1 time step from dump \"RestartTest2_t00000001\""\
     +" ...",
   log.write("\nEVOLVING FOR 1 TIME STEP ...\n")
   log.close()
@@ -345,18 +355,18 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
     print "SUCCESS"
   
   #combine final binary files and convert to ascii
-  print "combining binary files for dump \"./3DNARestartTest2_t00000002\" ...",
+  print "combining binary files for dump \"./RestartTest2_t00000002\" ...",
   result=subprocess.call([exePaths[2],"-p",str(15),"-c","dbca"
-    ,"./3DNARestartTest2_t00000002"])
+    ,"./RestartTest2_t00000002"])
   if result!=0:
     print "FAILED"
     os.chdir("../")
     return False
   else:
     print "SUCCESS"
-  print "combining binary files for dump \"./3DNARestartTest3_t00000002\" ...",
+  print "combining binary files for dump \"./RestartTest3_t00000002\" ...",
   result=subprocess.call([exePaths[2],"-p",str(15),"-c","dbca"
-    ,"./3DNARestartTest3_t00000002"])
+    ,"./RestartTest3_t00000002"])
   if result!=0:
     print "FAILED"
     os.chdir("../")
@@ -369,13 +379,13 @@ def test3DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   log.write("\nDIFFING LAST MODEL DUMPS ...\n")
   log.close()
   log=open("log.txt",'a')
-  result=diffDumps.diffDumps("./3DNARestartTest2_t00000002.txt","./3DNARestartTest3_t00000002.txt"
+  result=diffDumps.diffDumps("./RestartTest2_t00000002.txt","./RestartTest3_t00000002.txt"
     ,options.p,options.t,log)
   log.close()
   if not result:
     print "FAILED"
-    print "  model files \"./3DNARestartTest2_t00000002.txt\" and "\
-      +"\"./3DNARestartTest3_t00000002.txt\" differ"
+    print "  model files \"./RestartTest2_t00000002.txt\" and "\
+      +"\"./RestartTest3_t00000002.txt\" differ"
     
     #leave temporary directory so the failure can be inspected
     os.chdir("../")
@@ -462,7 +472,7 @@ def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
         <x1>1</x1>
         <x2>1</x2>
       </procDims>
-      <startModel>2DNARestartTest_t00000000</startModel>
+      <startModel>'''+paths.ref_calcs+'''2DNA/2DNARef_t00222559</startModel>
       <outputName>2DNARestartTest2</outputName>
       <peakKE>false</peakKE>
       <prints type="normal">
@@ -574,10 +584,11 @@ def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   os.chdir(tmpDir)
   
   #make SPHERLSgen.xml file
+  '''
   print "making \"SPHERLSgen.xml\" ..."
   f=open("SPHERLSgen.xml",'w')
   f.write(SPHERLSgen_xml)
-  f.close()
+  f.close()'''
   
   #make SPHERLS.xml file
   print "making \"SPHERLS.xml\" ..."
@@ -586,6 +597,7 @@ def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   f.close()
   
   #run SPHERLSgen
+  '''
   print "running \""+exePaths[1]+"\" ...",
   log=open("log.txt",'w')
   log.write("GENERATING STARTING MODEL ...\n")
@@ -598,6 +610,7 @@ def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
     return False
   else:
     print "SUCCESS"
+  '''
   
   #run 2 steps with SPHERLS
   print "running \""+exePaths[0]+"\" for 2 time steps ...",
