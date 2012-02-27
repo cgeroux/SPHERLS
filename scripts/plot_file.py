@@ -325,12 +325,12 @@ def plot(dataSets,options,title):
     fig.suptitle(title)
   
   #basic plot spacing options
-  #axisSpacing=0.05
-  #figBottom=0.05
-  #figTop=0.95
   axisSpacing=0.05
-  figBottom=0.1
-  figTop=0.93
+  figBottom=0.05
+  figTop=0.95
+  #axisSpacing=0.05
+  #figBottom=0.1
+  #figTop=0.93
   
   #count number of axes in all plots, this number will be the same for all plots.
   nNumAxes=0
@@ -354,6 +354,7 @@ def plot(dataSets,options,title):
   ax=[]
   gs=[]
   top=figTop
+  nDataSetCount=0
   for dataSet in dataSets:
     for axisMine in dataSet.axes:
       gs.append(GridSpec(len(axisMine.plots),1))
@@ -395,32 +396,33 @@ def plot(dataSets,options,title):
             lines.append(temp)
             labels.append(curve.label)
           curveCount=curveCount+1
-      ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
-      ax[nTotalPlotCount-1].set_ylim(plot.limits)
-      
-      #set legend
-      if len(lines)>0:
-        ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
-      
-      #remove x-axis labels
-      if nPlotCount!=len(axisMine.plots)-1:
-        plt.setp(plt.gca(), 'xticklabels', [])
-      else:
-        ax[nTotalPlotCount-1].set_xlabel(axisMine.xlabel)
-      
-      #set y-axis labels
-      ax[nTotalPlotCount-1].set_ylabel(plot.ylabel)
-      
-      #remove top and bottom y-axis tic labels
-      ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
-      
-      #adjust hspace to be 0 so plots for the same x-axis will be tight
-      nPlotCount=nPlotCount+1#resets every axis
-      nTotalPlotCount=nTotalPlotCount+1#continues to increase for all plots
+        ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
+        ax[nTotalPlotCount-1].set_ylim(plot.limits)
+        
+        #set legend
+        if len(lines)>0:
+          ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
+        
+        #remove x-axis labels
+        if nPlotCount!=len(axisMine.plots)-1:
+          plt.setp(plt.gca(), 'xticklabels', [])
+        else:
+          ax[nTotalPlotCount-1].set_xlabel(axisMine.xlabel)
+        
+        #set y-axis labels
+        ax[nTotalPlotCount-1].set_ylabel(plot.ylabel)
+        
+        #remove top and bottom y-axis tic labels
+        ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
+        
+        #adjust hspace to be 0 so plots for the same x-axis will be tight
+        nPlotCount=nPlotCount+1#resets every axis
+        nTotalPlotCount=nTotalPlotCount+1#continues to increase for all plots
       
       top=bottom-axisSpacing
       axisCount=axisCount+1
-  
+      
+    nDataSetCount+=1
   #done making plot
   if options.show:
     print "ploting file ",i," to screen, close for next plot"

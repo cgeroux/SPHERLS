@@ -21,6 +21,11 @@ def main():
       +"the peaks over 6 peaks/3periods.")
   parser.add_option('-n',default=10,type=int,dest="n",help="Sets the maximum number of jobs/threads "
     +"to submit/run at one time. [default: %default]")
+  parser.add_option('-e',action="append",dest="e",default=None,help="Add extra command to end of "
+    +"submit script. The \"\cwd\" can be used to include the absolute path of the directory in "
+    +"which \"SPHERLS.xml\" configuration file was found. Also the macro \"\sp\" can be used for "
+    +"the absolute path to the SPHERLS scripts. Note: if any scripts you are running use "
+    +"configuration files they should use absolute paths.")
   parser.add_option('-d',action="store_true",dest="d",default=False,help="Perform a dry run. "
     +"It will search directories and let the user know what files it finds but doesn't actually "
     +"create any submit scripts or submit any jobs. [not default]")
@@ -29,10 +34,9 @@ def main():
   
   #parse command line options
   (options,args)=parser.parse_args()
-  
-  '''if options.t:
-    print "not yet supported"
-    quit()'''
+  if options.t and options.e!=None:
+    print "Adding extra commands in threaded mode not yet supported"
+    quit()
   
   #get output file names and paths for running average_PKE.py in
   outputFilePaths=[]
@@ -109,10 +113,11 @@ def main():
       
       #create submission script
       script=""
-      if not options.d:#if not a dry run make submit scripts
-        settings['jobName']=jobName
-        settings['arguments']=[os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
-        script=makeSubScript(settings)
+      #if not options.d:#if not a dry run make submit scripts
+      settings['jobName']=jobName
+      settings['arguments']=[os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
+      settings['outputFilePath']=outputFilePaths[i]
+      script=makeSubScript(settings,options.e)
       
       #run job
       if not options.d:
@@ -142,11 +147,12 @@ def getConfigOutputDIR(fileName):
       os.chdir(cwd)
       return outputPath,fileName
   return None
-def makeSubScript(settings):
+def makeSubScript(settings,extras):
   '''
   Creates a submit script for the sun grid engine based on settings, and returns the name of the 
   script. If no que was specified it returns None.
   '''
+  
   #additional hard coded settings
   scriptName=settings['jobName']+"_que.sh"
   f=open(scriptName,'wb')
@@ -172,6 +178,13 @@ def makeSubScript(settings):
     for argument in settings['arguments']:
       script+=argument+" "
   script+="\n"
+  cwd=os.path.dirname(settings['outputFilePath'])
+  for extra in extras:
+    extra=extra.replace("\\cwd",cwd)
+    extra=extra.replace("//","/")
+    extra=extra.replace("\\sp",paths.scriptPaths)
+    extra=extra.replace("//","/")
+    script+=extra+"\n"
   f.write(script)
   f.close()
   return scriptName
