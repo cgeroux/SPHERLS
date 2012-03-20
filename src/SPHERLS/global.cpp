@@ -84,6 +84,7 @@ Time::Time(){
   dDelUmU0_t_UmU0_max=0.0;
   dDelV_t_V_max=0.0;
   dDelW_t_W_max=0.0;
+  nEndTimeStep=std::numeric_limits<int>::max();
 }
 Parameters::Parameters(){
   dPi=3.1415926535897932384626433832795;

@@ -635,6 +635,10 @@ class Time{
     double dEndTime; /**<
       The end time of the current calculation in seconds.
       */
+    int nEndTimeStep;/**<
+      The last time step to calculate, will stop if the current time step is larger than this. The 
+      default value is the largest integer of the system.
+      */
     double dTimeStepFactor; /**<
       Used for determining the time step. It is the factor which the
       courrant time step is multiplied by in order to determine \ref Time::dDeltat_np1half.

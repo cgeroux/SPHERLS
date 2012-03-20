@@ -54,7 +54,10 @@
     sound speed. -->
   <donorFrac>0.1</donorFrac><!-- fraction of upwind gradient to include in advection terms -->
   <time>
-    <endTime>1e3</endTime><!-- time in seconds -->
+    <endTime>1e3</endTime><!-- time in seconds at which the calculation should be halted-->
+    <endTimeStep>300000</endTimeStep><!-- number of time steps to be completed before halting
+      calculation. If both endTime and endTimeStep are set which ever is statisfied first will 
+      halt the calculation.-->
     <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time
       step, seems like I can get away with larger values when there aren't many 1D zones, and 
       when there are many I needs to be smaller. -->

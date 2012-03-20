@@ -52,7 +52,6 @@ int main(int argc, char* argv[]){
     //are updated in time, initialized in the ghost zones
     updateLocalBoundaries(global.procTop,global.messPass,global.grid);
     
-    bool bContinue=true;
     bool bFirstIterationDump=true;
     bool bFirstIterationPrint=true;
     if(global.output.nPrintMode==1&&global.procTop.nRank==0){//print out header if print time step info
@@ -64,7 +63,7 @@ int main(int argc, char* argv[]){
         <<" "<<"max(Del_UmU0/UmU0)"
         <<" "<<"max(Del_V/V)"<<std::endl;
     }
-    while(global.time.dt<=global.time.dEndTime&&bContinue){
+    while(global.time.dt<=global.time.dEndTime&&global.time.nTimeStepIndex<=global.time.nEndTimeStep){
       
       //write out grid
       if(global.output.bDump){

@@ -66,38 +66,40 @@ def main():
   failedTests=[]
   failedTestDirs=[]
   
+  #set number of time steps to compare after restart
+  numTimeStepsCompare=1
+  
   #caution, start model names may change, should perhaps have a more robust mechanism to determine 
   #them, may want to add this if this becomes a problem in the future
   
   #3D Non-Adiabatic Restart
   if not testRestarts("./test3DNARestarts",(paths.ref_calcs+"3DNA/3DNARef_t00222559")
-    ,1.54729759434051e+06
-    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
-    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
+    ,paths.SPHERLSPath
+    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options,numTimeStepsCompare):
     failedTests.append("3D Non-Adiabatic Restart")
     failedTestDirs.append("./test3DNARestarts")
-    
+  
   #2D Non-Adiabatic Restart
-  if not testRestarts("./test2DNARestarts",(paths.ref_calcs+"2DNA/2DNARef_t00137886"),0.0
-    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
-    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
+  if not testRestarts("./test2DNARestarts",(paths.ref_calcs+"2DNA/2DNARef_t00137886")
+    ,paths.SPHERLSPath
+    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options,numTimeStepsCompare):
     failedTests.append("2D Non-Adiabatic Restart")
     failedTestDirs.append("./test2DNARestarts")
     
   #1D Non-Adiabatic Restart
-  if not testRestarts("./test1DNARestarts",(paths.ref_calcs+"1DNA/1DNARef_t00000000"),0.0
-    ,[paths.SPHERLSPath,paths.SPHERLSgenPath,paths.SPHERLSanalPath]
-    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options):
+  if not testRestarts("./test1DNARestarts",(paths.ref_calcs+"1DNA/1DNARef_t00000000")
+    ,paths.SPHERLSPath
+    ,paths.EOSPath,paths.velocityProfilePath,numProcs,options,numTimeStepsCompare):
     failedTests.append("1D Non-Adiabatic Restart")
     failedTestDirs.append("./test1DNARestarts")
-    
+  
   if len(failedTests)>0:
     print "The following tests failed:"
     i=0
     for failedTest in failedTests:
       print "  "+failedTest+" : see \""+failedTestDirs[i]+"/log.txt\" for details on why the test failed"
       i=i+1
-def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProcs,options):
+def testRestarts(tmpDir,startModel,exePath,EOSFile,velocityProfile,numProcs,options,numTimeSteps):
   '''
   input:     path to SPHERLS and SPHERLSgen executables, number of processors to run test with
   output:    sucess of the test
@@ -111,54 +113,13 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
     4) restart code at first time step after initial model
     5) diff last models to see if they are the same
   '''
-  SPHERLSgen_xml=\
-    '''
-    <data>
-      <model type="stellar">
-        
-        <output>
-          <timeStepFactor>0.25</timeStepFactor>
-          <fileName>RestartTest_t00000000</fileName>
-          <binary>true</binary>
-          <writeToScreen>false</writeToScreen>
-        </output>
-        <EOS type="table">
-          <T-eff>6.1e3</T-eff>
-          <L>50.0</L>
-          <eosTable>'''+EOSFile+'''</eosTable>
-          <tolerance>5e-14</tolerance>
-        </EOS>
-        <dimensions>
-          <radIndepVar>
-            <M-total>5.75E-01</M-total>
-            <M-delta-init>1.2e-9</M-delta-init>
-            <M-delta-delta stopType="T" stopValue="1e4">2.5e-2</M-delta-delta>
-            <M-delta-delta stopType="T" stopValue="6e6">5e-2</M-delta-delta>
-            <alpha>0.2</alpha>
-            <num-1D>100</num-1D>
-          </radIndepVar>
-          <num-ghost-cells>2</num-ghost-cells><!-- number of ghost cells -->
-          <num-theta>3</num-theta><!-- number of theta zones before number of ghost cells -->
-          <delta-theta>1.0</delta-theta><!-- in degrees -->
-          <num-phi>3</num-phi><!-- number of phi zones before number of ghost cells -->
-          <delta-phi>1.0</delta-phi><!-- in degrees -->
-        </dimensions>
-        <velocityDist type="PRO">
-          <fileName>'''+velocityProfile+'''</fileName>
-          <uSurf>-2.0e5</uSurf>
-          <perturb type="torus">
-            <r_cen_off>2e11</r_cen_off>
-            <theta_cen_off>0.0</theta_cen_off>
-            <phi_cen_off>0.0</phi_cen_off>
-            <radius_cen>1e9</radius_cen>
-            <radius_outter>5e8</radius_outter>
-            <width_guassian>2.5e8</width_guassian>
-            <amplitude>1.0e20</amplitude>
-          </perturb>
-        </velocityDist>
-      </model>
-    </data>
-    '''
+  parts=startModel.rsplit("_t",1)
+  if len(parts)!=2:
+    print "\""+startModel+"\" is not a valid starting model, expecting something that ends "\
+      +"with _tXXXXXXXX, where the X's are integers."
+    return False
+  timeStep=int(parts[1])
+  endStep=timeStep+numTimeSteps
   SPHERLS_xml=\
     '''
     <data>
@@ -171,7 +132,7 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
         <x2>1</x2>
       </procDims>
       <startModel>'''+startModel+'''</startModel>
-      <outputName>RestartTest2</outputName>
+      <outputName>RestartTest1</outputName>
       <peakKE>false</peakKE>
       <prints type="normal">
         <frequency type="timeSteps">1</frequency>
@@ -186,8 +147,8 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
       <av>1.4</av>
       <av-threshold>0.01</av-threshold>
       <time>
-        <endTime>'''+str(time+1.5*5.0)+'''</endTime>
-        <timeStep>5.0</timeStep>
+        <endTimeStep>'''+str(endStep)+'''</endTimeStep>
+        <timeStepFactor>0.25</timeStepFactor>
       </time>
       <adiabatic>false</adiabatic>
       <turbMod>
@@ -213,8 +174,8 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
         <x1>1</x1>
         <x2>1</x2>
       </procDims>
-      <startModel>RestartTest2_t00000001</startModel>
-      <outputName>RestartTest3</outputName>
+      <startModel>RestartTest1_t'''+str(timeStep+1).zfill(8)+'''</startModel>
+      <outputName>RestartTest2</outputName>
       <peakKE>false</peakKE>
       <prints type="normal">
         <frequency type="timeSteps">1</frequency>
@@ -229,8 +190,8 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
       <av>1.4</av>
       <av-threshold>0.01</av-threshold>
       <time>
-        <endTime>13.0</endTime>
-        <timeStep>7.0</timeStep>
+        <endTimeStep>'''+str(endStep)+'''</endTimeStep>
+        <timeStepFactor>0.25</timeStepFactor>
       </time>
       <adiabatic>false</adiabatic>
       <turbMod>
@@ -282,41 +243,20 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
   print "changing into directory \""+tmpDir+"\" ..."
   os.chdir(tmpDir)
   
-  #make SPHERLSgen.xml file
-  '''
-  print "making \"SPHERLSgen.xml\" ..."
-  f=open("SPHERLSgen.xml",'w')
-  f.write(SPHERLSgen_xml)
-  f.close()'''
-  
   #make SPHERLS.xml file
   print "making \"SPHERLS.xml\" ..."
   f=open("SPHERLS.xml",'w')
   f.write(SPHERLS_xml)
   f.close()
   
-  #run SPHERLSgen
-  '''
-  print "running \""+exePaths[1]+"\" ...",
-  log=open("log.txt",'w')
-  log.write("GENERATING STARTING MODEL ...\n")
-  log.close()
-  log=open("log.txt",'a')
-  result=subprocess.call(exePaths[1],stdout=log,stderr=log)
-  if result!=0:
-    print "FAILED"
-    os.chdir("../")
-    return False
-  else:
-    print "SUCCESS"
-  '''
   #run 2 steps with SPHERLS
   log=open("log.txt",'w')
-  print "running \""+exePaths[0]+"\" for 2 time steps ...",
-  log.write("\nEVOLVING FOR 2 TIME STEPS ...\n")
+  print "running \""+exePath+"\" for "+str(numTimeSteps+1)+" time steps ...",
+  log.write("\nEVOLVING FOR "+str(numTimeSteps+1)+" TIME STEPS ...\n")
   log.close()
   log=open("log.txt",'a')
   result=subprocess.call(["SPHERLS_run.py"],stdout=log,stderr=log)
+  log.close()
   if result!=0:
     print "FAILED"
     os.chdir("../")
@@ -331,8 +271,10 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
   f.close()
   
   #combine binary files
-  print "combining binary dump \"./RestartTest2_t00000001\" for restart ...",
-  result=subprocess.call([exePaths[2],"-c","dbcb","./RestartTest2_t00000001"])
+  print "combining binary dump \"./RestartTest2_t[0-*]\" for restart ...",
+  log=open("log.txt",'a')
+  result=subprocess.call([paths.scriptPaths+"combine_bins.py","./RestartTest1_t[0-*]"],stdout=log,stderr=log)
+  log.close()
   if result!=0:
     print "FAILED"
     os.chdir("../")
@@ -341,50 +283,47 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
     print "SUCCESS"
   
   #run 1 step with SPHERLS
-  print "restarting \""+exePaths[0]+"\" for 1 time step from dump \"RestartTest2_t00000001\""\
-    +" ...",
+  print "restarting \""+exePath+"\" for 1 time step from dump \"RestartTest1_t"\
+    +str(timeStep+1).zfill(8)+"\" ...",
+  log=open("log.txt",'a')
   log.write("\nEVOLVING FOR 1 TIME STEP ...\n")
   log.close()
   log=open("log.txt",'a')
-  result=subprocess.call(["mpirun", "-np",str(numProcs),exePaths[0]],stdout=log,stderr=log)
+  result=subprocess.call(["mpirun", "-np",str(numProcs),exePath],stdout=log,stderr=log)
   if result!=0:
     print "FAILED"
     os.chdir("../")
     return False
   else:
     print "SUCCESS"
-  
+
   #combine final binary files and convert to ascii
-  print "combining binary files for dump \"./RestartTest2_t00000002\" ...",
-  result=subprocess.call([exePaths[2],"-p",str(15),"-c","dbca"
-    ,"./RestartTest2_t00000002"])
+  print "combining binary files for dump \"./RestartTest2_t[0-*]\" ...",
+  result=subprocess.call([paths.scriptPaths+"combine_bins.py","./RestartTest2_t[0-*]"],stdout=log,stderr=log)
   if result!=0:
     print "FAILED"
     os.chdir("../")
     return False
   else:
     print "SUCCESS"
-  print "combining binary files for dump \"./RestartTest3_t00000002\" ...",
-  result=subprocess.call([exePaths[2],"-p",str(15),"-c","dbca"
-    ,"./RestartTest3_t00000002"])
-  if result!=0:
-    print "FAILED"
-    os.chdir("../")
-    return False
-  else:
-    print "SUCCESS"
-  
+
   #compare final binary files
   print "diffing last dumps ...",
+  
   log.write("\nDIFFING LAST MODEL DUMPS ...\n")
+  difference=False
+  for i in range(timeStep+2,endStep+2):
+    log.close()
+    log=open("log.txt",'a')
+    result=diffDumps.diffDumps("./RestartTest1_t"+str(i).zfill(8)
+      ,"./RestartTest2_t"+str(i).zfill(8),options.p,options.t,log)
+    if not result:
+      difference=True
+    
   log.close()
-  log=open("log.txt",'a')
-  result=diffDumps.diffDumps("./RestartTest2_t00000002.txt","./RestartTest3_t00000002.txt"
-    ,options.p,options.t,log)
-  log.close()
-  if not result:
+  if difference:
     print "FAILED"
-    print "  model files \"./RestartTest2_t00000002.txt\" and "\
+    print "  model files \"./RestartTest1_t00000002.txt\" and "\
       +"\"./RestartTest3_t00000002.txt\" differ"
     
     #leave temporary directory so the failure can be inspected
@@ -392,7 +331,7 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
     return False
   else:
     print "SUCCESS"
-  
+  '''Bellow code needs to be updated
   #moving out of temporary directory
   os.chdir("../")
   
@@ -406,7 +345,7 @@ def testRestarts(tmpDir,startModel,time,exePaths,EOSFile,velocityProfile,numProc
       return False
     else:
       print "SUCCESS"
-  
+  '''
   return True
 def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   '''

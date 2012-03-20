@@ -10,7 +10,7 @@ def diffDumps(fileName0,fileName1,allowedRelativeDifference,thresholdValue,out):
   dumpFile1=dump.dump(fileName1)
   
   #check headers
-  [headersMatch,fatal]=diffHeader(dumpFile0,dumpFile1,out)
+  [headersMatch,fatal]=diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,out)
   if fatal:
     out.write("Differences do not allow comparison of variables, stopping!\n")
     return False
@@ -28,7 +28,7 @@ def diffDumps(fileName0,fileName1,allowedRelativeDifference,thresholdValue,out):
   else:
     out.write("files are numerically identical\n")
     return True
-def diffHeader(dumpFile0,dumpFile1,out):
+def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,out):
   '''Checks to see if the two file headers differ and if so tell where they differ'''
   headersMatch=True
   fatal=False
@@ -40,7 +40,8 @@ def diffHeader(dumpFile0,dumpFile1,out):
     out.write("file \""+dumpFile0.fileName+"\" has version \""+str(dumpFile0.version)+"\" while file \""\
       +dumpFile1.fileName+"\" has version \""+str(dumpFile1.version)+"\"\n")
     headersMatch=False
-  if dumpFile0.time!=dumpFile1.time:
+  relativeDifference=abs(dumpFile0.time-dumpFile1.time)/dumpFile0.time
+  if relativeDifference>allowedRelativeDifference:
     out.write("file \""+dumpFile0.fileName+"\" has time \""+str(dumpFile0.time)+"\" while file \""\
       +dumpFile1.fileName+"\" has time \""+str(dumpFile1.time)+"\"\n")
     headersMatch=False
@@ -49,12 +50,14 @@ def diffHeader(dumpFile0,dumpFile1,out):
       +"\" while file \""+dumpFile1.fileName+"\" has timeStepIndex \""+str(dumpFile1.timeStepIndex)\
       +"\"\n")
     headersMatch=False
-  if dumpFile0.delta_t_nm1half!=dumpFile1.delta_t_nm1half:
+  relativeDifference=abs(dumpFile0.delta_t_nm1half-dumpFile1.delta_t_nm1half)/dumpFile0.delta_t_nm1half
+  if relativeDifference>allowedRelativeDifference:
     out.write("file \""+dumpFile0.fileName+"\" has delta_t_nm1half \""+str(dumpFile0.delta_t_nm1half)\
       +"\" while file \""+dumpFile1.fileName+"\" has delta_t_nm1half \""\
       +str(dumpFile1.delta_t_nm1half)+"\"\n")
     headersMatch=False
-  if dumpFile0.delta_t_np1half!=dumpFile1.delta_t_np1half:
+  relativeDifference=abs(dumpFile0.delta_t_np1half-dumpFile1.delta_t_np1half)/dumpFile0.delta_t_np1half
+  if relativeDifference>allowedRelativeDifference:
     out.write("file \""+dumpFile0.fileName+"\" has delta_t_np1half \""+str(dumpFile0.delta_t_np1half)\
       +"\" while file \""+dumpFile1.fileName+"\" has delta_t_np1half \""\
       +str(dumpFile1.delta_t_np1half)+"\"\n")

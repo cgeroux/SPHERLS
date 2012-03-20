@@ -36,8 +36,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   }
   
   //turn on floating point exceptions
-  //feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW);
-  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);//don't need underflow linux
+  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
   
   
   //SET INITIAL VALUES FROM "SPHERLS.xml"
@@ -261,7 +260,24 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   XMLNode xTime=getXMLNode(xData,"time",0);
   
   //get end time
-  getXMLValue(xTime,"endTime",0,time.dEndTime);
+  bool bGotEnd=true;
+  if(!getXMLValueNoThrow(xTime,"endTime",0,time.dEndTime)){
+    time.dEndTime=std::numeric_limits<double>::max();
+    bGotEnd=false;
+  }
+  
+  //get end time
+  if(!getXMLValueNoThrow(xTime,"endTimeStep",0,time.nEndTimeStep)){
+    time.nEndTimeStep=std::numeric_limits<int>::max();/*set large so it won't be triggered, if it is
+      still triggered at this large value we will so have problems anyhow and need to stop.*/
+    if(!bGotEnd){//should have some way of knowing when to stop
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
+        <<": no \"endTime\" node or \"endTimeStep\" node found under \"time\" node. Must specify at "
+        <<"least one of these (need to know when to stop)."<<std::endl;
+      throw exception2(ssTemp.str(),INPUT);
+    }
+  }
   
   //get time factor
   bool bNoTimeStepFactor=false;

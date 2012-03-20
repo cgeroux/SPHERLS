@@ -179,12 +179,13 @@ def makeSubScript(settings,extras):
       script+=argument+" "
   script+="\n"
   cwd=os.path.dirname(settings['outputFilePath'])
-  for extra in extras:
-    extra=extra.replace("\\cwd",cwd)
-    extra=extra.replace("//","/")
-    extra=extra.replace("\\sp",paths.scriptPaths)
-    extra=extra.replace("//","/")
-    script+=extra+"\n"
+  if extras!=None:
+    for extra in extras:
+      extra=extra.replace("\\cwd",cwd)
+      extra=extra.replace("//","/")
+      extra=extra.replace("\\sp",paths.scriptPaths)
+      extra=extra.replace("//","/")
+      script+=extra+"\n"
   f.write(script)
   f.close()
   return scriptName
