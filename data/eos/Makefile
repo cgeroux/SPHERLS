@@ -2,10 +2,10 @@
 TARGET = convert
 
 #files needed to make target
-MYLIBDIR=/home/cgeroux/lib/
+SRC=../../src
 EXTOBJS =\
-  ${MYLIBDIR}exception/exception2.o\
-  /home/cgeroux/SPHERLS/trunk/eos.o
+  ${SRC}/SPHERLS-exception2.o\
+  ${SRC}/SPHERLS-eos.o\
 
 INTOBJS=convert.o
   
@@ -25,8 +25,8 @@ HEADEREXT = .h
 STDLIBS   = 
 LIBS      = 
 INCLUDE   =\
-  -I${MYLIBDIR}exception\
-  -I/home/cgeroux/SPHERLS/trunk
+  -I${SRC}
+
 ##################
 #### make bin ####
 ##################

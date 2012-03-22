@@ -12,8 +12,9 @@ int main(){
     //eosConvert.writeAscii("eos2.txt");
     //eosConvert.writeBin("eos2");
     //eosConvert.writeBin("eosCTOPAC");
-    eosConvert.readAscii("eosCTOPAC_fixed.txt");
-    eosConvert.writeBin("eosCTOPAC");
+    //eosConvert.readAscii("eosCTOPAC_fixed.txt");
+    eosConvert.readBin("eos");
+    eosConvert.writeAscii("eos.txt");
   }
   //error handeling
   catch(exception2& eTemp){

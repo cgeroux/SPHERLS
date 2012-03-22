@@ -40,6 +40,9 @@
     
   
   @section installation Compiling SPHERLS
+  
+    \todo This should be updated to reflect the use of the GNU build system.
+  
     Once the correct libraries are installed, and their paths added to your \verbatim LD_LIBRARY_PATH\endverbatim environment varible, it should just require typing make in the correct directories. SPHERLS is broken up into 3 main codes. SPHERLS it self, which is the main hydrodynamics code which integrates the initial static model, SPHERLSgen which creates the static model, and SPHERLSanal which is used for processing the output of SPHERLS and SPHERLSgen.
     
     To Add
@@ -77,7 +80,11 @@
         -# \verbatim ./configure --prefix=<path-to-final-location-of-library> \endverbatim
         -# \verbatim make \endverbatim
         -# \verbatim make install \endverbatim
-  
+    
+    @subsection installingSPHERLS Installing SPHERLS
+    
+    
+    
   @section usage Using SPHERLS
     - Generating a starting model (see SPHERLSgen documentation for details)
     - The XML configuration file
