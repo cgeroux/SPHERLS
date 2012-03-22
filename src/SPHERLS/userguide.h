@@ -32,6 +32,9 @@
   The simulation grid is broken up into two main sections, the 1D region towards the center of the star, the multi-dimensional region towards the surface. The inner part of the multi-dimensional region solves all the conservation equations explicitly, in that the new values for the conserved quantities are directly calculated from the information in the previous time step. In the outter parts of the multi-dimensional region the energy conservation equation is calculated semi-implicitly, which means that the new values are dependent on the new values averaged with the old values to correctly time cetner the equation. This semi-implicit energy conservervation equation can be preturbed and linearized producing a set of linear equations the size of the region being solved implicitly. The solution of these linear equations provide corrections for the temperature which can be applied and then resoloved in an iterative approach until the value of the new temperature converges. The equation of state is a funciton of temperature and not energy which is why the temperature is pretubed and not the energy. This set of equations for the temperature corrections are solved using the PETSC library.
   
   - Different ways in which SPHERLS can be used, 1D,2D,3D, Adiabatic,Non-adiabatic, implicit, debugging options/test
+  @section equations The Equations
+  
+  I will want to give a detailed description of the equations used (probably copied from my notes wiki) so that the reader can easily see a 1-1 correspondence between the equation and the terms in SPHERLS.
   
   @section flow Program Flow
     - Describe the grids

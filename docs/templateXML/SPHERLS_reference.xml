@@ -4,6 +4,8 @@
     <duration>35:00:00</duration><!-- time for job to run in the que -->
     <totalview>False</totalview><!-- if true will luanch without the que, with the debugg option -->
     <que>False</que><!-- if true it will run job in que, else at the command line -->
+    <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
+      using mpirun, check with your system admin for ideas about what this should be.-->
   </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
