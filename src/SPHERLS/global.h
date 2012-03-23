@@ -15,6 +15,7 @@
 #include "eos.h"
 #include "petscksp.h"
 #include <csignal>
+#include<limits>
 
 //Debugging flags
 #define SIGNEGDEN 0/**<
