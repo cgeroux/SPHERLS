@@ -94,7 +94,6 @@
     - Starting a calculation and the "makeFile"
     - getting data
       - watchzones
-      - peak KE tracking (might be removed at some point)
       - model dumps
     - post calculation analysis (see SPHERLSanal documention for details)
     - Adiabatic Calculations
@@ -120,6 +119,10 @@
       - boundary regions
       - grid updating
     - How to document SPHERLS
+    - Premade test for SPHERLS after modification
+      - reference calculations
+      - restart test
+      - calculation test (if not modifying calcluation part of SPHERLS)
     - How to modify SPHERLS
       - Common changes
         - How to add a new internal variable

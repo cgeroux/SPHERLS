@@ -6303,8 +6303,8 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
     grid.dLocalGridNew[grid.nU0][i][0][0]=-1.0*dCSum/dARhoSum;
     
     //set U equal to U0 at surface
-    for(j=grid.nStartUpdateExplicit[grid.nU][1];j<grid.nEndUpdateExplicit[grid.nU][1];j++){
-      for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
+   for(j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
+      for(k=0;k<grid.nLocalGridDims[procTop.nRank][grid.nU][2];k++){
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridNew[grid.nU0][i][0][0];
       }
     }
@@ -11272,9 +11272,10 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
   double dDVDtThreshold;
   double dR_i_sq;
   double dDVDt_mthreshold;
+  int i;
   
   //in the main grid
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -11289,8 +11290,8 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
       -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridNew[grid.nP][i][0][0])
+      /grid.dLocalGridNew[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
     
     if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11304,7 +11305,7 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
   }
   
   //outter ghost region
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
@@ -11320,8 +11321,8 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
       -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridNew[grid.nP][i][0][0])
+      /grid.dLocalGridNew[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
     
     if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11346,9 +11347,9 @@ void calNewQ0_R_GL(Grid& grid,Parameters &parameters){
   double dDVDtThreshold;
   double dR_i_sq;
   double dDVDt_mthreshold;
-  
+  int i;
   //in the main grid
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -11363,8 +11364,8 @@ void calNewQ0_R_GL(Grid& grid,Parameters &parameters){
       -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][0][0])
+      /grid.dLocalGridNew[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
     
     if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11378,7 +11379,7 @@ void calNewQ0_R_GL(Grid& grid,Parameters &parameters){
   }
   
   //outter ghost region
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
@@ -11394,8 +11395,8 @@ void calNewQ0_R_GL(Grid& grid,Parameters &parameters){
       -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][0][0])
+      /grid.dLocalGridNew[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
     
     if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11426,8 +11427,8 @@ void calNewQ0_R_GL(Grid& grid,Parameters &parameters){
       -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][0][0])
+      /grid.dLocalGridNew[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
     
     if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11452,13 +11453,16 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
   double dA_j;
   double dR_i;
   int nIInt;
+  int nJInt;
   double dC;
   double dDVDtThreshold;
   double dR_i_sq;
   double dDVDt_mthreshold;
+  int i;
+  int j;
   
   //in the main grid
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -11468,10 +11472,10 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
       
       //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      nJInt=j+grid.nCenIntOffset[1];
       
       //calculate Q0
       //calculate volume change
@@ -11479,8 +11483,8 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
         -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
       
       //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridNew[grid.nP][i][j][0])
+        /grid.dLocalGridNew[grid.nD][i][j][0]);
       dDVDtThreshold=parameters.dAVThreshold*dC;
       
       if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11513,7 +11517,7 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
   }
   
   //outter ghost region
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
@@ -11524,11 +11528,11 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
       
       //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      nJInt=j+grid.nCenIntOffset[1];
       
       //calculate Q0
       //calculate volume change
@@ -11536,8 +11540,8 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
         -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
       
       //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridNew[grid.nP][i][j][0])
+        /grid.dLocalGridNew[grid.nD][i][j][0]);
       dDVDtThreshold=parameters.dAVThreshold*dC;
       
       if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11580,13 +11584,16 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
   double dA_j;
   double dR_i;
   int nIInt;
+  int nJInt;
   double dC;
   double dDVDtThreshold;
   double dR_i_sq;
   double dDVDt_mthreshold;
+  int i;
+  int j;
   
   //in the main grid
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -11596,10 +11603,10 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
       
       //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      nJInt=j+grid.nCenIntOffset[1];
       
       //calculate Q0
       //calculate volume change
@@ -11607,8 +11614,8 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
         -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
       
       //calculate threshold compression to turn viscosity on at
-      dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][0])
+        /grid.dLocalGridNew[grid.nD][i][j][0]);
       dDVDtThreshold=parameters.dAVThreshold*dC;
       
       if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11641,7 +11648,7 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
   }
   
   //outter ghost region
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
@@ -11652,11 +11659,11 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
       
       //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      nJInt=j+grid.nCenIntOffset[1];
       
       //calculate Q0
       //calculate volume change
@@ -11664,8 +11671,8 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
         -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
       
       //calculate threshold compression to turn viscosity on at
-      dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][0])
+        /grid.dLocalGridNew[grid.nD][i][j][0]);
       dDVDtThreshold=parameters.dAVThreshold*dC;
       
       if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11699,7 +11706,7 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
   
   //inner ghost region
   #if SEDOV==1
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
       i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
       
       //calculate i for interface centered quantities
@@ -11710,11 +11717,11 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
       dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
         *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
       
-      for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
         j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
         
         //calculate j for interface centered quantities
-        int nJInt=j+grid.nCenIntOffset[1];
+        nJInt=j+grid.nCenIntOffset[1];
         
         //calculate Q0
         //calculate volume change
@@ -11722,8 +11729,8 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
           -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
         
         //calculate threshold compression to turn viscosity on at
-        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
-          /grid.dLocalGridOld[grid.nD][i][j][0]);
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][0])
+          /grid.dLocalGridNew[grid.nD][i][j][0]);
         dDVDtThreshold=parameters.dAVThreshold*dC;
         
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
@@ -11759,7 +11766,7 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
 void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
   
   double dA_sq=parameters.dA*parameters.dA;
-  double dDVDt;
+  double dDVDt;/*Rate of change of the volume*/
   double dA_ip1half;
   double dA_im1half;
   double dA_jp1half;
@@ -12005,9 +12012,12 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
   double dDVDtThreshold;
   double dR_i_sq;
   double dDVDt_mthreshold;
+  int i;
+  int j;
+  int k;
   
   //in the main grid
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -12017,7 +12027,7 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
@@ -12025,13 +12035,13 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      for(int k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
+      for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
         
         nKInt=k+grid.nCenIntOffset[2];
         
         //calculate threshold compression to turn viscosity on at
-        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
         dDVDtThreshold=parameters.dAVThreshold*dC;
         
         //calculate Q0
@@ -12075,7 +12085,7 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
   }
   
   //outter ghost region
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
@@ -12086,20 +12096,20 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       
-      for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
         k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
         
         nKInt=k+grid.nCenIntOffset[2];
         
         //calculate threshold compression to turn viscosity on at
-        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
         dDVDtThreshold=parameters.dAVThreshold*dC;
         
         //calculate Q0
@@ -12143,7 +12153,7 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
   
   //inner ghost region
   #if SEDOV==1
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
       i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
       
       //calculate i for interface centered quantities
@@ -12154,20 +12164,20 @@ void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
       dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
         *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
       
-      for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
         j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
         
         //calculate j for interface centered quantities
         nJInt=j+grid.nCenIntOffset[1];
         
-        for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+        for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
           k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
           
           nKInt=k+grid.nCenIntOffset[2];
           
           //calculate threshold compression to turn viscosity on at
-          dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-            /grid.dLocalGridOld[grid.nD][i][j][k]);
+          dC=sqrt(parameters.dGamma*(grid.dLocalGridNew[grid.nP][i][j][k])
+            /grid.dLocalGridNew[grid.nD][i][j][k]);
           dDVDtThreshold=parameters.dAVThreshold*dC;
           
           //calculate Q0
@@ -13365,189 +13375,182 @@ void calOldPEKappaGamma_TEOS(Grid& grid,Parameters &parameters){
   }
 }
 void calOldQ0_R_GL(Grid& grid, Parameters &parameters){
-  #if SEDOV==0
-    double dASq=parameters.dA*parameters.dA;
-    for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      //calculate sound speed
-      double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-        /grid.dLocalGridOld[grid.nD][i][0][0]);
-      
-      //calculate Q0
-      double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][0][0]-grid.dLocalGridOld[grid.nU][nIInt-1][0][0];
-      double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-      double dDelUDelR_i=dDelU_i/dDelR_i;
-      double dThreshold=-1.0*dC*parameters.dAVThreshold;
-      double dThreshold_DelR=-1.0*dC*parameters.dAVThreshold/dDelR_i;
-      if(dDelUDelR_i<dThreshold_DelR){//being compressed
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=grid.dLocalGridOld[grid.nD][i][0][0]*dASq*pow((dDelU_i-dThreshold)
-          ,2.0);
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-    
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      double dR_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-      double dRSq_ip1half=dR_ip1half*dR_ip1half;
-      double dR_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-      double dR_im1half_sq=dR_im1half*dR_im1half;
-      double dR_i=(dR_ip1half+dR_im1half)*0.5;
-      double dR_i_4=pow(dR_i,4);
-      double dVolumeChange=4.0*parameters.dPi*(dRSq_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
-        -dR_im1half_sq*grid.dLocalGridOld[grid.nU][nIInt-1][0][0]);
-      if(dVolumeChange<0.0){
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=parameters.dA*grid.dLocalGridOld[grid.nD][i][0][0]*dVolumeChange*dVolumeChange/dR_i_4;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-    
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      double dR_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-      double dRSq_ip1half=dR_ip1half*dR_ip1half;
-      double dR_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-      double dR_im1half_sq=dR_im1half*dR_im1half;
-      double dR_i=(dR_ip1half+dR_im1half)*0.5;
-      double dR_i_4=pow(dR_i,4);
-      double dVolumeChange=4.0*parameters.dPi*(dRSq_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
-        -dR_im1half_sq*grid.dLocalGridOld[grid.nU][nIInt-1][0][0]);
-      if(dVolumeChange<0.0){
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=parameters.dA*grid.dLocalGridOld[grid.nD][i][0][0]*dVolumeChange*dVolumeChange/dR_i_4;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-  #else
-    double dASq=parameters.dA*parameters.dA;
-    for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      double dR_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-      double dRSq_ip1half=dR_ip1half*dR_ip1half;
-      double dR_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-      double dR_im1half_sq=dR_im1half*dR_im1half;
-      double dR_i=(dR_ip1half+dR_im1half)*0.5;
-      double dR_i_4=pow(dR_i,4);
-      double dVolumeChange=(dRSq_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
-        -dR_im1half_sq*grid.dLocalGridOld[grid.nU][nIInt-1][0][0]);
-      if(dVolumeChange<0.0){
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=parameters.dA*grid.dLocalGridOld[grid.nD][i][0][0]*dVolumeChange*dVolumeChange/dR_i_4;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      //calculate sound speed
-      double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-        /grid.dLocalGridOld[grid.nD][i][0][0]);
-      
-      //calculate Q0
-      double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][0][0]-grid.dLocalGridOld[grid.nU][nIInt-1][0][0];
-      double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-      double dDelUDelR_i=dDelU_i/dDelR_i;
-      double dThreshold=-1.0*dC*parameters.dAVThreshold;
-      double dThreshold_DelR=dThreshold/dDelR_i;
-      if(dDelUDelR_i<dThreshold_DelR){//being compressed
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=grid.dLocalGridOld[grid.nD][i][0][0]*dASq*pow((dDelU_i-dThreshold)
-          ,2.0);
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
-      
-      //calculate i for interface centered quantities
-      int nIInt=i+grid.nCenIntOffset[0];
-      
-      //calculate sound speed
-      double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
-        /grid.dLocalGridOld[grid.nD][i][0][0]);
-      
-      //calculate Q0
-      double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][0][0]-grid.dLocalGridOld[grid.nU][nIInt-1][0][0];
-      double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-      double dDelUDelR_i=dDelU_i/dDelR_i;
-      double dThreshold=-1.0*dC*parameters.dAVThreshold;
-      double dThreshold_DelR=dThreshold/dDelR_i;
-      if(dDelUDelR_i<dThreshold_DelR){//being compressed
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=grid.dLocalGridOld[grid.nD][i][0][0]*dASq*pow((dDelU_i-dThreshold)
-          ,2.0);
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
-      }
-    }
-  #endif
-}
-void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
-  double dASq=parameters.dA*parameters.dA;
   
-  //explicit region
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+  double dA_sq=parameters.dA*parameters.dA;
+  double dDVDt;
+  double dA_ip1half;
+  double dA_im1half;
+  double dR_i;
+  int nIInt;
+  double dC;
+  double dDVDtThreshold;
+  double dR_i_sq;
+  double dDVDt_mthreshold;
+  int i;
+  //in the main grid
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
+    nIInt=i+grid.nCenIntOffset[0];
     
-    //calculate sound speed
-    double dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
+    //calculate volume change
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
+      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
+    
+    //calculate threshold compression to turn viscosity on at
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
       /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dDVDtThreshold=parameters.dAVThreshold*dC;
     
-    //calculate Q0
-    double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][0][0]-grid.dLocalGridOld[grid.nU][nIInt-1][0][0];
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    double dDelUDelR_i=dDelU_i/dDelR_i;
-    double dThreshold=-1.0*dC*parameters.dAVThreshold;
-    double dThreshold_DelR=dThreshold/dDelR_i;
-    if(dDelUDelR_i<dThreshold_DelR){//being compressed
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=grid.dLocalGridOld[grid.nD][i][0][0]*dASq*pow((dDelU_i-dThreshold)
-        ,2.0);
+    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
+        *dDVDt_mthreshold*dDVDt_mthreshold;
     }
     else{
       grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
     }
   }
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
+  
+  //outter ghost region
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
+    nIInt=i+grid.nCenIntOffset[0];
     
-    //calculate sound speed
-    double dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
+    //calculate volume change
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
+      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
+    
+    //calculate threshold compression to turn viscosity on at
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
       /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dDVDtThreshold=parameters.dAVThreshold*dC;
     
-    //calculate Q0
-    double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][0][0]-grid.dLocalGridOld[grid.nU][nIInt-1][0][0];
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    double dDelUDelR_i=dDelU_i/dDelR_i;
-    double dThreshold=-1.0*dC*parameters.dAVThreshold;
-    double dThreshold_DelR=dThreshold/dDelR_i;
-    if(dDelUDelR_i<dThreshold_DelR){//being compressed
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=grid.dLocalGridOld[grid.nD][i][0][0]*dASq*pow((dDelU_i-dThreshold)
-        ,2.0);
+    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
+        *dDVDt_mthreshold*dDVDt_mthreshold;
+    }
+    else{
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
+    }
+  }
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    
+    //calculate volume change
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
+      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
+    
+    //calculate threshold compression to turn viscosity on at
+    dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][0][0])
+      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dDVDtThreshold=parameters.dAVThreshold*dC;
+    
+    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
+        *dDVDt_mthreshold*dDVDt_mthreshold;
+    }
+    else{
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
+    }
+    }
+  #endif
+}
+void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
+  
+  double dA_sq=parameters.dA*parameters.dA;
+  double dDVDt;
+  double dA_ip1half;
+  double dA_im1half;
+  double dR_i;
+  int nIInt;
+  double dC;
+  double dDVDtThreshold;
+  double dR_i_sq;
+  double dDVDt_mthreshold;
+  int i;
+  
+  //in the main grid
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    
+    //calculate volume change
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
+      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
+    
+    //calculate threshold compression to turn viscosity on at
+    /**\todo should use new P and rho*/
+    dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
+      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dDVDtThreshold=parameters.dAVThreshold*dC;
+    
+    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
+        *dDVDt_mthreshold*dDVDt_mthreshold;
+    }
+    else{
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
+    }
+  }
+  
+  //outter ghost region
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    
+    //calculate volume change
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
+      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
+    
+    //calculate threshold compression to turn viscosity on at
+    dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
+      /grid.dLocalGridOld[grid.nD][i][0][0]);
+    dDVDtThreshold=parameters.dAVThreshold*dC;
+    
+    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
+        *dDVDt_mthreshold*dDVDt_mthreshold;
     }
     else{
       grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
@@ -13555,103 +13558,7 @@ void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
   }
 }
 void calOldQ0Q1_RT_GL(Grid& grid, Parameters &parameters){
-  double dASq=parameters.dA*parameters.dA;
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
-    
-    //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
-    
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    
-    for(int j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
-      
-      //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
-      for(int k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
-        
-        //calculate sound speed
-        double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
-        //calculate Q0
-        double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][j][k]-grid.dLocalGridOld[grid.nU][nIInt-1][j][k];
-        double dDelUDelR_i=dDelU_i/dDelR_i;
-        double dThreshold=-1.0*dC*parameters.dAVThreshold;
-        double dThreshold_DelR=dThreshold/dDelR_i;
-        if(dDelUDelR_i<dThreshold_DelR){//being compressed
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelU_i-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
-        }
-        
-        //calculate Q1
-        double dDelV_j=grid.dLocalGridOld[grid.nV][i][nJInt][k]-grid.dLocalGridOld[grid.nV][i][nJInt-1][k];
-        double dDelTheta=(grid.dLocalGridOld[grid.nDTheta][0][j][0]*(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-          +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5);
-        double dDelVRDelTheta_j=dDelV_j/dDelTheta;
-        double dThreshold_DelTheta=dThreshold/dDelTheta;
-        if(dDelVRDelTheta_j<dThreshold_DelTheta){//being compressed
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelV_j-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
-        }
-      }
-    }
-  }
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
-    
-    //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
-    
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    double dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-    
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
-      
-      //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
-      
-      double dDelTheta=grid.dLocalGridOld[grid.nDTheta][0][j][0]*dR_i;
-      
-      for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
-        
-        //calculate sound speed
-        double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
-        //calculate Q0
-        double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][j][k]-grid.dLocalGridOld[grid.nU][nIInt-1][j][k];
-        double dDelUDelR_i=dDelU_i/dDelR_i;
-        double dThreshold=-1.0*dC*parameters.dAVThreshold;
-        double dThreshold_DelR=dThreshold/dDelR_i;
-        if(dDelUDelR_i<dThreshold_DelR){//being compressed
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelU_i-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
-        }
-        
-        //calculate Q1
-        double dDelV_j=grid.dLocalGridOld[grid.nV][i][nJInt][k]-grid.dLocalGridOld[grid.nV][i][nJInt-1][k];
-        double dDelVRDelTheta_j=dDelV_j/dDelTheta;
-        double dThreshold_DelTheta=dThreshold/dDelTheta;
-        if(dDelVRDelTheta_j<dThreshold_DelTheta){//being compressed
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelV_j-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
-        }
-      }
-    }
-  }
-}
-void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
+  
   double dA_sq=parameters.dA*parameters.dA;
   double dDVDt;
   double dA_ip1half;
@@ -13668,8 +13575,331 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
   double dDVDt_mthreshold;
   int i;
   int j;
+  
+  //in the main grid
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+      
+      //calculate j for interface centered quantities
+      nJInt=j+grid.nCenIntOffset[1];
+      
+      //calculate Q0
+      //calculate volume change
+      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
+        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+      
+      //calculate threshold compression to turn viscosity on at
+      dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
+        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dDVDtThreshold=parameters.dAVThreshold*dC;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+      }
+      
+      //calculate Q1
+      //calculate volume change
+      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+      
+      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
+        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      }
+    }
+  }
+  
+  //outter ghost region
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+      
+      //calculate j for interface centered quantities
+      nJInt=j+grid.nCenIntOffset[1];
+      
+      //calculate Q0
+      //calculate volume change
+      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
+        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+      
+      //calculate threshold compression to turn viscosity on at
+      dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
+        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dDVDtThreshold=parameters.dAVThreshold*dC;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+      }
+      
+      //calculate Q1
+      //calculate volume change
+      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+      
+      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
+        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      }
+    }
+  }
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+      
+      //calculate i for interface centered quantities
+      nIInt=i+grid.nCenIntOffset[0];
+      dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+      dR_i_sq=dR_i*dR_i;
+      dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+      dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+        *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+      
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
+        
+        //calculate j for interface centered quantities
+        nJInt=j+grid.nCenIntOffset[1];
+        
+        //calculate Q0
+        //calculate volume change
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][0])
+          /grid.dLocalGridOld[grid.nD][i][j][0]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+        }
+        
+        //calculate Q1
+        //calculate volume change
+        dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+        dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+        dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+        
+        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
+          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
+        
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+        }
+      }
+    }
+  #endif
+}
+void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
+  
+  double dA_sq=parameters.dA*parameters.dA;
+  double dDVDt;
+  double dA_ip1half;
+  double dA_im1half;
+  double dA_jp1half;
+  double dA_jm1half;
+  double dA_j;
+  double dR_i;
+  int nIInt;
+  int nJInt;
+  double dC;
+  double dDVDtThreshold;
+  double dR_i_sq;
+  double dDVDt_mthreshold;
+  int i;
+  int j;
+  
+  //in the main grid
+  for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+      
+      //calculate j for interface centered quantities
+      nJInt=j+grid.nCenIntOffset[1];
+      
+      //calculate Q0
+      //calculate volume change
+      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
+        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+      
+      //calculate threshold compression to turn viscosity on at
+      dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
+        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dDVDtThreshold=parameters.dAVThreshold*dC;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;//need to add it since dVDt will be negative
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+      }
+      
+      //calculate Q1
+      //calculate volume change
+      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+      
+      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
+        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      }
+    }
+  }
+  
+  //outter ghost region
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+      
+      //calculate j for interface centered quantities
+      nJInt=j+grid.nCenIntOffset[1];
+      
+      //calculate Q0
+      //calculate volume change
+      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
+        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+      
+      //calculate threshold compression to turn viscosity on at
+      dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
+        /grid.dLocalGridOld[grid.nD][i][j][0]);
+      dDVDtThreshold=parameters.dAVThreshold*dC;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+      }
+      
+      //calculate Q1
+      //calculate volume change
+      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+      
+      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
+        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
+      
+      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          *dDVDt_mthreshold*dDVDt_mthreshold;
+      }
+      else{
+        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      }
+    }
+  }
+}
+void calOldQ0Q1Q2_RTP_GL(Grid& grid, Parameters &parameters){
+  
+  double dA_sq=parameters.dA*parameters.dA;
+  double dDVDt;
+  double dA_ip1half;
+  double dA_im1half;
+  double dA_jp1half;
+  double dA_jm1half;
+  double dA_j;
+  double dR_i;
+  int nIInt;
+  int nJInt;
+  int nKInt;
+  double dC;
+  double dDVDtThreshold;
+  double dR_i_sq;
+  double dDVDt_mthreshold;
+  int i;
+  int j;
   int k;
   
+  //in the main grid
   for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
@@ -13690,43 +13920,56 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
       
       for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
         
-        //calculate volume change
-        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
-          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+        nKInt=k+grid.nCenIntOffset[2];
         
-        //calculate sound speed
-        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
           /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
         dDVDtThreshold=parameters.dAVThreshold*dC;
         
         //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
           dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-          grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
             *dDVDt_mthreshold*dDVDt_mthreshold;
         }
         else{
-          grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
         }
         
         //calculate Q1
-        //calculate volume change
-        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
-          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
-        
+        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
           dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-          grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
             *dDVDt_mthreshold*dDVDt_mthreshold;
         }
         else{
-          grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
         }
+        
+        //calculate Q2
+        dDVDt=(grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          -grid.dLocalGridOld[grid.nW][i][j][nKInt-1]);
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
+        }
+        
       }
     }
   }
-  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
+  
+  //outter ghost region
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
@@ -13735,111 +13978,54 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
     dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+    
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
-      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
-      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
-      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
         
-        //calculate volume change
-        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
-          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
+        nKInt=k+grid.nCenIntOffset[2];
         
-        //calculate sound speed
-        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
           /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
         dDVDtThreshold=parameters.dAVThreshold*dC;
         
         //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
           dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-          grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
             *dDVDt_mthreshold*dDVDt_mthreshold;
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
-        }
-        
-        //calculate Q1
-        //calculate volume change
-        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
-          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
-        
-        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-          grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
-            *dDVDt_mthreshold*dDVDt_mthreshold;
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
-        }
-      }
-    }
-  }
-}
-void calOldQ0Q1Q2_RTP_GL(Grid& grid, Parameters &parameters){
-  double dASq=parameters.dA*parameters.dA;
-  for(int i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
-    
-    //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
-    
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    
-    for(int j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
-      
-      //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
-      for(int k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
-        
-        //calculate k for interface centered quantities
-        int nKInt=k+grid.nCenIntOffset[2];
-        
-        //calculate sound speed
-        double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
-        //calculate Q0
-        double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][j][k]-grid.dLocalGridOld[grid.nU][nIInt-1][j][k];
-        double dDelUDelR_i=dDelU_i/dDelR_i;
-        double dThreshold=-1.0*dC*parameters.dAVThreshold;
-        double dThreshold_DelR=dThreshold/dDelR_i;
-        if(dDelUDelR_i<dThreshold_DelR){//being compressed
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelU_i-dThreshold),2.0);
         }
         else{
           grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
         }
         
         //calculate Q1
-        double dDelV_j=grid.dLocalGridOld[grid.nV][i][nJInt][k]-grid.dLocalGridOld[grid.nV][i][nJInt-1][k];
-        double dDelTheta=(grid.dLocalGridOld[grid.nDTheta][0][j][0]*(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-          +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5);
-        double dDelVRDelTheta_j=dDelV_j/dDelTheta;
-        double dThreshold_DelTheta=dThreshold/dDelTheta;
-        if(dDelVRDelTheta_j<dThreshold_DelTheta){//being compressed
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelV_j-dThreshold),2.0);
+        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
         }
         else{
           grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
         }
         
         //calculate Q2
-        double dDelW_k=grid.dLocalGridOld[grid.nW][i][j][nKInt]-grid.dLocalGridOld[grid.nW][i][j][nKInt-1];
-        double dDelPhi=((grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])
-          *0.5*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
-        double dDelWRSinDelPhi_k=dDelW_k/dDelPhi;
-        double dThreshold_DelPhi=dThreshold/dDelPhi;
-        if(dDelWRSinDelPhi_k<dThreshold_DelPhi){//being compressed
-          grid.dLocalGridOld[grid.nQ2][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelW_k-dThreshold),2.0);
+        dDVDt=(grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          -grid.dLocalGridOld[grid.nW][i][j][nKInt-1]);
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
         }
         else{
           grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
@@ -13847,76 +14033,80 @@ void calOldQ0Q1Q2_RTP_GL(Grid& grid, Parameters &parameters){
       }
     }
   }
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nQ0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nQ0][0][0];i++){
-    
-    //calculate i for interface centered quantities
-    int nIInt=i+grid.nCenIntOffset[0];
-    
-    double dDelR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]-grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);
-    double dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-    
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
       
-      //calculate j for interface centered quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      //calculate i for interface centered quantities
+      nIInt=i+grid.nCenIntOffset[0];
+      dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+      dR_i_sq=dR_i*dR_i;
+      dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+      dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+        *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
       
-      double dDelTheta=grid.dLocalGridOld[grid.nDTheta][0][j][0]*dR_i;
-      
-      for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
         
-        //calculate k for interface centered quantities
-        int nKInt=k+grid.nCenIntOffset[2];
+        //calculate j for interface centered quantities
+        nJInt=j+grid.nCenIntOffset[1];
         
-        //calculate sound speed
-        double dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
-          /grid.dLocalGridOld[grid.nD][i][j][k]);
-        
-        //calculate Q0
-        double dDelU_i=grid.dLocalGridOld[grid.nU][nIInt][j][k]-grid.dLocalGridOld[grid.nU][nIInt-1][j][k];
-        double dDelUDelR_i=dDelU_i/dDelR_i;
-        double dThreshold=-1.0*dC*parameters.dAVThreshold;
-        double dThreshold_DelR=dThreshold/dDelR_i;
-        if(dDelUDelR_i<dThreshold_DelR){//being compressed
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelU_i-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
-        }
-        
-        //calculate Q1
-        double dDelV_j=grid.dLocalGridOld[grid.nV][i][nJInt][k]-grid.dLocalGridOld[grid.nV][i][nJInt-1][k];
-        double dDelVRDelTheta_j=dDelV_j/dDelTheta;
-        double dThreshold_DelTheta=dThreshold/dDelTheta;
-        if(dDelVRDelTheta_j<dThreshold_DelTheta){//being compressed
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelV_j-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
-        }
-        
-        //calculate Q2
-        double dDelW_k=grid.dLocalGridOld[grid.nW][i][j][nKInt]-grid.dLocalGridOld[grid.nW][i][j][nKInt-1];
-        double dDelPhi=(dR_i*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-          *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
-        double dDelWRSinDelPhi_k=dDelW_k/dDelPhi;
-        double dThreshold_DelPhi=dThreshold/dDelPhi;
-        if(dDelWRSinDelPhi_k<dThreshold_DelPhi){//being compressed
-          grid.dLocalGridOld[grid.nQ2][i][j][k]=grid.dLocalGridOld[grid.nD][i][j][k]*dASq
-            *pow((dDelW_k-dThreshold),2.0);
-        }
-        else{
-          grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
+        for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+          k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
+          
+          nKInt=k+grid.nCenIntOffset[2];
+          
+          //calculate threshold compression to turn viscosity on at
+          dC=sqrt(parameters.dGamma*(grid.dLocalGridOld[grid.nP][i][j][k])
+            /grid.dLocalGridOld[grid.nD][i][j][k]);
+          dDVDtThreshold=parameters.dAVThreshold*dC;
+          
+          //calculate Q0
+          dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+          }
+          
+          //calculate Q1
+          dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+            -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
+          }
+          
+          //calculate Q2
+          dDVDt=(grid.dLocalGridOld[grid.nW][i][j][nKInt]
+            -grid.dLocalGridOld[grid.nW][i][j][nKInt-1]);
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
+          }
         }
       }
     }
-  }
+  #endif
 }
 void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
   
   double dA_sq=parameters.dA*parameters.dA;
-  double dDVDt;
+  double dDVDt;/*Rate of change of the volume*/
   double dA_ip1half;
   double dA_im1half;
   double dA_jp1half;
@@ -13997,6 +14187,7 @@ void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
         else{
           grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
         }
+        
       }
     }
   }
@@ -14070,6 +14261,79 @@ void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
       }
     }
   }
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+      
+      //calculate i for interface centered quantities
+      nIInt=i+grid.nCenIntOffset[0];
+      dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+      dR_i_sq=dR_i*dR_i;
+      dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+      dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+        *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+      
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
+        
+        //calculate j for interface centered quantities
+        nJInt=j+grid.nCenIntOffset[1];
+        dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+        dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+        dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+        
+        for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+          k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
+          
+          nKInt=k+grid.nCenIntOffset[2];
+          
+          //calculate threshold compression to turn viscosity on at
+          dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+            /grid.dLocalGridOld[grid.nD][i][j][k]);
+          dDVDtThreshold=parameters.dAVThreshold*dC;
+          
+          //calculate Q0
+          dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+          }
+          
+          //calculate Q1
+          dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+            -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
+          }
+          
+          //calculate Q2
+          dDVDt=(grid.dLocalGridOld[grid.nW][i][j][nKInt]
+            -grid.dLocalGridOld[grid.nW][i][j][nKInt-1]);
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
+          }
+
+        }
+      }
+    }
+  #endif
 }
 void calOldEddyVisc_R_CN(Grid &grid, Parameters &parameters){
   

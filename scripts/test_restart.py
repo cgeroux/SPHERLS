@@ -326,12 +326,12 @@ def testRestarts(tmpDir,startModel,exePath,EOSFile,velocityProfile,numProcs,opti
     print "  model files \"./RestartTest1_t00000002.txt\" and "\
       +"\"./RestartTest3_t00000002.txt\" differ"
     
-    #leave temporary directory so the failure can be inspected
     os.chdir("../")
     return False
   else:
     print "SUCCESS"
-  '''Bellow code needs to be updated
+  
+  
   #moving out of temporary directory
   os.chdir("../")
   
@@ -345,7 +345,6 @@ def testRestarts(tmpDir,startModel,exePath,EOSFile,velocityProfile,numProcs,opti
       return False
     else:
       print "SUCCESS"
-  '''
   return True
 def test2DNARestarts(tmpDir,exePaths,EOSFile,velocityProfile,numProcs,options):
   '''
