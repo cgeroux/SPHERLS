@@ -325,12 +325,9 @@ def plot(dataSets,options,title):
     fig.suptitle(title)
   
   #basic plot spacing options
-  axisSpacing=0.05
-  figBottom=0.05
-  figTop=0.95
-  #axisSpacing=0.05
-  #figBottom=0.1
-  #figTop=0.93
+  axisSpacing=options.axisSpacing
+  figBottom=options.figBottom
+  figTop=options.figTop
   
   #count number of axes in all plots, this number will be the same for all plots.
   nNumAxes=0
@@ -501,6 +498,33 @@ def main():
   title=""
   if root.get("title")!=None and root.get("title")!="":
     title=root.get("title")
+  
+  #set spacing between axies
+  options.axisSpacing=0.05
+  if root.get("axisSpacing")!=None and root.get("axisSpacing")!="":
+    options.axisSpacing=float(root.get("axisSpacing"))
+  
+  #set location of top of the plot area
+  options.figTop=0.95
+  if root.get("figTop")!=None and root.get("figTop")!="":
+    options.figTop=float(root.get("figTop"))
+  
+  #set location of bottom of the plot area
+  options.figBottom=0.05
+  if root.get("figBottom")!=None and root.get("figBottom")!="":
+    options.figBottom=float(root.get("figBottom"))
+  
+  #set figure height
+  if root.get("figHeight")!=None and root.get("figHeight")!="":
+    options.figHeight=float(root.get("figHeight"))
+  
+  #set figure width
+  if root.get("figWidth")!=None and root.get("figWidth")!="":
+    options.figWidth=float(root.get("figWidth"))
+    
+  #set figure dpi
+  if root.get("dpi")!=None and root.get("dpi")!="":
+    options.dpi=int(root.get("dpi"))
   
   #set plot output
   if root.get("outputfile")!=None and root.get("outputfile")!="":

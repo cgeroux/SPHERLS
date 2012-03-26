@@ -128,7 +128,7 @@ def main():
           
           #remove temporary directory
           if not options.k:
-            tmpDir="./"+haveRef+"CalculationTest_tmp"
+            tmpDir="./test"+haveRef+"Calculation"
             result=subprocess.call(["rm","-rf",tmpDir])
             if result!=0:
               print "  unable to remove temporary directory \""+tmpDir+"\""
@@ -137,12 +137,12 @@ def main():
           print "SUCCESS"
         else:
           #print "FAILED"
-          print "  see \"./"+haveRef+"CalculationTest_tmp/log.txt\" for details of failure"
+          print "\n  see \"./test"+haveRef+"Calculation/log.txt\" for details of failure"
       else:
         print "FAILED"
         print "  \""+haveRef+"\" didn't have pre-calculated reference calculations, can't check"\
           +" against them."
-    if len(failedTests)>0:
+    if len(failedTests)>0:#will never execute
       print "The following tests failed:"
       i=0
       for failedTest in failedTests:
@@ -159,7 +159,7 @@ def checkCalAgainstRef(subDir,options):
   cwd=os.getcwd()
   if not createTestCalcNA(subDir,numProcs,options):
     return False
-  os.chdir("./"+subDir+"CalculationTest_tmp")
+  os.chdir("./test"+subDir+"Calculation")
   
   #compare model calculations
   log=open("./log.txt",'a')
@@ -193,7 +193,7 @@ def createTestCalcNA(subDir,numProcs,options):
   
   #check to see if we can make a tmp directory, and creating it if we can make tmp directory 
   #to perform test
-  tmpDir="./"+subDir+"CalculationTest_tmp"
+  tmpDir="./test"+subDir+"Calculation"
   #check for read and write permission in cwd
   if not os.access("./",os.R_OK) :
     print "FAILED"
