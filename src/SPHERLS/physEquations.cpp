@@ -14900,7 +14900,9 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
   double dV_ijkm1half_np1half;
   double dW_ijk_np1half;
   double dW_ip1halfjk_np1half;
+  double dW_im1halfjk_np1half;
   double dW_ijp1halfk_np1half;
+  double dW_ijm1halfk_np1half;
   double dW_ijkp1half_np1half;
   double dW_ijkm1half_np1half;
   double dDelR_i_np1half;
@@ -14943,9 +14945,11 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dU_ijk_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j][k])*0.5;
         dU_ijkp1half_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k+1]
-          +grid.dLocalGridOld[grid.nU][nIInt][j][k+1])*0.5;
+          +grid.dLocalGridOld[grid.nU][nIInt][j][k]+grid.dLocalGridOld[grid.nU][nIInt-1][j][k+1]
+          +grid.dLocalGridOld[grid.nU][nIInt-1][j][k])*0.25;
         dU_ijkm1half_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
-          +grid.dLocalGridOld[grid.nU][nIInt][j][k-1])*0.5;
+          +grid.dLocalGridOld[grid.nU][nIInt][j][k-1]+grid.dLocalGridOld[grid.nU][nIInt-1][j][k]
+          +grid.dLocalGridOld[grid.nU][nIInt-1][j][k-1])*0.25;
         dU_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j][k]+grid.dLocalGridOld[grid.nU][nIInt][j+1][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j+1][k])*0.25;
@@ -14976,8 +14980,16 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
           +grid.dLocalGridOld[grid.nW][i+1][j][nKInt-1]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
+        dW_im1halfjk_np1half=(grid.dLocalGridOld[grid.nW][i-1][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i-1][j][nKInt-1]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
         dW_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nW][i][j+1][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j+1][nKInt-1]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
+        dW_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nW][i][j-1][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j-1][nKInt-1]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
         dW_ijkp1half_np1half=grid.dLocalGridOld[grid.nW][i][j][nKInt];
@@ -14999,7 +15011,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
         
         //term 5
-        d5=(dW_ip1halfjk_np1half-dW_ip1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
+        d5=(dW_ip1halfjk_np1half-dW_im1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
         
         //term 6
         d6=dW_ijk_np1half/dR_i_np1half;
@@ -15015,7 +15027,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         d9=(dU_ijk_np1half-dU0_i_np1half)/dR_i_np1half;
         
         //term 10
-        d10=(dW_ijp1halfk_np1half-dW_ijkm1half_np1half)/(dR_i_np1half
+        d10=(dW_ijp1halfk_np1half-dW_ijm1halfk_np1half)/(dR_i_np1half
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
         //term 11
@@ -15114,9 +15126,11 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dU_ijk_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j][k])*0.5;
         dU_ijkp1half_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k+1]
-          +grid.dLocalGridOld[grid.nU][nIInt][j][k])*0.5;
+          +grid.dLocalGridOld[grid.nU][nIInt][j][k]+grid.dLocalGridOld[grid.nU][nIInt-1][j][k+1]
+          +grid.dLocalGridOld[grid.nU][nIInt-1][j][k])*0.25;
         dU_ijkm1half_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
-          +grid.dLocalGridOld[grid.nU][nIInt][j][k-1])*0.5;
+          +grid.dLocalGridOld[grid.nU][nIInt][j][k-1]+grid.dLocalGridOld[grid.nU][nIInt-1][j][k]
+          +grid.dLocalGridOld[grid.nU][nIInt-1][j][k-1])*0.25;
         dU_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j][k]+grid.dLocalGridOld[grid.nU][nIInt][j+1][k]
           +grid.dLocalGridOld[grid.nU][nIInt-1][j+1][k])*0.25;
@@ -15146,8 +15160,16 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dW_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nW][i][j][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.5;/**\BC assume phi velocity is constant
           across surface*/
+        dW_im1halfjk_np1half=(grid.dLocalGridOld[grid.nW][i-1][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i-1][j][nKInt-1]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
         dW_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nW][i][j+1][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j+1][nKInt-1]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
+        dW_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nW][i][j-1][nKInt]
+          +grid.dLocalGridOld[grid.nW][i][j-1][nKInt-1]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt]
           +grid.dLocalGridOld[grid.nW][i][j][nKInt-1])*0.25;
         dW_ijkp1half_np1half=grid.dLocalGridOld[grid.nW][i][j][nKInt];
@@ -15169,7 +15191,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
         
         //term 5
-        d5=(dW_ip1halfjk_np1half-dW_ip1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
+        d5=(dW_ip1halfjk_np1half-dW_im1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
         
         //term 6
         d6=dW_ijk_np1half/dR_i_np1half;
@@ -15185,7 +15207,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         d9=(dU_ijk_np1half-dU0_i_np1half)/dR_i_np1half;
         
         //term 10
-        d10=(dW_ijp1halfk_np1half-dW_ijkm1half_np1half)/(dR_i_np1half
+        d10=(dW_ijp1halfk_np1half-dW_ijm1halfk_np1half)/(dR_i_np1half
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
         //term 11
