@@ -353,6 +353,8 @@ class Axis:
       
       #if there is a foluma get list of columns
       self.formulaOrig=element.get("column")
+      if self.formulaOrig==None:
+        raise Exception("need \"column\" attributed in axis node with type=\"profile\"")
       columnsTemp=self.formulaOrig.split('$')
       self.formula=columnsTemp[0]
       if len(columnsTemp)>1:#turn into a list

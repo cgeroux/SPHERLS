@@ -319,7 +319,7 @@ def plot(dataSets,options,title):
   
   #create a figure object, to be reused for each figure, could be 1 or more
   fig=plt.figure(figsize=(options.figWidth,options.figHeight))
-  
+  basicMatPlotColors=['b','g','r','c','m','y','k','w']
   #add title
   if title!="":
     fig.suptitle(title)
@@ -387,8 +387,15 @@ def plot(dataSets,options,title):
         for curve in plot.curves:
           
           #plot the curve
-          temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,str(curve.color)+str(curve.style)
-            ,markersize=curve.markersize,linewidth=curve.linewidth)
+          if curve.color in basicMatPlotColors:
+            temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,str(curve.color)+str(curve.style)
+              ,markersize=curve.markersize,linewidth=curve.linewidth)
+          elif curve.color[0]=="#":
+            temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,str(curve.style),color=str(curve.color)
+              ,markersize=curve.markersize,linewidth=curve.linewidth)
+          else:
+            print "only hex strings are accepted for colors other than "+basicMatPlotColors
+            quit()
           if curve.label!=None and curve.label!="":
             lines.append(temp)
             labels.append(curve.label)

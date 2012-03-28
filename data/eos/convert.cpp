@@ -5,16 +5,19 @@
 
 int main(){
   //read in bob's eos table
+  eos eosConvert;
+  
   try{
-    eos eosConvert;
     //eosConvert.readBobsAscii("ct_opac");
     //eosConvert.readAscii("Chris_new_EOS_opac");
     //eosConvert.writeAscii("eos2.txt");
     //eosConvert.writeBin("eos2");
     //eosConvert.writeBin("eosCTOPAC");
     //eosConvert.readAscii("eosCTOPAC_fixed.txt");
-    eosConvert.readBin("eos");
-    eosConvert.writeAscii("eos.txt");
+    eosConvert.readAscii("eosY240Z002.txt");
+    eosConvert.writeBin("eosY240Z002");
+    //eosConvert.readBin("eosY240Z002");
+    //eosConvert.writeAscii("eosY240Z002.txt");
   }
   //error handeling
   catch(exception2& eTemp){
@@ -26,21 +29,21 @@ int main(){
   catch(...){
     std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<"main: unknown error\n";
   }
-  /*
+  
   std::ofstream ofOut;
-  //ofOut.open("pressure.dat");
-  //ofOut.precision(16);
-  //ofOut.unsetf(std::ios::fixed);
-  //ofOut.setf(std::ios::scientific);
-  //for(int i=0;i<eosConvert.nNumRho;i++){
-  //  for(int j=0;j<eosConvert.nNumT;j++){
-  //    ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
-  //      <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
-  //      <<eosConvert.dLogP[i][j]<<std::endl;
-  //  }
-  //  ofOut<<std::endl;
-  //}
-  //ofOut.close();
+  ofOut.open("pressure.dat");
+  ofOut.precision(16);
+  ofOut.unsetf(std::ios::fixed);
+  ofOut.setf(std::ios::scientific);
+  for(int i=0;i<eosConvert.nNumRho;i++){
+    for(int j=0;j<eosConvert.nNumT;j++){
+      ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
+        <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
+        <<eosConvert.dLogP[i][j]<<std::endl;
+    }
+    ofOut<<std::endl;
+  }
+  ofOut.close();
   
   ofOut.open("opacity.dat");
   ofOut.precision(16);
@@ -56,18 +59,18 @@ int main(){
   }
   ofOut.close();
   
-  //ofOut.open("energy.dat");
-  //ofOut.precision(16);
-  //ofOut.unsetf(std::ios::fixed);
-  //ofOut.setf(std::ios::scientific);
-  //for(int i=0;i<eosConvert.nNumRho;i++){
-  //  for(int j=0;j<eosConvert.nNumT;j++){
-  //    ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
-  //      <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
-  //      <<eosConvert.dLogE[i][j]<<std::endl;
-  //  }
-  //  ofOut<<std::endl;
-  //}
-  //ofOut.close();*/
+  ofOut.open("energy.dat");
+  ofOut.precision(16);
+  ofOut.unsetf(std::ios::fixed);
+  ofOut.setf(std::ios::scientific);
+  for(int i=0;i<eosConvert.nNumRho;i++){
+    for(int j=0;j<eosConvert.nNumT;j++){
+      ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
+        <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
+        <<eosConvert.dLogE[i][j]<<std::endl;
+    }
+    ofOut<<std::endl;
+  }
+  ofOut.close();
   return 0;
 }

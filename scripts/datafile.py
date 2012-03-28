@@ -125,7 +125,13 @@ class DataFile:
         if rowTemp[i]=='-' :
           fLineValues.append(None)
         else:
-          fLineValues.append(float(rowTemp[i]))
+          try:
+            fLineValues.append(float(rowTemp[i]))
+          except ValueError:
+            print "\""+rowTemp[i]+"\" in file \""+sFileName+"\" row "+str(nLine)+" column "+str(i)\
+              +" not a float skipping"
+            fLineValues.append(None)
+
       
       #add line of values to list
       self.fColumnValues.append(fLineValues)
