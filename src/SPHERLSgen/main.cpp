@@ -979,7 +979,7 @@ void calculateShell_TEOS(unsigned int nShell){
     ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
       <<": delta M over M ("<<vecdMDel[nShell-1]/vecdM[nShell-1]
       <<") for shell "<<nShell
-      <<" is smaller than is representable by doulbe precision on current machine. Check "
+      <<" is smaller than is representable by double precision on current machine. Check "
       <<"\"M-delta-delta\" nodes.\n";
     throw exception2(ssTemp.str(),INPUT);
   }
@@ -1052,7 +1052,28 @@ void calculateShell_TEOS(unsigned int nShell){
   vecdKappa.push_back(dKappa);
   
   //mass at (nShell+1/2)
-  vecdM.push_back(vecdM[nShell-1]+vecdMDel[nShell]);
+  vecdM.push_back(vecdM[nShell]+vecdMDel[nShell]);
+  if(vecdM[nShell+1]<0.0){//gone past center of star
+    //print out what we have so far
+    vecdR.push_back(std::numeric_limits<float>::quiet_NaN());//set radius to a nan
+    if(nNumDims==1){
+      writeModel_R_TEOS();
+    }
+    else if(nNumDims==2){
+      writeModel_RT_TEOS();
+    }
+    else if(nNumDims==3){
+      writeModel_RTP_TEOS();
+    }
+    
+    //throw exception
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": vecdM["<<nShell+1<<"]="<<vecdM[nShell+1]<<", we have gone past the center of the star!\n"
+      <<"\tTry adjusting \"R-stop\", \"M-delta-delta\", and or \"M-delta-init\". See output model "
+      <<"for details.\n";
+    throw exception2(ssTemp.str(),CALCULATION);
+  }
   
   //radius at (nShell+1/2)
   vecdR.push_back(pow(3.0/(4.0*dPi)*vecdMDel[nShell]/vecdRho[nShell]+pow(vecdR[nShell],3.0)

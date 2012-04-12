@@ -415,7 +415,8 @@ class Grid{
       \ref ProcTop::nPeriodic.
       */
     int nGlobalGridPositionLocalGrid[3];/**<
-      The location at which the local grid starts in the global grid
+      The location at which the local grid starts in the global grid. This starts at 0, for the 
+      inner most cell, including ghost zones.
       */
     Grid(); /**<
       Constructor for the class \ref Grid.
