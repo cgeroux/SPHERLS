@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 #from mpl_toolkits.mplot3d import axes3d
 
-nNumCoords=4
+nNumCoords=7
 colors=['r','g','b','c','m','y']
 class File2DSlice:
   def load(self,fileName):
@@ -117,7 +117,7 @@ def main():
   parser.add_argument('-b',action="store_true",default=False,help="Re-combine binary files, at "\
     +"this option momement doesn't do anything")
   parser.add_argument('-r',action="store_true",default=False,help="Remove distributed binary files")
-  parser.add_argument('-c',action="store_true",default=False,help="Show codes as the will be "\
+  parser.add_argument('-c',action="store_true",default=False,help="Show codes as they will be "\
     +"executed, mostly a debugging option")
   
   #parse arguments
@@ -203,10 +203,17 @@ def parseXMLFile(fileName):
     settings['title']=""
   
   #get baseFileName
+  inputFileNameElement=root.findall("inputFileName")[0]
   if root.findtext("inputFileName")==None or root.findtext("inputFileName")=="":
     print "Requires an \"inputFileName\" node"
     quit()
   settings['inputFileName']=root.findtext("inputFileName")
+  
+  #get file frequency
+  settings["fileFrequency"]=1
+  if inputFileNameElement.get("frequency")!=None:
+    settings["fileFrequency"]=int(inputFileNameElement.get("frequency"))
+    
   
   # get plane elements
   planeElements=root.findall("plane")
@@ -485,23 +492,23 @@ def setCodes(settings,parsed):
     #set allowed coordinates,vectors, and scalors. This makes sure that the zoning always works out 
     #correctly
     if plane['planeType']=="rt":
-      allowedCoordinate1=[0,1]
-      allowedCoordinate2=[2]
-      allowedVectors1=[4,5]
-      allowedVectors2=[6]
-      allowedScalors=[7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+      allowedCoordinate1=[0,1,2]
+      allowedCoordinate2=[3,4]
+      allowedVectors1=[7,8]
+      allowedVectors2=[9]
+      allowedScalors=[10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     if plane['planeType']=="rp":
-      allowedCoordinate1=[0,1]
-      allowedCoordinate2=[3]
-      allowedVectors1=[4,5]
-      allowedVectors2=[7]
-      allowedScalors=[6,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+      allowedCoordinate1=[0,1,2]
+      allowedCoordinate2=[4,5]
+      allowedVectors1=[7,8]
+      allowedVectors2=[10]
+      allowedScalors=[9,11,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     if plane['planeType']=="tp":
-      allowedCoordinate1=[2]
-      allowedCoordinate2=[3]
-      allowedVectors1=[6]
-      allowedVectors2=[7]
-      allowedScalors=[4,5,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+      allowedCoordinate1=[3,4]
+      allowedCoordinate2=[5,6]
+      allowedVectors1=[9]
+      allowedVectors2=[10]
+      allowedScalors=[7,8,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     
     #get all coordinate references
     coordRefs=[]
@@ -666,6 +673,7 @@ def setCodes(settings,parsed):
       plane['scalorCode']=parser.expr(string).compile()
     
     #for each vector, make code
+    j=0
     for vector in plane['vectors']:
       
       #make xposition code
@@ -983,6 +991,7 @@ def setCodes(settings,parsed):
       if parsed.c:
         print "vector ",j,"'s vCode=",string
       vector['vCode']=parser.expr(string).compile()
+      j+=1
 def createPlots(settings,parsed):
   
   #get base file name
@@ -1036,7 +1045,7 @@ def createPlots(settings,parsed):
     setStellarPallet(plane['scalorMax'],plane['scalorMin'],plane['palletFocus'])
   
   nCount=settings['startIndex']
-  for i in range(len(plane0['files'])):
+  for i in range(0,len(plane0['files']),settings["fileFrequency"]):
     
     fig=plt.figure(figsize=(settings['figWidth'],settings['figHeight']))
     nPlaneCount=0

@@ -1,15 +1,15 @@
 <!-- Coordinates:
-Allowed radial coordinates: M_r_im1half[g](0), R_im1half[cm](1)
-Allowed theta coordinates : theta_jm1half[rad](2)
-Allowed phi coordinates   : phi_km1half[rad](3)
-Allowed radial vectors (scalors in tp planes): U_im1halfjk[cm/s](4) , U0_im1half[cm/s](5)
-Allowed theta vectors (scalors in rp planes) : V_ijm1halfk[cm/s](6)
-Allowed phi vectors (scalors in rt planes)   : W_ijkm1half[cm/s](7)
+Allowed radial coordinates: im1half(0), M_r_im1half[g](1), R_im1half[cm](2)
+Allowed theta coordinates : jm1half(3), theta_jm1half[rad](4)
+Allowed phi coordinates   : km1half(5), phi_km1half[rad](6)
+Allowed radial vectors (scalors in tp planes): U_im1halfjk[cm/s](7) , U0_im1half[cm/s](8)
+Allowed theta vectors (scalors in rp planes) : V_ijm1halfk[cm/s](9)
+Allowed phi vectors (scalors in rt planes)   : W_ijkm1half[cm/s](10)
 Allowed Scalors :
-D_ijk[g/cm^3](8)     , D_rel_dif_hor_ave(9)   , E_ijk[erg/g](10)      , E_rel_dif_hor_ave(11)  ,
-T_ijk[K](12)         , T_rel_dif_hor_ave(13)  , P_ijk[dynes/cm^2](14) , P_rel_dif_hor_ave(15)  ,
-Q_ijk[dynes/cm^2](16), Q_rel_dif_hor_ave(17)  , Kap_ij[cm^2/g](18)    , Kap_rel_dif_hor_ave(19),
-Gam_ijk[na](20)      , Gam_rel_dif_hor_ave(21)
+D_ijk[g/cm^3](11)     , D_rel_dif_hor_ave(12)   , E_ijk[erg/g](13)      , E_rel_dif_hor_ave(14)  ,
+T_ijk[K](15)          , T_rel_dif_hor_ave(16)   , P_ijk[dynes/cm^2](17) , P_rel_dif_hor_ave(18)  ,
+Q_ijk[dynes/cm^2](19) , Q_rel_dif_hor_ave(20)   , Kap_ij[cm^2/g](21)    , Kap_rel_dif_hor_ave(22),
+Gam_ijk[na](23)       , Gam_rel_dif_hor_ave(24)
 
 r from (0,0,0)
 t measured from +z axis down
@@ -34,17 +34,21 @@ p^=-       sin(p)*x^+       cos(p)*y^
   height    : height of the figure in inches
   dpi       : dots per inches
   outputFile: Name of the output file(s). The suffix specifies the file type, supported file 
-              types are .png, .pdf, .jpg, .gif-->
+              types are .png, .pdf, .jpg, .gif
+  startIndex: index to start plots with, by default startIndex is 0, so that plot indices go 0,1 
+              etc. This allows plot indices to be startIndex, startIndex+1, etc.
+              -->
 <figure title="$r-\phi$ slice at $j=11$, $t=$\time[s], time step=\index" width="12.0" height="3.0"
-  dpi="150" outputFile="./slices_rt.png">
+  dpi="150" outputFile="./slices_rt.png" startIndex="0">
   
   <!-- <inputFileName></inputFileName>
     Name of the input file names including path. A single file can be choosen or, a range selected
     by providing [start index-end index], where "start index" is the first model dump to include
     and "end index" is 1 larger than the last model dump to include. "end index" may also be a "*"
     which indicates that all model dumps from "start index" to the last model dump found is 
-    included. -->
-  <inputFileName>../output/3D_T5700_t[101000-102000]</inputFileName>
+    included. The frequency option allows one to skip plots. If set to 2 will plot every other file,
+    if 3 every third file etc.-->
+  <inputFileName  frequency="2">../output/3D_T5700_t[101000-102000]</inputFileName>
   
   <!-- RT-plane with combined u-u_0 and v vectors, transform: p=0, x->x, z->y-->
   <!-- <plane></plane>

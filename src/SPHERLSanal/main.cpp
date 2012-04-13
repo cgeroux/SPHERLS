@@ -4095,17 +4095,31 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
   if(nPlane==0){//r-theta
     
     //write out cooridnate variables
+    //i
+    ofFile<<"im1half(0) ";
+    for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
+      ofFile<<i<<" ";
+    }
+    ofFile<<std::endl;
+    
     //M_r
-    ofFile<<"M_r_im1half[g](0) ";
+    ofFile<<"M_r_im1half[g](1) ";
     for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
       ofFile<<dGrid[nM][i][0][0]<<" ";
     }
     ofFile<<std::endl;
     
     //R
-    ofFile<<"R_im1half[cm](1) ";
+    ofFile<<"R_im1half[cm](2) ";
     for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
       ofFile<<dGrid[nR][i][0][0]<<" ";
+    }
+    ofFile<<std::endl;
+    
+    //j
+    ofFile<<"jm1half(3) ";
+    for( int j=0;j<nSize[nD][1]+1+2*nNumGhostCells;j++){//add an extra since it is an interface
+      ofFile<<j<<" ";
     }
     ofFile<<std::endl;
     
@@ -4114,7 +4128,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     if(nPeriodic[1]==0){
       nInterFaceY=1;
     }
-    ofFile<<"theta_jm1half[rad](2) ";
+    ofFile<<"theta_jm1half[rad](4) ";
     if(nPeriodic[1]==1){/*write out inner interface if periodic, if not periodic, it is already 
       included*/
       double dInnerTheta=dGrid[nTheta][0][0][0]-(dGrid[nTheta][0][nSize[nD][1]+nNumGhostCells-2][0]
@@ -4127,9 +4141,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     }
     ofFile<<std::endl;
     
+    //k
+    if(nNumDims>2){
+      ofFile<<"km1half(5) "<<nPlaneIndex<<" "<<nPlaneIndex+1<<std::endl;
+    }
+    else{
+      ofFile<<"km1half(5) "<<0<<" "<<1<<std::endl;
+    }
+    
     //phi
     if(nNumDims>2){
-      ofFile<<"phi_km1half[rad](3) "<<dGrid[nPhi][0][0][nPlaneIndex]<<" ";
+      ofFile<<"phi_km1half[rad](6) "<<dGrid[nPhi][0][0][nPlaneIndex]<<" ";
       if(nPlaneIndex==nSize[nPhi][2]+2*nNumGhostCells-1){//if in last zone, need to do something to get outter phi
         ofFile<<dGrid[nPhi][0][0][nPlaneIndex]+(dGrid[nPhi][0][0][nPlaneIndex]
           -dGrid[nPhi][0][0][nPlaneIndex-1])<<std::endl;
@@ -4139,29 +4161,29 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
       }
     }
     else{
-      ofFile<<"phi_km1half[rad](3) "<<0.0<<" "<<0.0<<std::endl;
+      ofFile<<"phi_km1half[rad](6) "<<0.0<<" "<<0.0<<std::endl;
     }
     
     //write out header for 2D data
     ofFile
-      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](4)"
-      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](5)"
-      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](6)"
-      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](7)"
-      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](8)"<<std::setw(nWidthOutputField)
-      <<"D_rel_dif_hor_ave(9)"
-      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](10)"<<std::setw(nWidthOutputField)
-      <<"E_rel_dif_hor_ave(11)"
-      <<std::setw(nWidthOutputField)<<"T_ijk[K](12)"<<std::setw(nWidthOutputField)
-      <<"T_rel_dif_hor_ave(13)"
-      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](14)"<<std::setw(nWidthOutputField)
-      <<"P_rel_dif_hor_ave(15)"
-      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](16)"<<std::setw(nWidthOutputField)
-      <<"Q_rel_dif_hor_ave(17)"
-      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](18)"<<std::setw(nWidthOutputField)
-      <<"Kap_rel_dif_hor_ave(19)"
-      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](20)"<<std::setw(nWidthOutputField)
-      <<"Gam_rel_dif_hor_ave(21)"
+      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](7)"
+      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](8)"
+      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](9)"
+      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](10)"
+      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](11)"<<std::setw(nWidthOutputField)
+      <<"D_rel_dif_hor_ave(12)"
+      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](13)"<<std::setw(nWidthOutputField)
+      <<"E_rel_dif_hor_ave(14)"
+      <<std::setw(nWidthOutputField)<<"T_ijk[K](15)"<<std::setw(nWidthOutputField)
+      <<"T_rel_dif_hor_ave(16)"
+      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](17)"<<std::setw(nWidthOutputField)
+      <<"P_rel_dif_hor_ave(18)"
+      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](19)"<<std::setw(nWidthOutputField)
+      <<"Q_rel_dif_hor_ave(20)"
+      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](21)"<<std::setw(nWidthOutputField)
+      <<"Kap_rel_dif_hor_ave(22)"
+      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
+      <<"Gam_rel_dif_hor_ave(24)"
       <<std::endl;
     
     //copy 1D region to 2D grid
@@ -4688,20 +4710,31 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
   }
   if(nPlane==1){//theta-phi
     
+    //i
+    ofFile<<"im1half[g](0) "<<nPlaneIndex<<" "
+      <<nPlaneIndex+1<<std::endl;
+    
     //M_r
-    ofFile<<"M_r_im1half[g](0) "<<dGrid[nM][nPlaneIndex][0][0]<<" "
+    ofFile<<"M_r_im1half[g](1) "<<dGrid[nM][nPlaneIndex][0][0]<<" "
       <<dGrid[nM][nPlaneIndex+1][0][0]<<std::endl;
     
     //R
-    ofFile<<"R_im1half[cm](1) "<<dGrid[nR][nPlaneIndex][0][0]<<" "
+    ofFile<<"R_im1half[cm](2) "<<dGrid[nR][nPlaneIndex][0][0]<<" "
       <<dGrid[nR][nPlaneIndex+1][0][0]<<std::endl;
+    
+    //j
+    ofFile<<"jm1half(3) ";
+    for( int j=0;j<nSize[nD][1]+1+2*nNumGhostCells;j++){//add an extra since it is an interface
+      ofFile<<j<<" ";
+    }
+    ofFile<<std::endl;
     
     //write out theta
     int nInterFaceY=0;
     if(nPeriodic[1]==0){
       nInterFaceY=1;
     }
-    ofFile<<"theta_jm1half[rad](2) ";
+    ofFile<<"theta_jm1half[rad](4) ";
     if(nPeriodic[1]==1){/*write out inner interface if periodic, if not periodic, it is already 
       included*/
       double dInnerTheta=dGrid[nTheta][0][0][0]-(dGrid[nTheta][0][nSize[nD][1]+nNumGhostCells-2][0]
@@ -4714,12 +4747,19 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     }
     ofFile<<std::endl;
     
+    //k
+    ofFile<<"km1half(5) ";
+    for( int k=0;k<nSize[nD][2]+1+2*nNumGhostCells;k++){//add an extra since it is an interface
+      ofFile<<k<<" ";
+    }
+    ofFile<<std::endl;
+    
     //write out phi
     int nInterFaceZ=0;
     if(nPeriodic[2]==0){
       nInterFaceZ=1;
     }
-    ofFile<<"phi_km1half[rad](3) ";
+    ofFile<<"phi_km1half[rad](6) ";
     if(nPeriodic[2]==1){/*write out inner interface if periodic, if not periodic, it is already
       included*/
       double dInnerTheta=dGrid[nPhi][0][0][0]-(dGrid[nPhi][0][0][nSize[nD][2]+nNumGhostCells-2]
@@ -4733,24 +4773,24 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     ofFile<<std::endl;
     
     ofFile
-      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](4)"
-      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](5)"
-      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](6)"
-      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](7)"
-      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](8)"<<std::setw(nWidthOutputField)
-      <<"D_rel_dif_hor_ave(9)"
-      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](10)"<<std::setw(nWidthOutputField)
-      <<"E_rel_dif_hor_ave(11)"
-      <<std::setw(nWidthOutputField)<<"T_ijk[K](12)"<<std::setw(nWidthOutputField)
-      <<"T_rel_dif_hor_ave(13)"
-      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](14)"<<std::setw(nWidthOutputField)
-      <<"P_rel_dif_hor_ave(15)"
-      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](16)"<<std::setw(nWidthOutputField)
-      <<"Q_rel_dif_hor_ave(17)"
-      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](18)"<<std::setw(nWidthOutputField)
-      <<"Kap_rel_dif_hor_ave(19)"
-      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](20)"<<std::setw(nWidthOutputField)
-      <<"Gam_rel_dif_hor_ave(21)"
+      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](7)"
+      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](8)"
+      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](9)"
+      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](10)"
+      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](11)"<<std::setw(nWidthOutputField)
+      <<"D_rel_dif_hor_ave(12)"
+      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](13)"<<std::setw(nWidthOutputField)
+      <<"E_rel_dif_hor_ave(14)"
+      <<std::setw(nWidthOutputField)<<"T_ijk[K](15)"<<std::setw(nWidthOutputField)
+      <<"T_rel_dif_hor_ave(16)"
+      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](17)"<<std::setw(nWidthOutputField)
+      <<"P_rel_dif_hor_ave(18)"
+      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](19)"<<std::setw(nWidthOutputField)
+      <<"Q_rel_dif_hor_ave(20)"
+      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](21)"<<std::setw(nWidthOutputField)
+      <<"Kap_rel_dif_hor_ave(22)"
+      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
+      <<"Gam_rel_dif_hor_ave(24)"
       <<std::endl;
     
     //3D region
@@ -5179,22 +5219,37 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
   }
   if(nPlane==2){//r-phi
      
+    //i
+    ofFile<<"im1half(0) ";
+    for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
+      ofFile<<i<<" ";
+    }
+    ofFile<<std::endl;
+    
     //M_r
-    ofFile<<"M_r_im1half[g](0) ";
+    ofFile<<"M_r_im1half[g](1) ";
     for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
       ofFile<<dGrid[nM][i][0][0]<<" ";
     }
     ofFile<<std::endl;
     
     //R
-    ofFile<<"R_im1half[cm](1) ";
+    ofFile<<"R_im1half[cm](2) ";
     for( int i=0;i<nSize[nR][0]+2*nNumGhostCells;i++){
       ofFile<<dGrid[nR][i][0][0]<<" ";
     }
     ofFile<<std::endl;
-     
+    
+    //j
+    if(nNumDims>2){
+      ofFile<<"jm1half(3) "<<nPlaneIndex<<" "<<nPlaneIndex+1<<std::endl;
+    }
+    else{
+      ofFile<<"jm1half(3) "<<0<<" "<<1<<std::endl;
+    }
+    
     //theta
-    ofFile<<"theta_jm1half[rad](2) "<<dGrid[nTheta][0][nPlaneIndex][0]<<" ";
+    ofFile<<"theta_jm1half[rad](4) "<<dGrid[nTheta][0][nPlaneIndex][0]<<" ";
     if(nPlaneIndex==nSize[nTheta][1]+2*nNumGhostCells-1){//if in last zone, need to do something to get outter phi
       ofFile<<dGrid[nTheta][0][nPlaneIndex][0]+(dGrid[nTheta][0][nPlaneIndex][0]
         -dGrid[nTheta][0][nPlaneIndex-1][0])<<std::endl;
@@ -5203,12 +5258,19 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
       ofFile<<dGrid[nTheta][0][nPlaneIndex+1][0]<<std::endl;
     }
     
+    //k
+    ofFile<<"km1half(5) ";
+    for( int k=0;k<nSize[nD][2]+1+2*nNumGhostCells;k++){//add an extra since it is an interface
+      ofFile<<k<<" ";
+    }
+    ofFile<<std::endl;
+    
     //phi
     int nInterFaceZ=0;
     if(nPeriodic[2]==0){
       nInterFaceZ=1;
     }
-    ofFile<<"phi_km1half[rad](3) ";
+    ofFile<<"phi_km1half[rad](6) ";
     if(nPeriodic[2]==1){/*write out inner interface if periodic, if not periodic, it is already
       included*/
       double dInnerTheta=dGrid[nPhi][0][0][0]-(dGrid[nPhi][0][0][nSize[nD][2]+nNumGhostCells-2]
@@ -5222,24 +5284,24 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     ofFile<<std::endl;
     
     ofFile
-      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](4)"
-      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](5)"
-      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](6)"
-      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](7)"
-      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](8)"<<std::setw(nWidthOutputField)
-      <<"D_rel_dif_hor_ave(9)"
-      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](10)"<<std::setw(nWidthOutputField)
-      <<"E_rel_dif_hor_ave(11)"
-      <<std::setw(nWidthOutputField)<<"T_ijk[K](12)"<<std::setw(nWidthOutputField)
-      <<"T_rel_dif_hor_ave(13)"
-      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](14)"<<std::setw(nWidthOutputField)
-      <<"P_rel_dif_hor_ave(15)"
-      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](16)"<<std::setw(nWidthOutputField)
-      <<"Q_rel_dif_hor_ave(17)"
-      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](18)"<<std::setw(nWidthOutputField)
-      <<"Kap_rel_dif_hor_ave(19)"
-      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](20)"<<std::setw(nWidthOutputField)
-      <<"Gam_rel_dif_hor_ave(21)"
+      <<std::setw(nWidthOutputField)<<"U_im1halfjk[cm/s](7)"
+      <<std::setw(nWidthOutputField)<<"U0_im1half[cm/s](8)"
+      <<std::setw(nWidthOutputField)<<"V_ijm1halfk[cm/s](9)"
+      <<std::setw(nWidthOutputField)<<"W_ijkm1half[cm/s](10)"
+      <<std::setw(nWidthOutputField)<<"D_ijk[g/cm^3](11)"<<std::setw(nWidthOutputField)
+      <<"D_rel_dif_hor_ave(12)"
+      <<std::setw(nWidthOutputField)<<"E_ijk[erg/g](13)"<<std::setw(nWidthOutputField)
+      <<"E_rel_dif_hor_ave(14)"
+      <<std::setw(nWidthOutputField)<<"T_ijk[K](15)"<<std::setw(nWidthOutputField)
+      <<"T_rel_dif_hor_ave(16)"
+      <<std::setw(nWidthOutputField)<<"P_ijk[dynes/cm^2](17)"<<std::setw(nWidthOutputField)
+      <<"P_rel_dif_hor_ave(18)"
+      <<std::setw(nWidthOutputField)<<"Q_ijk[dynes/cm^2](19)"<<std::setw(nWidthOutputField)
+      <<"Q_rel_dif_hor_ave(20)"
+      <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](21)"<<std::setw(nWidthOutputField)
+      <<"Kap_rel_dif_hor_ave(22)"
+      <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
+      <<"Gam_rel_dif_hor_ave(24)"
       <<std::endl;
     
     //1D region
