@@ -4334,6 +4334,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][nPlaneIndex]
@@ -4351,7 +4353,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][nPlaneIndex]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][nPlaneIndex])/dA_j;
@@ -4369,7 +4373,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(nPlaneIndex==0){
               dDVDt=(dGrid[nW][i][j][nPlaneIndex]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -4427,6 +4433,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][nPlaneIndex]
@@ -4444,7 +4452,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][nPlaneIndex]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][nPlaneIndex])/dA_j;
@@ -4462,7 +4472,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(nPlaneIndex==0){
               dDVDt=(dGrid[nW][i][j][nPlaneIndex]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -4532,6 +4544,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q, uses dGamma
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][nPlaneIndex]
@@ -4549,7 +4563,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][nPlaneIndex]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][nPlaneIndex])/dA_j;
@@ -4567,7 +4583,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q1
+          if(nNumDims==3){
             if(nPlaneIndex==0){
               dDVDt=(dGrid[nW][i][j][nPlaneIndex]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -4588,8 +4606,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][nPlaneIndex]
             <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][nPlaneIndex]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
@@ -4603,6 +4630,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][nPlaneIndex]
@@ -4620,7 +4649,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][nPlaneIndex]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][nPlaneIndex])/dA_j;
@@ -4638,7 +4669,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(nPlaneIndex==0){
               dDVDt=(dGrid[nW][i][j][nPlaneIndex]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -4658,8 +4691,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           ofFile
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0<<std::endl;//8
         }
@@ -4839,6 +4881,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
@@ -4856,7 +4900,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY-1][k])/dA_j;
@@ -4874,7 +4920,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -4934,49 +4982,62 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][k]);
           dDVDtThreshold=dAVThreshold*dC;
-          if(i==nSizeX1){
-            dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
-              -dA_im1half*dGrid[nU][i][0][0])/dRSq_i;
+          
+          
+          //Q0
+          if(nNumDims>=1){
+            if(i==nSizeX1){
+              dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
+                -dA_im1half*dGrid[nU][i][0][0])/dRSq_i;
+            }
+            else{
+              dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
+                -dA_im1half*dGrid[nU][i][j][k])/dRSq_i;
+            }
+            if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+              dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+              dQ0=dASq*dGrid[nD][i][j][k]*dDVDt_mthreshold*dDVDt_mthreshold;
+            }
+            else{
+              dQ0=0.0;
+            }
           }
-          else{
-            dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
-              -dA_im1half*dGrid[nU][i][j][k])/dRSq_i;
+          
+          //Q1
+          if(nNumDims>=2){
+            if(j==0){
+              dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
+                -dA_jm1half*dGrid[nV][i][nSizeY-1][k])/dA_j;
+            }
+            else{
+              dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
+                -dA_jm1half*dGrid[nV][i][j-1][k])/dA_j;
+            }
+            if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+              dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+              dQ1=dASq*dGrid[nD][i][j][k]
+                *dDVDt_mthreshold*dDVDt_mthreshold;
+            }
+            else{
+              dQ1=0.0;
+            }
           }
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            dQ0=dASq*dGrid[nD][i][j][k]*dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            dQ0=0.0;
-          }
-          if(j==0){
-            dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
-              -dA_jm1half*dGrid[nV][i][nSizeY-1][k])/dA_j;
-          }
-          else{
-            dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
-              -dA_jm1half*dGrid[nV][i][j-1][k])/dA_j;
-          }
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            dQ1=dASq*dGrid[nD][i][j][k]
-              *dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            dQ1=0.0;
-          }
-          if(k==0){
-            dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][nSizeZ-1]);
-          }
-          else{
-            dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][k-1]);
-          }
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            dQ2=dASq*dGrid[nD][i][j][k]*dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            dQ2=0.0;
+          
+          //Q2
+          if(nNumDims==3){
+            if(k==0){
+              dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][nSizeZ-1]);
+            }
+            else{
+              dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][k-1]);
+            }
+            if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+              dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+              dQ2=dASq*dGrid[nD][i][j][k]*dDVDt_mthreshold*dDVDt_mthreshold;
+            }
+            else{
+              dQ2=0.0;
+            }
           }
           dQ=dQ0+dQ1+dQ2;
           
@@ -5089,8 +5150,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][k]
             <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][k]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
@@ -5104,6 +5174,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][j][k]
@@ -5121,7 +5193,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(j==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][j][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY-1][k])/dA_j;
@@ -5139,7 +5213,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][j][k]-dGrid[nW][i][j][nSizeZ-1]);
             }
@@ -5159,8 +5235,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           ofFile
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0<<std::endl;//8
         }
@@ -5461,6 +5546,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][nPlaneIndex][k]
@@ -5478,7 +5565,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(nPlaneIndex==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][nPlaneIndex][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][k])/dA_j;
@@ -5496,7 +5585,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][nPlaneIndex][k]-dGrid[nW][i][nPlaneIndex][nSizeZ-1]);
             }
@@ -5555,6 +5646,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][nPlaneIndex][k]
@@ -5572,7 +5665,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(nPlaneIndex==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][nPlaneIndex][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][k])/dA_j;
@@ -5590,7 +5685,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][nPlaneIndex][k]-dGrid[nW][i][nPlaneIndex][nSizeZ-1]);
             }
@@ -5664,6 +5761,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][nPlaneIndex][k]
@@ -5675,13 +5774,15 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             }
             if(dDVDt<-1.0*dDVDtThreshold){//being compressed
               dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-              dQ0=dASq*dGrid[nD][i][nPlaneIndex][nPlaneIndex]*dDVDt_mthreshold*dDVDt_mthreshold;
+              dQ0=dASq*dGrid[nD][i][nPlaneIndex][k]*dDVDt_mthreshold*dDVDt_mthreshold;
             }
             else{
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(nPlaneIndex==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][nPlaneIndex][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][k])/dA_j;
@@ -5699,7 +5800,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][nPlaneIndex][k]-dGrid[nW][i][nPlaneIndex][nSizeZ-1]);
             }
@@ -5720,8 +5823,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<dGrid[nT][i][nPlaneIndex][k]
             <<std::setw(nWidthOutputField)<<(dGrid[nT][i][nPlaneIndex][k]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
@@ -5735,6 +5847,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
           dDVDtThreshold=dAVThreshold*dC;
+          
+          //Q0
           if(nNumDims>=1){
             if(i==nSizeX1){
               dDVDt=(dA_ip1half*dGrid[nU][i+1][nPlaneIndex][k]
@@ -5752,7 +5866,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ0=0.0;
             }
           }
-          else if(nNumDims>=2){
+          
+          //Q1
+          if(nNumDims>=2){
             if(nPlaneIndex==0){
               dDVDt=(dA_jp1half*dGrid[nV][i][nPlaneIndex][k]
                 -dA_jm1half*dGrid[nV][i][nSizeY2-1][nPlaneIndex])/dA_j;
@@ -5770,7 +5886,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
               dQ1=0.0;
             }
           }
-          else if(nNumDims==3){
+          
+          //Q2
+          if(nNumDims==3){
             if(k==0){
               dDVDt=(dGrid[nW][i][nPlaneIndex][k]-dGrid[nW][i][nPlaneIndex][nSizeZ-1]);
             }
@@ -5790,8 +5908,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           ofFile
             <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve
-            <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+          if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
+            horizontal zone also*/
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+          }
+          else{
+            ofFile
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+          }
+          ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"<<std::endl;//8
         }
