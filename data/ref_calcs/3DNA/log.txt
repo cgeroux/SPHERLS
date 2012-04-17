@@ -1,4 +1,4 @@
-2012-03-26 14:03:01.237521
+2012-04-17 16:56:39.565973
 directory "/home/cgeroux/SPHERLS/data/ref_calcs/3DNA" found
 checking for needed files ...
 found "/home/cgeroux/SPHERLS/data/ref_calcs/3DNA/SPHERLS.xml"
@@ -172,7 +172,7 @@ src/SPHERLS/dataManipulation.cpp:fin:649:0:
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 4
     * Largest relative error in calculation of temperature was     6.50594e-15
-Run time for proc 0 is 7.1465840340e+00 [s]
+Run time for proc 0 is 7.1156351566e+00 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./3DNARef_t00222559" and removing distributed binaries ...

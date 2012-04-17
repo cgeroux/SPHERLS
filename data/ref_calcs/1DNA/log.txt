@@ -1,12 +1,12 @@
-2012-03-26 14:02:59.842362
+2012-04-17 16:56:37.156215
 directory "/home/cgeroux/SPHERLS/data/ref_calcs/1DNA" found
 checking for needed files ...
 found "/home/cgeroux/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
 found start model "1DNARef_t00000000"
 
 RUNNING SPHERLS
-src/SPHERLS/dataManipulation.cpp:init:294:3: WARNING: using constant time step of 7s 
 src/SPHERLS/dataManipulation.cpp:init:294:0: WARNING: using constant time step of 7s 
+src/SPHERLS/dataManipulation.cpp:init:294:3: WARNING: using constant time step of 7s 
 src/SPHERLS/dataManipulation.cpp:init:294:1: WARNING: using constant time step of 7s 
 src/SPHERLS/dataManipulation.cpp:init:294:2: WARNING: using constant time step of 7s 
 src/SPHERLS/main.cpp:main:94:0:
@@ -117,7 +117,7 @@ src/SPHERLS/dataManipulation.cpp:fin:649:0:
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.72124e-15
-Run time for proc 0 is 1.2147402763e-01 [s]
+Run time for proc 0 is 1.3283991814e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...
