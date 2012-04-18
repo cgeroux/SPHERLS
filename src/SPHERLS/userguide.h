@@ -53,12 +53,14 @@
     - also the make files will need to know where the paths for the libraries are, either describe how the user can do this, or automate it some how.
     
     @subsection requirements Requirements
+      - gcc/g++
       - openMPI
-      - gcc
       - PETSc library, used as the core matrix solver
     @subsection optional_requirements Optional Requirements
       - python for analysis scripts
-      - fftw library for analysis
+      - - numpy
+      - - matplotlib
+      - fftw3 library for analysis
       - hdf4 library for converting to hdf4 file format
       - Doxygen used to create documentation from source code via "make docs"
     

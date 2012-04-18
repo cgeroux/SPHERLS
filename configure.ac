@@ -6,18 +6,21 @@ AS_IF(
 [AC_MSG_RESULT(["mpic++ not found! Aborting"])
 exit;])
 AC_LANG([C++])
+GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
+GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
+
 #
 #common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS="/home/$USER/lib/fftw3/include /share/apps/fftw/include"
-FFTW_LIB_PATHS="/home/$USER/lib/fftw3/lib /share/apps/fftw/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
+FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
+FFTW_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/fftw/lib /usr/local/FFTW3/lib /share/apps/fftw/lib"
 #
 #common places for fftw libraries and includes
-HDF_INCLUDE_PATHS="/home/$USER/lib/hdf4/include /share/apps/hdf4/include"
-HDF_LIB_PATHS="/home/$USER/lib/hdf4/lib /share/apps/hdf4/lib"
+HDF_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/hdf4/include"
+HDF_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/hdf4/lib"
 #
 #common places for PETSc libraries and includes
-PETSC_INCLUDE_PATHS="/home/$USER/lib/petsc3/include"
-PETSC_LIB_PATHS="/home/$USER/lib/petsc3/lib"
+PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
+PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
 #
 #################################################################
 ## Check for FFTW3 include and library
