@@ -63,18 +63,17 @@
     
     @subsection installPETSC Installing PETSC Library
       - Download PETSc library, from the PETSc 
-        <a href="http://www.mcs.anl.gov/petsc/petsc-as/download/index.html">website</a>. Version 
-        petsc-lite-3.1-p8 has been tested to work with SPHERLS.
-      - The downloaded PETSc file  (e.g. petsc-lite-3.1-p8-tar.gz) will need to be unziped to do so
-      type <tt>gunzip petsc-lite-3.1-p8.tar.gz</tt>
-      - Then untar it with <tt>tar -xf petsc-lite-3.1-p8.tar</tt>
+        <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>. Version 
+        petsc-lite-3.1-p8, and petsc-lite-3.2-p7 have been tested to work with SPHERLS.
+      - The downloaded PETSc file  (e.g. petsc-lite-3.2-p7-tar.gz) 
+      - Then untar and unzip it with <tt>tar -xzf petsc-lite-3.2-p7.tar</tt>
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
-        -# \verbatim ./configure --prefix=<path-to-final-location-of-library> --with-c++-support --with-c-support
- --with-shared --download-f-blas-lapack=1 \endverbatim
+        -# \verbatim ./configure --prefix=/home/$USER/lib/petsc3 --with-c++-support --with-c-support
+ --with-shared --download-f-blas-lapack=1 \endverbatim where \verbatim $USER \endverbatim is the environment varible coresponding to your username.
         -# \verbatim make all \endverbatim
         -# \verbatim make install \endverbatim
-        -# \verbatim make PETSC_DIR=<path-to-final-location-of-library> test \endverbatim
+        -# \verbatim make PETSC_DIR=/home/$USER/lib/petsc3 test \endverbatim
     
     @subsection installFFTW Installing FFTW Library
       - Download the FFTW Library from the FFTS <a href="http://www.fftw.org/download.html">website</a>. Version fftw-3.2.2 has been tested to work with SPHERLS.
