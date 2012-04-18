@@ -55,9 +55,11 @@
     @subsection requirements Requirements
       - openMPI
       - gcc
-      - PETSc library
+      - PETSc library, used as the core matrix solver
+    @subsection optional_requirements Optional Requirements
       - python for analysis scripts
       - fftw library for analysis
+      - hdf4 library for converting to hdf4 file format
     
     @subsection installPETSC Installing PETSC Library
       - Download PETSc library, from the PETSc 
