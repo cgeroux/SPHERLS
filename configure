@@ -2460,16 +2460,16 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 #
 #common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS="/home/$USER/lib/fftw-3.2.2/include /share/apps/fftw/include"
-FFTW_LIB_PATHS="/home/$USER/lib/fftw-3.2.2/lib /share/apps/fftw/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
+FFTW_INCLUDE_PATHS="/home/$USER/lib/fftw3/include /share/apps/fftw/include"
+FFTW_LIB_PATHS="/home/$USER/lib/fftw3/lib /share/apps/fftw/lib /usr/local/FFTW3/lib /usr/lib /share/apps/fftw/lib"
 #
 #common places for fftw libraries and includes
 HDF_INCLUDE_PATHS="/home/$USER/lib/hdf4/include /share/apps/hdf4/include"
 HDF_LIB_PATHS="/home/$USER/lib/hdf4/lib /share/apps/hdf4/lib"
 #
 #common places for PETSc libraries and includes
-PETSC_INCLUDE_PATHS="/home/$USER/lib/petsc/include"
-PETSC_LIB_PATHS="/home/$USER/lib/petsc/lib"
+PETSC_INCLUDE_PATHS="/home/$USER/lib/petsc3/include"
+PETSC_LIB_PATHS="/home/$USER/lib/petsc3/lib"
 #
 #################################################################
 ## Check for FFTW3 include and library

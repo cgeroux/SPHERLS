@@ -66,10 +66,10 @@
       - Download PETSc library, from the PETSc 
         <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>. Version 
         petsc-lite-3.1-p8, and petsc-lite-3.2-p7 have been tested to work with SPHERLS.
-      - The downloaded PETSc file  (e.g. petsc-lite-3.2-p7-tar.gz) 
       - Then untar and unzip it with <tt>tar -xzf petsc-lite-3.2-p7.tar</tt>
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
+        -# \verbatim export PETSC_DIR= \endverbatim <path-to-newly-extracted-archive>. <path-to-newly-extracted-archive> should not be the same as the directory specified by \verbatim --prefix \endverbatim below.
         -# \verbatim ./configure --prefix=/home/$USER/lib/petsc3 --with-c++-support --with-c-support
  --with-shared --download-f-blas-lapack=1 \endverbatim where \verbatim $USER \endverbatim is the environment varible coresponding to your username.
         -# \verbatim make all \endverbatim
