@@ -60,6 +60,7 @@
       - python for analysis scripts
       - fftw library for analysis
       - hdf4 library for converting to hdf4 file format
+      - Doxygen used to create documentation from source code via "make docs"
     
     @subsection installPETSC Installing PETSC Library
       - Download PETSc library, from the PETSc 
@@ -85,7 +86,12 @@
         -# \verbatim make \endverbatim
         -# \verbatim make install \endverbatim
     
-    @subsection installingSPHERLS Installing SPHERLS
+    #@subsection installHDF4 Installing HDF4 Library
+    #@subsection installDoxygen Installing Doxygen
+    #@subsection installDoxygen Installing Doxygen
+    #@subsection installPython Installing Python
+    
+    #@subsection installingSPHERLS Installing SPHERLS
     
     
     
