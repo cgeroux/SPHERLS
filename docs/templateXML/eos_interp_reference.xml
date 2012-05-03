@@ -1,0 +1,288 @@
+<root>
+  <eos>
+    <files>
+      <!--equation of state files for the 2D grid defined by the above Xs ant Zs, they don't have
+      to be in any particular order, but they do have to form a ractangular grid in X and Z.-->
+      <file>eos2005/EOS5_00z0x</file>
+      <file>eos2005/EOS5_00z2x</file>
+      <file>eos2005/EOS5_00z4x</file>
+      <file>eos2005/EOS5_00z6x</file>
+      <file>eos2005/EOS5_00z8x</file>
+      <file>eos2005/EOS5_02z0x</file>
+      <file>eos2005/EOS5_02z2x</file>
+      <file>eos2005/EOS5_02z4x</file>
+      <file>eos2005/EOS5_02z6x</file>
+      <file>eos2005/EOS5_02z8x</file>
+      <file>eos2005/EOS5_04z0x</file>
+      <file>eos2005/EOS5_04z2x</file>
+      <file>eos2005/EOS5_04z4x</file>
+      <file>eos2005/EOS5_04z6x</file>
+      <file>eos2005/EOS5_04z8x</file>
+    </files>
+  </eos>
+  <opacity>
+    <!-- Uses the OPAL opacities with GN93 mix, and AF94 opacities with GN93 mix -->
+    <files>
+      <file id="1">opacity/GN93hz</file>
+      
+      <file id="2">opacity/low_temp_opacity/g0.0.tron</file>
+      <file id="3">opacity/low_temp_opacity/g1.0.tron</file>
+      <file id="4">opacity/low_temp_opacity/g2.0.tron</file>
+      <file id="5">opacity/low_temp_opacity/g35.0.tron</file>
+      <file id="6">opacity/low_temp_opacity/g5.0.tron</file>
+      <file id="7">opacity/low_temp_opacity/g7.0.tron</file>
+      <file id="8">opacity/low_temp_opacity/g8.0.tron</file>
+      
+      <file id="10">opacity/low_temp_opacity/g0.0001.tron</file>
+      <file id="11">opacity/low_temp_opacity/g1.0001.tron</file>
+      <file id="12">opacity/low_temp_opacity/g2.0001.tron</file>
+      <file id="13">opacity/low_temp_opacity/g35.0001.tron</file>
+      <file id="14">opacity/low_temp_opacity/g5.0001.tron</file>
+      <file id="15">opacity/low_temp_opacity/g7.0001.tron</file>
+      <file id="16">opacity/low_temp_opacity/g8.0001.tron</file>
+      
+      <file id="18">opacity/low_temp_opacity/g0.0003.tron</file>
+      <file id="19">opacity/low_temp_opacity/g1.0003.tron</file>
+      <file id="20">opacity/low_temp_opacity/g2.0003.tron</file>
+      <file id="21">opacity/low_temp_opacity/g35.0003.tron</file>
+      <file id="22">opacity/low_temp_opacity/g5.0003.tron</file>
+      <file id="23">opacity/low_temp_opacity/g7.0003.tron</file>
+      <file id="24">opacity/low_temp_opacity/g8.0003.tron</file>
+      
+      <file id="26">opacity/low_temp_opacity/g0.001.tron</file>
+      <file id="27">opacity/low_temp_opacity/g1.001.tron</file>
+      <file id="28">opacity/low_temp_opacity/g2.001.tron</file>
+      <file id="29">opacity/low_temp_opacity/g35.001.tron</file>
+      <file id="30">opacity/low_temp_opacity/g5.001.tron</file>
+      <file id="31">opacity/low_temp_opacity/g7.001.tron</file>
+      <file id="32">opacity/low_temp_opacity/g8.001.tron</file>
+      
+      <file id="34">opacity/low_temp_opacity/g0.002.tron</file>
+      <file id="35">opacity/low_temp_opacity/g1.002.tron</file>
+      <file id="36">opacity/low_temp_opacity/g2.002.tron</file>
+      <file id="37">opacity/low_temp_opacity/g35.002.tron</file>
+      <file id="38">opacity/low_temp_opacity/g5.002.tron</file>
+      <file id="39">opacity/low_temp_opacity/g7.002.tron</file>
+      <file id="40">opacity/low_temp_opacity/g8.002.tron</file>
+      
+      <file id="42">opacity/low_temp_opacity/g0.004.tron</file>
+      <file id="43">opacity/low_temp_opacity/g1.004.tron</file>
+      <file id="44">opacity/low_temp_opacity/g2.004.tron</file>
+      <file id="45">opacity/low_temp_opacity/g35.004.tron</file>
+      <file id="46">opacity/low_temp_opacity/g5.004.tron</file>
+      <file id="47">opacity/low_temp_opacity/g7.004.tron</file>
+      <file id="48">opacity/low_temp_opacity/g8.004.tron</file>
+      
+      <file id="50">opacity/low_temp_opacity/g0.01.tron</file>
+      <file id="51">opacity/low_temp_opacity/g1.01.tron</file>
+      <file id="52">opacity/low_temp_opacity/g2.01.tron</file>
+      <file id="53">opacity/low_temp_opacity/g35.01.tron</file>
+      <file id="54">opacity/low_temp_opacity/g5.01.tron</file>
+      <file id="55">opacity/low_temp_opacity/g7.01.tron</file>
+      <file id="56">opacity/low_temp_opacity/g8.01.tron</file>
+      
+      <file id="58">opacity/low_temp_opacity/g0.02.tron</file>
+      <file id="59">opacity/low_temp_opacity/g1.02.tron</file>
+      <file id="60">opacity/low_temp_opacity/g2.02.tron</file>
+      <file id="61">opacity/low_temp_opacity/g35.02.tron</file>
+      <file id="62">opacity/low_temp_opacity/g5.02.tron</file>
+      <file id="63">opacity/low_temp_opacity/g7.02.tron</file>
+      <file id="64">opacity/low_temp_opacity/g8.02.tron</file>
+      
+      <file id="66">opacity/low_temp_opacity/g0.03.tron</file>
+      <file id="67">opacity/low_temp_opacity/g1.03.tron</file>
+      <file id="68">opacity/low_temp_opacity/g2.03.tron</file>
+      <file id="69">opacity/low_temp_opacity/g35.03.tron</file>
+      <file id="70">opacity/low_temp_opacity/g5.03.tron</file>
+      <file id="71">opacity/low_temp_opacity/g7.03.tron</file>
+      <file id="72">opacity/low_temp_opacity/g8.03.tron</file>
+      
+      <file id="74">opacity/low_temp_opacity/g0.04.tron</file>
+      <file id="75">opacity/low_temp_opacity/g1.04.tron</file>
+      <file id="76">opacity/low_temp_opacity/g2.04.tron</file>
+      <file id="77">opacity/low_temp_opacity/g35.04.tron</file>
+      <file id="78">opacity/low_temp_opacity/g5.04.tron</file>
+      <file id="79">opacity/low_temp_opacity/g7.04.tron</file>
+      <file id="80">opacity/low_temp_opacity/g8.04.tron</file>
+      
+    </files>
+    <tables>
+      
+      <!-- OPAL opacities -->
+      <table fileID="1" X="0.0" Z="0.0"></table>
+      <table fileID="1" X="0.1" Z="0.0"></table>
+      <table fileID="1" X="0.2" Z="0.0"></table>
+      <table fileID="1" X="0.35" Z="0.0"></table>
+      <table fileID="1" X="0.5" Z="0.0"></table>
+      <table fileID="1" X="0.7" Z="0.0"></table>
+      <table fileID="1" X="0.8" Z="0.0"></table>
+      
+      <table fileID="1" X="0.0" Z="0.0001"></table>
+      <table fileID="1" X="0.1" Z="0.0001"></table>
+      <table fileID="1" X="0.2" Z="0.0001"></table>
+      <table fileID="1" X="0.35" Z="0.0001"></table>
+      <table fileID="1" X="0.5" Z="0.0001"></table>
+      <table fileID="1" X="0.7" Z="0.0001"></table>
+      <table fileID="1" X="0.8" Z="0.0001"></table>
+      
+      <table fileID="1" X="0.0" Z="0.0003"></table>
+      <table fileID="1" X="0.1" Z="0.0003"></table>
+      <table fileID="1" X="0.2" Z="0.0003"></table>
+      <table fileID="1" X="0.35" Z="0.0003"></table>
+      <table fileID="1" X="0.5" Z="0.0003"></table>
+      <table fileID="1" X="0.7" Z="0.0003"></table>
+      <table fileID="1" X="0.8" Z="0.0003"></table>
+      
+      <table fileID="1" X="0.0" Z="0.001"></table>
+      <table fileID="1" X="0.1" Z="0.001"></table>
+      <table fileID="1" X="0.2" Z="0.001"></table>
+      <table fileID="1" X="0.35" Z="0.001"></table>
+      <table fileID="1" X="0.5" Z="0.001"></table>
+      <table fileID="1" X="0.7" Z="0.001"></table>
+      <table fileID="1" X="0.8" Z="0.001"></table>
+      
+      <table fileID="1" X="0.0" Z="0.002"></table>
+      <table fileID="1" X="0.1" Z="0.002"></table>
+      <table fileID="1" X="0.2" Z="0.002"></table>
+      <table fileID="1" X="0.35" Z="0.002"></table>
+      <table fileID="1" X="0.5" Z="0.002"></table>
+      <table fileID="1" X="0.7" Z="0.002"></table>
+      <table fileID="1" X="0.8" Z="0.002"></table>
+      
+      <table fileID="1" X="0.0" Z="0.004"></table>
+      <table fileID="1" X="0.1" Z="0.004"></table>
+      <table fileID="1" X="0.2" Z="0.004"></table>
+      <table fileID="1" X="0.35" Z="0.004"></table>
+      <table fileID="1" X="0.5" Z="0.004"></table>
+      <table fileID="1" X="0.7" Z="0.004"></table>
+      <table fileID="1" X="0.8" Z="0.004"></table>
+      
+      <table fileID="1" X="0.0" Z="0.01"></table>
+      <table fileID="1" X="0.1" Z="0.01"></table>
+      <table fileID="1" X="0.2" Z="0.01"></table>
+      <table fileID="1" X="0.35" Z="0.01"></table>
+      <table fileID="1" X="0.5" Z="0.01"></table>
+      <table fileID="1" X="0.7" Z="0.01"></table>
+      <table fileID="1" X="0.8" Z="0.01"></table>
+      
+      <table fileID="1" X="0.0" Z="0.02"></table>
+      <table fileID="1" X="0.1" Z="0.02"></table>
+      <table fileID="1" X="0.2" Z="0.02"></table>
+      <table fileID="1" X="0.35" Z="0.02"></table>
+      <table fileID="1" X="0.5" Z="0.02"></table>
+      <table fileID="1" X="0.7" Z="0.02"></table>
+      <table fileID="1" X="0.8" Z="0.02"></table>
+      
+      <table fileID="1" X="0.0" Z="0.03"></table>
+      <table fileID="1" X="0.1" Z="0.03"></table>
+      <table fileID="1" X="0.2" Z="0.03"></table>
+      <table fileID="1" X="0.35" Z="0.03"></table>
+      <table fileID="1" X="0.5" Z="0.03"></table>
+      <table fileID="1" X="0.7" Z="0.03"></table>
+      <table fileID="1" X="0.8" Z="0.03"></table>
+      
+      <table fileID="1" X="0.0" Z="0.04"></table>
+      <table fileID="1" X="0.1" Z="0.04"></table>
+      <table fileID="1" X="0.2" Z="0.04"></table>
+      <table fileID="1" X="0.35" Z="0.04"></table>
+      <table fileID="1" X="0.5" Z="0.04"></table>
+      <table fileID="1" X="0.7" Z="0.04"></table>
+      <table fileID="1" X="0.8" Z="0.04"></table>
+      
+      <!-- low temperture Alexander opacities -->
+      <table fileID="2" X="0.0" Z="0.0"></table>
+      <table fileID="3" X="0.1" Z="0.0"></table>
+      <table fileID="4" X="0.2" Z="0.0"></table>
+      <table fileID="5" X="0.35" Z="0.0"></table>
+      <table fileID="6" X="0.5" Z="0.0"></table>
+      <table fileID="7" X="0.7" Z="0.0"></table>
+      <table fileID="8" X="0.8" Z="0.0"></table>
+      
+      <table fileID="10" X="0.0" Z="0.0001"></table>
+      <table fileID="11" X="0.1" Z="0.0001"></table>
+      <table fileID="12" X="0.2" Z="0.0001"></table>
+      <table fileID="13" X="0.35" Z="0.0001"></table>
+      <table fileID="14" X="0.5" Z="0.0001"></table>
+      <table fileID="15" X="0.7" Z="0.0001"></table>
+      <table fileID="16" X="0.8" Z="0.0001"></table>
+      
+      <table fileID="18" X="0.0" Z="0.0003"></table>
+      <table fileID="19" X="0.1" Z="0.0003"></table>
+      <table fileID="20" X="0.2" Z="0.0003"></table>
+      <table fileID="21" X="0.35" Z="0.0003"></table>
+      <table fileID="22" X="0.5" Z="0.0003"></table>
+      <table fileID="23" X="0.7" Z="0.0003"></table>
+      <table fileID="24" X="0.8" Z="0.0003"></table>
+      
+      <table fileID="26" X="0.0" Z="0.001"></table>
+      <table fileID="27" X="0.1" Z="0.001"></table>
+      <table fileID="28" X="0.2" Z="0.001"></table>
+      <table fileID="29" X="0.35" Z="0.001"></table>
+      <table fileID="30" X="0.5" Z="0.001"></table>
+      <table fileID="31" X="0.7" Z="0.001"></table>
+      <table fileID="32" X="0.8" Z="0.001"></table>
+      
+      <table fileID="34" X="0.0" Z="0.002"></table>
+      <table fileID="35" X="0.1" Z="0.002"></table>
+      <table fileID="36" X="0.2" Z="0.002"></table>
+      <table fileID="37" X="0.35" Z="0.002"></table>
+      <table fileID="38" X="0.5" Z="0.002"></table>
+      <table fileID="39" X="0.7" Z="0.002"></table>
+      <table fileID="40" X="0.8" Z="0.002"></table>
+      
+      <table fileID="42" X="0.0" Z="0.004"></table>
+      <table fileID="43" X="0.1" Z="0.004"></table>
+      <table fileID="44" X="0.2" Z="0.004"></table>
+      <table fileID="45" X="0.35" Z="0.004"></table>
+      <table fileID="46" X="0.5" Z="0.004"></table>
+      <table fileID="47" X="0.7" Z="0.004"></table>
+      <table fileID="48" X="0.8" Z="0.004"></table>
+      
+      <table fileID="50" X="0.0" Z="0.01"></table>
+      <table fileID="51" X="0.1" Z="0.01"></table>
+      <table fileID="52" X="0.2" Z="0.01"></table>
+      <table fileID="53" X="0.35" Z="0.01"></table>
+      <table fileID="54" X="0.5" Z="0.01"></table>
+      <table fileID="55" X="0.7" Z="0.01"></table>
+      <table fileID="56" X="0.8" Z="0.01"></table>
+      
+      <table fileID="58" X="0.0" Z="0.02"></table>
+      <table fileID="59" X="0.1" Z="0.02"></table>
+      <table fileID="60" X="0.2" Z="0.02"></table>
+      <table fileID="61" X="0.35" Z="0.02"></table>
+      <table fileID="62" X="0.5" Z="0.02"></table>
+      <table fileID="63" X="0.7" Z="0.02"></table>
+      <table fileID="64" X="0.8" Z="0.02"></table>
+      
+      <table fileID="66" X="0.0" Z="0.03"></table>
+      <table fileID="67" X="0.1" Z="0.03"></table>
+      <table fileID="68" X="0.2" Z="0.03"></table>
+      <table fileID="69" X="0.35" Z="0.03"></table>
+      <table fileID="70" X="0.5" Z="0.03"></table>
+      <table fileID="71" X="0.7" Z="0.03"></table>
+      <table fileID="72" X="0.8" Z="0.03"></table>
+      
+      <table fileID="74" X="0.0" Z="0.04"></table>
+      <table fileID="75" X="0.1" Z="0.04"></table>
+      <table fileID="76" X="0.2" Z="0.04"></table>
+      <table fileID="77" X="0.35" Z="0.04"></table>
+      <table fileID="78" X="0.5" Z="0.04"></table>
+      <table fileID="79" X="0.7" Z="0.04"></table>
+      <table fileID="80" X="0.8" Z="0.04"></table>
+      
+    </tables>
+  </opacity>
+  <interpolatedTables>
+    <table>
+      <X>0.8</X>
+      <Z>0.02</Z>
+      <minLogD>-14.0</minLogD>
+      <delLogD>1</delLogD>
+      <numLogD>21</numLogD>
+      <minLogT>3.3</minLogT>
+      <delLogT>0.04</delLogT>
+      <numLogT>800</numLogT>
+      <outputFile>eosTest</outputFile>
+    </table>
+  </interpolatedTables>
+</root>
