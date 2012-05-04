@@ -465,11 +465,6 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       //get number of 1D zones at center
       getXMLValue(xIndepVar,"num-1D",0,nNumZones1D);
       
-      //get intial density
-      if(!getXMLValueNoThrow(xIndepVar,"init-Rho",0,dInitRho)){
-        dInitRho=-1.0;//default
-      }
-      
       ////////////////////////////////////////
       //GET PERIODICITY
       
@@ -847,10 +842,7 @@ void calculateFirstShell_TEOS(){
   
   //calculate density at (0)
   //density will be low, start between first two grid points of table
-  double dRho=pow(10.0,(eosTable.dLogRhoMin+5.0*eosTable.dLogRhoDelta));
-  if (dInitRho>0.0 && (dInitRho>pow(10.0,eosTable.dLogRhoMin))){
-    dRho=dInitRho;
-  }
+  double dRho=pow(10.0,(eosTable.dLogRhoMin+0.5*eosTable.dLogRhoDelta));
   double dError=std::numeric_limits<double>::max();
   double dP;
   double dDRhoDP;
