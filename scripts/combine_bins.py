@@ -37,8 +37,14 @@ def combine_bin_files(keep,fileName,remakeBins):
   
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
   
-  #check for distributed binary files in interation range starting with baseFileName
-  filesExist=glob.glob(baseFileName+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-0")
+  #if only doning one file we can make this faster
+  filesExist=[]
+  if end-start==1:
+    filesExist.append(baseFileName+str(start).zfill(8)+"-0")
+  else:
+    #check for distributed binary files in interation range starting with baseFileName
+    filesExist=glob.glob(baseFileName+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-0")
+  
   files=[]
   for file in filesExist:
     intOfFile=int(file[len(baseFileName):len(file)-2])
