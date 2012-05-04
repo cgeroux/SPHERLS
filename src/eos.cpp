@@ -608,9 +608,15 @@ double eos::dDRhoDP(double dT,double dRho){
   //temperature constant
   double dP_i  =(dLogP[nILower][nJUpper]-dLogP[nILower][nJLower])*dTFrac+dLogP[nILower][nJLower];
   double dP_ip1=(dLogP[nIUpper][nJUpper]-dLogP[nIUpper][nJLower])*dTFrac+dLogP[nIUpper][nJLower];
-  double dRhoDP=(pow(10.0,dLogRhoUpper)-pow(10.0,dLogRhoLower))/(pow(10.0,dP_ip1)-pow(10.0,dP_i));
-  
-  return dRhoDP;
+  double dDRhoDP=(pow(10.0,dLogRhoUpper)-pow(10.0,dLogRhoLower))/(pow(10.0,dP_ip1)-pow(10.0,dP_i));
+  if (std::isnan(dDRhoDP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for DRhoDP, indicating that one or more values used in the interpolation "
+      <<"are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  return dDRhoDP;
 }
 double eos::dSoundSpeed(double dT,double dRho){
   
@@ -709,7 +715,15 @@ double eos::dSoundSpeed(double dT,double dRho){
   double dGamma1=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
   
   //calculate speed of sound
-  return sqrt(dGamma1*dP/dRho);
+  double dC=sqrt(dGamma1*dP/dRho);
+  if (std::isnan(dC)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the sound speed, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  return dC;
 }
 void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa){
   
@@ -781,6 +795,13 @@ void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa){
   double dE_j  =(dLogE[nIUpper][nJLower]-dLogE[nILower][nJLower])*dRhoFrac+dLogE[nILower][nJLower];
   double dE_jp1=(dLogE[nIUpper][nJUpper]-dLogE[nILower][nJUpper])*dRhoFrac+dLogE[nILower][nJUpper];
   dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated opacity
   double dKappa_j  =(dLogKappa[nIUpper][nJLower]-dLogKappa[nILower][nJLower])*dRhoFrac
@@ -788,6 +809,13 @@ void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa){
   double dKappa_jp1=(dLogKappa[nIUpper][nJUpper]-dLogKappa[nILower][nJUpper])*dRhoFrac
     +dLogKappa[nILower][nJUpper];
   dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKappa){
   
@@ -859,11 +887,25 @@ void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKa
   double dP_j  =(dLogP[nIUpper][nJLower]-dLogP[nILower][nJLower])*dRhoFrac+dLogP[nILower][nJLower];
   double dP_jp1=(dLogP[nIUpper][nJUpper]-dLogP[nILower][nJUpper])*dRhoFrac+dLogP[nILower][nJUpper];
   dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated energy
   double dE_j  =(dLogE[nIUpper][nJLower]-dLogE[nILower][nJLower])*dRhoFrac+dLogE[nILower][nJLower];
   double dE_jp1=(dLogE[nIUpper][nJUpper]-dLogE[nILower][nJUpper])*dRhoFrac+dLogE[nILower][nJUpper];
   dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated opacity
   double dKappa_j  =(dLogKappa[nIUpper][nJLower]-dLogKappa[nILower][nJLower])*dRhoFrac
@@ -871,6 +913,13 @@ void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKa
   double dKappa_jp1=(dLogKappa[nIUpper][nJUpper]-dLogKappa[nILower][nJUpper])*dRhoFrac
     +dLogKappa[nILower][nJUpper];
   dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double &dKappa
   ,double &dGamma){
@@ -968,18 +1017,46 @@ void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double
   
   //calculate interpolated energy
   dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated pressure
   dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated opacity
   dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
-  //calculate Gamma3 - 1
+  //calculate Gamma3-1
   double dGamma3m1=dP/(dRho*dT*dDEDT)*dDlnPDlnT;
   
   //calculate Gamma1
   dGamma=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
+  if (std::isnan(dGamma)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the gamma, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, double &dKappa
   ,double &dGamma, double &dC_p){
@@ -1077,24 +1154,59 @@ void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, doub
   
   //calculate interpolated energy
   dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated pressure
   dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated opacity
   dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate Gamma3 - 1
   double dGamma3m1=dP/(dRho*dT*dDEDT)*dDlnPDlnT;
   
   //calculate Gamma1
   dGamma=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
+  if (std::isnan(dGamma)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the gamma, indicating that one or more values used in the"
+      <<"interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
   double dC_v=dE/dT*(dE_jp1-dE_j)/(dLogTUpper-dLogTLower);
   
   //calculate dE/dT at constant pressure, equal to C_p (specific heat at constant pressure)
   dC_p=dGamma*dC_v/dDlnPDlnRho;
+  if (std::isnan(dC_p)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the specific heat at constant pressure, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma){
   
@@ -1194,15 +1306,36 @@ void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,doub
   
   //calculate interpolated pressure
   dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated opacity
   dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate Gamma3 - 1
   double dGamma3m1=dP/(dRho*dT*dDEDT)*dDlnPDlnT;
   
   //calculate Gamma1
   dGamma=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
+  if (std::isnan(dGamma)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the gamma, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,double &dC_v){
   
@@ -1294,15 +1427,36 @@ void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,d
   
   //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
   dC_v=dE/dT*(dE_jp1-dE_j)/(dLogTUpper-dLogTLower);
+  if (std::isnan(dC_v)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the specific heat at constant volume, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate Gamma3 - 1
   double dGamma3m1=dP/(dRho*dT*dC_v)*dDlnPDlnT;
   
   //calculate Gamma1
   dGamma1=dDlnPDlnT*dGamma3m1+dDlnPDlnRho;
+  if (std::isnan(dGamma1)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the gamma, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate DelAd
   dDelAd=dGamma3m1/dGamma1;
+  if (std::isnan(dDelAd)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the adiatabtic temperature gradient, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP){
   
@@ -1374,9 +1528,23 @@ void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP){
   double dLogP_i  =(dLogP[nILower][nJUpper]-dLogP[nILower][nJLower])*dTFrac+dLogP[nILower][nJLower];
   double dLogP_ip1=(dLogP[nIUpper][nJUpper]-dLogP[nIUpper][nJLower])*dTFrac+dLogP[nIUpper][nJLower];
   dDRhoDP=(pow(10.0,dLogRhoUpper)-pow(10.0,dLogRhoLower))/(pow(10.0,dLogP_ip1)-pow(10.0,dLogP_i));
+  if (std::isnan(dDRhoDP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the DRhoDP, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated pressure
   dP=pow(10.0,((dLogP_ip1-dLogP_i)*dRhoFrac+dLogP_i));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
 void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE){
   
@@ -1448,7 +1616,21 @@ void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE){
   double dLogE_j  =(dLogE[nIUpper][nJLower]-dLogE[nILower][nJLower])*dRhoFrac+dLogE[nILower][nJLower];
   double dLogE_jp1=(dLogE[nIUpper][nJUpper]-dLogE[nILower][nJUpper])*dRhoFrac+dLogE[nILower][nJUpper];
   dDTDE=(pow(10.0,dLogTUpper)-pow(10.0,dLogTLower))/(pow(10.0,dLogE_jp1)-pow(10.0,dLogE_j));
+  if (std::isnan(dDTDE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the DTDE, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate interpolated energy
   dE=pow(10.0,((dLogE_jp1-dLogE_j)*dTFrac+dLogE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values "
+      <<"used in the interpolation are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
 }
