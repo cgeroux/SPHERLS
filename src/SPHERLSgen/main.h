@@ -267,7 +267,10 @@ bool bWriteToScreen;/**<
 bool bIsSedov;/**<
   If true it will generate a starting model to preform a Sedov (blast wave) test of the code.
   */
-
+double dInitRho;/**<
+  If greater than 0 and greater than the minimum density in the eos/opacity table it will be used
+  as the frist density at the surface of the model.
+  */
 //functions
 void readConfig(std::string sConfigFileName,std::string sStartNode);/**<
   Reads in an xml configuration file and sets the values of many global variables. 
