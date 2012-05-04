@@ -531,7 +531,7 @@ double eos::dGetOpacity(double dT, double dRho){
     +dLogKappa[nILower][nJLower];
   double dKappa_jp1=(dLogKappa[nIUpper][nJUpper]-dLogKappa[nILower][nJUpper])*dRhoFrac
     +dLogKappa[nILower][nJUpper];
-  double dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j))
+  double dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
   if (std::isnan(dKappa)){
     std::stringstream ssTemp;
     ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__

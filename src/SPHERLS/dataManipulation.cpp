@@ -646,7 +646,7 @@ void fin(bool bWriteCurrentStateToFile, Time &time, Output &output,ProcTop
             std::cout.setf(std::ios::scientific);
             std::cout.precision(14);
             if(output.nPrintMode==0){
-              std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<global.procTop.nRank<<":"
+              std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank<<":"
                 <<std::endl<<"  Dumping model to file: "<<ssFileNameOut.str()<<std::endl;
               std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank<<":"
                 <<std::endl
