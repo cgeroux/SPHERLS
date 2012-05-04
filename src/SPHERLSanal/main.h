@@ -92,6 +92,9 @@ int nL_con;/**<
 int nKE;/**<
   Index of the Kinetic energy.
   */
+int nC;/**<
+  Index of the sound speed.
+  */
 
 //variables
 int  nPrecisionAscii=16;/**<

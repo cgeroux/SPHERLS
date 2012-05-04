@@ -371,7 +371,15 @@ double eos::dGetPressure(double dT, double dRho){
   //calculate interpolated pressure
   double dP_j  =(dLogP[nIUpper][nJLower]-dLogP[nILower][nJLower])*dRhoFrac+dLogP[nILower][nJLower];
   double dP_jp1=(dLogP[nIUpper][nJUpper]-dLogP[nILower][nJUpper])*dRhoFrac+dLogP[nILower][nJUpper];
-  return pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  double dP=pow(10.0,((dP_jp1-dP_j)*dTFrac+dP_j));
+  if (std::isnan(dP)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the pressure, indicating that one or more values used in the interpolation "
+      <<"are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  return dP;
 }
 double eos::dGetEnergy(double dT, double dRho){
   
@@ -442,7 +450,15 @@ double eos::dGetEnergy(double dT, double dRho){
   //calculate interpolated energy
   double dE_j  =(dLogE[nIUpper][nJLower]-dLogE[nILower][nJLower])*dRhoFrac+dLogE[nILower][nJLower];
   double dE_jp1=(dLogE[nIUpper][nJUpper]-dLogE[nILower][nJUpper])*dRhoFrac+dLogE[nILower][nJUpper];
-  return pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  double dE=pow(10.0,((dE_jp1-dE_j)*dTFrac+dE_j));
+  if (std::isnan(dE)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the energy, indicating that one or more values used in the interpolation "
+      <<"are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  return dE;
 }
 double eos::dGetOpacity(double dT, double dRho){
   
@@ -515,7 +531,15 @@ double eos::dGetOpacity(double dT, double dRho){
     +dLogKappa[nILower][nJLower];
   double dKappa_jp1=(dLogKappa[nIUpper][nJUpper]-dLogKappa[nILower][nJUpper])*dRhoFrac
     +dLogKappa[nILower][nJUpper];
-  return pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j));
+  double dKappa=pow(10.0,((dKappa_jp1-dKappa_j)*dTFrac+dKappa_j))
+  if (std::isnan(dKappa)){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": got nan for the opacity, indicating that one or more values used in the interpolation "
+      <<"are outside the calculated grid points.\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  return dKappa;
 }
 double eos::dDRhoDP(double dT,double dRho){
   
@@ -584,7 +608,9 @@ double eos::dDRhoDP(double dT,double dRho){
   //temperature constant
   double dP_i  =(dLogP[nILower][nJUpper]-dLogP[nILower][nJLower])*dTFrac+dLogP[nILower][nJLower];
   double dP_ip1=(dLogP[nIUpper][nJUpper]-dLogP[nIUpper][nJLower])*dTFrac+dLogP[nIUpper][nJLower];
-  return (pow(10.0,dLogRhoUpper)-pow(10.0,dLogRhoLower))/(pow(10.0,dP_ip1)-pow(10.0,dP_i));
+  double dRhoDP=(pow(10.0,dLogRhoUpper)-pow(10.0,dLogRhoLower))/(pow(10.0,dP_ip1)-pow(10.0,dP_i));
+  
+  return dRhoDP;
 }
 double eos::dSoundSpeed(double dT,double dRho){
   

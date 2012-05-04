@@ -94,7 +94,7 @@ def averagePKE(start,end,baseFileName,options):
     else:
       print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but re-sum set so resumming KE entries in profiles"
   
-  nColumKE=57
+  nColumKE=61
   for file in files:
     fileIndex=int(file[len(file)-16:len(file)-8])
     if fileIndex>lastIndex:#make sure that file hasn't already been done

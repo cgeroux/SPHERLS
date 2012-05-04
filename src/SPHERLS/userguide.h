@@ -52,9 +52,9 @@
     - example .bashrc entries, showing LD_LIBRARY_PATH additions, and other SPHERLS related configuration options
     - also the make files will need to know where the paths for the libraries are, either describe how the user can do this, or automate it some how.
     
-    A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib \c /include , \c /usr/lib /usr/include , \c /usr/local/lib \c/usr/local/include , and \c /home/$USER/lib \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manualy tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options.
+    A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib, \c /include, \c /usr/lib /usr/include, \c /usr/local/lib, \c /usr/local/include, \c /home/$USER/lib, and \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manualy tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options to tell the script where to find these include files and libraries.
     
-    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin , \c ~/lib \c ~/include ,and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \c --prefix=/home/$USER/ to point to where you want to install it. 
+    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \c --prefix=/home/$USER/, mentioned below, to point to where you want to install it. 
     
     If you have root access and want to install for all users of the current machine you will likely want to install the libraries into \c /usr/local  which can be achieved by setting \c --prefix=/usr/local instead of \c --prefix=/home/$USER/ used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
@@ -71,19 +71,20 @@
       - Doxygen used to create documentation from source code via "make docs"
     
     @subsection installPETSC Installing PETSC Library
-      - Download PETSc library, from the PETSc 
-        <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>. Version 
-        petsc-lite-3.1-p8, has been tested to work with SPHERLS. petsc-lite-3.2-p7 is known to be incompatible, which as of this writting is the current version of the petsc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. 
-        
-        I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
+      Version \c petsc-lite-3.1-p8, has been tested to work with SPHERLS. \c petsc-lite-3.2-p7 is known to be incompatible, which as of this writting is the current version of the petsc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
+      - Download PETSc library, from the PETSc <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>.
       - Then untar and unzip it with <tt>tar -xzf petsc-lite-3.1-p8.tar</tt>
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
         -# \verbatim ./configure PETSC_DIR=$PWD --prefix=/home/$USER/ --with-c++-support --with-c-support
- --with-shared --download-f-blas-lapack=1 --with-x11=no --with-x11=no \endverbatim where \verbatim $USER \endverbatim is the environment varible coresponding to your username.
+ --with-shared --download-f-blas-lapack=1 --with-x11=no --with-x11=no \endverbatim \c $USER is the environment varible coresponding to your username.
         -# \verbatim make all \endverbatim
         -# \verbatim make install \endverbatim
-        -# \verbatim make PETSC_DIR=/home/$USER/lib/petsc3 test \endverbatim
+        -# \verbatim make PETSC_DIR=/home/$USER/lib test \endverbatim
+      - You will then need to add the following line to you \c .bashrc file to assure that you will pick up the library
+      \verbatim
+      export PETSC_DIR=/home/$USER/lib
+      \endverbatim
     
     @subsection installFFTW Installing FFTW Library
       - Download the FFTW Library from the FFTS <a href="http://www.fftw.org/download.html">website</a>. Version fftw-3.2.2 has been tested to work with SPHERLS.
@@ -95,12 +96,12 @@
         -# \verbatim make \endverbatim
         -# \verbatim make install \endverbatim
     
-    #@subsection installHDF4 Installing HDF4 Library
-    #@subsection installDoxygen Installing Doxygen
-    #@subsection installDoxygen Installing Doxygen
-    #@subsection installPython Installing Python
+    @subsection installHDF4 Installing HDF4 Library
+    @subsection installDoxygen Installing Doxygen
+    The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
+    @subsection installPython Installing Python
     
-    #@subsection installingSPHERLS Installing SPHERLS
+    @subsection installingSPHERLS Installing SPHERLS
     
     
     

@@ -31,6 +31,10 @@ def main():
     +"create any submit scripts or submit any jobs. [not default]")
   parser.add_option('-t',action="store_true",dest="t",default=False,help="If set will use "
     +"threading instead of the sun grid engine")
+  parser.add_option('-m',action="store_true",dest="m",default=False,help="If set will re-make "
+   +"radial profiles even if the already exist.")
+  parser.add_option('-r',action="store_true",dest="r",default=False,help="If set will re-sum "
+   +"the model profiles kinetic energies.")
   
   #parse command line options
   (options,args)=parser.parse_args()
@@ -115,7 +119,13 @@ def main():
       script=""
       #if not options.d:#if not a dry run make submit scripts
       settings['jobName']=jobName
-      settings['arguments']=[os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
+      remake=""
+      resum=""
+      if options.m:#use --remake option to remake profiles even if they exist already
+        remake=" --remake "
+      if options.r:#use --re-sum option so that all model profiles KE will be re-summed
+        resum=" --re-sum "
+      settings['arguments']=[remake,resum,os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
       script=makeSubScript(settings,options.e)
       
@@ -127,6 +137,10 @@ def main():
         break
 def runAverage(outputFileName,logFile,options):
   cmd=os.path.join(paths.scriptPaths,"average_PKE.py")
+  if options.m:#use --remake option to remake profiles even if they exist already
+    cmd+=" --remake"
+  if options.r:#use --re-sum option so that all model profiles KE will be re-summed
+    cmd+=" --re-sum"
   cmd+=" "+outputFileName+"_t[0-*] >"+logFile+".out"
   if options.d:
     print cmd

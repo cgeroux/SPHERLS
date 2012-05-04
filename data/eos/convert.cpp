@@ -14,10 +14,10 @@ int main(){
     //eosConvert.writeBin("eos2");
     //eosConvert.writeBin("eosCTOPAC");
     //eosConvert.readAscii("eosCTOPAC_fixed.txt");
-    eosConvert.readAscii("eosY240Z002.txt");
-    eosConvert.writeBin("eosY240Z002");
+    //eosConvert.readAscii("eosY240Z002.txt");
+    eosConvert.readBin("eosY240Z002_HEAD");
     //eosConvert.readBin("eosY240Z002");
-    //eosConvert.writeAscii("eosY240Z002.txt");
+    eosConvert.writeAscii("eosY240Z002_HEAD.txt");
   }
   //error handeling
   catch(exception2& eTemp){
@@ -35,13 +35,22 @@ int main(){
   ofOut.precision(16);
   ofOut.unsetf(std::ios::fixed);
   ofOut.setf(std::ios::scientific);
+  double dCurLogRho;
+  double dCurLogT;
+  //std::cout<<eosConvert.nNumRho<<std::endl;
+  //std::cout<<eosConvert.nNumT<<std::endl;
   for(int i=0;i<eosConvert.nNumRho;i++){
     for(int j=0;j<eosConvert.nNumT;j++){
-      ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
-        <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
-        <<eosConvert.dLogP[i][j]<<std::endl;
+      
+      dCurLogRho=eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i);
+      dCurLogT=eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j);
+      if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89 &&dCurLogT>=5.66&&dCurLogT<=5.676){
+        ofOut<<eosConvert.dLogP[i][j]<<" ";
+      }
     }
-    ofOut<<std::endl;
+    if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89){
+      ofOut<<std::endl;
+    }
   }
   ofOut.close();
   
@@ -51,11 +60,15 @@ int main(){
   ofOut.setf(std::ios::scientific);
   for(int i=0;i<eosConvert.nNumRho;i++){
     for(int j=0;j<eosConvert.nNumT;j++){
-      ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
-        <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
-        <<eosConvert.dLogKappa[i][j]<<std::endl;
+      dCurLogRho=eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i);
+      dCurLogT=eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j);
+      if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89 &&dCurLogT>=5.66&&dCurLogT<=5.676){
+        ofOut<<eosConvert.dLogKappa[i][j]<<" ";
+      }
     }
-    ofOut<<std::endl;
+    if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89){
+      ofOut<<std::endl;
+    }
   }
   ofOut.close();
   
@@ -65,11 +78,18 @@ int main(){
   ofOut.setf(std::ios::scientific);
   for(int i=0;i<eosConvert.nNumRho;i++){
     for(int j=0;j<eosConvert.nNumT;j++){
-      ofOut<<eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i)<<" "
-        <<eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j)<<" "
-        <<eosConvert.dLogE[i][j]<<std::endl;
+      dCurLogRho=eosConvert.dLogRhoMin+eosConvert.dLogRhoDelta*double(i);
+      dCurLogT=eosConvert.dLogTMin+eosConvert.dLogTDelta*double(j);
+      //std::cout<<"("<<dCurLogRho<<","<<dCurLogT<<")"<<std::endl;
+      if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89 &&dCurLogT>=5.66&&dCurLogT<=5.676){
+        std::cout<<"("<<dCurLogRho<<","<<dCurLogT<<") ";
+        ofOut<<eosConvert.dLogE[i][j]<<" ";
+      }
     }
-    ofOut<<std::endl;
+    if(dCurLogRho>=-4.3&&dCurLogRho<=-3.89){
+      ofOut<<std::endl;
+      std::cout<<std::endl;
+    }
   }
   ofOut.close();
   return 0;
