@@ -847,7 +847,7 @@ void calculateFirstShell_TEOS(){
   
   //calculate density at (0)
   //density will be low, start between first two grid points of table
-  double dRho=pow(10.0,(eosTable.dLogRhoMin+0.5*eosTable.dLogRhoDelta));
+  double dRho=pow(10.0,(eosTable.dLogRhoMin+5.0*eosTable.dLogRhoDelta));
   if (dInitRho>0.0 && (dInitRho>pow(10.0,eosTable.dLogRhoMin))){
     dRho=dInitRho;
   }
