@@ -6027,8 +6027,14 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
   //calculate grid velocities for local grid
   int nICen;
   double dARatio;
-  double dRhoim1half;
-  double dRhoip1half;
+  double dRho_im1half;
+  double dRho_upwind_im1half;
+  double dRho_cen_im1half;
+  double dRho_ip1half;
+  double dRho_upwind_ip1half;
+  double dRho_cen_ip1half;
+  double dUmU0_ip1halfjk_nm1half;
+  double dUmU0_im1halfjk_np1half;
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
     
@@ -6039,30 +6045,40 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
     dARatio=grid.dLocalGridOld[grid.nR][i-1][0][0]*grid.dLocalGridOld[grid.nR][i-1][0][0]
       /(grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0]);
     
-    dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-      +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+    //calculate difference between U and U0
+    dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][0][0]
+      -grid.dLocalGridOld[grid.nU0][i][0][0];
+    
+    dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][0][0]
+      -grid.dLocalGridNew[grid.nU0][i-1][0][0];
+    
+    //calculate rho at i-1/2, not time centered
+    dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
+      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])*0.5;
     if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][i][j][k];
+      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
     }
     else{//moving from inside out
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][i-1][j][k];
+      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][0][0];
     }
     dRho_im1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
       *dRho_upwind_im1half);
     
-    //calculate density at i-1/2
-    dRhoim1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])*0.5;
-    
-    //calculate density at i+1/2
-    dRhoip1half=(grid.dLocalGridOld[grid.nD][nICen+1][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen][0][0])*0.5;
+    //calculate rho at i+1/2, not time centered
+    dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
+      +grid.dLocalGridOld[grid.nD][nICen+1][0][0])*0.5;
+    if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen+1][0][0];
+    }
+    else{//moving from inside out
+      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
+    }
+    dRho_ip1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+      *dRho_upwind_ip1half);
     
     //calculate new grid velocity
-    grid.dLocalGridNew[grid.nU0][i][0][0]=(grid.dLocalGridNew[grid.nU0][i-1][0][0]
-      -grid.dLocalGridNew[grid.nU][i-1][0][0])
-      *dARatio*dRhoim1half/dRhoip1half+grid.dLocalGridNew[grid.nU][i][0][0];
-    
+    grid.dLocalGridNew[grid.nU0][i][0][0]=dUmU0_im1halfjk_np1half*dARatio*dRho_im1half/dRho_ip1half
+      +grid.dLocalGridNew[grid.nU][i][0][0];
   }
   
   //post a blocking send to outer radial neighbour
@@ -6114,15 +6130,41 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
     dARatio=grid.dLocalGridOld[grid.nR][i-1][0][0]*grid.dLocalGridOld[grid.nR][i-1][0][0]
       /(grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0]);
     
-    //calculate density at i-1/2
-    dRhoim1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])/2.0;
+    //calculate difference between U and U0
+    dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][0][0]
+      -grid.dLocalGridOld[grid.nU0][i][0][0];
     
-    //calculate density at i+1/2
-    dRhoip1half=(0.0+grid.dLocalGridOld[grid.nD][nICen][0][0])/2.0;
+    dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][0][0]
+      -grid.dLocalGridNew[grid.nU0][i-1][0][0];
     
-    grid.dLocalGridNew[grid.nU0][i][0][0]=(grid.dLocalGridNew[grid.nU0][i-1][0][0]
-      -grid.dLocalGridNew[grid.nU][i-1][0][0])*dARatio*dRhoim1half/dRhoip1half
+    //calculate rho at i-1/2, not time centered
+    dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
+      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])*0.5;
+    if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
+      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
+    }
+    else{//moving from inside out
+      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][0][0];
+    }
+    dRho_im1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
+      *dRho_upwind_im1half);
+    
+    //calculate rho at i+1/2, not time centered
+    /**\BC assuming density outside the star is 0 for the purposes of calculating the grid velocity.
+    This boundary condition works, but is probably not strictly correct. The proper condition can
+    be calculated by knowing that the mass conservation is independent of u0_ip1half at the surface.
+    This allows one to simply use the new densities and calculate the grid velocity from them.*/
+    dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]+0.0)*0.5;
+    if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+      dRho_upwind_ip1half=0.0;
+    }
+    else{//moving from inside out
+      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
+    }
+    dRho_ip1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+      *dRho_upwind_ip1half);
+    
+    grid.dLocalGridNew[grid.nU0][i][0][0]=dUmU0_im1halfjk_np1half*dARatio*dRho_im1half/dRho_ip1half
       +grid.dLocalGridNew[grid.nU][i][0][0];
     
   }
@@ -6180,6 +6222,16 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
   double dRho_ip1halfjk_np1half;
   double dRho_ijm1halfk_np1half;
   double dRho_ijp1halfk_np1half;
+  double dUmU0_ip1halfjk_nm1half;
+  double dUmU0_im1halfjk_np1half;
+  double dRho_cen_im1half;
+  double dRho_upwind_im1half;
+  double dRho_cen_ip1half;
+  double dRho_upwind_ip1half;
+  double dRho_cen_jm1half;
+  double dRho_upwind_jm1half;
+  double dRho_cen_jp1half;
+  double dRho_upwind_jp1half;
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
     dCSum=0.0;
@@ -6207,15 +6259,59 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
       
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
         
-        //calculate interpolated quantities
-        dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        //calculate difference between U and U0
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
+          -grid.dLocalGridOld[grid.nU0][i][0][0];
+        dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][j][k]
+          -grid.dLocalGridNew[grid.nU0][i-1][0][0];
+        
+        //calculate rho at i-1/2, not time centered
+        dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen-1][j][k])*0.5;
-        dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][j][k];
+        }
+        dRho_im1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
+          *dRho_upwind_im1half);
+        
+        //calculate rho at i+1/2, not time centered
+        dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen+1][j][k])*0.5;
-        dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen+1][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ip1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+          *dRho_upwind_ip1half);
+        
+        //calculte rho at j-1/2
+        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
+        }
+        dRho_ijm1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jm1half+parameters.dDonorFrac
+          *dRho_upwind_jm1half);
+        
+        //calculte rho at j+1/2
+        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
+        }
+        else{
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijp1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jp1half+parameters.dDonorFrac
+          *dRho_upwind_jp1half);
         
         //calculate sum
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
@@ -6292,14 +6388,62 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
         *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0];
       
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
-        dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        
+        //calculate difference between U and U0
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
+          -grid.dLocalGridOld[grid.nU0][i][0][0];
+        dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][j][k]
+          -grid.dLocalGridNew[grid.nU0][i-1][0][0];
+        
+        //calculate rho at i-1/2, not time centered
+        dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen-1][j][k])*0.5;
+        if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][j][k];
+        }
+        dRho_im1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
+          *dRho_upwind_im1half);
+        
+        //calculate rho at i+1/2, not time centered
         /**\BC grid.dLocalGridOld[grid.nD][i+1][j][k] is missing*/
-        dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
+        dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]+0.0)*0.5;
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+          dRho_upwind_ip1half=0.0;
+        }
+        else{//moving from inside out
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ip1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+          *dRho_upwind_ip1half);
+        
+        //calculte rho at j-1/2
+        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
+        }
+        dRho_ijm1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jm1half+parameters.dDonorFrac
+          *dRho_upwind_jm1half);
+        
+        //calculte rho at j+1/2
+        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
+        }
+        else{
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijp1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jp1half+parameters.dDonorFrac
+          *dRho_upwind_jp1half);
+        
+        
         
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
@@ -6327,7 +6471,7 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
   delete [] requestTempRecv;
   delete [] statusTempRecv;
 }
-void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,MessPass &messPass){//resume, moving decalerations
+void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,MessPass &messPass){
   
   /**\todo
     At some point I will likely want to make this funciton compatiable with a 3D domain 
@@ -6360,6 +6504,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   int j;
   int k;
   int nJInt;
+  int nKInt;
   double dR_im1half_np1half;
   double dR_ip1half_np1half;
   double dRSq_im1half_np1half;
@@ -6373,7 +6518,25 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   double dA_ijkm1half_np1half;
   double dA_ijkp1half_np1half;
   double dRho_im1halfjk_np1half;
-  
+  double dRho_ip1halfjk_np1half;
+  double dRho_ijm1halfk_np1half;
+  double dRho_ijp1halfk_np1half;
+  double dRho_ijkm1half_np1half;
+  double dRho_ijkp1half_np1half;
+  double dUmU0_ip1halfjk_nm1half;
+  double dUmU0_im1halfjk_np1half;
+  double dRho_cen_im1half;
+  double dRho_upwind_im1half;
+  double dRho_cen_ip1half;
+  double dRho_upwind_ip1half;
+  double dRho_cen_jm1half;
+  double dRho_upwind_jm1half;
+  double dRho_cen_jp1half;
+  double dRho_upwind_jp1half;
+  double dRho_cen_km1half;
+  double dRho_upwind_km1half;
+  double dRho_cen_kp1half;
+  double dRho_upwind_kp1half;
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
     dCSum=0.0;
@@ -6394,7 +6557,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
       
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
         
-          
+        nKInt=k+grid.nCenIntOffset[2];
+        
         dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
@@ -6408,18 +6572,84 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
         dA_ijkm1half_np1half=d1half_RSq_ip1half_m_RSq_im1half
           *grid.dLocalGridOld[grid.nDTheta][0][j][0];
         dA_ijkp1half_np1half=dA_ijkm1half_np1half;
-        dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        
+        //calculate difference between U and U0
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
+          -grid.dLocalGridOld[grid.nU0][i][0][0];
+        dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][j][k]
+          -grid.dLocalGridNew[grid.nU0][i-1][0][0];
+        
+        //calculate rho at i-1/2, not time centered
+        dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen-1][j][k])*0.5;
-        double dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][j][k];
+        }
+        dRho_im1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
+          *dRho_upwind_im1half);
+        
+        //calculate rho at i+1/2, not time centered
+        dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen+1][j][k])*0.5;
-        double dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen+1][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ip1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+          *dRho_upwind_ip1half);
+        
+        //calculte rho at j-1/2
+        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
+        }
+        dRho_ijm1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jm1half+parameters.dDonorFrac
+          *dRho_upwind_jm1half);
+        
+        //calculte rho at j+1/2
+        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijkm1half_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
+        }
+        else{
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijp1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jp1half+parameters.dDonorFrac
+          *dRho_upwind_jp1half);
+        
+        //calculte rho at k-1/2
+        dRho_cen_km1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijkp1half_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
+        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt-1]<0.0){
+          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k-1];
+        }
+        dRho_ijkm1half_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_km1half+parameters.dDonorFrac
+          *dRho_upwind_km1half);
+        
+        //calculte rho at k+1/2
+        dRho_cen_kp1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
+        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt]<0.0){
+          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k+1];
+        }
+        else{
+          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijkp1half_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_kp1half+parameters.dDonorFrac
+          *dRho_upwind_kp1half);
         
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
@@ -6439,7 +6669,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   
   //post a blocking send to outer radial neighbour
   int nNumRecieves=0;
-  for(int i=0;i<procTop.nNumRadialNeighbors;i++){
+  for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
       if current processor has a radial neighbor at inside post a recieve*/
       MPI::COMM_WORLD.Send(grid.dLocalGridNew,1
@@ -6452,7 +6682,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   //post a non-blocking recieve for outer radial neighbour
   MPI::Request *requestTempRecv=new MPI::Request[nNumRecieves];
   int nCount=0;
-  for(int i=0;i<procTop.nNumRadialNeighbors;i++){
+  for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
       if current processor has a radial neighbor at inside post a recieve*/
       requestTempRecv[nCount]=MPI::COMM_WORLD.Irecv(grid.dLocalGridNew,1
@@ -6463,7 +6693,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   }
   
   //post a blocking recieve for inner radial neighbour
-  for(int i=0;i<procTop.nNumRadialNeighbors;i++){
+  for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
       if current processor has a radial neighbor at inside post a recieve*/
       MPI::COMM_WORLD.Send(grid.dLocalGridNew,1
@@ -6473,46 +6703,113 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   }
   
   //calculate outermost grid velocity
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nU0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU0][0][0];i++){
-    double dCSum=0.0;
-    double dARhoSum=0.0;
+  for(i=grid.nStartGhostUpdateExplicit[grid.nU0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU0][0][0];i++){
+    dCSum=0.0;
+    dARhoSum=0.0;
     
     //calculate i of centered quantities
-    int nICen=i-grid.nCenIntOffset[0];
+    nICen=i-grid.nCenIntOffset[0];
+    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][i-1][0][0];
+    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][i][0][0];
+    dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
+    dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
     
-    for(int j=grid.nStartUpdateExplicit[grid.nU][1];j<grid.nEndUpdateExplicit[grid.nU][1];j++){
+    for(j=grid.nStartUpdateExplicit[grid.nU][1];j<grid.nEndUpdateExplicit[grid.nU][1];j++){
       
       //calculate j of interface quantities
-      int nJInt=j+grid.nCenIntOffset[1];
+      nJInt=j+grid.nCenIntOffset[1];
       
-      for(int k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
-        double dR_im1half_np1half=grid.dLocalGridOld[grid.nR][i-1][0][0];
-        double dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][i][0][0];
-        double dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-        double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-        double dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0]
+      for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
+      
+        nKInt=k+grid.nCenIntOffset[2];
+        dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
-        double dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
-        double dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
+        dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
+        dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
         dTemp=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half)
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
-        double dA_ijm1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j-1][0];
-        double dA_ijp1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0];
-        double dA_ijkm1half_np1half=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half)
+        dA_ijm1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j-1][0];
+        dA_ijp1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0];
+        dA_ijkm1half_np1half=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half)
           *grid.dLocalGridOld[grid.nDTheta][0][j][0];
-        double dA_ijkp1half_np1half=dA_ijkm1half_np1half;
-        double dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
+        dA_ijkp1half_np1half=dA_ijkm1half_np1half;
+        
+        //calculate difference between U and U0
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
+          -grid.dLocalGridOld[grid.nU0][i][0][0];
+        dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][j][k]
+          -grid.dLocalGridNew[grid.nU0][i-1][0][0];
+        
+        //calculate rho at i-1/2, not time centered
+        dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]
           +grid.dLocalGridOld[grid.nD][nICen-1][j][k])*0.5;
-        /**\BC grid.dLocalGridOld[grid.nD][i+1][j][k] is missing*/
-        double dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
+        if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{//moving from inside out
+          dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][j][k];
+        }
+        dRho_im1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_im1half+parameters.dDonorFrac
+          *dRho_upwind_im1half);
+        
+        //calculate rho at i+1/2, not time centered
+        dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]+0.0)*0.5;
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
+          dRho_upwind_ip1half=0.0;
+        }
+        else{//moving from inside out
+          dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ip1halfjk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_ip1half+parameters.dDonorFrac
+          *dRho_upwind_ip1half);
+        
+        //calculte rho at j-1/2
+        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
+        }
+        dRho_ijm1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jm1half+parameters.dDonorFrac
+          *dRho_upwind_jm1half);
+        
+        //calculte rho at j+1/2
+        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijkm1half_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
+        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
+        }
+        else{
+          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijp1halfk_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_jp1half+parameters.dDonorFrac
+          *dRho_upwind_jp1half);
+        
+        //calculte rho at k-1/2
+        dRho_cen_km1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        double dRho_ijkp1half_np1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
+        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt-1]<0.0){
+          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        else{
+          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k-1];
+        }
+        dRho_ijkm1half_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_km1half+parameters.dDonorFrac
+          *dRho_upwind_km1half);
+        
+        //calculte rho at j+1/2
+        dRho_cen_kp1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
           +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
+        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt]<0.0){
+          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k+1];
+        }
+        else{
+          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
+        }
+        dRho_ijkp1half_np1half=((1.0-parameters.dDonorFrac)*dRho_cen_kp1half+parameters.dDonorFrac
+          *dRho_upwind_kp1half);
         
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
@@ -6531,8 +6828,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
     grid.dLocalGridNew[grid.nU0][i][0][0]=-1.0*dCSum/dARhoSum;
     
     //set U equal to U0
-    for(int j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
-      for(int k=0;k<grid.nLocalGridDims[procTop.nRank][grid.nU][2]+2*grid.nNumGhostCells;k++){
+    for(j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
+      for(k=0;k<grid.nLocalGridDims[procTop.nRank][grid.nU][2]+2*grid.nNumGhostCells;k++){
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridNew[grid.nU0][i][0][0];
       }
     }
@@ -6545,13 +6842,14 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   delete [] statusTempRecv;
 }
 void calNewR(Grid &grid, Time &time){
-  
-  for(int i=grid.nStartUpdateExplicit[grid.nR][0];i<grid.nEndUpdateExplicit[grid.nR][0];i++){//nR needs to be 1D
+  int i;
+  int l;
+  for(i=grid.nStartUpdateExplicit[grid.nR][0];i<grid.nEndUpdateExplicit[grid.nR][0];i++){//nR needs to be 1D
     grid.dLocalGridNew[grid.nR][i][0][0]=grid.dLocalGridOld[grid.nR][i][0][0]
       +time.dDeltat_np1half*grid.dLocalGridNew[grid.nU0][i][0][0];
   }
-  for(int l=0;l<6;l++){
-    for(int i=grid.nStartGhostUpdateExplicit[grid.nR][l][0];i<grid.nEndGhostUpdateExplicit[grid.nR][l][0];i++){
+  for(l=0;l<6;l++){
+    for(i=grid.nStartGhostUpdateExplicit[grid.nR][l][0];i<grid.nEndGhostUpdateExplicit[grid.nR][l][0];i++){
       grid.dLocalGridNew[grid.nR][i][0][0]=grid.dLocalGridOld[grid.nR][i][0][0]
         +time.dDeltat_np1half*grid.dLocalGridNew[grid.nU0][i][0][0];
     }
@@ -6584,6 +6882,7 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
   double dDeltaRhoR;
   double dVr_np1;
   double dUmU0_ip1halfjk_np1half;
+  double dUmU0_ip1halfjk_nm1half;
   double dUmU0_im1halfjk_np1half;
   double d1Thrid=0.333333333333333333333333333333;
   for(i=grid.nStartUpdateExplicit[grid.nD][0];i<grid.nEndUpdateExplicit[grid.nD][0];i++){
@@ -6619,6 +6918,9 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0];
         
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -grid.dLocalGridOld[grid.nU0][nIInt][0][0];
+        
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
         
@@ -6637,7 +6939,7 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
         //calculate rho at i+1/2, not time centered
         dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i+1][j][k])*0.5;
-        if(dUmU0_ip1halfjk_np1half<0.0){//moving from outside in
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
           dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][i+1][j][k];
         }
         else{//moving from inside out
@@ -6836,6 +7138,7 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
   double d1Thrid=0.333333333333333333333333333333;
   double dUmU0_ip1halfjk_np1half;
   double dUmU0_im1halfjk_np1half;
+  double dUmU0_ip1halfjk_nm1half;
   for(i=grid.nStartUpdateExplicit[grid.nD][0];i<grid.nEndUpdateExplicit[grid.nD][0];i++){
     
     //calculate i for interface centered quantities
@@ -6873,6 +7176,8 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
         //calculate difference between U and U0
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0];
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -grid.dLocalGridOld[grid.nU0][nIInt][0][0];
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
         
@@ -6891,7 +7196,7 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
         //calculate rho at i+1/2, not time centered
         dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i+1][j][k])*0.5;
-        if(dUmU0_ip1halfjk_np1half<0.0){//moving from outside in
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
           dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][i+1][j][k];
         }
         else{//moving from inside out
@@ -7209,6 +7514,7 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
   double d1Thrid=0.333333333333333333333333333333;
   double dUmU0_ip1halfjk_np1half;
   double dUmU0_im1halfjk_np1half;
+  double dUmU0_ip1halfjk_nm1half;
   for(i=grid.nStartUpdateExplicit[grid.nD][0];i<grid.nEndUpdateExplicit[grid.nD][0];i++){
     
     //calculate i for interface centered quantities
@@ -7242,6 +7548,8 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         //calculate difference between U and U0
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0];
+        dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -grid.dLocalGridOld[grid.nU0][nIInt][0][0];
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
         
@@ -7260,7 +7568,7 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         //calculate rho at i+1/2, not time centered
         dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i+1][j][k])*0.5;
-        if(dUmU0_ip1halfjk_np1half<0.0){//moving from outside in
+        if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
           dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][i+1][j][k];
         }
         else{//moving from inside out
@@ -7629,7 +7937,7 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
     }
   #endif
 }
-void calNewE_R_AD(Grid &grid, Parameters &parameters, Time &time, ProcTop &procTop){
+void calNewE_R_AD(Grid &grid, Parameters &parameters, Time &time, ProcTop &procTop){//resume, moving decalerations
   for(int i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
