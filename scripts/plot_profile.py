@@ -142,7 +142,8 @@ class Curve:
           self.nColumn.append(columnAndFormula[0]-1)
         self.code=parser.expr(self.formula).compile()
       else:
-        self.formula=None
+        self.formula=self.formulaOrig
+        self.code=parser.expr(self.formula).compile()
         if element.text == None or element.text=="":
           print "No column number given for curve, must have curve text be either an integer, or"\
             +" a mathatmical formula containing column references prefixed with a \"$\"."
@@ -714,18 +715,19 @@ def splitFirstFloat(str):
       break
   return [float(strInt),str[i:]]
 def getY(nColumn,fileData,code,i):
-  if isinstance(nColumn,int):
-    #normal simple 1 column data
-    return fileData.fColumnValues[i][nColumn]
-  else:
-    #new column operation
-    a=[]
-    for j in range(len(nColumn)):
-      if fileData.fColumnValues[i][nColumn[j]]==None:
-        return None
-      else:
-        a.append(fileData.fColumnValues[i][nColumn[j]])
-    return eval(code)
+  if nColumn!=None:
+    if isinstance(nColumn,int):
+      #normal simple 1 column data
+      return fileData.fColumnValues[i][nColumn]
+    else:
+      #new column operation
+      a=[]
+      for j in range(len(nColumn)):
+        if fileData.fColumnValues[i][nColumn[j]]==None:
+          return None
+        else:
+          a.append(fileData.fColumnValues[i][nColumn[j]])
+  return eval(code)
 def main():
   
   #parse command line options
