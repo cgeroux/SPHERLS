@@ -6999,7 +6999,6 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
         //calculate area at i-1/2
         dA_im1half=dRSq_im1half_np1half;
         
-        
         //calculate difference between U and U0
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
@@ -7316,8 +7315,7 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
           *dRho_upwind_im1half);
         
         //calculate radial term
-        dDeltaRhoR=(grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
-          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*dRho_im1half*dA_im1half;
+        dDeltaRhoR=dUmU0_im1halfjk_np1half*dRho_im1half*dA_im1half;
         
         
         //CALCULATE RATE OF CHANGE IN RHO IN THE THETA DIRECTION
@@ -7545,6 +7543,12 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         
         //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
         
+        //calculate area at i-1/2
+        dA_im1half=dRSq_im1half_np1half*dDelCosThetaDelPhi;
+        
+        //calculate area at i+1/2
+        dA_ip1half=dRSq_ip1half_np1half*dDelCosThetaDelPhi;
+        
         //calculate difference between U and U0
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0];
@@ -7586,11 +7590,13 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         
         //calculate ratio of area at j-1/2,n to volume at i,j,k, n+1
         dA_jm1half=0.5*dDelRSq_i_np1half
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
+          *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         
         //calculate ratio of area at j+1/2,n to volume at i,j,k, n+1
         dA_jp1half=0.5*dDelRSq_i_np1half
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
+          *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         
         //calculte rho at j-1/2
         dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][i][j-1][k]
@@ -7726,19 +7732,20 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
           *dRho_upwind_im1half);
         
         //calculate radial term
-        dDeltaRhoR=(grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
-          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*dRho_im1half*dA_im1half;
+        dDeltaRhoR=dUmU0_im1halfjk_np1half*dRho_im1half*dA_im1half;
         
         
         //CALCULATE RATE OF CHANGE IN RHO IN THE THETA DIRECTION
         
         //calculate ratio of area at j-1/2,n to volume at i,j,k, n+1
         dA_jm1half=0.5*dDelRSq_i_np1half
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
+          *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         
         //calculate ratio of area at j+1/2,n to volume at i,j,k, n+1
         dA_jp1half=0.5*dDelRSq_i_np1half
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
+          *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         
         //calculte rho at j-1/2
         dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][i][j-1][k]
@@ -15948,7 +15955,7 @@ void calDelt_R_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16114,7 +16121,7 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16332,7 +16339,7 @@ void calDelt_RT_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &proc
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16556,7 +16563,7 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16817,7 +16824,7 @@ void calDelt_RTP_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -17078,7 +17085,7 @@ void calDelt_RTP_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &p
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20726,7 +20733,7 @@ void initDonorFracAndMaxConVel_R_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20788,7 +20795,7 @@ void initDonorFracAndMaxConVel_R_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20861,7 +20868,7 @@ void initDonorFracAndMaxConVel_RT_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20937,7 +20944,7 @@ void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -21018,7 +21025,7 @@ void initDonorFracAndMaxConVel_RTP_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -21105,7 +21112,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{

@@ -1,10 +1,12 @@
-If this is just the raw source:
+==========================================
+IF RAW SOURCE:
 
 autoreconf --install
 ./configure
 make
 
-If this is a package:
+===========================================
+IF PACKAGE:
 
 To build and install:
 
@@ -13,3 +15,12 @@ make
 make install
 
 To find out more on how to use the SPHERLS packages see user manuals in ./docs/manuals
+
+============================================
+COMMON OPTIONS
+
+for debugging configurations do 
+
+  ./configure CXXFLAGS="-g -O0"
+
+instead of the regular ./configure
