@@ -3,7 +3,8 @@
     <name>Test</name><!-- name of the job -->
     <duration>35:00:00</duration><!-- time for job to run in the que -->
     <totalview>False</totalview><!-- if true will luanch without the que, with the debugg option -->
-    <que>False</que><!-- if true it will run job in que, else at the command line -->
+    <que>False</que><!-- if "true" or "main" it will run the job in main que, if it is test it will 
+      run in the test que if it isn't given, or is something else it will run at the command line -->
     <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
       using mpirun, check with your system admin for ideas about what this should be.-->
   </job>

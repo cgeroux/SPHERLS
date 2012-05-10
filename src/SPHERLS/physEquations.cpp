@@ -6795,10 +6795,10 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
+      dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
       
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
         
-        dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
         dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosTheta;
           
         //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
@@ -15414,7 +15414,7 @@ void calDelt_R_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -15580,7 +15580,7 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -15798,7 +15798,7 @@ void calDelt_RT_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &proc
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16022,7 +16022,7 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16283,7 +16283,7 @@ void calDelt_RTP_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -16544,7 +16544,7 @@ void calDelt_RTP_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &p
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20192,7 +20192,7 @@ void initDonorFracAndMaxConVel_R_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20254,7 +20254,7 @@ void initDonorFracAndMaxConVel_R_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20327,7 +20327,7 @@ void initDonorFracAndMaxConVel_RT_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20403,7 +20403,7 @@ void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20484,7 +20484,7 @@ void initDonorFracAndMaxConVel_RTP_GL(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{
@@ -20571,7 +20571,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
   if(dTest_ConVelOverSoundSpeed2>1.0){
     parameters.dDonorFrac=1.0;
   }
-  if(dTest_ConVelOverSoundSpeed2<0.1){
+  else if(dTest_ConVelOverSoundSpeed2<0.1){
     parameters.dDonorFrac=0.1;
   }
   else{

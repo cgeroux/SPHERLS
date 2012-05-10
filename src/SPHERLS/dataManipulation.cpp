@@ -266,7 +266,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     bGotEnd=false;
   }
   
-  //get end time
+  //get end timestep
   if(!getXMLValueNoThrow(xTime,"endTimeStep",0,time.nEndTimeStep)){
     time.nEndTimeStep=std::numeric_limits<int>::max();/*set large so it won't be triggered, if it is
       still triggered at this large value we will so have problems anyhow and need to stop.*/
@@ -289,7 +289,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   time.dPerChange=1.0e-1;//default is 10%, probably need something an order or two smaller
   getXMLValueNoThrow(xTime,"percentChangePerTimeStep",0,time.dPerChange);
   
-  //get time step
+  //get constant time step
   if(getXMLValueNoThrow(xTime,"timeStep",0,time.dConstTimeStep)){
     std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
       <<": WARNING: using constant time step of "<<time.dConstTimeStep<<"s "<<std::endl;
