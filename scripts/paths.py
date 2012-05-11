@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 import os
-BasePath="/home/cgeroux/mass_cons_donner_cell/"
-SPHERLSanalPath=BasePath+"SPHERLSanal"
-SPHERLSgenPath=BasePath+"SPHERLSgen"
-SPHERLSPath=BasePath+"SPHERLS"
-scriptPaths=BasePath+"scripts/"
-SPHERLSDATA=BasePath+"data/"
-EOSPath=BasePath+"eosY240Z002"
-velocityProfilePath=BasePath+"data/velocity_pro/T5700_L50_M575_fu.dat"
-ref_calcs=BasePath+"data/ref_calcs/"
+import sys
 
+BasePath=os.path.dirname(os.path.dirname(sys.argv[0]))#remove script name, remove scripts directory
+SPHERLSanalPath=BasePath+"/SPHERLSanal"
+SPHERLSgenPath=BasePath+"/SPHERLSgen"
+SPHERLSPath=BasePath+"/SPHERLS"
+scriptPaths=BasePath+"/scripts/"
+SPHERLSDATA=BasePath+"/data/"
+EOSPath=BasePath+"/data/eos/eosY240Z002"
+velocityProfilePath=BasePath+"/data/velocity_pro/T5700_L50_M575_fu.dat"
+ref_calcs=BasePath+"/data/ref_calcs/"
 
 def check_paths():
   #check paths
