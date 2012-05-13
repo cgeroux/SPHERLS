@@ -7157,10 +7157,10 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
+      dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
       
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
         
-        dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
         dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosTheta;
         
         

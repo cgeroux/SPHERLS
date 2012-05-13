@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 from scipy import interpolate
 import xml.etree.ElementTree as xml
+import optparse as op
 import numpy as np
 import math
 import struct
+import paths
+a=7.56591e-15 #radiation constant [erg cm^{-3} K^{-4}]
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
@@ -15,21 +18,26 @@ def parseOptions():
     +" a configuration file see eos_interp_reference.xml under docs/templateXML.")
     
   #parse command line options
-  return parser.parse_args()
+  (options,args)=parser.parse_args()
+  if len(args)==0:
+    raise Exception("need to specify configuration file")
+  return (options,args)
 def checkLineForMinusSplitError(line):
   """Checks for spaces being replaced with "-" as the seperator and properly splits the line if that
   is the case"""
   
   splitLine=line.split()
   
-  #check that we can convert first element to a float
+  #check that we can convert elements to a floats
   if len(splitLine)>0:
     try:
-      temp=float(splitLine[0])
+      for i in range(len(splitLine)):
+        temp=float(splitLine[i])
     except ValueError:
       
       '''if not able to convert to a float it likely means that we have an issue with '-' take up
       ' ' so numbers aren't seperated by ' ', such a pain'''
+      
       splitLineMinus=line.split("-")
       count=0
       splitLine=[]#empty list so we can refill it properly
@@ -122,8 +130,9 @@ class eosTable:
         temperature=float(lineSplit[0])
         pressure=float(lineSplit[3])
         energy=float(lineSplit[4])
-        po=temperature*density
-        pressure=pressure/po#remove temperture*density scaling
+        #po=temperature*density
+        #pressure=pressure*po#remove temperture*density scaling
+        pressure=pressure*1.0e12#convert from MB to dynes/cm^2
         energy=(energy*MassPerMole-eground)/(MassPerMole)*1.0e12#set e=0 at T=0
         
         #save values
@@ -317,8 +326,21 @@ class eosTable:
     print "  interpolating to new grid ..."
     for i in range(numLogD):
       for j in range(numLogT):
-        interpolatedTable.logP[i][j]=splineInterpLogP(interpolatedTable.logD[i][j],interpolatedTable.logT[i][j])
-        interpolatedTable.logE[i][j]=splineInterpLogE(interpolatedTable.logD[i][j],interpolatedTable.logT[i][j])
+        logPGas=splineInterpLogP(interpolatedTable.logD[i][j],interpolatedTable.logT[i][j])
+        logEGas=splineInterpLogE(interpolatedTable.logD[i][j],interpolatedTable.logT[i][j])
+        
+        #print 10**interpolatedTable.logP[i][j]/10**interpolatedTable.logD[i][j],interpolatedTable.logE[i][j]
+        
+        #add radiation pressure
+        PGas=10**logPGas
+        EGas=10**logEGas
+        T=10**interpolatedTable.logT[i][j]
+        rho=10**interpolatedTable.logD[i][j]
+        
+        PRad=a*T**4/3.0
+        ERad=3.0*PRad/rho
+        interpolatedTable.logP[i][j]=math.log10(PGas+PRad)
+        interpolatedTable.logE[i][j]=math.log10(EGas+ERad)
     
     #set values outside grid, and near nans on original grid equal to nan in interpolated grid
     if setExtrapolatedToNan:
@@ -591,8 +613,18 @@ class opacityTable:
       #if the line has a composition on it
       if nIndexX!=-1 and nIndexZ!=-1:
         
+        #handle both the case where X=0.0 and X= 0.0, need to work with the space and without
+        if len(lineParts[nIndexX])>2:
+          xString=lineParts[nIndexX][2:]
+        else:
+          xString=lineParts[nIndexX+1]
+        if len(lineParts[nIndexZ])>2:
+          zString=lineParts[nIndexZ][2:]
+        else:
+          zString=lineParts[nIndexZ+1]
+        
         #if there is a match between X and Z we have the right composition
-        if float(lineParts[nIndexX][2:])==self.X and float(lineParts[nIndexZ][2:])==self.Z:
+        if float(xString)==self.X and float(zString)==self.Z:
           
           if nCount==2 and self.multitableFile:
             self.__loadTableFromFile(f)
@@ -806,16 +838,24 @@ class opacityTable:
     print "loading table with (X="+str(self.X)+",Z="+str(self.Z)+") from file, "\
       +self.sFileName+" ..."
     
-    #skip 3 lines
+    #skip the right number of lines, depends on the table
     line=f.readline()
-    line=f.readline()
-    line=f.readline()
+    bContinue=True
+    while bContinue:
+      if line[0:5]=="log T":
+        line=line[5:]
+        bContinue=False
+      elif  line[0:4]=="logT":
+        line=line[4:]
+        bContinue=False
+      else:
+        line=f.readline()
     
     #get Log(R); R=density/(T*1e-6)
-    line=f.readline()
+    #line=f.readline()
     splitLine=line.split()
     logR1D=[]
-    for entry in splitLine[1:]:
+    for entry in splitLine:
       logR1D.append(entry)
     
     #skip lines until they aren't empty
@@ -1092,7 +1132,14 @@ class opacityTableManager:
       fileElements=filesElements[0].findall("file")
       for fileElement in fileElements:
         id=fileElement.get("id")
-        self.opacityFileNames[id]=fileElement.text
+        
+        fileName=fileElement.text
+        
+        #if not absolute or relative add path assume it is in SPHERLS data path
+        if fileName[0:2]!="./" and fileName[0:1]!="/":
+          fileName=paths.SPHERLSDATA+fileName
+        
+        self.opacityFileNames[id]=fileName
       
       #get compositions in each file
       fileCompositions={}
@@ -1162,7 +1209,6 @@ class opacityTableManager:
     """Merge two opacity tables together.
     
     returns an opacityTable containing the merged table
-    
     """
     
     '''find start indices for logR of table 1 and table 2 and how many logR points the merged table
@@ -1195,7 +1241,7 @@ class opacityTableManager:
           startIndexTable2LogT=i
           break
     else:
-      for i in range(self.opacityTables[table2Index].logT.shape[1]):
+      for i in range(self.opacityTables[table2Index].logT.shape[0]):
         if self.opacityTables[table2Index].logT[i][0]==self.opacityTables[table1Index].logT[0][0]:
           numLogT=i+self.opacityTables[table1Index].logT.shape[0]
           startIndexTable1LogT=i
@@ -1564,8 +1610,6 @@ class opacityTableManager:
     sFileName: the name of the file to search for (X,Z) compositions.
     """
     
-    #print "checking compositions in \""+sFileName+"\" ..."
-    
     f=open(sFileName,'r')
     
     nCurrentTable=0
@@ -1602,8 +1646,18 @@ class opacityTableManager:
           else:
             nCurrentTable=nTempTable
         
+        #handle both the case where X=0.0 and X= 0.0, need to work with the space and without
+        if len(lineParts[nIndexX])>2:
+          xString=lineParts[nIndexX][2:]
+        else:
+          xString=lineParts[nIndexX+1]
+        if len(lineParts[nIndexZ])>2:
+          zString=lineParts[nIndexZ][2:]
+        else:
+          zString=lineParts[nIndexZ+1]
+          
         #add composition to list
-        compositions.append([float(lineParts[nIndexX][2:]),float(lineParts[nIndexZ][2:])])
+        compositions.append([float(xString),float(zString)])
         
     return compositions
   def __setCompLists(self):
@@ -1788,7 +1842,12 @@ class eosTableManager:
     self.eosTables=[]
     fileElements=filesElements[0].findall("file")
     for fileElement in fileElements:
-      self.eosTables.append(eosTable(fileElement.text))
+      fileName=fileElement.text
+      
+      #if not absolute or relative add path assume it is in SPHERLS data path
+      if fileName[0:2]!="./" and fileName[0:1]!="/":
+        fileName=paths.SPHERLSDATA+fileName
+      self.eosTables.append(eosTable(fileName))
   def __cubicSplineInX(self,eosManagerInterpZ,X):
     """Interpolates a set of equations of state which are at the same Z to a particular X using
     cubic spline interpolation."""
@@ -2017,7 +2076,7 @@ class eosTableManager:
     c=y1-a*x1Sq-b*x1
     return a*x*x+b*x+c
 class interpTable:
-  def interpolate(self,eosSet,opacitySet):
+  def interpolate(self,eosSet,opacitySet,withoutNans=False):
       """creates the interpolated table and writes it out"""
       
       #interpolate in composition
@@ -2025,111 +2084,346 @@ class interpTable:
       self.opacityAtNewComp=opacitySet.interpComp(self.X,self.Z)
       
       #interpolate in logD and logT
-      self.eosTable=self.eosAtNewComp.interpolate(self.gridConfig)
-      self.opacityTable=self.opacityAtNewComp.interpolate(self.gridConfig)
+      self.eosTable=self.eosAtNewComp.interpolate(self.gridConfig,(not withoutNans))
+      self.opacityTable=self.opacityAtNewComp.interpolate(self.gridConfig,(not withoutNans))
       
       #write out table
       self.__writeCompleteEOS()
-  def __init__(self,tableElement):
-    """Reads in an interpolation table info from from the xml element tableElement."""
-    
-    #get hydrogen mass fraction
-    element=tableElement.findall("X")
-    if len(element)>1:
-      print "WARNING: more than one \"X\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"X\" node found")
-    try:
-      self.X=float(element[0].text)
-    except (TypeError, ValueError):
-      raise Exception("\"X\" node expected to be a float got \""+str(element[0].text)+"\"")
       
-    #get metal mass fraction
-    element=tableElement.findall("Z")
-    if len(element)>1:
-      print "WARNING: more than one \"Z\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"Z\" node found")
-    try:
-      self.Z=float(element[0].text)
-    except (TypeError, ValueError):
-      raise Exception("\"Z\" node expected to be a float got \""+str(element[0].text)+"\"")
+      #plot final table for inspection
+      if self.plot:
+      
+        print "plotting final tables, logP, logE, and logK in that order ..."
+        self.eosTable.plotLogE()
+        self.eosTable.plotLogP()
+        self.opacityTable.plotLogK()
+  def read(self,sFilename):
+    """Reads in an interpolated table"""
     
-    #get grid configuration of new table
-    self.gridConfig=[]
+    f=open(sFilename,'rb')
+    data=f.read()
     
-    #get minLogD
-    element=tableElement.findall("minLogD")
-    if len(element)>1:
-      print "WARNING: more than one \"minLogD\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"minLogD\" node found")
-    try:
-      self.gridConfig.append(float(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"minLogD\" node expected to be a float got \""+str(element[0].text)+"\"")
-    
-    #get delLogD
-    element=tableElement.findall("delLogD")
-    if len(element)>1:
-      print "WARNING: more than one \"delLogD\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"delLogD\" node found")
-    try:
-      self.gridConfig.append(float(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"delLogD\" node expected to be a float got \""+str(element[0].text)+"\"")
+    self.numLogR=-1
+    sizeInt=struct.calcsize('i')
+    sizeDouble=struct.calcsize('d')
+    pos=0
     
     #get numLogD
-    element=tableElement.findall("numLogD")
-    if len(element)>1:
-      print "WARNING: more than one \"numLogD\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"numLogD\" node found")
-    try:
-      self.gridConfig.append(int(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"numLogD\" node expected to be an int got \""+str(element[0].text)+"\"")
-    
-    #get minLogT
-    element=tableElement.findall("minLogT")
-    if len(element)>1:
-      print "WARNING: more than one \"minLogT\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"minLogT\" node found")
-    try:
-      self.gridConfig.append(float(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"minLogT\" node expected to be a float got \""+str(element[0].text)+"\"")
-    
-    #get delLogT
-    element=tableElement.findall("delLogT")
-    if len(element)>1:
-      print "WARNING: more than one \"delLogT\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"delLogT\" node found")
-    try:
-      self.gridConfig.append(float(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"delLogT\" node expected to be a float got \""+str(element[0].text)+"\"")
+    numLogD=struct.unpack('i',data[pos:pos+sizeInt])[0]
+    pos+=sizeInt
     
     #get numLogT
-    element=tableElement.findall("numLogT")
-    if len(element)>1:
-      print "WARNING: more than one \"numLogT\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"numLogT\" node found")
-    try:
-      self.gridConfig.append(int(element[0].text))
-    except (TypeError, ValueError):
-      raise Exception("\"numLogT\" node expected to be an int got \""+str(element[0].text)+"\"")
+    numLogT=struct.unpack('i',data[pos:pos+sizeInt])[0]
+    pos+=sizeInt
+    
+    #get X
+    self.X=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #get Y
+    Y=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #calculate Z
+    self.Z=1.0-self.X-Y
+    
+    #get minLogD
+    minLogD=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #get delLogD
+    delLogD=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #get minLogT
+    minLogT=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #get delLogT
+    delLogT=struct.unpack('d',data[pos:pos+sizeDouble])[0]
+    pos+=sizeDouble
+    
+    #put everything into grid config
+    self.gridConfig=[minLogD,delLogD,numLogD,minLogT,delLogT,numLogT]
+    
+    #create arrays to store data
+    self.logD=np.empty((numLogD,numLogT))
+    self.logT=np.empty((numLogD,numLogT))
+    self.logP=np.empty((numLogD,numLogT))
+    self.logE=np.empty((numLogD,numLogT))
+    self.logK=np.empty((numLogD,numLogT))
+    for i in range(numLogD):
       
-    element=tableElement.findall("outputFile")
-    if len(element)>1:
-      print "WARNING: more than one \"outputFile\" found using only first node found"
-    elif len(element)==0:
-      raise Exception("no \"outputFile\" node found")
-    self.outputFile=element[0].text
+      #get logP at all temps at this density
+      fmt=str(numLogT)+'d'
+      logPSet=struct.unpack(fmt,data[pos:pos+numLogT*sizeDouble])
+      pos+=numLogT*sizeDouble
+      
+      #get logE at all temps at this density
+      logESet=struct.unpack(fmt,data[pos:pos+numLogT*sizeDouble])
+      pos+=numLogT*sizeDouble
+      
+      #get logK at all temps at this density
+      logKSet=struct.unpack(fmt,data[pos:pos+numLogT*sizeDouble])
+      pos+=numLogT*sizeDouble
+      
+      for j in range(numLogT):
+        
+        #set logD and logT
+        self.logD[i][j]=minLogD+float(i)*delLogD
+        self.logT[i][j]=minLogT+float(j)*delLogT
+        
+        #read in pressure
+        self.logP[i][j]=logPSet[j]
+        
+        #read in energy
+        self.logE[i][j]=logESet[j]
+        
+        #read in opacity
+        self.logK[i][j]=logKSet[j]
+        
+    f.close()
+  def plotLogE(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+    """Plots LogE
+    
+    Keywords:
+    otherTables: a list of other eosTables to include in the plot
+    logDIndexList: a list of integers corresponding to which densities to plot the tables at
+    wireFrame: if set to true (the default) and logDIndexList is set to None it will plot a 3D
+      wireframe of logE.
+    """
+    
+    if logDIndexList!=None:
+      wireFrame=False
+    from mpl_toolkits.mplot3d import axes3d
+    import matplotlib
+    import matplotlib.pyplot as plt
+    fig=plt.figure()
+    if wireFrame:
+      ax=fig.add_subplot(111,projection='3d')
+      ax.plot_wireframe(self.logD,self.logT,self.logE)
+      if otherTables:
+        for otherTable in otherTables:
+          ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logE,color="green")
+    else:
+      ax=fig.add_subplot(111)
+      l=logDIndexList[0]
+      h=logDIndexList[0]+logDRangeList[0]
+      print "logD=",self.logD[l:h,0]
+      if logDRangeList[0]>1:
+        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logE[l:h,:]), "bo-")
+      else:
+        ax.plot(self.logT[l:h,:][0],self.logE[l:h,:][0], "bo-")
+      counter=1
+      if otherTables:
+        for otherTable in otherTables:
+          l=logDIndexList[counter]
+          h=logDIndexList[counter]+logDRangeList[counter]
+          print "logD=",otherTable.logD[l:h,0]
+          if logDRangeList[counter]>1:
+            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logE[l:h,:]), "go-")
+          else:
+            ax.plot(otherTable.logT[l:h,:][0],otherTable.logE[l:h,:][0], "go-")
+          counter+=1
+    plt.show()
+  def plotLogP(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+    """Plots LogP
+    
+    Keywords:
+    otherTables: a list of other eosTables to include in the plot
+    logDIndexList: a list of integers corresponding to which densities to plot the tables at
+    wireFrame: if set to true (the default) and logDIndexList is set to None it will plot a 3D
+      wireframe of logP.
+    """
+    
+    if logDIndexList!=None:
+      wireFrame=False
+    from mpl_toolkits.mplot3d import axes3d
+    import matplotlib
+    import matplotlib.pyplot as plt
+    fig=plt.figure()
+    if wireFrame:
+      ax=fig.add_subplot(111,projection='3d')
+      ax.plot_wireframe(self.logD,self.logT,self.logP)
+      if otherTables:
+        for otherTable in otherTables:
+          ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logP,color="green")
+    else:
+      ax=fig.add_subplot(111)
+      l=logDIndexList[0]
+      h=logDIndexList[0]+logDRangeList[0]
+      print "logD=",self.logD[l:h,0]
+      if logDRangeList[0]>1:
+        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logP[l:h,:]), "bo-")
+      else:
+        ax.plot(self.logT[l:h,:][0],self.logP[l:h,:][0], "bo-")
+      counter=1
+      if otherTables:
+        for otherTable in otherTables:
+          l=logDIndexList[counter]
+          h=logDIndexList[counter]+logDRangeList[counter]
+          print "logD=",otherTable.logD[l:h,0]
+          if logDRangeList[counter]>1:
+            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logP[l:h,:]), "go-")
+          else:
+            ax.plot(otherTable.logT[l:h,:][0],otherTable.logP[l:h,:][0], "go-")
+          counter+=1
+    plt.show()
+  def plotLogK(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+    """Plots opacity
+    
+    Keywords:
+    otherTables: a list of opacity tables to also be ploted
+    logDIndex: a list of integers used to indicate a specific logR index to plot 2D line plots at.
+    """
+    
+    if logDIndexList!=None:
+      wireFrame=False
+    from mpl_toolkits.mplot3d import axes3d
+    import matplotlib
+    import matplotlib.pyplot as plt
+    fig=plt.figure()
+    if wireFrame:
+      ax=fig.add_subplot(111,projection='3d')
+      ax.plot_wireframe(self.logD,self.logT,self.logK)
+      if otherTables:
+        for otherTable in otherTables:
+          ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logK,color="green")
+    else:
+      ax=fig.add_subplot(111)
+      l=logDIndexList[0]
+      h=logDIndexList[0]+logDRangeList[0]
+      print "logD=",self.logD[l:h,0]
+      if logDRangeList[0]>1:
+        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "bo-")
+      else:
+        ax.plot(self.logT[l:h,:][0],self.logK[l:h,:][0], "bo-")
+      counter=1
+      if otherTables:
+        for otherTable in otherTables:
+          l=logDIndexList[counter]
+          h=logDIndexList[counter]+logDRangeList[counter]
+          print "logD=",otherTable.logD[l:h,0]
+          if logDRangeList[counter]>1:
+            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "go-")
+          else:
+            ax.plot(otherTable.logT[l:h,:][0],otherTable.logK[l:h,:][0], "go-")
+          counter+=1
+    plt.show()
+  def __init__(self,tableElement=None):
+    """Reads in an interpolation table info from from the xml element tableElement."""
+    
+    if tableElement!=None:
+      
+      #get hydrogen mass fraction
+      element=tableElement.findall("X")
+      if len(element)>1:
+        print "WARNING: more than one \"X\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"X\" node found")
+      try:
+        self.X=float(element[0].text)
+      except (TypeError, ValueError):
+        raise Exception("\"X\" node expected to be a float got \""+str(element[0].text)+"\"")
+        
+      #get metal mass fraction
+      element=tableElement.findall("Z")
+      if len(element)>1:
+        print "WARNING: more than one \"Z\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"Z\" node found")
+      try:
+        self.Z=float(element[0].text)
+      except (TypeError, ValueError):
+        raise Exception("\"Z\" node expected to be a float got \""+str(element[0].text)+"\"")
+      
+      #get grid configuration of new table
+      self.gridConfig=[]
+      
+      #get minLogD
+      element=tableElement.findall("minLogD")
+      if len(element)>1:
+        print "WARNING: more than one \"minLogD\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"minLogD\" node found")
+      try:
+        self.gridConfig.append(float(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"minLogD\" node expected to be a float got \""+str(element[0].text)+"\"")
+      
+      #get delLogD
+      element=tableElement.findall("delLogD")
+      if len(element)>1:
+        print "WARNING: more than one \"delLogD\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"delLogD\" node found")
+      try:
+        self.gridConfig.append(float(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"delLogD\" node expected to be a float got \""+str(element[0].text)+"\"")
+      
+      #get numLogD
+      element=tableElement.findall("numLogD")
+      if len(element)>1:
+        print "WARNING: more than one \"numLogD\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"numLogD\" node found")
+      try:
+        self.gridConfig.append(int(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"numLogD\" node expected to be an int got \""+str(element[0].text)+"\"")
+      
+      #get minLogT
+      element=tableElement.findall("minLogT")
+      if len(element)>1:
+        print "WARNING: more than one \"minLogT\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"minLogT\" node found")
+      try:
+        self.gridConfig.append(float(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"minLogT\" node expected to be a float got \""+str(element[0].text)+"\"")
+      
+      #get delLogT
+      element=tableElement.findall("delLogT")
+      if len(element)>1:
+        print "WARNING: more than one \"delLogT\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"delLogT\" node found")
+      try:
+        self.gridConfig.append(float(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"delLogT\" node expected to be a float got \""+str(element[0].text)+"\"")
+      
+      #get numLogT
+      element=tableElement.findall("numLogT")
+      if len(element)>1:
+        print "WARNING: more than one \"numLogT\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"numLogT\" node found")
+      try:
+        self.gridConfig.append(int(element[0].text))
+      except (TypeError, ValueError):
+        raise Exception("\"numLogT\" node expected to be an int got \""+str(element[0].text)+"\"")
+      
+      #get outputFile
+      element=tableElement.findall("outputFile")
+      if len(element)>1:
+        print "WARNING: more than one \"outputFile\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"outputFile\" node found")
+      self.outputFile=element[0].text
+      
+      #get wether to plot
+      element=tableElement.findall("plot")
+      if len(element)>1:
+        print "WARNING: more than one \"plot\" found using only first node found"
+      elif len(element)==0:
+        raise Exception("no \"plot\" node found")
+      if element[0].text.lower() in ['true','1','t','y','yes']:
+        self.plot=True
+      else:
+        self.plot=False
   def __writeCompleteEOS(self):
     """Writes out an eosTable and and an opacity Table in a form that SPHERLS can read in
     """
@@ -2160,7 +2454,8 @@ class interpTable:
     f=open(self.outputFile,'wb')
     
     #write out header info
-    data=struct.pack("2i6d",self.eosTable.logD.shape[0],self.eosTable.logD.shape[1],self.eosTable.X,self.eosTable.Z,\
+    Y=1.0-self.eosTable.X-self.eosTable.Z
+    data=struct.pack("2i6d",self.eosTable.logD.shape[0],self.eosTable.logD.shape[1],self.eosTable.X,Y,\
       self.eosTable.logDMin,self.eosTable.logDDel,self.eosTable.logTMin,self.eosTable.logTDel)
     f.write(data)
     
@@ -2177,11 +2472,12 @@ class interpTable:
       
     f.close()
 class interpTableManager:
-  def createTables(self):
+  def createTables(self,withoutNans=False):
     """Creates interpolated tables and write them out."""
     
     for interpTableTemp in self.tables:
-      interpTableTemp.interpolate(self.eosSet,self.opacitySet)
+      print "creating table \""+interpTableTemp.outputFile+"\" ..."
+      interpTableTemp.interpolate(self.eosSet,self.opacitySet,withoutNans)
   def __init__(self,configFile=None):
     """Initializes interpTableManager from the given configuration file."""
     
@@ -2224,7 +2520,27 @@ def main():
   #parse command line options
   (options,args)=parseOptions()
   
-  interp=interpTableManager(args[0])
-  interp.createTables()
+  #assume reading a configuration file to make a new table
+  if len(args)==1:
+    interp=interpTableManager(args[0])
+    interp.createTables(withoutNans=False)
+    
+  #assume comparing two pre-existing tables
+  elif len(args)==2:
+    table1=interpTable()
+    table1.read(args[0])
+    
+    table2=interpTable()
+    table2.read(args[1])
+    rhoIndex=100
+    numRho=10
+    
+    table1.plotLogP([table2],[rhoIndex,rhoIndex],[numRho,numRho])
+    table1.plotLogE([table2],[rhoIndex,rhoIndex],[numRho,numRho])
+    table1.plotLogK([table2],[rhoIndex,rhoIndex],[numRho,numRho])
+    
+    #table1.plotLogP([table2])
+    #table1.plotLogE([table2])
+    #table1.plotLogK([table2])
 if __name__ == "__main__":
   main()
