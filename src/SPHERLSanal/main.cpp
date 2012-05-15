@@ -1283,7 +1283,7 @@ void convertDistBinToAscii(std::string sFileNameBase){//tested
     //check time
     double dTemp;
     ifFile.read((char*)(&dTemp),sizeof(double));
-    if(dTemp!=dTime){
+    if(!(dTemp<=dTime*(1.0+5e-15)&&dTemp>=dTime*(1.0-5e-15))){
       std::stringstream ssTemp;
       ssTemp.unsetf(std::ios::fixed);
       ssTemp.setf(std::ios::scientific);
@@ -1308,7 +1308,7 @@ void convertDistBinToAscii(std::string sFileNameBase){//tested
     
     //check time step
     ifFile.read((char*)(&dTemp),sizeof(double));
-    if(dTemp!=dTimeStep1){
+    if(!(dTemp<=dTimeStep1*(1.0+5e-15)&&dTemp>=dTimeStep1*(1.0-5e-15))){
       std::stringstream ssTemp;
       ssTemp.unsetf(std::ios::fixed);
       ssTemp.setf(std::ios::scientific);
@@ -1321,7 +1321,7 @@ void convertDistBinToAscii(std::string sFileNameBase){//tested
     
     //check time step
     ifFile.read((char*)(&dTemp),sizeof(double));
-    if(dTemp!=dTimeStep2){
+    if(!(dTemp<=dTimeStep2*(1.0+5e-15)&&dTemp>=dTimeStep2*(1.0-5e-15))){
       std::stringstream ssTemp;
       ssTemp.unsetf(std::ios::fixed);
       ssTemp.setf(std::ios::scientific);
@@ -1711,7 +1711,7 @@ void combineBinFiles(std::string sFileNameBase){//tested
       //read in time
       double dTemp;
       ifIn[i].read((char*)(&dTemp),sizeof(double));
-      if(dTemp!=dTime){
+      if(!(dTemp<=dTime*(1.0+5e-15)&&dTemp>=dTime*(1.0-5e-15))){
         std::stringstream ssTemp;
         ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": file \""
           <<ossFileName.str()<<"\" has time="<<dTemp
@@ -1733,7 +1733,7 @@ void combineBinFiles(std::string sFileNameBase){//tested
       
       //read in timestep
       ifIn[i].read((char*)(&dTemp),sizeof(double));
-      if(dTemp!=dTimeStep1){
+      if(!(dTemp<=dTimeStep1*(1.0+5e-15)&&dTemp>=dTimeStep1*(1.0-5e-15))){
         std::stringstream ssTemp;
         ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": file \""
           <<ossFileName.str()<<"\" has time step="<<dTemp
@@ -1744,7 +1744,7 @@ void combineBinFiles(std::string sFileNameBase){//tested
       
       //read in timestep
       ifIn[i].read((char*)(&dTemp),sizeof(double));
-      if(dTemp!=dTimeStep2){
+      if(!(dTemp<=dTimeStep2*(1.0+5e-15)&&dTemp>=dTimeStep2*(1.0-5e-15))){
         std::stringstream ssTemp;
         ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": file \""
           <<ossFileName.str()<<"\" has time step="<<dTemp
