@@ -8,7 +8,10 @@
 */
 
 //#include "fftw++.h"
-#include <fftw3.h>
+#include "../../config.h"
+#ifdef FFTW_ENABLE
+  #include <fftw3.h>
+#endif
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -126,9 +129,11 @@ void printHelp();
 bool bFileExists(std::string strFilename);
 void fpSignalHandler(int nSig);
 void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex);
-void computeFourierTrans(std::string sInFileName,std::string sOutFileName);
 void convertBinToLNA(std::string sFileName);
+#ifdef FFTW_ENABLE
 void computeFourierTransFromList(std::string sInFileName,std::string sOutFileName);
+void computeFourierTrans(std::string sInFileName,std::string sOutFileName);
+#endif
 struct watchzone{
   std::vector<double> vecdT;//2
   std::vector<double> vecdU_ip1half;//3

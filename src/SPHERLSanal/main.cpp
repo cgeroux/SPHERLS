@@ -611,9 +611,16 @@ int main(int argc, char *argv[]){
         break;
       }
       case 4:{//compute fourier transform
-        std::stringstream ssOutFileName;
-        ssOutFileName<<sFileName.substr(0,sFileName.length()-4)<<"-FT.txt";
-        computeFourierTrans(sFileName,ssOutFileName.str());
+        #ifdef FFTW_ENABLE
+          std::stringstream ssOutFileName;
+          ssOutFileName<<sFileName.substr(0,sFileName.length()-4)<<"-FT.txt";
+          computeFourierTrans(sFileName,ssOutFileName.str());
+        #else
+          std::stringstream ssTemp;
+          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+            <<": FFTW was disable during configuration, this option is not avaible "<<nOperation<<"\n";
+          throw exception2(ssTemp.str(),SYNTAX);
+        #endif
         break;
       }
       case 5:{//convert to LNA format
@@ -652,9 +659,16 @@ int main(int argc, char *argv[]){
         break;
       }
       case 41:{//compute a fourier transform
-        std::stringstream ssOutFileName;
-        ssOutFileName<<sFileName.substr(0,sFileName.length()-4)<<"-FT.txt";
-        computeFourierTransFromList(sFileName,ssOutFileName.str());
+        #ifdef FFTW_ENABLE
+          std::stringstream ssOutFileName;
+          ssOutFileName<<sFileName.substr(0,sFileName.length()-4)<<"-FT.txt";
+          computeFourierTransFromList(sFileName,ssOutFileName.str());
+        #else
+          std::stringstream ssTemp;
+          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+            <<": FFTW was disable during configuration, this option is not avaible "<<nOperation<<"\n";
+          throw exception2(ssTemp.str(),SYNTAX);
+        #endif
         break;
       }
       default:{
@@ -6333,79 +6347,6 @@ watchzone readInWatchZone(std::string sFileName){
   }
   return watchzoneTemp;
 }
-void computeFourierTrans(std::string sInFileName,std::string sOutFileName){
-  
-  //read in watchzone
-  watchzone watchzoneIn=readInWatchZone(sInFileName);
-  
-  //interpolate dependent variable to evenly spaced times
-  fftw_complex *in;
-  in=(fftw_complex*) fftw_malloc(sizeof(fftw_complex)*watchzoneIn.vecdT.size());
-  double dTInterp=(watchzoneIn.vecdT[watchzoneIn.vecdT.size()-1]-watchzoneIn.vecdT[0])
-    /double(watchzoneIn.vecdT.size());
-  unsigned int nIndexKeep=1;
-  unsigned int nIndexCur=1;
-  for(unsigned int i=0;i<watchzoneIn.vecdT.size();i++){
-    
-    //calculate time to interpolate to
-    double dt=double(i)*dTInterp+watchzoneIn.vecdT[0];
-    
-    //find bracketing times, will be nIndexKeep, and nIndexKeep-1
-    bool bFound=false;
-    nIndexCur--;
-    while(!bFound&&nIndexCur<watchzoneIn.vecdT.size()){
-      if(watchzoneIn.vecdT[nIndexCur]>dt){
-        nIndexKeep=nIndexCur;
-        bFound=true;
-      }
-      nIndexCur++;
-    }
-    
-    //if not found, say so
-    if(!bFound){
-      fftw_free(in);
-      std::stringstream ssTemp;
-      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<" time interpolating to, "<<dt
-        <<" out side data set.\n";
-      throw exception2(ssTemp.str());
-    }
-    
-    //do linear interpolation to dt
-    in[i][0]=(watchzoneIn.vecdU_ip1half[nIndexKeep]-watchzoneIn.vecdU_ip1half[nIndexKeep-1])
-      /(watchzoneIn.vecdT[nIndexKeep]-watchzoneIn.vecdT[nIndexKeep-1])*
-      (dt-watchzoneIn.vecdT[nIndexKeep-1])+watchzoneIn.vecdU_ip1half[nIndexKeep-1];
-  }
-  
-  //setup FFT plan
-  fftw_complex *out;
-  fftw_plan p;
-  out=(fftw_complex*) fftw_malloc(sizeof(fftw_complex)*watchzoneIn.vecdT.size());
-  p=fftw_plan_dft_1d(watchzoneIn.vecdT.size(),in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-  
-  //do the FFT
-  fftw_execute(p);
-  
-  //output to file
-  std::ofstream ofOut;
-  ofOut.open(sOutFileName.c_str());
-  if(!ofOut.good()){
-    std::stringstream ssTemp;
-    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<" unable to open the file \""
-      <<sOutFileName<<"\"\n";
-    throw exception2(ssTemp.str());
-  }
-  
-  //write out the properly scaled transform
-  for(unsigned int i=0;i<watchzoneIn.vecdT.size()/2;i++){
-    ofOut<<double(i)/dTInterp/watchzoneIn.vecdT.size()
-      <<" "<<sqrt(out[i][0]*out[i][0]+out[i][1]*out[i][1])/double(watchzoneIn.vecdT.size())*2.0<<" "
-      <<atan2(out[i][1],out[i][0])<<std::endl;
-  }
-  
-  //free memory
-  fftw_destroy_plan(p);
-  fftw_free(in); fftw_free(out);
-}
 void convertBinToLNA(std::string sFileName){
   
   //open input file
@@ -6854,6 +6795,7 @@ void convertBinToLNA(std::string sFileName){
   delete [] nSize;
   delete [] nVarInfo;
 }
+#ifdef FFTW_ENABLE
 void computeFourierTransFromList(std::string sInFileName,std::string sOutFileName){
 
   //read in file list
@@ -6943,3 +6885,79 @@ void computeFourierTransFromList(std::string sInFileName,std::string sOutFileNam
   fftw_destroy_plan(p);
   fftw_free(in); fftw_free(out);
 }
+void computeFourierTrans(std::string sInFileName,std::string sOutFileName){
+  
+  //read in watchzone
+  watchzone watchzoneIn=readInWatchZone(sInFileName);
+  
+  //interpolate dependent variable to evenly spaced times
+  fftw_complex *in;
+  in=(fftw_complex*) fftw_malloc(sizeof(fftw_complex)*watchzoneIn.vecdT.size());
+  double dTInterp=(watchzoneIn.vecdT[watchzoneIn.vecdT.size()-1]-watchzoneIn.vecdT[0])
+    /double(watchzoneIn.vecdT.size());
+  unsigned int nIndexKeep=1;
+  unsigned int nIndexCur=1;
+  for(unsigned int i=0;i<watchzoneIn.vecdT.size();i++){
+    
+    //calculate time to interpolate to
+    double dt=double(i)*dTInterp+watchzoneIn.vecdT[0];
+    
+    //find bracketing times, will be nIndexKeep, and nIndexKeep-1
+    bool bFound=false;
+    nIndexCur--;
+    while(!bFound&&nIndexCur<watchzoneIn.vecdT.size()){
+      if(watchzoneIn.vecdT[nIndexCur]>dt){
+        nIndexKeep=nIndexCur;
+        bFound=true;
+      }
+      nIndexCur++;
+    }
+    
+    //if not found, say so
+    if(!bFound){
+      fftw_free(in);
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<" time interpolating to, "<<dt
+        <<" out side data set.\n";
+      throw exception2(ssTemp.str());
+    }
+    
+    //do linear interpolation to dt
+    in[i][0]=(watchzoneIn.vecdU_ip1half[nIndexKeep]-watchzoneIn.vecdU_ip1half[nIndexKeep-1])
+      /(watchzoneIn.vecdT[nIndexKeep]-watchzoneIn.vecdT[nIndexKeep-1])*
+      (dt-watchzoneIn.vecdT[nIndexKeep-1])+watchzoneIn.vecdU_ip1half[nIndexKeep-1];
+  }
+  
+  //setup FFT plan
+  fftw_complex *out;
+  fftw_plan p;
+  out=(fftw_complex*) fftw_malloc(sizeof(fftw_complex)*watchzoneIn.vecdT.size());
+  p=fftw_plan_dft_1d(watchzoneIn.vecdT.size(),in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+  
+  //do the FFT
+  fftw_execute(p);
+  
+  //output to file
+  std::ofstream ofOut;
+  ofOut.open(sOutFileName.c_str());
+  if(!ofOut.good()){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<" unable to open the file \""
+      <<sOutFileName<<"\"\n";
+    throw exception2(ssTemp.str());
+  }
+  
+  //write out the properly scaled transform
+  for(unsigned int i=0;i<watchzoneIn.vecdT.size()/2;i++){
+    ofOut<<double(i)/dTInterp/watchzoneIn.vecdT.size()
+      <<" "<<sqrt(out[i][0]*out[i][0]+out[i][1]*out[i][1])/double(watchzoneIn.vecdT.size())*2.0<<" "
+      <<atan2(out[i][1],out[i][0])<<std::endl;
+  }
+  
+  //free memory
+  fftw_destroy_plan(p);
+  fftw_free(in); fftw_free(out);
+}
+#endif
+
+
