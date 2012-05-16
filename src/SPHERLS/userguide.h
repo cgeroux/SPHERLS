@@ -54,9 +54,9 @@
     
     A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib, \c /include, \c /usr/lib /usr/include, \c /usr/local/lib, \c /usr/local/include, \c /home/$USER/lib, and \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manualy tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options to tell the script where to find these include files and libraries.
     
-    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \c --prefix=/home/$USER/, mentioned below, to point to where you want to install it. 
+    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \verbatim --prefix=/home/$USER/ \endverbatim , mentioned below, to point to where you want to install it. 
     
-    If you have root access and want to install for all users of the current machine you will likely want to install the libraries into \c /usr/local  which can be achieved by setting \c --prefix=/usr/local instead of \c --prefix=/home/$USER/ used in the below installations and SPHERLS will automatically check this location for the install libraries.
+    If you have root access and want to install for all users of the current machine you will likely want to install the libraries into \c /usr/local  which can be achieved by setting \verbatim --prefix=/usr/local \endverbatim instead of \verbatim --prefix=/home/$USER/ \endverbatim used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
     @subsection requirements Requirements
       - gcc/g++
@@ -64,10 +64,11 @@
       - PETSc library, used as the core matrix solver
     @subsection optional_requirements Optional Requirements
       - python for analysis scripts
-      - - numpy
-      - - matplotlib
-      - fftw3 library for analysis
-      - hdf4 library for converting to hdf4 file format
+      -- numpy used by matplotlib
+      -- matplotlib for creating plots
+      -- scipy for interpolating in equation of state files
+      - fftw3 library for frequency analysis
+      - hdf4 library for converting to hdf4 file format (not yet implemented)
       - Doxygen used to create documentation from source code via "make docs"
     
     @subsection installPETSC Installing PETSC Library
@@ -78,8 +79,10 @@
         and type the following commands:
         -# \verbatim ./configure PETSC_DIR=$PWD --prefix=/home/$USER/ --with-c++-support --with-c-support
  --with-shared --download-f-blas-lapack=1 --with-x11=no --with-x11=no \endverbatim \c $USER is the environment varible coresponding to your username.
-        -# \verbatim make all \endverbatim
-        -# \verbatim make install \endverbatim
+        -# \verbatim make all \endverbatim \\
+        Often at the end of the configuration stage the configuartion script will give the command to make the library. One should use this over the above if given.
+        -# \verbatim make install \endverbatim \\
+        as with the \verbatim make all \endverbatim the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
         -# \verbatim make PETSC_DIR=/home/$USER/lib test \endverbatim
       - You will then need to add the following line to you \c .bashrc file to assure that you will pick up the library
       \verbatim
