@@ -18708,6 +18708,8 @@ double dImplicitEnergyFunction_RTP(Grid &grid,Parameters &parameters,Time &time,
   double dE_ijkm1half_np1half=(dE_ijkm1_np1half+dE_ijk_np1half)*0.5;
   
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half,grid.dLocalGridOld[grid.nD][i][j][k]);
+  
+  /**\TODO these artificial viscosities should be combined into one pressure.*/
   double dPi_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k];
   double dPj_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ1][i][j][k];
   double dPk_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ2][i][j][k];

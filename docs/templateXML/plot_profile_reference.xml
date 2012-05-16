@@ -38,6 +38,9 @@
     </axis>
     <axis type="time" xlabel="t [s]" xminortics="True">
       <plot ylabel="u_0 [km/s]" grid="major">
+        
+        <!-- radial zone can be either a reference to a particular radial zone (0=surface increasing
+        inward) or "max" or "min" for the maximum or minimum of all radial zones.-->
         <curve radialZone="1" style="-o">$21/1e5</curve>
       </plot>
     </axis>

@@ -25,6 +25,8 @@ def parseOptions():
   #these options apply globaly
   parser.add_option("-s","--show",dest="show",action="store_true",default=False
     ,help="Display plot to x11 display rather than saving to a file.")
+  parser.add_option("-f","--file",dest="file",action="store_true",default=False
+    ,help="Instead of plotting the data will be written to an ascii file.")
   parser.add_option("-k","--keep",action="store_true",dest="keep"
     ,help="Keeps distributed binary files [default].",default=True)
   parser.add_option("-r","--remove",action="store_false",dest="keep"
@@ -535,7 +537,7 @@ def plot(dataSets,options,title):
     ax=[]
     gs=[]
     top=options.figTop
-    
+    plotDataForFile=[]
     #add title
     if title!="":
       tempTitle=title
@@ -601,6 +603,8 @@ def plot(dataSets,options,title):
                 if axisMine.period!=None:#use phase instead of time if period is given
                   temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
                     ,markersize=curve.markersize,linewidth=curve.linewidth)
+                  if options.file:
+                    plotDataForFile.append([axisMine.phase,curve.y])
                   if curve.label!=None and curve.label!="":
                     lines.append(temp)
                     labels.append(curve.label)
@@ -613,9 +617,13 @@ def plot(dataSets,options,title):
                     if plot.limits[1]!=None:
                       yTemp[1]=plot.limits[1]
                     ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
+                    if options.file:
+                      plotDataForFile.append([xTemp,yTemp])
                 else:
                   temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,str(curve.color)+str(curve.style)
                     ,markersize=curve.markersize,linewidth=curve.linewidth)
+                  if options.file:
+                    plotDataForFile.append([axisMine.x,curve.y])
                   if curve.label!=None and curve.label!="":
                     lines.append(temp)
                     labels.append(curve.label)
@@ -628,6 +636,8 @@ def plot(dataSets,options,title):
                     if plot.limits[1]!=None:
                       yTemp[1]=plot.limits[1]
                     ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
+                    if options.file:
+                      plotDataForFile.append([xTemp,yTemp])
                 curveCount=curveCount+1
             else:
               curveCount=0
@@ -636,6 +646,8 @@ def plot(dataSets,options,title):
                 #plot the curve
                 temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],str(curve.color)+str(curve.style)
                   ,markersize=curve.markersize,linewidth=curve.linewidth)
+                if options.file:
+                  plotDataForFile.append([axisMine.x[i],curve.y[i]])
                 if curve.label!=None and curve.label!="":
                   lines.append(temp)
                   labels.append(curve.label)
@@ -672,13 +684,39 @@ def plot(dataSets,options,title):
       plt.show()
     else:
       [path,ext]=os.path.splitext(options.outputFile)
-      supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
-      if ext[1:] not in supportedFileTypes:
-        print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
-        quit()
-      print __name__+":"+main.__name__+": saving figure to file \""+path+"_"+str(fileCount)+ext+"\" ..."
-      fig.savefig(path+"_"+str(fileCount)+ext,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
-      plt.close(fig)
+      if options.file:
+        f=open(path+"_"+str(fileCount)+".txt",'w')
+        
+        #write info to file
+        nIndex=0
+        bContinue=True
+        while bContinue:
+          line=""
+          bContinue=False
+          for [x,y] in plotDataForFile:
+            if nIndex<len(x):
+              line+=str(x[nIndex])+" "
+              bContinue=True
+            else:
+              line+="- "
+            if nIndex<len(y):
+              line+=str(y[nIndex])+" "
+              bContinue=True
+            else:
+              line+="- "
+          line+="\n"
+          f.write(line)
+          nIndex+=1
+        f.close()
+      else:
+        supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
+        if ext[1:] not in supportedFileTypes:
+          print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+          quit()
+        print __name__+":"+main.__name__+": saving figure to file \""+path+"_"+str(fileCount)+ext+"\" ..."
+        fig.savefig(path+"_"+str(fileCount)+ext,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
+        plt.close(fig)
+      
     fileCount=fileCount+1
 def splitFirstInt(str):
   '''Returns the integer which starts at the very first character of str, and drops everything else 
