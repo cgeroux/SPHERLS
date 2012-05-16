@@ -6,7 +6,7 @@
     <que>False</que><!-- if "true" or "main" it will run the job in main que, if it is test it will 
       run in the test que if it isn't given, or is something else it will run at the command line -->
     <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
-      using mpirun, check with your system admin for ideas about what this should be.-->
+      using mpirun, check with your system admin for ideas about what this should be. ompi* works on ace-net machines, while openmpi works on lachesis-->
   </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->

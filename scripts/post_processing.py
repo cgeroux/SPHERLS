@@ -35,6 +35,7 @@ def main():
    +"radial profiles even if the already exist.")
   parser.add_option('-r',action="store_true",dest="r",default=False,help="If set will re-sum "
    +"the model profiles kinetic energies.")
+  parser.add_option('-l',default=None,type=str,dest="l",help="Used to set the runtime of the job, required by some que systems [default: %default]")
   
   #parse command line options
   (options,args)=parser.parse_args()
@@ -127,6 +128,7 @@ def main():
         resum=" --re-sum "
       settings['arguments']=[remake,resum,os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
+      settings['runtime']=options.l
       script=makeSubScript(settings,options.e)
       
       #run job
@@ -187,6 +189,8 @@ def makeSubScript(settings,extras):
     +"##\n"\
     +"## Transfer all environment variables when job is submitted\n"\
     +"#$ -V\n"
+  if settings['runtime']!=None:
+    script+="#$ -l h_rt="+settings['runtime']+"\n"
   script=script+settings['exe']+" "
   if "arguments" in settings.keys():
     for argument in settings['arguments']:
