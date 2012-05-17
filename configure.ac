@@ -87,6 +87,7 @@ AS_IF([test "$FFTW_ENABLE" = "yes"],[
   #define FFTW_ENABLE in include file
   AC_DEFINE([FFTW_ENABLE],[],[Defined if fftw is enabled])
   ])
+AM_CONDITIONAL([FFTW_ENABLE],[test "$FFTW_ENABLE" = "yes"])
 #################################################################
 
 #################################################################
@@ -148,6 +149,7 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
   AC_SUBST([HDF_INCLUDE_PATH])
   AC_SUBST([HDF_LIB_PATH])
   ])
+AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 #################################################################
 #
 #################################################################

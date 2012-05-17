@@ -76,8 +76,24 @@ SPHERLSanal_SOURCES	=	\
 	src/eos.cpp	\
 	src/exception2.cpp	\
 	src/exception2.h	
-SPHERLSanal_LDADD	=	-L$(FFTW_LIB_PATH)	-L$(HDF_LIB_PATH)	-lfftw3	-lm	-ldf	-lmfhdf	-ljpeg	-lz
-SPHERLSanal_CPPFLAGS	=	-I$(FFTW_INCLUDE_PATH)	-I$(HDF_INCLUDE_PATH)	-Isrc/
+
+if FFTW_ENABLE
+FFTW_LDADDS=-L$(FFTW_LIB_PATH) -lfftw3
+FFTW_CPPFLAGS=-I$(FFTW_INCLUDE_PATH)
+else
+FFTW_LDADDS= 
+FFTW_CPPFLAGS= 
+endif
+if HDF_ENABLE
+HDF_LDADDS=-L$(HDF_LIB_PATH) -lm -ldf -lmfhdf -ljpeg -lz
+HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH) 
+else
+HDF_LDADDS= 
+HDF_CPPFLAGS= 
+endif
+
+SPHERLSanal_LDADD=$(FFTW_LDADDS) $(HDF_LDADDS) 
+SPHERLSanal_CPPFLAGS=$(FFTW_CPPFLAGS) $(HDF_CPPFLAGS) -Isrc/ 
 
 SPHERLSgen_SOURCES	=	\
 	src/SPHERLSgen/main.cpp	\
