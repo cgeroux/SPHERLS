@@ -647,7 +647,8 @@ class Time{
       */
     int nTimeStepIndex; /**<
       An index indecating the current time step. An index of zero corresponds
-      to a \ref Time::dt=0.
+      to a \ref Time::dt=0. \todo should probably make this an unsigned variable, and perhaps also
+      use the keyword long to help ensure there are enough values. Often need 7 decimal places.
       */
     bool bVariableTimeStep;/**<
       If true a variable time step is used as specified by the Courant condition, times the \ref dTimeStepFactor.

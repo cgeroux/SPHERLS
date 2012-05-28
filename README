@@ -1,26 +1,25 @@
 ==========================================
 IF RAW SOURCE:
 
-autoreconf --install
-./configure
-make
+  autoreconf --install
+  ./configure
+  make
 
 ===========================================
 IF PACKAGE:
 
 To build and install:
 
-./configure
-make
-make install
+  ./configure
+  make
+  make install
 
-To find out more on how to use the SPHERLS packages see user manuals in ./docs/manuals
+To find out more on how to use the SPHERLS packages see user manuals in
+./docs/manuals
 
 ============================================
 COMMON OPTIONS
 
-for debugging configurations do 
+useful options for debugging add 'CXXFLAGS="-g -O0"' to ./configure to
+compile unoptimized version for debugging.
 
-  ./configure CXXFLAGS="-g -O0"
-
-instead of the regular ./configure
