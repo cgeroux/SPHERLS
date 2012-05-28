@@ -499,7 +499,7 @@ def setCodes(settings,parsed):
       allowedScalors=[10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     if plane['planeType']=="rp":
       allowedCoordinate1=[0,1,2]
-      allowedCoordinate2=[4,5]
+      allowedCoordinate2=[5,6]
       allowedVectors1=[7,8]
       allowedVectors2=[10]
       allowedScalors=[9,11,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
