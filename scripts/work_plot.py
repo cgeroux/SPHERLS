@@ -13,8 +13,9 @@ import average_PKE
 
 def parseOptions():
   #setup command line parser
-  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START]"
-    ,version="%prog 1.0",description="")
+  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
+    ,version="%prog 1.0",description="Computes the work done in the model over each period between "
+    +"START and END")
   parser.add_option("-k","--keep",action="store_true",dest="keep"
     ,help="Keeps distributed binary files [default].",default=True)
   parser.add_option("-r","--remove",action="store_false",dest="keep"
@@ -55,9 +56,9 @@ def parseOptions():
   return parser.parse_args()
 def main():
   deltaMColumn=2#the column number for delta M in the profile file, start at 0 for the first column
-  pColumn=58#the column number for P_ave in the profile file, starting at 0 for first column
+  pColumn=62#the column number for P_ave in the profile file, starting at 0 for first column
   rhoColumn=6#the column number for Rho_ave in the profile file
-  tColumn=45#the column number for T_ave in the profile file
+  tColumn=49#the column number for T_ave in the profile file
   QColumn=35
   
   #parse command line options
@@ -103,6 +104,7 @@ def main():
         nSet=1
         periodCount+=1
   dWSum=[]
+  dWSumError=[]
   
   #get all possible file names
   extension="_pro"+".txt"
@@ -134,8 +136,14 @@ def main():
       if intOfFile>=periodRange[n][0] and intOfFile<periodRange[n][1]:
         files.append(file)
     
+    #check to make sure we have a start and end for the period
+    if periodRange[n][1]==None:
+      raise Exception("file range index range "+str(start)+"-"+str(end)+" should contain at least"
+        +" one period as indicated by PKE peaks, but does not.")
+    
     if len(files)<3:
-      print "need more than 3 files to compute the work, likely alot more"
+      print "need more than 3 files to compute the work, likely alot more with file indices"\
+        +" in the range  ("+str(periodRange[n][0])+","+str(periodRange[n][1])+")"
       return False
     
     #for first model dump
@@ -154,7 +162,7 @@ def main():
     deltaM=np.zeros( (len(fileData.fColumnValues)-1,len(files)+1) )
     for i in range(len(fileData.fColumnValues)-1):
       p[i][0]=fileData.fColumnValues[i][pColumn]
-      p[i][len(files)]=fileData.fColumnValues[i][pColumn]+fileData.fColumnValues[i][QColumn]
+      p[i][len(files)]=fileData.fColumnValues[i][pColumn]
       if options.withAV:
         p[i][0]+=fileData.fColumnValues[i][QColumn]
         p[i][len(files)]+=fileData.fColumnValues[i][QColumn]
@@ -168,7 +176,9 @@ def main():
         deltaM[i][len(files)]=1.0
     
     #read all files in
+    #print "len(files)=",len(files)
     for i in range(1,len(files)):#for each dump
+      #print "i=",i
       print "reading file ",files[i]," ..."
       fileData.readFile(files[i])
       for j in range(len(fileData.fColumnValues)-1):#for each zone
@@ -183,29 +193,51 @@ def main():
       
     #compute work
     dW=np.zeros(len(fileData.fColumnValues)-1)
+    dWError=np.zeros(len(fileData.fColumnValues)-1)
     dWSum.append(0.0)
-    for i in range(1,len(files)+1):
-      for j in range(len(fileData.fColumnValues)-1):
+    for i in range(1,len(files)+1):#time
+      for j in range(len(fileData.fColumnValues)-1):#position
         dW[j]+=(0.5*(rhoInvert[j][i]-rhoInvert[j][i-1])*(p[j][i]+p[j][i-1]))*deltaM[j][i]
-    for j in range(len(fileData.fColumnValues)-1):
+    
+    dWMax=0.0
+    dWMin=0.0
+    for j in range(len(fileData.fColumnValues)-1):#position
       dWSum[n]+=dW[j]
+      y1=p[j][len(files)]
+      y0=p[j][len(files)-1]
+      ym1=p[j][len(files)-2]
+      x1=rhoInvert[j][len(files)]
+      x0=rhoInvert[j][len(files)-1]
+      xm1=rhoInvert[j][len(files)-2]
+      deltaX=(x1-x0)
+      y1py0=y1+y0
+      tiny=1e-300#fixes the case where things don't move, e.g. near the core
+      m=(y0-ym1)/((x0-xm1)+tiny)
+      y1p=y0+m*deltaX
+      y1ppy0=y1p+y0
+      #how far off is our guess from assuming a linear extrapolation
+      dWError[j]=abs(0.5*deltaX*y1py0-0.5*deltaX*y1ppy0)*deltaM[j][len(files)]
+      dWMax+=dW[j]+dWError[j]
+      dWMin+=dW[j]-dWError[j]
+    dWSumError.append((dWMax-dWMin)*0.5)
     
     #make plots of P and 1/rho for each zone
     fig=plt.figure(figsize=(13,8))
     ax1 = plt.subplot2grid((3,3), (0,0),colspan=3,rowspan=3)
     if options.plotCurves:
       for j in range(options.startZone,len(fileData.fColumnValues)-1):
+        #print rhoInvert[j]
         make_plot(rhoInvert[j],p[j],options,j,fig,ax1)
     
     #make work plot
-    make_plot2(Log10T,dW,options,fig,ax1,"work_plot_"+str(n),"Log10(T)")
-    make_plot2(range(len(fileData.fColumnValues)-1),dW,options,fig,ax1,"work_plot2_"+str(n),"zone #")
+    make_plot2(Log10T,dW,dWError,options,fig,ax1,"work_plot_"+str(n),"Log10(T)")
+    make_plot2(range(len(fileData.fColumnValues)-1),dW,dWError,options,fig,ax1,"work_plot2_"+str(n),"zone #")
     
   #print out total work done by model
   f=open(options.outputFile+"_work_per_period.txt",'w')
-  f.write("time[s]      work[ergs]\n")
+  f.write("time[s]      work[ergs] work_uncertianty[ergs]\n")
   for i in range(len(dWSum)):
-    f.write(str(time[i])+" "+str(dWSum[i])+"\n")
+    f.write(str(time[i])+" "+str(dWSum[i])+" "+str(dWSumError[i])+"\n")
   f.close()
 def make_plot(x,y,options,i,fig,ax1):
   if not options.noGrid:
@@ -217,6 +249,7 @@ def make_plot(x,y,options,i,fig,ax1):
     plotString=plotString+'o'
   line1=ax1.plot(x,y,plotString,markersize=3)
   line1=ax1.plot(x[0],y[0],'x',markersize=15)
+  line1=ax1.plot(x[len(x)-1],y[len(x)-1],'x',markersize=15)
   ax1.set_xlabel("<1/rho>")
   ax1.set_ylabel("<P>")
   if options.show:
@@ -228,7 +261,7 @@ def make_plot(x,y,options,i,fig,ax1):
   
   ax1.cla()#clear plot
   return True
-def make_plot2(x,y,options,fig,ax1,name,xlabel):
+def make_plot2(x,y,yerr,options,fig,ax1,name,xlabel):
   if not options.noGrid:
     ax1.grid()
   plotString='-'
@@ -237,7 +270,7 @@ def make_plot2(x,y,options,fig,ax1,name,xlabel):
   #if options.points:
   #  plotString=plotString+'o'
   #line1=ax1.plot(x,y,plotString,markersize=5)
-  line1=ax1.plot(x,y,plotString,markersize=5)
+  line1=ax1.errorbar(x,y,yerr=yerr,fmt=plotString,markersize=5,ecolor='r')
   ax1.set_xlabel(xlabel)
   if options.withMass:
     ax1.set_ylabel("Work [ergs]")

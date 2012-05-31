@@ -771,6 +771,10 @@ def main():
   #parse command line options
   (options,args)=parseOptions()
   
+  if len(args)==0:
+    print "must supply an input file"
+    quit()
+  
   #get root element
   tree=xml.parse(args[0])
   root=tree.getroot()

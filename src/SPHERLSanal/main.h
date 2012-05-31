@@ -118,7 +118,10 @@ const double dLSun=3.839e33;/**<
 const int nDumpFileVersion=1;/**<
   Version of the dump file supported
   */
-  
+bool bExtraInfoInProfile=false;/**<
+  If true include extra information in radial profile about equation of state and opacity
+  derivatives.
+*/
 //functions
 void convertDistBinToAscii(std::string sFileNameBase);
 void combineBinFiles(std::string sFileNameBase);

@@ -342,6 +342,10 @@ int main(int argc, char *argv[]){
               }
               break;
             }
+            case 'v':{//add extra information to radial profile
+              bExtraInfoInProfile=true;
+              break;
+            }
             default:{//default is to display help
               std::stringstream ssTemp;
               ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
@@ -720,6 +724,7 @@ void printHelp(){
     <<"       defult is scientific (s)\n"
     <<" -h    displays this message\n"
     <<" -a [input file type]   make a radial profile from [input file type]\n"
+    <<" -v adds extra information to the radial profile about equation of state derivatives.\n"
     <<" -s [input file type] [plane] [planeIndex]   make a 2D slice where\n"
     <<"       [input file type] is a two character combination of c/d or b/a for\n"
     <<"       collected/distributed and binary/ascii.\n"
@@ -3509,8 +3514,13 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthIntOutputField)<<"C_max_k(72)"
     <<std::setw(nWidthOutputField)<<"C_min[cm/s](73)"
     <<std::setw(nWidthIntOutputField)<<"C_min_j(74)"
-    <<std::setw(nWidthIntOutputField)<<"C_min_k(75)"
-    <<std::endl;
+    <<std::setw(nWidthIntOutputField)<<"C_min_k(75)";
+  if(bExtraInfoInProfile){
+    ofFile<<std::setw(nWidthOutputField)<<"DlnPDlnT(76)"
+      <<std::setw(nWidthOutputField)<<"DlnPDlnRho(77)"
+      <<std::setw(nWidthOutputField)<<"DEDT(78)";
+  }
+  ofFile<<std::endl;
   
   //write out profile
   double dErrorDM_r;
@@ -3519,12 +3529,16 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     //calculate mass error
     dErrorDM_r=(4.0/3.0*dPi*dGrid[nD][i][0][0]*(pow(dGrid[nR][i+1][0][0],3.0)
       -pow(dGrid[nR][i][0][0],3.0))-dGrid[nDM][i][0][0])/dGrid[nDM][i][0][0];
+    double dDlnPDlnT;
+    double dDlnPDlnRho;
+    double dDEDT;
+    eosTable.getDlnPDlnTDlnPDlnPDEDT(dAve[nT][i],dAve[nD][i],dDlnPDlnT,dDlnPDlnRho,dDEDT);
     
-      nMaxJIndex[nP][i]=0;
-      nMaxKIndex[nP][i]=0;
-      nMinJIndex[nP][i]=0;
-      nMinKIndex[nP][i]=0;
-      
+    nMaxJIndex[nP][i]=0;
+    nMaxKIndex[nP][i]=0;
+    nMinJIndex[nP][i]=0;
+    nMinKIndex[nP][i]=0;
+    
     ofFile<<std::setw(nWidthIntOutputField)<<i//1
       <<std::setw(nWidthOutputField)<<dGrid[nM][i][0][0]//2
       <<std::setw(nWidthOutputField)<<dGrid[nDM][i][0][0]//3
@@ -3654,8 +3668,13 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       <<std::setw(nWidthIntOutputField)<<nMaxKIndex[nC][i]//72
       <<std::setw(nWidthOutputField)<<dMin[nC][i]//73
       <<std::setw(nWidthIntOutputField)<<nMinJIndex[nC][i]//74
-      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i]//75
-      <<std::endl;
+      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i];//75
+    if(bExtraInfoInProfile){
+      ofFile<<std::setw(nWidthOutputField)<<dDlnPDlnT
+        <<std::setw(nWidthOutputField)<<dDlnPDlnRho
+        <<std::setw(nWidthOutputField)<<dDEDT;
+    }
+    ofFile<<std::endl;
   }
   ofFile
     <<std::setw(nWidthIntOutputField)<<(nSizeGlobe[0]+2*nNumGhostCells)//1

@@ -211,6 +211,15 @@ class eos{
       @param [out] dE energy at dT and dRho
       @param [out] dDTDE derivative of temperature w.r.t. energy at constant density
       */
+    void getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT, double &dDlnPDlnRho,
+      double &dDEDT);/**<
+        This function calculates various partial derivatives
+        @param [in] dT temperature at which the derivative is to be computed
+        @param [in] dRho density at which the derivative is to be computed
+        @param [out] dDlnPDlnT derivative of ln(P) w.r.t. ln(T)
+        @param [out] dDlnPDlnRho derivative of ln(P) w.r.t. ln(Rho)
+        @param [out] dDEDT derivative of temperature w.r.t. energy at constant density
+      */
 };/**@class eos
   This class holds an equation of state as well as many functions useful for manipulating it
   */
