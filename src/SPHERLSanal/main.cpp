@@ -3751,8 +3751,13 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthIntOutputField)<<"-"//72
     <<std::setw(nWidthOutputField)<<"-"//73
     <<std::setw(nWidthIntOutputField)<<"-"//74
-    <<std::setw(nWidthIntOutputField)<<"-"//75
-    <<std::endl;
+    <<std::setw(nWidthIntOutputField)<<"-";//75
+  if(bExtraInfoInProfile){
+    ofFile<<std::setw(nWidthOutputField)<<"-"
+      <<std::setw(nWidthOutputField)<<"-"
+      <<std::setw(nWidthOutputField)<<"-";
+  }
+  ofFile<<std::endl;
   
   ofFile.close();
   //also need to delete dGrid

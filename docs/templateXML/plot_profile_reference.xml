@@ -18,6 +18,9 @@
     P_max[dynes/cm^2](65)          Gam_ave[na](66)          Gam_min[na](67)          Gam_max[na](68)
           C_ave[cm/s](69)          C_max[cm/s](70)              C_max_j(71)              C_max_k(72)
           C_min[cm/s](73)              C_min_j(74)              C_min_k(75)
+
+OPTIONAL if created with SPHERLSanal with the -v option
+             DlnPDlnT(76)           DlnPDlnRho(77)                 DEDT(78)
 -->
 <figure title="Measuring Overshooting in Pressure Scale Heights \time0 \index0 \phase0" outputfile="./grid_velocity.pdf"
   axisSpacing="0.05" figBottom="0.05" figTop="0.95" figWidth="10" figHeight="8" dpi="300">
