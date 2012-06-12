@@ -2100,6 +2100,8 @@ class interpTable:
   def read(self,sFilename):
     """Reads in an interpolated table"""
     
+    self.sFileName=sFilename
+    
     f=open(sFilename,'rb')
     data=f.read()
     
@@ -2183,7 +2185,8 @@ class interpTable:
         self.logK[i][j]=logKSet[j]
         
     f.close()
-  def plotLogE(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+  def plotLogE(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True,rstride=1
+    ,cstride=1):
     """Plots LogE
     
     Keywords:
@@ -2201,7 +2204,7 @@ class interpTable:
     fig=plt.figure()
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
-      ax.plot_wireframe(self.logD,self.logT,self.logE)
+      ax.plot_wireframe(self.logD,self.logT,self.logE,rstride=rstride,cstride=cstride)
       if otherTables:
         for otherTable in otherTables:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logE,color="green")
@@ -2209,7 +2212,7 @@ class interpTable:
       ax=fig.add_subplot(111)
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print "logD=",self.logD[l:h,0]
+      print self.sFileName," logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
         ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logE[l:h,:]), "bo-")
       else:
@@ -2219,7 +2222,7 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print "logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
             ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logE[l:h,:]), "go-")
           else:
@@ -2252,7 +2255,7 @@ class interpTable:
       ax=fig.add_subplot(111)
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print "logD=",self.logD[l:h,0]
+      print self.sFileName," logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
         ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logP[l:h,:]), "bo-")
       else:
@@ -2262,7 +2265,7 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print "logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
             ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logP[l:h,:]), "go-")
           else:
@@ -2283,6 +2286,8 @@ class interpTable:
     import matplotlib
     import matplotlib.pyplot as plt
     fig=plt.figure()
+    lines=[]
+    lables=[]
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
       ax.plot_wireframe(self.logD,self.logT,self.logK)
@@ -2293,22 +2298,29 @@ class interpTable:
       ax=fig.add_subplot(111)
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print "logD=",self.logD[l:h,0]
+      print self.sFileName," logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
-        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "bo-")
+        #fig.suptitle("logD=",str(self.logD[l:h,0]))
+        temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "bo-")
       else:
-        ax.plot(self.logT[l:h,:][0],self.logK[l:h,:][0], "bo-")
+        temp=ax.plot(self.logT[l:h,:][0],self.logK[l:h,:][0], "bo-")
+      lines.append(temp)
+      lables.append(self.sFileName)
       counter=1
       if otherTables:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print "logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
-            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "go-")
+            temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "go-",)
           else:
-            ax.plot(otherTable.logT[l:h,:][0],otherTable.logK[l:h,:][0], "go-")
+            temp=ax.plot(otherTable.logT[l:h,:][0],otherTable.logK[l:h,:][0], "go-")
           counter+=1
+          lines.append(temp)
+          lables.append(self.sFileName)
+    if len(lines)>0:
+      ax.legend(lines,lables,loc="1")
     plt.show()
   def __init__(self,tableElement=None):
     """Reads in an interpolation table info from from the xml element tableElement."""
@@ -2523,7 +2535,8 @@ def main():
   #assume reading a configuration file to make a new table
   if len(args)==1:
     interp=interpTableManager(args[0])
-    interp.createTables(withoutNans=False)
+    #interp.createTables(withoutNans=True)
+    interp.createTables()
     
   #assume comparing two pre-existing tables
   elif len(args)==2:
@@ -2532,12 +2545,13 @@ def main():
     
     table2=interpTable()
     table2.read(args[1])
-    rhoIndex=100
-    numRho=10
+    rhoIndex1=40
+    rhoIndex2=140
+    numRho=1
     
-    table1.plotLogP([table2],[rhoIndex,rhoIndex],[numRho,numRho])
-    table1.plotLogE([table2],[rhoIndex,rhoIndex],[numRho,numRho])
-    table1.plotLogK([table2],[rhoIndex,rhoIndex],[numRho,numRho])
+    table1.plotLogP([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
+    table1.plotLogE([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
+    table1.plotLogK([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
     
     #table1.plotLogP([table2])
     #table1.plotLogE([table2])

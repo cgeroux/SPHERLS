@@ -293,14 +293,26 @@
     <table>
       <X>0.758</X>
       <Z>0.002</Z>
+      <minLogD>-11.0</minLogD>
+      <delLogD>0.1</delLogD>
+      <numLogD>111</numLogD>
+      <minLogT>3.5</minLogT>
+      <delLogT>0.004</delLogT>
+      <numLogT>876</numLogT>
+      <outputFile>eosNewY240Z002</outputFile>
+      <plot>False</plot>
+    </table>
+    <!--<table>
+      <X>0.758</X>
+      <Z>0.002</Z>
       <minLogD>-14.0</minLogD>
       <delLogD>0.05</delLogD>
       <numLogD>300</numLogD>
       <minLogT>3.28</minLogT>
       <delLogT>0.002</delLogT>
       <numLogT>2000</numLogT>
-      <outputFile>eosNewY240Z002_wider_finer</outputFile>
+      <outputFile>eosNewY240Z002_wider_finer_no_nans</outputFile>
       <plot>False</plot>
-    </table>
+    </table>-->
   </interpolatedTables>
 </root>
