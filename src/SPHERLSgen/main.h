@@ -267,7 +267,9 @@ bool bWriteToScreen;/**<
 bool bIsSedov;/**<
   If true it will generate a starting model to preform a Sedov (blast wave) test of the code.
   */
-
+bool bAutoDeltaM;/**<
+  If true it will use an algorithm to choose the mass spacing.
+  */
 //functions
 void readConfig(std::string sConfigFileName,std::string sStartNode);/**<
   Reads in an xml configuration file and sets the values of many global variables. 

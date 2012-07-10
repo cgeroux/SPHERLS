@@ -1,0 +1,43 @@
+import paths
+
+#paths to reference calculations
+refCalcs={
+  '1DNA':
+  [paths.ref_calcs+"1DNA/1DNARef_t00000000"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000001"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000002"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000003"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000004"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000005"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000006"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000007"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000008"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000009"
+  ,paths.ref_calcs+"1DNA/1DNARef_t00000010"]
+  ,'2DNA':
+  [paths.ref_calcs+"2DNA/2DNARef_t00137886"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137887"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137888"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137889"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137890"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137891"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137892"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137893"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137894"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137895"
+  ,paths.ref_calcs+"2DNA/2DNARef_t00137896"]
+  ,'3DNA':
+  [paths.ref_calcs+"3DNA/T6500_5x5_t00090143"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090144"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090145"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090146"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090147"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090148"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090149"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090150"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090151"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090152"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090153"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090154"
+  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090155"]
+  }

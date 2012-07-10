@@ -15,9 +15,17 @@ int main(){
     //eosConvert.writeBin("eosCTOPAC");
     //eosConvert.readAscii("eosCTOPAC_fixed.txt");
     //eosConvert.readAscii("eosY240Z002.txt");
-    eosConvert.readBin("eosY240Z002_HEAD");
     //eosConvert.readBin("eosY240Z002");
-    eosConvert.writeAscii("eosY240Z002_HEAD.txt");
+    eosConvert.readBin("eosCTOPAC");
+    eosConvert.writeAscii("eosCTOPAC.txt");
+    eosConvert.readBin("eosCTOPAC_old");
+    eosConvert.writeAscii("eosCTOPAC_old.txt");
+    eosConvert.readBin("eosNewY240Z002");
+    eosConvert.writeAscii("eosNewY240Z002.txt");
+    eosConvert.readBin("eosY240Z002");
+    eosConvert.writeAscii("eosY240Z002.txt");
+    eosConvert.readBin("eosY300Z002");
+    eosConvert.writeAscii("eosY300Z002.txt");
   }
   //error handeling
   catch(exception2& eTemp){
@@ -29,7 +37,7 @@ int main(){
   catch(...){
     std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<"main: unknown error\n";
   }
-  
+  /*
   std::ofstream ofOut;
   ofOut.open("pressure.dat");
   ofOut.precision(16);
@@ -91,6 +99,6 @@ int main(){
       std::cout<<std::endl;
     }
   }
-  ofOut.close();
+  ofOut.close();*/
   return 0;
 }

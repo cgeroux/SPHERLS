@@ -18,6 +18,7 @@
 #include "xmlFunctions.h"
 #include "dataMonitoring.h"
 #include "global.h"
+#include "fileExists.h"
 
 using namespace std;
 
@@ -621,14 +622,4 @@ void finWatchZones(Output &output){
     output.ofWatchZoneFiles[i].close();
   }
 }
-bool bFileExists(std::string sFilename){
-  std::ifstream ifTest;
-  ifTest.open(sFilename.c_str(),std::ios::in);
-  if(!ifTest){
-    return false;//doesn't exsist
-  }
-  else{
-    ifTest.close();
-    return true;//does exsist
-  }
-}
+

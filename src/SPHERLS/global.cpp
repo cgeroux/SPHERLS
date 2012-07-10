@@ -6,17 +6,6 @@
 */
 #include "global.h"
 
-ProcTop::ProcTop(){
-  //initialize
-  nProcDims=NULL;
-  nPeriodic=NULL;
-  nCoords=NULL;
-  nNumNeighbors=0;
-  nNeighborRanks=NULL;
-  nNumRadialNeighbors=0;
-  nRadialNeighborRanks=NULL;
-  nRadialNeighborNeighborIDs=NULL;
-}
 MessPass::MessPass(){
   typeSendNewGrid=NULL; 
   typeRecvOldGrid=NULL;
@@ -69,22 +58,7 @@ Grid::Grid(){
   nCotThetaIJK=-1;
   nDCosThetaIJK=-1;
   nEddyVisc=-1;
-}
-Time::Time(){
-  dDeltat_np1half=0.0;
-  dDeltat_n=0.0;
-  dt=0.0;
-  dEndTime=0.0;
-  dTimeStepFactor=0.0;
-  nTimeStepIndex=0;
-  dPerChange=1e-2;
-  dDelRho_t_Rho_max=0.0;
-  dDelT_t_T_max=0.0;
-  dDelE_t_E_max=0.0;
-  dDelUmU0_t_UmU0_max=0.0;
-  dDelV_t_V_max=0.0;
-  dDelW_t_W_max=0.0;
-  nEndTimeStep=std::numeric_limits<int>::max();
+  nDonorCellFrac=-1;
 }
 Parameters::Parameters(){
   dPi=3.1415926535897932384626433832795;
@@ -98,6 +72,12 @@ Parameters::Parameters(){
   dMaxConvectiveVelocity=6.69041282767684e-02;
   dMaxConvectiveVelocity_c=0.0;
   dPrt=0.7;
+  dDonorCellMin=0.05;
+  dT_cut=2.35e4;
+  bDEDM_cut_set=false;
+  #if DEBUG_EQUATIONS==1
+  bSetThisCall=false;
+  #endif
 }
 Output::Output(){
   nDumpFrequencyStep=1;

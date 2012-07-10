@@ -15,7 +15,10 @@
 #include "eos.h"
 #include "petscksp.h"
 #include <csignal>
-#include<limits>
+#include <limits>
+#include "profileData.h"
+#include "procTop.h"
+#include "time.h"
 
 //Debugging flags
 #define SIGNEGDEN 0/**<
@@ -58,63 +61,16 @@
   Sets the version of the dump file. Should be incremented if changes are made to the information that
   is printed out in a dump.
   */
-//classes
-class ProcTop{
-  public:
-    int nNumProcs;/**<
-      Number of processors in global communicator MPI::COMM_WORLD. The value of this variable is
-      independent of processor \ref ProcTop::nRank.
-      */
-    int *nProcDims;/**<
-      Dimensions of the processor topology. It is an array of size 3 to hold the
-      size of the processor grid in each dimension. The value of this variable is set in the 
-      configuration file "config.xml" which is parsed by the function \ref init. The values of this 
-      variable are independent of processor \ref ProcTop::nRank.
-      */
-    int *nPeriodic;/**<
-      Periodic boundary conditions. It is an array of size 3 to tell if a 
-      dimension is periodic (wraps) or not. It contains an interger value of 0 or 1. 0, the 
-      boundary condition is not periodic, 1 the boundary condition is periodic. The value of this 
-      variable is set in the configuration file "config.xml" which is parsed by the function 
-      \ref init. The values of this variable are independent of processor \ref ProcTop::nRank.
-      */
-    int **nCoords;/**<
-      Coordinates of the processors. It is of size \ref ProcTop::nNumProcs by 3.
-      The values of this variable are independent of processor \ref ProcTop::nRank.
-      */
-    int nRank;/**<
-      Is a unique integer which identifies the processor. The values of \c ProcTop::nRank range
-      from 0 to \ref ProcTop::nNumProcs-1 depending on the processor.
-      */
-    int nNumNeighbors;/**<
-      The number of neighbors surrounding the current processor.
-      The maximum number of neighbors possible is 27, 3x3x3 don't forget the current processor
-      itself can be its own neighbor because of periodic boundary conditions. The value of this
-      variable is dependent on processor \ref ProcTop::nRank.
-      */
-    int *nNeighborRanks;/**<
-      \ref ProcTop::nRank s of the neighboring processors.
-      An array of size \ref nNumNeighbors to hold ranks of neighbouring processors.
-      */
-    int nNumRadialNeighbors;/**<
-      The number of neighbors in the radial direction.
-      Can range from 1 to 2 depending on weather there is a processor beneath or above the current 
-      preccessor.
-      */
-    int *nRadialNeighborRanks;/**<
-      \ref ProcTop::nRank s of the neighboring radial processors.
-      It is an array of size \ref ProcTop::nNumRadialNeighbors.
-      */
-    int *nRadialNeighborNeighborIDs;/**<
-      Holds the ID of a radialial neighbor, to be used to
-      obtain their \ref ProcTop::nRank from \ref ProcTop::nNeighborRanks
-      */
-    ProcTop();/**<
-      Constructor for class \ref ProcTop.
-      */
-};/**@class ProcTop
-  This class manages information which pertains to the processor topology.
+#define DEBUG_EQUATIONS 1/**<
+  If 1 will write out in the form of a profile file, all the horizontal maximum values of all terms
+  in all equations.
   */
+#define DEDEM_CLAMP 0/**<
+  If 1 a clamp on the DEDM gradient will be used to limit how large DE/DM becomes in the advection
+  term in the energy equation.
+  */
+
+//classes
 class MessPass{
   public:
     MPI::Datatype *typeSendNewGrid;/**<
@@ -276,6 +232,11 @@ class Grid{
       Index of the eddy viscosity in the grid, it is defined at zone centers in the grids. This is 
       an internal grid  variable and is included in the count of \ref Grid::nNumIntVars.
     */
+    int nDonorCellFrac;/**<
+      Index of the amount of donor cell to use at that particular radial zone. It is defined at zone
+      centers, and is an internal grid variable and is included in the count of
+      \ref Grid::nNumIntVars.
+      */
     int nNumDims; /**<
       Number of dimensions of the grid. It is used to chose the appropriate conservation equations.
       The value of this variable is independent of processor \ref ProcTop::nRank.
@@ -615,72 +576,6 @@ class Grid{
   
   The variable indexes are set in \ref modelRead based on the input model.
   */
-class Time{
-  public:
-    double dDeltat_np1half; /**<
-      The time step centered at \f$n+1/2\f$ in seconds. It is used for
-      calculating new variables defined at time step \f$n\f$, e.g. the density \ref Grid::nD.
-      */
-    double dDeltat_nm1half;/**<
-      The previously used timestep centered at \f$n-1/2\f$ in seconds. It 
-      is used for calculating \ref dDeltat_n the \f$n\f$ centered time step.
-      */
-    double dDeltat_n; /**<
-      The time step centered at \f$n\f$ in seconds. It is used for calculating
-      new variables defined at time step \f$n+1/2\f$, e.g. the radial velocity \ref Grid::nU. This value is
-      determined by averaging the current \ref Time::dDeltat_np1half, and the last 
-      \ref Time::dDeltat_np1half.
-      */
-    double dt; /**<
-      The current time of the simulation in seconds.
-      */
-    double dEndTime; /**<
-      The end time of the current calculation in seconds.
-      */
-    int nEndTimeStep;/**<
-      The last time step to calculate, will stop if the current time step is larger than this. The 
-      default value is the largest integer of the system.
-      */
-    double dTimeStepFactor; /**<
-      Used for determining the time step. It is the factor which the
-      courrant time step is multiplied by in order to determine \ref Time::dDeltat_np1half.
-      */
-    int nTimeStepIndex; /**<
-      An index indecating the current time step. An index of zero corresponds
-      to a \ref Time::dt=0. \todo should probably make this an unsigned variable, and perhaps also
-      use the keyword long to help ensure there are enough values. Often need 7 decimal places.
-      */
-    bool bVariableTimeStep;/**<
-      If true a variable time step is used as specified by the Courant condition, times the \ref dTimeStepFactor.
-      */
-    double dConstTimeStep;/**<
-      If set to a value other than 0, will use that constant time step in place of the courant time
-      step.
-      */
-    double dPerChange;/**< 
-      A percentage amount to allow the maximum horizontal temperture variation and radial, theta 
-      and phi convective velocities to change by from one time step to the next. The time step is 
-      reduced accordingly to keep this precent change intact.
-    */
-    double dDelRho_t_Rho_max;/**<
-      Keeps track of the maximum relative change in density from one time step to the next.*/
-    double dDelT_t_T_max;/**<
-      Keeps track of the maximum relative change in temperature from one time step to the 
-      next. This quantity is only tracked if the calculation is non-adiabatic, else the energy is
-      tracked instead, see \ref Time::dDelE_t_E_max*/
-    double dDelE_t_E_max;/**<
-      Keeps track of the maximum relative change in energy from one time step to the 
-      next. This quantity is only tracked if the calculation is adiabatic, else the temperature is
-      tracked instead, see \ref Time::dDelT_t_T_max*/
-    double dDelUmU0_t_UmU0_max;
-    double dDelV_t_V_max;
-    double dDelW_t_W_max;
-    Time(); /**<
-      Constructor for the class \ref Time.
-      */
-};/**@class Time
-  This class manages information which pertains to time variables.
-*/
 class Parameters{
   public:
     bool bEOSGammaLaw;/**<
@@ -725,8 +620,15 @@ class Parameters{
     double dAVThreshold; /**<
       The amount of compression before AV is turned on. It is in terms of a
       velocity difference between zone sides and is in fractions of the local sound speed.*/
-    double dDonorFrac; /**<
-      Fraction of the upwind gradient to contribute to the advection term
+    double dDonorCellMultiplier; /**<
+      Multiplier used to determine the faction of the sound speed at 
+      which donor cell is full. e.g. a value of 1.0 means the donor cell will be full when the 
+      convective velocity is equal to the sound speed. A value of 0.5 will mean that it will be full
+      donor cell when the convective velocity is twice the sound speed. A value of 2.0 will mean that 
+      it will use full donor cell when the convective velocity is half the sound speed.
+      */
+    double dDonorCellMin; /**<
+      The minimum amount of donor cell allowed. Set in constructor, \ref Parameters::Parameters
       */
     double dAlpha; /**<
       This parameter controls the amount of extra mass above the outter interface.
@@ -762,6 +664,30 @@ class Parameters{
       Cloutman in "The LUVD11 Large Eddy Simulation Model" April 15, 1991 a Lawrence Livermore 
       National Labratory report.
       */
+    double dT_cut;/**<
+      The temperature at which to cut the DEDM gradient back
+    */
+    double dDEDM_cut;/**<
+      The value to use for DEDM in energy conservation quation when DEDM becomes too large.
+    */
+    int nDEDM_cut_zone;/**<
+      The zone at which the DEDM cut was made
+    */
+    bool bDEDM_cut_set;/**<
+      If \ref Paramters::dDEDM_cut  has been set for this time step it will be true.
+    */
+    std::string sDebugProfileOutput;/**<
+      output file name for debuging profile, only used if DEBUG_EQUATIONS is set to 1
+    */
+    
+    #if DEBUG_EQUATIONS==1
+    profileData profileDataDebug;/**<
+      tracks and writes out profile data useful for debugging
+      */
+    bool bSetThisCall;/**<
+      if true will call set function, if not it won't
+      */
+    #endif
     Parameters(); /**<
       Constructor for the class \ref Parameters
       */

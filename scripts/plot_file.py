@@ -11,6 +11,7 @@ import disect_filename
 import parser
 from math import *
 import xml.etree.ElementTree as xml
+import parse_formula
 
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
@@ -54,25 +55,41 @@ class Curve:
     
     self.nColumnX=None
     self.nColumnY=None
+    self.nColumnErr=None
     self.y=[]
     self.x=[]
+    self.error=[]
     self.index=[]
     self.formulaOrigY=None
     self.formulaOrigX=None
+    self.formulaOrigErr=None
     self.formulaX=None
     self.formulaY=None
+    self.formulaErr=None
     self.codeY=None
     self.codeX=None
-    self.style=""
-    self.color=""
-    self.markersize=3.0
+    self.codeErr=None
+    self.style="-"
+    self.color="b"
+    self.markersize=2.0
     self.linewidth=1.0
     self.label=None
     self.fileReference=None
+    self.nRowShiftErr=None
+    self.nRowShiftX=None
+    self.nRowShiftY=None
+    self.marker=None
+    self.ecolor="red"
+    self.elinewidth=1.0
+    self.capsize=1.0
     
     #set curve style
     if element.get("style")!=None:
       self.style=element.get("style")
+      
+    #set curve marker
+    if element.get("marker")!=None:
+      self.marker=element.get("marker")
     
     #set curve color
     if element.get("color")!=None:
@@ -89,6 +106,27 @@ class Curve:
       else:
         print "\"markersize\" must be a float, got \"",element.get("markersize"),"\""
     
+    #get capsize
+    if element.get("capsize")!=None:
+      if isFloat(element.get("capsize")):
+        self.capsize=float(element.get("capsize"))
+      else:
+        print "\"capsize\" must be a float, got \"",element.get("capsize"),"\""
+    
+    #get elinewidth
+    if element.get("elinewidth")!=None:
+      if isFloat(element.get("elinewidth")):
+        self.elinewidth=float(element.get("elinewidth"))
+      else:
+        print "\"elinewidth\" must be a float, got \"",element.get("elinewidth"),"\""
+        
+    #get ecolor
+    if element.get("ecolor")!=None:
+      if isFloat(element.get("ecolor")):
+        self.ecolor=float(element.get("ecolor"))
+      else:
+        print "\"ecolor\" must be a float, got \"",element.get("ecolor"),"\""
+    
     #get linewidth
     if element.get("linewidth")!=None:
       if isFloat(element.get("linewidth")):
@@ -103,58 +141,31 @@ class Curve:
       print "Curve must have a \"file\" set to the name of a file form which the data is to be taken."
       quit()
     
-    #get xcolumns
-    if element.get("xcolumn").isdigit():
-      self.nColumnX=int(element.get("xcolumn"))-1
-    else:
-      
-      #if there is a foluma get list of columns
-      self.formulaOrigX=element.get("xcolumn")
-      columnsTemp=self.formulaOrigX.split('$')
-      self.formulaX=columnsTemp[0]
-      if len(columnsTemp)>1:#turn into a list
-        self.nColumnX=[]
-        for i in range(1,len(columnsTemp)):
-          columnAndFormula=splitFirstInt(columnsTemp[i])
-          self.formulaX+="a["+str(i-1)+"]"+columnAndFormula[1]
-          self.nColumnX.append(columnAndFormula[0]-1)
-        self.codeX=parser.expr(self.formulaX).compile()
-      else:
-        self.formulaX=None
-        if element.get("xcolumn") == None or element.get("xcolumn")=="":
-          print "\"xcolumn\" number given for curve, must be either an integer, or"\
-            +" a mathatmical formula containing column references prefixed with a \"$\"."
-          quit()
+    #get xcolumn
+    [self.formulaOrigX,self.formulaX,self.nColumnX,self.nRowShiftX,self.codeX]=\
+      parse_formula.getFormula(element.get("xcolumn"))
     
     #get ycolumn
-    if element.get("ycolumn").isdigit():
-      self.nColumnY=int(element.get("ycolumn"))-1
-    else:
-      
-      #if there is a foluma get list of columns
-      self.formulaOrigY=element.get("ycolumn")
-      columnsTemp=self.formulaOrigY.split('$')
-      self.formulaY=columnsTemp[0]
-      if len(columnsTemp)>1:#turn into a list
-        self.nColumnY=[]
-        for i in range(1,len(columnsTemp)):
-          columnAndFormula=splitFirstInt(columnsTemp[i])
-          self.formulaY+="a["+str(i-1)+"]"+columnAndFormula[1]
-          self.nColumnY.append(columnAndFormula[0]-1)
-        self.codeY=parser.expr(self.formulaY).compile()
-      else:
-        self.formulaY=None
-        if element.get("ycolumn") == None or element.get("ycolumn")=="":
-          print "\"xcolumn\" number given for curve, must be either an integer, or"\
-            +" a mathatmical formula containing column references prefixed with a \"$\"."
-          quit()
+    [self.formulaOrigY,self.formulaY,self.nColumnY,self.nRowShiftY,self.codeY]=\
+      parse_formula.getFormula(element.get("ycolumn"))
+    
+    #get errcolumns
+    if element.get("errcolumn")!=None:
+      [self.formulaOrigErr,self.formulaErr,self.nColumnErr,self.nRowShiftErr,self.codeErr]=\
+        parse_formula.getFormula(element.get("errcolumn"))
+    
   def load(self,files,options):
     '''This method adds a y value and index to the curve for the current fileData.'''
     
     #get y's from file
     for i in range(len(files[self.fileReference].fColumnValues)):
-      y=getY(self.nColumnY,files[self.fileReference],self.codeY,i)
-      x=getY(self.nColumnX,files[self.fileReference],self.codeX,i)
+      y=parse_formula.getY(self.nRowShiftY,self.nColumnY,files[self.fileReference],self.codeY,i)
+      x=parse_formula.getY(self.nRowShiftX,self.nColumnX,files[self.fileReference],self.codeX,i)
+      if self.nColumnErr!=None:
+        error=parse_formula.getY(self.nRowShiftErr,self.nColumnErr,files[self.fileReference]
+          ,self.codeErr,i)
+        if error!=None:
+          self.error.append(error)
       if x!=None and y!=None:
         self.y.append(y)
         self.x.append(x)
@@ -388,11 +399,26 @@ def plot(dataSets,options,title):
           
           #plot the curve
           if curve.color in basicMatPlotColors:
-            temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,str(curve.color)+str(curve.style)
-              ,markersize=curve.markersize,linewidth=curve.linewidth)
-          elif curve.color[0]=="#":
-            temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y,str(curve.style),color=str(curve.color)
-              ,markersize=curve.markersize,linewidth=curve.linewidth)
+            if len(curve.error)==0:
+              temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y
+                ,linestyle=curve.style
+                ,marker=curve.marker
+                ,color=curve.color
+                ,markersize=curve.markersize
+                ,linewidth=curve.linewidth)
+            else:
+              print curve.style,curve.color,curve.marker,curve.markersize,curve.linewidth\
+                ,curve.ecolor,curve.elinewidth,curve.capsize
+              temp=ax[nTotalPlotCount-1].errorbar(curve.x,curve.y,yerr=curve.error
+                ,linestyle=curve.style
+                ,color=curve.color
+                ,marker=curve.marker
+                ,markersize=curve.markersize
+                ,linewidth=curve.linewidth
+                ,ecolor=curve.ecolor
+                ,elinewidth=curve.elinewidth
+                ,capsize=curve.capsize
+                )
           else:
             print "only hex strings are accepted for colors other than "+basicMatPlotColors
             quit()
@@ -439,53 +465,6 @@ def plot(dataSets,options,title):
       quit()
     print __name__+":"+main.__name__+": saving figure to file \""+options.outputFile
     fig.savefig(options.outputFile,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
-def splitFirstInt(str):
-  '''Returns the integer which starts at the very first character of str, and drops everything else 
-  from str'''
-  
-  strInt=''
-  i=0
-  while str[i].isdigit() or (str[i]=='-' and i==0):
-    strInt=strInt+str[i]
-    i=i+1
-    if i>=len(str):#check that we haven't passed the end of the string
-      break
-  return [int(strInt),str[i:]]
-def splitFirstFloat(str):
-  '''Returns the integer which starts at the very first character of str, and drops everything else 
-  from str'''
-  
-  strInt=''
-  i=0
-  nExponentIndex=-1
-  nDecimalCount=0
-  while str[i].isdigit()\
-    or ((str[i]=='-' or str[i]=='+') and i==0)\
-    or ((str[i]=="e" or str[i]=="E") and nExponentIndex==-1)\
-    or ((str[i]=="-" or str[i]=="+") and nExponentIndex+1==i)\
-    or (str[i]=="." and nDecimalCount==0) :
-    if str[i]=="e" or str[i]=="E":
-      nExponentIndex=i
-    if str[i]==".":
-      nDecimalCount=nDecimalCount+1
-    strInt=strInt+str[i]
-    i=i+1
-    if i>=len(str):#check that we haven't passed the end of the string
-      break
-  return [float(strInt),str[i:]]
-def getY(nColumn,fileData,code,i):
-  if isinstance(nColumn,int):
-    #normal simple 1 column data
-    return fileData.fColumnValues[i][nColumn]
-  else:
-    #new column operation
-    a=[]
-    for j in range(len(nColumn)):
-      if fileData.fColumnValues[i][nColumn[j]]==None:
-        return None
-      else:
-        a.append(fileData.fColumnValues[i][nColumn[j]])
-    return eval(code)
 def isFloat(str):
   try:
     float(str)

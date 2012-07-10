@@ -1,133 +1,60 @@
-2012-04-17 16:56:37.156215
-directory "/home/cgeroux/SPHERLS/data/ref_calcs/1DNA" found
+2012-06-06 10:18:30.162074
+directory "/home/cgeroux/bobs_donor_cell/data/ref_calcs/1DNA" found
 checking for needed files ...
-found "/home/cgeroux/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
+found "/home/cgeroux/bobs_donor_cell/data/ref_calcs/1DNA/SPHERLS.xml"
 found start model "1DNARef_t00000000"
 
 RUNNING SPHERLS
-src/SPHERLS/dataManipulation.cpp:init:294:0: WARNING: using constant time step of 7s 
-src/SPHERLS/dataManipulation.cpp:init:294:3: WARNING: using constant time step of 7s 
-src/SPHERLS/dataManipulation.cpp:init:294:1: WARNING: using constant time step of 7s 
-src/SPHERLS/dataManipulation.cpp:init:294:2: WARNING: using constant time step of 7s 
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000000
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 0 at time t=0.00000000000000e+00 [s] with time step dt=6.70048e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 0 time steps :
-    * Largest number of iterations for temperature calculation was 0
-    * Largest relative error in calculation of temperature was     0.00000e+00
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000001
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 1 at time t=7.00000000000000e+00 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     4.95730e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000002
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 2 at time t=1.40000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.67001e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000003
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 3 at time t=2.10000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.37366e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000004
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 4 at time t=2.80000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.59905e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000005
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 5 at time t=3.50000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.50973e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000006
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 6 at time t=4.20000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     4.79235e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000007
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 7 at time t=4.90000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.40779e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000008
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 8 at time t=5.60000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.18440e-15
-src/SPHERLS/main.cpp:main:94:0:
-  Dumping model to file: 1DNARef_t00000009
-src/SPHERLS/main.cpp:main:130:0:
-  For current time step 9 at time t=6.30000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 1 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.29634e-15
-src/SPHERLS/dataManipulation.cpp:fin:649:0:
-  For current time step 10 at time t=7.00000000000000e+01 [s] with time step dt=7.00000e+00 [s]
-    * max( (Del Rho)_t/Rho )   =0.00000e+00
-    * max( (Del T)_t/T )       =0.00000e+00
-    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
-  : Over last 0 time steps :
-    * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.72124e-15
-Run time for proc 0 is 1.3283991814e-01 [s]
+[lachesis:04216] *** Process received signal ***
+[lachesis:04216] Signal: Segmentation fault (11)
+[lachesis:04216] Signal code: Address not mapped (1)
+[lachesis:04216] Failing at address: 0x71
+[lachesis:04218] *** Process received signal ***
+[lachesis:04218] Signal: Segmentation fault (11)
+[lachesis:04218] Signal code: Address not mapped (1)
+[lachesis:04218] Failing at address: 0x71
+[lachesis:04215] *** Process received signal ***
+[lachesis:04215] Signal: Segmentation fault (11)
+[lachesis:04215] Signal code: Address not mapped (1)
+[lachesis:04215] Failing at address: 0x71
+[lachesis:04217] *** Process received signal ***
+[lachesis:04217] Signal: Segmentation fault (11)
+[lachesis:04217] Signal code: Address not mapped (1)
+[lachesis:04217] Failing at address: 0x71
+[lachesis:04218] [ 0] /lib64/libpthread.so.0 [0x3a3cc0eb10]
+[lachesis:04218] [ 1] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z17setInternalVarInfR4GridR10Parameters+0x1bb) [0x493da5]
+[lachesis:04218] [ 2] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z9modelReadSsR7ProcTopR4GridR4TimeR10Parameters+0x2aa2) [0x433ef2]
+[lachesis:04218] [ 3] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z4initR7ProcTopR4GridR6OutputR4TimeR10ParametersR8MessPassR11PerformanceR8ImplicitiPPc+0x11ac) [0x4391e2]
+[lachesis:04218] [ 4] /home/cgeroux/bobs_donor_cell/SPHERLS(main+0xe3) [0x4512bb]
+[lachesis:04218] [ 5] /lib64/libc.so.6(__libc_start_main+0xf4) [0x3a3c01d994]
+[lachesis:04218] [ 6] /home/cgeroux/bobs_donor_cell/SPHERLS(__gxx_personality_v0+0x381) [0x41c9d9]
+[lachesis:04218] *** End of error message ***
+[lachesis:04217] [ 0] /lib64/libpthread.so.0 [0x3a3cc0eb10]
+[lachesis:04217] [ 1] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z17setInternalVarInfR4GridR10Parameters+0x1bb) [0x493da5]
+[lachesis:04217] [ 2] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z9modelReadSsR7ProcTopR4GridR4TimeR10Parameters+0x2aa2) [0x433ef2]
+[lachesis:04217] [ 3] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z4initR7ProcTopR4GridR6OutputR4TimeR10ParametersR8MessPassR11PerformanceR8ImplicitiPPc+0x11ac) [0x4391e2]
+[lachesis:04217] [ 4] /home/cgeroux/bobs_donor_cell/SPHERLS(main+0xe3) [0x4512bb]
+[lachesis:04217] [ 5] /lib64/libc.so.6(__libc_start_main+0xf4) [0x3a3c01d994]
+[lachesis:04217] [ 6] /home/cgeroux/bobs_donor_cell/SPHERLS(__gxx_personality_v0+0x381) [0x41c9d9]
+[lachesis:04217] *** End of error message ***
+--------------------------------------------------------------------------
+mpirun noticed that process rank 2 with PID 4217 on node lachesis.smu.ca exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------
+[lachesis:04215] [ 0] /lib64/libpthread.so.0 [0x3a3cc0eb10]
+[lachesis:04215] [ 1] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z17setInternalVarInfR4GridR10Parameters+0x1bb) [0x493da5]
+[lachesis:04215] [ 2] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z9modelReadSsR7ProcTopR4GridR4TimeR10Parameters+0x2aa2) [0x433ef2]
+[lachesis:04215] [ 3] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z4initR7ProcTopR4GridR6OutputR4TimeR10ParametersR8MessPassR11PerformanceR8ImplicitiPPc+0x11ac) [0x4391e2]
+[lachesis:04215] [ 4] /home/cgeroux/bobs_donor_cell/SPHERLS(main+0xe3) [0x4512bb]
+[lachesis:04215] [ 5] /lib64/libc.so.6(__libc_start_main+0xf4) [0x3a3c01d994]
+[lachesis:04215] [ 6] /home/cgeroux/bobs_donor_cell/SPHERLS(__gxx_personality_v0+0x381) [0x41c9d9]
+[lachesis:04215] *** End of error message ***
+[lachesis:04216] [ 0] /lib64/libpthread.so.0 [0x3a3cc0eb10]
+[lachesis:04216] [ 1] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z17setInternalVarInfR4GridR10Parameters+0x1bb) [0x493da5]
+[lachesis:04216] [ 2] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z9modelReadSsR7ProcTopR4GridR4TimeR10Parameters+0x2aa2) [0x433ef2]
+[lachesis:04216] [ 3] /home/cgeroux/bobs_donor_cell/SPHERLS(_Z4initR7ProcTopR4GridR6OutputR4TimeR10ParametersR8MessPassR11PerformanceR8ImplicitiPPc+0x11ac) [0x4391e2]
+[lachesis:04216] [ 4] /home/cgeroux/bobs_donor_cell/SPHERLS(main+0xe3) [0x4512bb]
+[lachesis:04216] [ 5] /lib64/libc.so.6(__libc_start_main+0xf4) [0x3a3c01d994]
+[lachesis:04216] [ 6] /home/cgeroux/bobs_donor_cell/SPHERLS(__gxx_personality_v0+0x381) [0x41c9d9]
+[lachesis:04216] *** End of error message ***
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
-__main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000001" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000002" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000003" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000004" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000005" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000006" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000007" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000008" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000009" and removing distributed binaries ...
-__main__:combine_bin_files: combining "./1DNARef_t00000010" and removing distributed binaries ...

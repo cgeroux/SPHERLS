@@ -11,7 +11,7 @@ import disect_filename
 import parser
 from math import *
 import xml.etree.ElementTree as xml
-
+import parse_formula
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
@@ -128,40 +128,22 @@ class Curve:
         print "Attribute \"radialZone\" must be set for a curve in an axis of type=\"time\""
         quit()
     
-    if element.text.isdigit():
-      self.nColumn=int(element.text)-1
-    else:
-      
-      #if there is a foluma get list of columns
-      self.formulaOrig=element.text
-      columnsTemp=self.formulaOrig.split('$')
-      self.formula=columnsTemp[0]
-      if len(columnsTemp)>1:#turn into a list
-        self.nColumn=[]
-        for i in range(1,len(columnsTemp)):
-          columnAndFormula=splitFirstInt(columnsTemp[i])
-          self.formula+="a["+str(i-1)+"]"+columnAndFormula[1]
-          self.nColumn.append(columnAndFormula[0]-1)
-        self.code=parser.expr(self.formula).compile()
-      else:
-        self.formula=self.formulaOrig
-        self.code=parser.expr(self.formula).compile()
-        if element.text == None or element.text=="":
-          print "No column number given for curve, must have curve text be either an integer, or"\
-            +" a mathatmical formula containing column references prefixed with a \"$\"."
-          quit()
+    #create forula and code from the formula, as well as which columns are referenced and weather 
+    #they are shifted in i
+    [self.formulaOrig,self.formula,self.nColumn,self.nRowShift,self.code]\
+      =parse_formula.getFormula(element.text)
   def load(self,fileData,options):
     '''This method adds a y value and index to the curve for the current fileData.'''
     
     if self.zone=="max":
       #find largest value in column and use that
       nIndex=0
-      while getY(self.nColumn,fileData,self.code,nIndex)==None:
+      while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
         nIndex=nIndex+1
-      yTemp=getY(self.nColumn,fileData,self.code,nIndex)
+      yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
       yIndexTemp=0
       for i in range(nIndex,len(fileData.fColumnValues)-1):
-        yTest=getY(self.nColumn,fileData,self.code,i)
+        yTest=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i)
         if yTest>yTemp:
           yTemp=yTest
           yIndexTemp=i
@@ -170,12 +152,12 @@ class Curve:
     elif self.zone=="min":
       #find smallest value in column and use that
       nIndex=0
-      while getY(self.nColumn,fileData,self.code,nIndex)==None:
+      while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
         nIndex=nIndex+1
-      yTemp=getY(self.nColumn,fileData,self.code,nIndex)
+      yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
       yIndexTemp=0
       for i in range(nIndex,len(fileData.fColumnValues)-1):
-        testY=getY(self.nColumn,fileData,self.code,nIndex)
+        testY=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
         if testY<yTemp:
           yTemp=testY
           yIndexTemp=i
@@ -185,7 +167,7 @@ class Curve:
       #creating a 2D list instead of a 1D list
       yTemp=[]
       for i in range(len(fileData.fColumnValues)):
-        yTemp.append(getY(self.nColumn,fileData,self.code,i))
+        yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
       self.y.append(yTemp)
       
     elif self.zone==None:
@@ -197,11 +179,11 @@ class Curve:
           zone=len(fileData.fColumnValues)-1-int(self.zone)
           
           #if right at the surface, and the zone is a non-interface, should move in
-          while getY(self.nColumn,fileData,self.code,zone)==None:
+          while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,zone)==None:
             zone=zone-1
           self.zone=str(zone)
         self.testZoneAdjust=True
-      self.y.append(getY(self.nColumn,fileData,self.code,int(self.zone)))
+      self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(self.zone)))
       self.index.append(int(self.zone))
     else:#I don't know what to do ??
       print "unknown zone spedificiation \"",zone,"\""
@@ -353,28 +335,8 @@ class Axis:
     
     #get column if not a time axis
     if not self.bTime:
-      
-      #if there is a foluma get list of columns
-      self.formulaOrig=element.get("column")
-      if self.formulaOrig==None:
-        raise Exception("need \"column\" attributed in axis node with type=\"profile\"")
-      columnsTemp=self.formulaOrig.split('$')
-      self.formula=columnsTemp[0]
-      if len(columnsTemp)>1:#turn into a list
-        self.nColumn=[]
-        for i in range(1,len(columnsTemp)):
-          columnAndFormula=splitFirstInt(columnsTemp[i])
-          self.formula+="a["+str(i-1)+"]"+columnAndFormula[1]
-          self.nColumn.append(columnAndFormula[0]-1)
-        self.code=parser.expr(self.formula).compile()
-      else:
-        self.formula=None
-        if element.get("column") == None or element.get("column")=="":
-          print "no column number given for axis, must set \"column\" to an integer, or a "\
-            +"mathatmical formula containing column references prefixed with a \"$\""
-          quit()
-        else:
-          self.nColumn=int(element.get("column"))-1
+      [self.formulaOrig,self.formula,self.nColumn,self.nRowShift,self.code]\
+        =parse_formula.getFormula(element.get("column"))
     
     #add plots to axis
     plotElements=element.findall("plot")
@@ -404,7 +366,7 @@ class Axis:
             self.xlabel=self.formulaOrig
         xTemp=[]
         for i in range(len(fileData.fColumnValues)):
-          xTemp.append(getY(self.nColumn,fileData,self.code,i))
+          xTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
         self.x.append(xTemp)
           
     #load plots
@@ -449,7 +411,8 @@ class DataSet:
     extension="_pro"+".txt"
     filesExistProfiles=glob.glob(self.baseFileName+"*"+extension)
     files=[]
-    for file in filesExistProfiles:
+    for i in range(0,len(filesExistProfiles),options.frequency):
+      file=filesExistProfiles[i]
       intOfFile=int(file[len(self.baseFileName):len(file)-len(extension)])
       if intOfFile>=self.start and intOfFile<self.end:
         files.append(file)
@@ -516,12 +479,13 @@ def plot(dataSets,options,title):
   #figure out how many output files will be made, will match the largest number of files read in of
   #all dataSets
   nMaxNumFiles=1
+  bNonTimeAxisAny=False
   for dataSet in dataSets:
-    bNonTimeAxis=False
-    for axis in dataSet.axes:
-      if axis.bTime:
-        bNonTimeAxis=True
+    #for axis in dataSet.axes:
+    #  if not axis.bTime:
+    #    bNonTimeAxis=True
     if dataSet.hasNonTimeAxis:
+      bNonTimeAxisAny=True
       if nMaxNumFiles<dataSet.nNumFiles:
         nMaxNumFiles=dataSet.nNumFiles
   
@@ -545,16 +509,17 @@ def plot(dataSets,options,title):
       for dataSet in dataSets:
         for axisMine in dataSet.axes:
           if axisMine.bTime:
-            time=axisMine.x[fileCount]
-            timeStr=format(time,"0.4e")
-            tempTitle=tempTitle.replace("\\time"+str(count),timeStr)
-            break
-            
-            if axisMine.period!=None:
-              phase=axisMine.phase[fileCount]
-              phaseStr=format(phase,"0.4e")
-              tempTitle=tempTitle.replace("\phase"+str(count),phaseStr)
+            if fileCount<len(axisMine.x):
+              time=axisMine.x[fileCount]
+              timeStr=format(time,"0.4e")
+              tempTitle=tempTitle.replace("\\time"+str(count),timeStr)
               break
+              
+              if axisMine.period!=None:
+                phase=axisMine.phase[fileCount]
+                phaseStr=format(phase,"0.4e")
+                tempTitle=tempTitle.replace("\phase"+str(count),phaseStr)
+                break
         indexStr="\index"+str(count)
         if fileCount<len(dataSet.fileIndices):
           tempTitle=tempTitle.replace(indexStr,str(dataSet.fileIndices[fileCount]))
@@ -608,7 +573,7 @@ def plot(dataSets,options,title):
                   if curve.label!=None and curve.label!="":
                     lines.append(temp)
                     labels.append(curve.label)
-                  if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
+                  if bNonTimeAxisAny:#only need bar, if there are non-time axes in dataSet
                     limits=ax[nTotalPlotCount-1].axis()
                     xTemp=[axisMine.phase[fileCount],axisMine.phase[fileCount]]
                     yTemp=[limits[2],limits[3]]
@@ -627,7 +592,7 @@ def plot(dataSets,options,title):
                   if curve.label!=None and curve.label!="":
                     lines.append(temp)
                     labels.append(curve.label)
-                  if dataSet.hasNonTimeAxis:#only need bar, if there are non-time axes in dataSet
+                  if bNonTimeAxisAny:#only need bar, if there are non-time axes in any of the dataSets
                     limits=ax[nTotalPlotCount-1].axis()
                     xTemp=[axisMine.x[fileCount],axisMine.x[fileCount]]
                     yTemp=[limits[2],limits[3]]
@@ -711,61 +676,16 @@ def plot(dataSets,options,title):
       else:
         supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
         if ext[1:] not in supportedFileTypes:
-          print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+          print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes\
+            ," please choose one of those"
           quit()
-        print __name__+":"+main.__name__+": saving figure to file \""+path+"_"+str(fileCount)+ext+"\" ..."
-        fig.savefig(path+"_"+str(fileCount)+ext,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
+        print __name__+":"+main.__name__+": saving figure to file \""+path+"_"+str(fileCount\
+          +options.startIndex)+ext+"\" ..."
+        fig.savefig(path+"_"+str(fileCount+options.startIndex)+ext,format=ext[1:]
+          ,transparent=False,dpi=options.dpi)#save to file
         plt.close(fig)
       
     fileCount=fileCount+1
-def splitFirstInt(str):
-  '''Returns the integer which starts at the very first character of str, and drops everything else 
-  from str'''
-  
-  strInt=''
-  i=0
-  while str[i].isdigit() or (str[i]=='-' and i==0):
-    strInt=strInt+str[i]
-    i=i+1
-    if i>=len(str):#check that we haven't passed the end of the string
-      break
-  return [int(strInt),str[i:]]
-def splitFirstFloat(str):
-  '''Returns the integer which starts at the very first character of str, and drops everything else 
-  from str'''
-  
-  strInt=''
-  i=0
-  nExponentIndex=-1
-  nDecimalCount=0
-  while str[i].isdigit()\
-    or ((str[i]=='-' or str[i]=='+') and i==0)\
-    or ((str[i]=="e" or str[i]=="E") and nExponentIndex==-1)\
-    or ((str[i]=="-" or str[i]=="+") and nExponentIndex+1==i)\
-    or (str[i]=="." and nDecimalCount==0) :
-    if str[i]=="e" or str[i]=="E":
-      nExponentIndex=i
-    if str[i]==".":
-      nDecimalCount=nDecimalCount+1
-    strInt=strInt+str[i]
-    i=i+1
-    if i>=len(str):#check that we haven't passed the end of the string
-      break
-  return [float(strInt),str[i:]]
-def getY(nColumn,fileData,code,i):
-  if nColumn!=None:
-    if isinstance(nColumn,int):
-      #normal simple 1 column data
-      return fileData.fColumnValues[i][nColumn]
-    else:
-      #new column operation
-      a=[]
-      for j in range(len(nColumn)):
-        if fileData.fColumnValues[i][nColumn[j]]==None:
-          return None
-        else:
-          a.append(fileData.fColumnValues[i][nColumn[j]])
-  return eval(code)
 def main():
   
   #parse command line options
@@ -819,6 +739,16 @@ def main():
     if ext[1:] not in supportedFileTypes:
       print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
       quit()
+  
+  #get plot start index
+  options.startIndex=0
+  if root.get("outputFileStartIndex")!=None and root.get("outputFileStartIndex")!="":
+    options.startIndex=int(root.get("outputFileStartIndex"))
+  
+  #get file frequency
+  options.frequency=1
+  if root.get("inputFileFrequency")!=None and root.get("inputFileFrequency")!="":
+    options.frequency=int(root.get("inputFileFrequency"))
   
   #get list of dataSet elements
   dataSetElements=root.findall("dataSet")

@@ -81,6 +81,7 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
   int nCount=0;
   int nCount2=0;
   XMLNode xMDeltaDelta;
+  XMLNode xMDeltaPicking;
   MDeltaDelta mDeltaDeltaTemp;
   std::string sModelType;
   std::string sEOSType;
@@ -287,7 +288,8 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       
       //get name of file to write model to
       getXMLValue(xOutput,"fileName",0,sOutPutfile);
-      std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": generating stellar model \""<<sOutPutfile<<"\" ...\n";
+      std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": generating stellar model \""
+        <<sOutPutfile<<"\" ...\n";
       
       //get output file type, binary or ascii
       if(!getXMLValueNoThrow(xOutput,"binary",0,bBinaryOutput)){
@@ -416,49 +418,71 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       //get delta mass init
       getXMLValue(xIndepVar,"M-delta-init",0,dMDelta);
       
-      //get % change in delta mass
-      xMDeltaDelta=getXMLNodeNoThrow(xIndepVar, "M-delta-delta",0);
-      if(xMDeltaDelta.isEmpty()){
-        std::stringstream ssTemp;
-        ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-          <<": no \"M-delta-delta\" node found under \"radIndepVar\" node, under \"dimensions\""
-          <<" node under the "<<nCount<<"th model.\n";
-        throw exception2(ssTemp.str(),INPUT);
-      }
-      nCount2=0;
-      while(!xMDeltaDelta.isEmpty()){
+      //get method for determining % change in delta mass
+      xMDeltaPicking=getXMLNodeNoThrow(xIndepVar,"M-delta-picking",0);
+      if(!xMDeltaPicking.isEmpty()){
         
-        //get type of stop
-        getXMLAttribute(xMDeltaDelta,"stopType",mDeltaDeltaTemp.sStopType);
-        
-        //if type is T and model is adiabatic, halt
-        if(mDeltaDeltaTemp.sStopType.compare("T")==0&&sEOSType.compare("gammaLaw")==0){
+        std::string sDeltaMPicking;
+        getXMLAttribute(xMDeltaPicking,"type",sDeltaMPicking);
+        if(sDeltaMPicking.compare("auto")==0){
+          bAutoDeltaM=true;
+        }
+        else if (sDeltaMPicking.compare("manual")==0){
+          bAutoDeltaM=false;
+        }
+        else{
           std::stringstream ssTemp;
           ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-            <<":"<<nCount2<<"th \"M-delta-delta\" node of "<<nCount<<"th model has a \"stopType\""
-            <<" of \"T\" but model uses a gamma-law gas, must have a tabulated equation of state to"
-            <<" use a \"stopType\" of \"T\". Perhpas use a \"stoptype\" of \"R\" or use a different"
-            <<" equation of state.\n";
+            <<": \"M-delta-picking\" node attribute \"type\" must be either  \"auto\" or \"manual\""
+            <<" node under the "<<nCount<<"th model.\n";
           throw exception2(ssTemp.str(),INPUT);
         }
-        
-        //get value of stop
-        getXMLAttribute(xMDeltaDelta,"stopValue",mDeltaDeltaTemp.dStopValue);
-        
-        /**\todo need to check that T is increasing, and R is decreasing. This will get tricky if
-        R and T types are mixed.*/
-        
-        //get value of MDeltaDelta
-        getXMLValue(xIndepVar,"M-delta-delta",nCount2,mDeltaDeltaTemp.dMDeltaDelta);
-        
-        //add to vector
-        vecMDeltaDeltaList.push_back(mDeltaDeltaTemp);
-        
-        //get next node
-        nCount2++;
-        xMDeltaDelta=getXMLNodeNoThrow(xIndepVar, "M-delta-delta",nCount2);
       }
-      
+      if(!bAutoDeltaM){
+        
+        //get % change in delta mass
+        xMDeltaDelta=getXMLNodeNoThrow(xMDeltaPicking, "M-delta-delta",0);
+        if(xMDeltaDelta.isEmpty()){
+          std::stringstream ssTemp;
+          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+            <<": no \"M-delta-delta\" node found under \"radIndepVar\" node, under \"dimensions\""
+            <<" node under the "<<nCount<<"th model.\n";
+          throw exception2(ssTemp.str(),INPUT);
+        }
+        nCount2=0;
+        while(!xMDeltaDelta.isEmpty()){
+          
+          //get type of stop
+          getXMLAttribute(xMDeltaDelta,"stopType",mDeltaDeltaTemp.sStopType);
+          
+          //if type is T and model is adiabatic, halt
+          if(mDeltaDeltaTemp.sStopType.compare("T")==0&&sEOSType.compare("gammaLaw")==0){
+            std::stringstream ssTemp;
+            ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+              <<":"<<nCount2<<"th \"M-delta-delta\" node of "<<nCount<<"th model has a \"stopType\""
+              <<" of \"T\" but model uses a gamma-law gas, must have a tabulated equation of state to"
+              <<" use a \"stopType\" of \"T\". Perhpas use a \"stoptype\" of \"R\" or use a different"
+              <<" equation of state.\n";
+            throw exception2(ssTemp.str(),INPUT);
+          }
+          
+          //get value of stop
+          getXMLAttribute(xMDeltaDelta,"stopValue",mDeltaDeltaTemp.dStopValue);
+          
+          /**\todo need to check that T is increasing, and R is decreasing. This will get tricky if
+          R and T types are mixed.*/
+          
+          //get value of MDeltaDelta
+          getXMLValue(xMDeltaPicking,"M-delta-delta",nCount2,mDeltaDeltaTemp.dMDeltaDelta);
+          
+          //add to vector
+          vecMDeltaDeltaList.push_back(mDeltaDeltaTemp);
+          
+          //get next node
+          nCount2++;
+          xMDeltaDelta=getXMLNodeNoThrow(xMDeltaPicking, "M-delta-delta",nCount2);
+        }
+      }
       //get dAlpha
       getXMLValue(xIndepVar,"alpha",0,dAlpha);
       

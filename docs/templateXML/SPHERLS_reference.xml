@@ -6,7 +6,8 @@
     <que>False</que><!-- if "true" or "main" it will run the job in main que, if it is test it will 
       run in the test que if it isn't given, or is something else it will run at the command line -->
     <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
-      using mpirun, check with your system admin for ideas about what this should be. ompi* works on ace-net machines, while openmpi works on lachesis-->
+      using mpirun, check with your system admin for ideas about what this should be. ompi* works on
+      ace-net machines, while openmpi works on lachesis-->
   </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
@@ -16,9 +17,13 @@
   </procDims>
   <startModel>/nqs/cgeroux/implicit_test/3D_TEOS_v0</startModel><!-- Model to start with-->
   <outputName>/nqs/cgeroux/implicit_test/output/3D_TEOS_v0_1</outputName><!--Where to put output, 
-    and how to name it. It will append _t######## to the end for model dumps where ######## is a zero
-    padded timestep index. This is also used for watchzones, with _watchZone_r#_t%_p$.txt where # is the 
-    index of the radial zone, % is the index of the theta zone, and $ is the index of the phi zone.-->
+    and how to name it. It will append _t######## to the end for model dumps where ######## is a 
+    zero  padded timestep index. This is also used for watchzones, with _watchZone_r#_t%_p$.txt 
+    where # is the index of the radial zone, % is the index of the theta zone, and $ is the index 
+    of the phi zone.-->
+  <debugProfileOutput>/nqs/cgeroux/implicit_test/debug/3D_TEOS_v0_1</debugProfileOutput><!--file name for debug profiles, allowing them to go 
+    under a different directory/name. Has no effect if the precompiler directive DEBUG_EQUATIONS 
+    is set to 0, if set to 1 however it will print out terms added to the profileDataDebug object.-->
   <watchZones><!-- a list of zones to output information on every timestep-->
     <watchZone x0="121" x1="0" x2="0"></watchZone><!--15,10,6,6-->
     <watchZone x0="122" x1="0" x2="0"></watchZone><!--15,10,6,6-->
@@ -28,11 +33,11 @@
     <watchZone x0="126" x1="0" x2="0"></watchZone><!--15,10,6,6-->
   </watchZones>
   <peakKE>true</peakKE><!-- true=track peak KE, false=don't track it -->
-  <prints type="normal"><!-- aviable types are "normal" where info about the gernal progress of the code is printed
-    "timeStepInfo" where information about the timestep is printed out in column form specifically for identifying prolems
-    with timestep selection-->
-    <frequency type="timeSteps">10</frequency><!-- how often to print 1=every time step, 2=every other time step
-      etc. -->
+  <prints type="normal"><!-- aviable types are "normal" where info about the gernal progress of the 
+    code is printed "timeStepInfo" where information about the timestep is printed out in column 
+    form specifically for identifying prolems with timestep selection-->
+    <frequency type="timeSteps">10</frequency><!-- how often to print 1=every time step, 2=every 
+      other time step etc. -->
     <frequency type="seconds">600.00</frequency><!-- how often to print in simulation time -->
   </prints>
   <dumps>
@@ -55,7 +60,11 @@
   <av-threshold>0.01</av-threshold><!-- The amount of compression before AV is turned on.
     It is in terms of a velocity difference between zone sides and is in fractions of the local 
     sound speed. -->
-  <donorFrac>0.1</donorFrac><!-- fraction of upwind gradient to include in advection terms -->
+  <donorMult>1.0</donorMult><!-- multiplier used to determine the faction of the sound speed at 
+    which donor cell is full. e.g. a value of 1.0 means the donor cell will be full when the 
+    convective velocity is equal to the sound speed. A value of 0.5 will mean that it will be full
+    donor cell when the convective velocity is twice the sound speed. A value of 2.0 will mean that 
+    it will use full donor cell when the convective velocity is half the sound speed.-->
   <time>
     <endTime>1e3</endTime><!-- time in seconds at which the calculation should be halted-->
     <endTimeStep>300000</endTimeStep><!-- number of time steps to be completed before halting

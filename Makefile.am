@@ -47,24 +47,33 @@ bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen
 SPHERLS_SOURCES	=	\
 	src/SPHERLS/dataManipulation.cpp	\
 	src/SPHERLS/dataMonitoring.cpp	\
+	src/SPHERLS/dataMonitoring.h	\
 	src/SPHERLS/global.cpp	\
+	src/SPHERLS/global.h	\
 	src/SPHERLS/main.cpp	\
+	src/SPHERLS/main.h	\
 	src/SPHERLS/physEquations.cpp	\
+	src/SPHERLS/physEquations.h	\
 	src/SPHERLS/watchzone.cpp	\
 	src/SPHERLS/dataManipulation.h	\
-	src/SPHERLS/dataMonitoring.h	\
-	src/SPHERLS/global.h	\
-	src/SPHERLS/main.h	\
-	src/SPHERLS/physEquations.h	\
+	src/SPHERLS/time.h	\
+	src/SPHERLS/time.cpp	\
+	src/SPHERLS/procTop.h	\
+	src/SPHERLS/procTop.cpp	\
 	src/SPHERLS/userguide.h	\
 	src/SPHERLS/watchzone.h	\
-	src/eos.cpp	src/eos.h	\
+	src/SPHERLS/profileData.cpp	\
+	src/SPHERLS/profileData.h	\
+	src/SPHERLS/fileExists.h	\
+	src/SPHERLS/fileExists.cpp	\
+	src/eos.cpp	\
+	src/eos.h	\
 	src/exception2.cpp	\
 	src/exception2.h	\
 	src/xmlFunctions.cpp	\
 	src/xmlFunctions.h	\
 	src/xmlParser.cpp	\
-	src/xmlParser.h
+	src/xmlParser.h	
 SPHERLS_LDADD	=	-L$(PETSC_LIB_PATH)	-lpetsc
 SPHERLS_CPPFLAGS	=	-I$(PETSC_INCLUDE_PATH)	-Isrc/
 
@@ -85,8 +94,8 @@ FFTW_LDADDS=
 FFTW_CPPFLAGS= 
 endif
 if HDF_ENABLE
-HDF_LDADDS=-L$(HDF_LIB_PATH) -lm -ldf -lmfhdf -ljpeg -lz
-HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH) 
+HDF_LDADDS=-L$(HDF_LIB_PATH) -lm -lmfhdf -ldf -ljpeg -lz
+HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
 else
 HDF_LDADDS= 
 HDF_CPPFLAGS= 

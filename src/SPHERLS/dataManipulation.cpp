@@ -75,6 +75,11 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //get output file name
   getXMLValue(xData,"outputName",0,output.sBaseOutputFileName);
   
+  //get debug outputfile name if there is one set
+  if(!getXMLValueNoThrow(xData,"debugProfileOutput",0,parameters.sDebugProfileOutput)){
+    parameters.sDebugProfileOutput=output.sBaseOutputFileName+"_debug";
+  };
+  
   //get starting model file name
   std::string sStartModel;
   getXMLValue(xData,"startModel",0,sStartModel);
@@ -315,6 +320,10 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //get extra alpha
   parameters.dAlphaExtra=0.0;
   getXMLValueNoThrow(xData,"extraAlpha",0,parameters.dAlphaExtra);
+  
+  //get extra alpha
+  parameters.dDonorCellMultiplier=1.0;
+  getXMLValueNoThrow(xData,"donorMult",0,parameters.dDonorCellMultiplier);
   
   //get A.V. threshold value
   getXMLValue(xData,"av-threshold",0,parameters.dAVThreshold);
@@ -697,6 +706,14 @@ void fin(bool bWriteCurrentStateToFile, Time &time, Output &output,ProcTop
             }
           }
     functions.fpModelWrite(ssFileNameOut.str(),procTop,grid,time,parameters);
+    
+    #if DEBUG_EQUATIONS==1
+    std::stringstream ssFileNameProOut;
+    ssFileNameProOut<<parameters.sDebugProfileOutput<<"_t"<<std::setfill('0')
+      <<std::setw(8)<<time.nTimeStepIndex<<"_pro.txt";
+    parameters.profileDataDebug.toFile(ssFileNameProOut.str(),time,procTop);
+    parameters.profileDataDebug.clear();
+    #endif
   }
   
   //finish other tasks
@@ -1145,7 +1162,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
     }
   }
   else{
-    char *cBuffer=new char[nGammaLaw];//if nGammaLaw not zero then it is the size of the string following it
+    char *cBuffer=new char[nGammaLaw+1];//if nGammaLaw not zero then it is the size of the string following it
     ifIn.read(cBuffer,(nGammaLaw)*sizeof(char));
     cBuffer[nGammaLaw]='\0';
     std::string sTemp=cBuffer;
@@ -1256,7 +1273,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
       grid.nQ0                = grid.nNumVars+1;
     }
     else if(grid.nNumDims==2){
-      grid.nNumIntVars=8;
+      grid.nNumIntVars=9;
       
       grid.nM                 = 0;
       grid.nTheta             = 1;
@@ -1275,9 +1292,10 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
       grid.nDTheta            = grid.nNumVars+5;
       grid.nSinThetaIJK       = grid.nNumVars+6;
       grid.nSinThetaIJp1halfK = grid.nNumVars+7;
+      grid.nDonorCellFrac    = grid.nNumVars+8;
     }
     else if(grid.nNumDims==3){
-      grid.nNumIntVars=12;
+      grid.nNumIntVars=13;
       
       grid.nM                 = 0;
       grid.nTheta             = 1;
@@ -1302,6 +1320,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
       grid.nCotThetaIJK       = grid.nNumVars+9;
       grid.nCotThetaIJp1halfK = grid.nNumVars+10;
       grid.nQ2                = grid.nNumVars+11;
+      grid.nDonorCellFrac    = grid.nNumVars+12;
     }
   }
   else{
@@ -1324,7 +1343,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
         grid.nEddyVisc          = grid.nNumVars+5;
       }
       else if(grid.nNumDims==2){
-        grid.nNumIntVars=14;
+        grid.nNumIntVars=15;
         
         grid.nM                 = 0;
         grid.nTheta             = 1;
@@ -1349,6 +1368,82 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
         grid.nCotThetaIJK       = grid.nNumVars+11;
         grid.nCotThetaIJp1halfK = grid.nNumVars+12;
         grid.nEddyVisc          = grid.nNumVars+13;
+        grid.nDonorCellFrac     = grid.nNumVars+14;
+      }
+      else if(grid.nNumDims==3){
+        grid.nNumIntVars=17;
+        
+        grid.nM                 = 0;
+        grid.nTheta             = 1;
+        grid.nPhi               = 2;
+        grid.nDM                = 3;
+        grid.nR                 = 4;
+        grid.nD                 = 5;
+        grid.nU                 = 6;
+        grid.nU0                = 7;
+        grid.nV                 = 8;
+        grid.nW                 = 9;
+        grid.nT                 = 10;
+        grid.nP                 = grid.nNumVars+0;
+        grid.nQ0                = grid.nNumVars+1;
+        grid.nDenAve            = grid.nNumVars+2;
+        grid.nDPhi              = grid.nNumVars+3;
+        grid.nDCosThetaIJK      = grid.nNumVars+4;
+        grid.nE                 = grid.nNumVars+5;
+        grid.nKappa             = grid.nNumVars+6;
+        grid.nGamma             = grid.nNumVars+7;
+        grid.nQ1                = grid.nNumVars+8;
+        grid.nDTheta            = grid.nNumVars+9;
+        grid.nSinThetaIJK       = grid.nNumVars+10;
+        grid.nSinThetaIJp1halfK = grid.nNumVars+11;
+        grid.nCotThetaIJK       = grid.nNumVars+12;
+        grid.nCotThetaIJp1halfK = grid.nNumVars+13;
+        grid.nQ2                = grid.nNumVars+14;
+        grid.nEddyVisc          = grid.nNumVars+15;
+        grid.nDonorCellFrac     = grid.nNumVars+16;
+      }
+    }
+    else{//no turulance model
+      if(grid.nNumDims==1){
+        grid.nNumIntVars=5;
+        
+        grid.nM                 = 0;
+        grid.nDM                = 1;
+        grid.nR                 = 2;
+        grid.nD                 = 3;
+        grid.nU                 = 4;
+        grid.nU0                = 5;
+        grid.nT                 = 6;
+        grid.nP                 = grid.nNumVars+0;
+        grid.nQ0                = grid.nNumVars+1;
+        grid.nE                 = grid.nNumVars+2;
+        grid.nKappa             = grid.nNumVars+3;
+        grid.nGamma             = grid.nNumVars+4;
+      }
+      else if(grid.nNumDims==2){
+        grid.nNumIntVars=12;
+        
+        grid.nM                 = 0;
+        grid.nTheta             = 1;
+        grid.nDM                = 2;
+        grid.nR                 = 3;
+        grid.nD                 = 4;
+        grid.nU                 = 5;
+        grid.nU0                = 6;
+        grid.nV                 = 7;
+        grid.nT                 = 8;
+        grid.nP                 = grid.nNumVars+0;
+        grid.nQ0                = grid.nNumVars+1;
+        grid.nDenAve            = grid.nNumVars+2;
+        grid.nDCosThetaIJK      = grid.nNumVars+3;
+        grid.nE                 = grid.nNumVars+4;
+        grid.nKappa             = grid.nNumVars+5;
+        grid.nGamma             = grid.nNumVars+6;
+        grid.nQ1                = grid.nNumVars+7;
+        grid.nDTheta            = grid.nNumVars+8;
+        grid.nSinThetaIJK       = grid.nNumVars+9;
+        grid.nSinThetaIJp1halfK = grid.nNumVars+10;
+        grid.nDonorCellFrac     = grid.nNumVars+11;
       }
       else if(grid.nNumDims==3){
         grid.nNumIntVars=16;
@@ -1379,79 +1474,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
         grid.nCotThetaIJK       = grid.nNumVars+12;
         grid.nCotThetaIJp1halfK = grid.nNumVars+13;
         grid.nQ2                = grid.nNumVars+14;
-        grid.nEddyVisc          = grid.nNumVars+15;
-      }
-    }
-    else{//no turulance model
-      if(grid.nNumDims==1){
-        grid.nNumIntVars=5;
-        
-        grid.nM                 = 0;
-        grid.nDM                = 1;
-        grid.nR                 = 2;
-        grid.nD                 = 3;
-        grid.nU                 = 4;
-        grid.nU0                = 5;
-        grid.nT                 = 6;
-        grid.nP                 = grid.nNumVars+0;
-        grid.nQ0                = grid.nNumVars+1;
-        grid.nE                 = grid.nNumVars+2;
-        grid.nKappa             = grid.nNumVars+3;
-        grid.nGamma             = grid.nNumVars+4;
-      }
-      else if(grid.nNumDims==2){
-        grid.nNumIntVars=11;
-        
-        grid.nM                 = 0;
-        grid.nTheta             = 1;
-        grid.nDM                = 2;
-        grid.nR                 = 3;
-        grid.nD                 = 4;
-        grid.nU                 = 5;
-        grid.nU0                = 6;
-        grid.nV                 = 7;
-        grid.nT                 = 8;
-        grid.nP                 = grid.nNumVars+0;
-        grid.nQ0                = grid.nNumVars+1;
-        grid.nDenAve            = grid.nNumVars+2;
-        grid.nDCosThetaIJK      = grid.nNumVars+3;
-        grid.nE                 = grid.nNumVars+4;
-        grid.nKappa             = grid.nNumVars+5;
-        grid.nGamma             = grid.nNumVars+6;
-        grid.nQ1                = grid.nNumVars+7;
-        grid.nDTheta            = grid.nNumVars+8;
-        grid.nSinThetaIJK       = grid.nNumVars+9;
-        grid.nSinThetaIJp1halfK = grid.nNumVars+10;
-      }
-      else if(grid.nNumDims==3){
-        grid.nNumIntVars=15;
-        
-        grid.nM                 = 0;
-        grid.nTheta             = 1;
-        grid.nPhi               = 2;
-        grid.nDM                = 3;
-        grid.nR                 = 4;
-        grid.nD                 = 5;
-        grid.nU                 = 6;
-        grid.nU0                = 7;
-        grid.nV                 = 8;
-        grid.nW                 = 9;
-        grid.nT                 = 10;
-        grid.nP                 = grid.nNumVars+0;
-        grid.nQ0                = grid.nNumVars+1;
-        grid.nDenAve            = grid.nNumVars+2;
-        grid.nDPhi              = grid.nNumVars+3;
-        grid.nDCosThetaIJK      = grid.nNumVars+4;
-        grid.nE                 = grid.nNumVars+5;
-        grid.nKappa             = grid.nNumVars+6;
-        grid.nGamma             = grid.nNumVars+7;
-        grid.nQ1                = grid.nNumVars+8;
-        grid.nDTheta            = grid.nNumVars+9;
-        grid.nSinThetaIJK       = grid.nNumVars+10;
-        grid.nSinThetaIJp1halfK = grid.nNumVars+11;
-        grid.nCotThetaIJK       = grid.nNumVars+12;
-        grid.nCotThetaIJp1halfK = grid.nNumVars+13;
-        grid.nQ2                = grid.nNumVars+14;
+        grid.nDonorCellFrac     = grid.nNumVars+15;
       }
     }
   }

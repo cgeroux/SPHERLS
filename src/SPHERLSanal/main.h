@@ -12,6 +12,9 @@
 #ifdef FFTW_ENABLE
   #include <fftw3.h>
 #endif
+#ifdef HDF_ENABLE
+  #include "mfhdf.h"
+#endif
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -133,6 +136,10 @@ bool bFileExists(std::string strFilename);
 void fpSignalHandler(int nSig);
 void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex);
 void convertBinToLNA(std::string sFileName);
+double dCalRhoAve(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ);/**
+  Calculates a volume weighted average density given the grid varibles, dGrid and the radial
+  index, nI, the start and stop indices in the Y and Z direction.
+*/
 #ifdef FFTW_ENABLE
 void computeFourierTransFromList(std::string sInFileName,std::string sOutFileName);
 void computeFourierTrans(std::string sInFileName,std::string sOutFileName);
@@ -161,5 +168,10 @@ struct watchzone{
   std::vector<double> vecdDelM_r;//22
   std::vector<double> vecdErrorDelM_r;//23
 };
+#endif
+#ifdef HDF_ENABLE
+void convertBinToHDF4(std::string sFileName);/**<
+  converts a collected binary file to an hdf file
+*/
 #endif
 

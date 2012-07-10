@@ -20,47 +20,9 @@ import xml.etree.ElementTree as xml
 #set number of processors to use
 numProcs=4
 
-#set paths
-refCalcs={
-  '1DNA':
-  [paths.ref_calcs+"1DNA/1DNARef_t00000000"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000001"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000002"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000003"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000004"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000005"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000006"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000007"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000008"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000009"
-  ,paths.ref_calcs+"1DNA/1DNARef_t00000010"]
-  ,'2DNA':
-  [paths.ref_calcs+"2DNA/2DNARef_t00137886"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137887"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137888"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137889"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137890"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137891"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137892"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137893"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137894"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137895"
-  ,paths.ref_calcs+"2DNA/2DNARef_t00137896"]
-  ,'3DNA':
-  [paths.ref_calcs+"3DNA/3DNARef_t00222559"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222560"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222561"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222562"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222563"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222564"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222565"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222566"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222567"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222568"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222569"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222570"
-  ,paths.ref_calcs+"3DNA/3DNARef_t00222571"]
-  }
+#set paths to reference calculations
+import ref_calcs
+
 def main():
   
   #if argparse is availble
@@ -165,10 +127,10 @@ def checkCalAgainstRef(subDir,options):
   log=open("./log.txt",'a')
   log.write("\nDIFFING MODEL DUMPS ...\n")
   calculationsAreTheSame=True
-  for i in range(1,len(refCalcs[subDir])):
-    refFileNameParts=refCalcs[subDir][i].split('_t')
+  for i in range(1,len(ref_calcs.refCalcs[subDir])):
+    refFileNameParts=ref_calcs.refCalcs[subDir][i].split('_t')
     file1="./"+subDir+"Test_t"+str(refFileNameParts[1])
-    file2=refCalcs[subDir][i]
+    file2=ref_calcs.refCalcs[subDir][i]
     log.close()
     log=open("./log.txt",'a')
     log.write("diffing model files \""+file1+"\" and "+"\""+file2+"\" ... \n  ")
@@ -232,10 +194,10 @@ def createTestCalcNA(subDir,numProcs,options):
   
   #make SPHERLS.xml file
   log.write("making \"SPHERLS.xml\" ...")
-  configFile=os.path.dirname(refCalcs[subDir][0])+"/SPHERLS.xml"
+  configFile=os.path.dirname(ref_calcs.refCalcs[subDir][0])+"/SPHERLS.xml"
   cmd=["cp",configFile,"./SPHERLS.xml"]
   result=subprocess.call(cmd,stdout=log,stderr=log)
-  setSPHERLSStartAndOutputModel("./SPHERLS.xml",refCalcs[subDir][0],subDir+"Test")
+  setSPHERLSStartAndOutputModel("./SPHERLS.xml",ref_calcs.refCalcs[subDir][0],subDir+"Test")
   log.write("SUCCESS\n")
   
   #run 10 steps with SPHERLS
@@ -262,20 +224,20 @@ def checkForRefCalcsAndRemake(options):
   
   #check for calculations
   haveRefCalcs={}
-  for key in refCalcs.keys():
+  for key in ref_calcs.refCalcs.keys():
     
     #check that all model files are there
     haveRefCalc=True
     if not options.m:
       print "checking for reference calculations for \""+key+"\" calculation ... ",
-      for j in range(len(refCalcs[key])):
-        if not os.access(refCalcs[key][j],os.F_OK):
+      for j in range(len(ref_calcs.refCalcs[key])):
+        if not os.access(ref_calcs.refCalcs[key][j],os.F_OK):
           haveRefCalc=False
     else:
       haveRefCalc=False
     
     #check to see if there is a SPHERLS.xml file in the test directory
-    configFile=os.path.dirname(refCalcs[key][0])+"/SPHERLS.xml"
+    configFile=os.path.dirname(ref_calcs.refCalcs[key][0])+"/SPHERLS.xml"
     if not os.access(configFile,os.F_OK):
       haveRefCalc=False
     haveRefCalcs[key]=haveRefCalc

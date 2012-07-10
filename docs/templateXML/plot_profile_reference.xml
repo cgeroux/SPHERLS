@@ -22,8 +22,26 @@
 OPTIONAL if created with SPHERLSanal with the -v option
              DlnPDlnT(76)           DlnPDlnRho(77)                 DEDT(78)
 -->
-<figure title="Measuring Overshooting in Pressure Scale Heights \time0 \index0 \phase0" outputfile="./grid_velocity.pdf"
-  axisSpacing="0.05" figBottom="0.05" figTop="0.95" figWidth="10" figHeight="8" dpi="300">
+<figure title="Measuring Overshooting in Pressure Scale Heights \time0 \index0 \phase0"
+  outputfile="./grid_velocity.pdf" axisSpacing="0.05" figBottom="0.05" figTop="0.95" figWidth="10"
+  figHeight="8" dpi="300" outputFileStartIndex="0" inputFileFrequency="10">
+  <!--attributes for figure
+  title: title of the plot, my use reference to \time0, \index0, and \phase0 where they are the 
+    time, time step index, and phase of data set 0 respectively. Different datasets can be 
+    referenced by using values other than 0 in the reference.
+  outputfile: name of the output file with extension. The extension is used to determine what kind
+    of output file to make. The name of the output file will have an "_n" appended where "n" is an
+    index ranging from outputFileStartIndex to the number of included input files -1.
+  axisSpacing: amount of spacing between axis in units of figure size
+  figBottom: amount of space at the bottom of the figure, in units of figure size
+  figTop: location of the top of the figure, in units of figure size
+  figWidth: width of the figure in inches
+  figHeight: height of the figure in inches
+  dpi: dots per inch
+  outputFileStartIndex: is the index to start the output plots file names at.
+  inputFileFrequency: if 1 it will plot every input file, if 2 every other input file etc.
+  -->
+  
   <dataSet fileRange="/globalscratch/cgeroux/test/2D/T6100_L50_Y24_Z002_100_dt01/output/2D_T6100_L50_Y24_Z002_t[2047596-*]">
     <axis type="profile" xlabel="r/H_p" xmin="100" xmax="112" column="$5/4e9" xminortics="True">
       <plot ylabel="(u_max-u_0)(T_max-T_min)" ymin="0" ymax="1.65e5" grid="both" legendloc="2">

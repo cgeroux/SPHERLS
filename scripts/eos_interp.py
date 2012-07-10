@@ -1117,7 +1117,7 @@ class opacityTableManager:
       #switch to opacities node
       opacityElements=root.findall("opacity")
       if len(opacityElements)>1:
-        print "WARNING: found "+str(len(eosElements))+" \"opacity\" nodes, all but first node will "\
+        print "WARNING: found "+str(len(opacityElements))+" \"opacity\" nodes, all but first node will "\
           +"be ignored."
       opacityElement=opacityElements[0]
       
@@ -2076,6 +2076,9 @@ class eosTableManager:
     c=y1-a*x1Sq-b*x1
     return a*x*x+b*x+c
 class interpTable:
+  """This class reads in and holds data for an equations of state and opacities from a file formated
+  in the same was as read to and written by the class defined in eos.h, and implemented in eos.cpp."""
+  
   def interpolate(self,eosSet,opacitySet,withoutNans=False):
       """creates the interpolated table and writes it out"""
       

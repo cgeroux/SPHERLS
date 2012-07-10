@@ -6,6 +6,9 @@
 #include <math.h>
 #include <iomanip>
 #include "eos.h"
+#ifdef HDF_ENABLE
+  #include "mfhdf.h"
+#endif
 
 int main(int argc, char *argv[]){
   
@@ -160,6 +163,56 @@ int main(int argc, char *argv[]){
             case 'a':{//make a radial profile
               
               nOperation=2;
+              
+              //check that there are enough arguments
+              if(argc<3){//"exe name"+"-c"+"these arguments"
+                std::stringstream ssTemp;
+                ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+                  <<": too few arguments\n";
+                throw exception2(ssTemp.str(),SYNTAX);
+              }
+              
+              //get from file type
+              nFromFileType=0;
+              switch(argv[i+1][0]){
+                case 'd':{//distributed
+                  nFromFileType+=1;
+                  break;
+                }
+                case 'c':{//collected
+                  nFromFileType+=2;
+                  break;
+                }
+                default:{//unknown
+                  std::stringstream ssTemp;
+                  ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+                    <<": unknown file type \""<<argv[i+1][0]
+                    <<"\", should be either \"d\" or \"c\".\n";
+                  throw exception2(ssTemp.str(),SYNTAX);
+                }
+              }
+              switch(argv[i+1][1]){
+                case 'b':{//binary
+                  nFromFileType+=4;
+                  break;
+                }
+                case 'a':{//ascii
+                  nFromFileType+=8;
+                  break;
+                }
+                default:{//unknown
+                  std::stringstream ssTemp;
+                  ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+                    <<": unknown file type \""<<argv[i+1][1]
+                    <<"\", should be either \"b\" or \"a\".\n";
+                  throw exception2(ssTemp.str(),SYNTAX);
+                }
+              }
+              break;
+            }
+            case 'd':{//make an HDF file
+              
+              nOperation=6;
               
               //check that there are enough arguments
               if(argc<3){//"exe name"+"-c"+"these arguments"
@@ -675,6 +728,41 @@ int main(int argc, char *argv[]){
         #endif
         break;
       }
+      case 6:{//make an HDF file
+        switch(nFromFileType){
+          case 5:{//from db
+          
+            //convert to a collected ascii file
+            combineBinFiles(sFileName);
+            convertBinToHDF4(sFileName);
+            break;
+          }
+          case 9:{//from da
+            std::stringstream ssTemp;
+            ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+              <<": creating an HDF file from file type \"da\" not yet supported\n";
+            throw exception2(ssTemp.str(),SYNTAX);
+            break;
+          }
+          case 6:{//from cb
+            convertBinToHDF4(sFileName);
+            break;
+          }
+          case 10:{//from ca
+            convertCollAsciiToBin(sFileName);
+            convertBinToHDF4(sFileName);
+            break;
+          }
+          default:{
+            std::stringstream ssTemp;
+            ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+              <<": unknown file type to convert from. \n";
+            throw exception2(ssTemp.str(),SYNTAX);
+            break;
+          }
+        }
+        break;
+      }
       default:{
         std::stringstream ssTemp;
         ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
@@ -723,6 +811,7 @@ void printHelp(){
     <<"    f  sets output formating to fixed\n"
     <<"       defult is scientific (s)\n"
     <<" -h    displays this message\n"
+    <<" -d [input file type]   make an HDF file from [input file type]\n"
     <<" -a [input file type]   make a radial profile from [input file type]\n"
     <<" -v adds extra information to the radial profile about equation of state derivatives.\n"
     <<" -s [input file type] [plane] [planeIndex]   make a 2D slice where\n"
@@ -2744,7 +2833,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     nMinKIndex[n]=new int[nSize[nD][0]+nGhostCellsX*2*nNumGhostCells];
   }
   
-  if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, L_rad and L_con, KE, and C
+  if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, L_rad and L_con, KE, C, <rho>
     
     //allocate space
     nGhostCellsX=1;
@@ -3150,6 +3239,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
           nCount++;
         }
       }
+      dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
       dAve[nL_rad][i]=dLSum_rad/dAreaSum*4.0*dPi*dRSq_ip1half;
       dAve[nL_con][i]=dLSum_con/dAreaSum*4.0*dPi*dRSq_ip1half;
       dU_i=(dGrid[nU0][i+1][0][0]+dGrid[nU0][i][0][0])*0.5;
@@ -3397,6 +3487,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
         }
       }
       dU_i=(dGrid[nU0][i+1][0][0]+dGrid[nU0][i][0][0])*0.5;
+      dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
       dAve[nKE][i]=0.5*dGrid[nDM][i][0][0]*dU_i*dU_i;
       dMax[nP][i]=dMaxP;
       dMin[nP][i]=dMinP;
@@ -3446,7 +3537,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthOutputField)<<"ErrorDM_r(4)"
     <<std::setw(nWidthOutputField)<<"R_im1half[cm](5)"
     <<std::setw(nWidthOutputField)<<"R_ip1half[cm](6)"
-    <<std::setw(nWidthOutputField)<<"D_ave[g/cm^3](7)"
+    <<std::setw(nWidthOutputField)<<"<D>[g/cm^3](7)"
     <<std::setw(nWidthOutputField)<<"D_max[g/cm^3](8)"
     <<std::setw(nWidthIntOutputField)<<"D_max_j(9)"
     <<std::setw(nWidthIntOutputField)<<"D_max_k(10)"
@@ -3527,7 +3618,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
   for(int i=0;i<nSizeGlobe[0]+2*nNumGhostCells;i++){
     
     //calculate mass error
-    dErrorDM_r=(4.0/3.0*dPi*dGrid[nD][i][0][0]*(pow(dGrid[nR][i+1][0][0],3.0)
+    dErrorDM_r=(4.0/3.0*dPi*dAve[nD][i]*(pow(dGrid[nR][i+1][0][0],3.0)
       -pow(dGrid[nR][i][0][0],3.0))-dGrid[nDM][i][0][0])/dGrid[nDM][i][0][0];
     double dDlnPDlnT;
     double dDlnPDlnRho;
@@ -6819,6 +6910,27 @@ void convertBinToLNA(std::string sFileName){
   delete [] nSize;
   delete [] nVarInfo;
 }
+double dCalRhoAve(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ){
+  int j;
+  int k;
+  double dSum=0.0;
+  double dVolume=0.0;
+  double dRFactor=0.33333333333333333*(pow(dGrid[nR][nI][0][0],3.0)
+    -pow(dGrid[nR][nI-1][0][0],3.0));
+  double dVolumeTemp;
+  double dDeltaCosThetaIJK;
+  double dDeltaPhi;
+  for(j=nStartY;j<nEndY;j++){
+    dDeltaCosThetaIJK=cos(dGrid[nTheta][0][j-1][0])-cos(dGrid[nTheta][0][j][0]);
+    for(k=nStartZ;k<nEndZ;k++){
+      dDeltaPhi=dGrid[nPhi][0][0][k]-dGrid[nPhi][0][0][k-1];
+      dVolumeTemp=dRFactor*dDeltaCosThetaIJK*dDeltaPhi;
+      dSum+=dVolumeTemp*dGrid[nD][nI][j][k];
+      dVolume+=dVolumeTemp;
+    }
+  }
+  return dSum/dVolume;
+}
 #ifdef FFTW_ENABLE
 void computeFourierTransFromList(std::string sInFileName,std::string sOutFileName){
 
@@ -6983,5 +7095,672 @@ void computeFourierTrans(std::string sInFileName,std::string sOutFileName){
   fftw_free(in); fftw_free(out);
 }
 #endif
-
-
+#ifdef HDF_ENABLE
+void convertBinToHDF4(std::string sFileName){
+  
+  int nCutZone=225;
+  bool bIncludeBoundaries=false;
+  
+  
+  //open input file
+  std::string sExtension=sFileName.substr(sFileName.size()-4,1);
+  if(sExtension.compare(".")==0){//if there is an extension remove it
+    sFileName=sFileName.substr(0,sFileName.size()-4);
+  }
+  if(sFileName.size()==0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": no input file specified\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  std::ifstream ifFile;
+  ifFile.open(sFileName.c_str(),std::ios::binary);
+  if(!ifFile.good()){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": input file \""
+      <<sFileName<<"\" didn't open properly\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check that it is a binary file
+  char cTemp;
+  ifFile.read((char*)(&cTemp),sizeof(char));
+  if(cTemp!='b'){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": input file \""
+      <<sFileName<<"\" isn't a binary file.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check that it is the correct version
+  int nTemp;
+  ifFile.read((char*)(&nTemp),sizeof(int));
+  if(nTemp!=nDumpFileVersion){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": inpput file \""
+      <<sFileName<<"\" version \""<<nTemp
+      <<"\" isn't the supported version \""<<nDumpFileVersion<<"\".\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //read in time
+  double dTime;
+  ifFile.read((char*)(&dTime),sizeof(double));
+  
+  //read in the time step index
+  int nTimeStepIndex;
+  ifFile.read((char*)(&nTimeStepIndex),sizeof(int));
+  
+  //read in the time step
+  double dTimeStep1;
+  ifFile.read((char*)(&dTimeStep1),sizeof(double));
+  
+  //read in the time step
+  double dTimeStep2;
+  ifFile.read((char*)(&dTimeStep2),sizeof(double));
+  
+  //read in alpha
+  double dAlpha;
+  ifFile.read((char*)(&dAlpha),sizeof(double));
+  
+  //read in gamma law
+  int nGammaLaw;
+  ifFile.read((char*)(&nGammaLaw),sizeof(int));
+  
+  double dGamma;
+  std::string sEOSTable;
+  eos eosTable;
+  if(nGammaLaw==0){
+    ifFile.read((char*)(&dGamma),sizeof(double));
+  }
+  else{
+    char *cBuffer=new char[nGammaLaw+1];
+    ifFile.read(cBuffer,nGammaLaw*sizeof(char));
+    cBuffer[nGammaLaw]='\0';
+    sEOSTable=cBuffer;
+    delete [] cBuffer;
+    eosTable.readBin(sEOSTable);
+  }
+  
+  //read in artificial viscosity
+  double dA;
+  ifFile.read((char*)(&dA),sizeof(double));
+  
+  //read in artificial viscosity threshold
+  double dAVThreshold;
+  ifFile.read((char*)(&dAVThreshold),sizeof(double));
+  
+  //read in global grid size
+  int nSizeGlobe[3];
+  ifFile.read((char*)(nSizeGlobe),3*sizeof(int));
+  
+  //read in periodicity
+  int nPeriodic[3];
+  ifFile.read((char*)(nPeriodic),3*sizeof(int));
+  
+  //read in number of 1D Zones
+  int nNum1DZones;
+  ifFile.read((char*)(&nNum1DZones),sizeof(int));
+  
+  //read in number of ghostcells
+  int nNumGhostCells;
+  ifFile.read((char*)(&nNumGhostCells),sizeof(int));
+  
+  //read in number of grid variables
+  int nNumVars;
+  ifFile.read((char*)(&nNumVars),sizeof(int));
+  
+  //get variable info, and set grid sizes
+  int **nSize=new int*[nNumVars];
+  int **nVarInfo=new int*[nNumVars];
+  int l;
+  for(int n=0;n<nNumVars;n++){
+    nSize[n]=new int[3];
+    nVarInfo[n]=new int[3];
+    ifFile.read((char*)(nVarInfo[n]),(4)*sizeof(int));
+    for(l=0;l<3;l++){
+      if(nSizeGlobe[l]==1){
+        nVarInfo[n][l]=-1;
+      }
+      if(nVarInfo[n][l]==-1){//variable not defined in direction l
+        nSize[n][l]=1;
+      }
+      else if(nVarInfo[n][l]==1&&l==0){//interface variable
+        nSize[n][l]=nSizeGlobe[l]+1;
+      }
+      else{
+        nSize[n][l]=nSizeGlobe[l];
+      }
+    }
+  }
+  
+  //figure out number of dimensions
+  int nNumDims=0;
+  if(nSizeGlobe[0]>1){
+    nNumDims++;
+  }
+  if(nSizeGlobe[1]>1){
+    nNumDims++;
+  }
+  if(nSizeGlobe[2]>1){
+    nNumDims++;
+  }
+  
+  //set variable indices
+  int nNumIntVars=0;
+  if(nGammaLaw==0){//using gamma law gas
+    if(nNumDims==1){
+      nNumIntVars=4;
+      nM=0;
+      nDM=1;
+      nR=2;
+      nD=3;
+      nU=4;
+      nU0=5;
+      nE=6;
+      nP=nNumVars+0;
+      nQ=nNumVars+1;
+      nKE=nNumVars+2;
+      nC=nNumVars+3;
+      nV=-1;
+      nW=-1;
+      nT=-1;
+      nTheta=-1;
+      nPhi=-1;
+      nKappa=-1;
+      nGamma=-1;
+    }
+    else if(nNumDims==2){
+      nNumIntVars=4;
+      nM=0;
+      nTheta=1;
+      nDM=2;
+      nR=3;
+      nD=4;
+      nU=5;
+      nU0=6;
+      nV=7;
+      nE=8;
+      nP=nNumVars+0;
+      nQ=nNumVars+1;
+      nKE=nNumVars+2;
+      nC=nNumVars+3;
+      nW=-1;
+      nT=-1;
+      nPhi=-1;
+      nKappa=-1;
+      nGamma=-1;
+    }
+    else if(nNumDims==3){
+      nNumIntVars=4;
+      nM=0;
+      nTheta=1;
+      nPhi=2;
+      nDM=3;
+      nR=4;
+      nD=5;
+      nU=6;
+      nU0=7;
+      nV=8;
+      nW=9;
+      nE=10;
+      nP=nNumVars+0;
+      nQ=nNumVars+1;
+      nKE=nNumVars+2;
+      nC=nNumVars+3;
+      nT=-1;
+      nKappa=-1;
+      nGamma=-1;
+    }
+  }
+  else{//using a tabulated equaiton of state
+    if(nNumDims==1){
+      nNumIntVars=9;
+      nM=0;
+      nDM=1;
+      nR=2;
+      nD=3;
+      nU=4;
+      nU0=5;
+      nT=6;
+      nE=nNumVars+0;
+      nQ=nNumVars+1;
+      nP=nNumVars+2;
+      nKappa=nNumVars+3;
+      nGamma=nNumVars+4;
+      nL_rad=nNumVars+5;
+      nL_con=nNumVars+6;
+      nKE=nNumVars+7;
+      nC=nNumVars+8;
+      nV=-1;
+      nW=-1;
+      nTheta=-1;
+      nPhi=-1;
+    }
+    else if(nNumDims==2){
+      nNumIntVars=9;
+      nM=0;
+      nTheta=1;
+      nDM=2;
+      nR=3;
+      nD=4;
+      nU=5;
+      nU0=6;
+      nV=7;
+      nT=8;
+      nE=nNumVars+0;
+      nQ=nNumVars+1;
+      nP=nNumVars+2;
+      nKappa=nNumVars+3;
+      nGamma=nNumVars+4;
+      nL_rad=nNumVars+5;
+      nL_con=nNumVars+6;
+      nKE=nNumVars+7;
+      nC=nNumVars+8;
+      nPhi=-1;
+      nW=-1;
+    }
+    else if(nNumDims==3){
+      nNumIntVars=9;
+      nM=0;
+      nTheta=1;
+      nPhi=2;
+      nDM=3;
+      nR=4;
+      nD=5;
+      nU=6;
+      nU0=7;
+      nV=8;
+      nW=9;
+      nT=10;
+      nE=nNumVars+0;
+      nQ=nNumVars+1;
+      nP=nNumVars+2;
+      nKappa=nNumVars+3;
+      nGamma=nNumVars+4;
+      nL_rad=nNumVars+5;
+      nL_con=nNumVars+6;
+      nKE=nNumVars+7;
+      nC=nNumVars+8;
+    }
+  }
+  
+  //read in grid, and write out each variable
+  int nGhostCellsX;
+  int nGhostCellsY;
+  int nGhostCellsZ;
+  int nSizeX1;
+  int nSizeX2;
+  int nStartY;
+  int nEndY;
+  int nSizeY;
+  int nStartZ;
+  int nEndZ;
+  int nSizeZ;
+  int i;
+  int j;
+  int k;
+  double *dTempArray;
+  double dSum;
+  int nCount;
+  int32 nRank=3;
+  int32 nDims[3];
+  int32 nStart[3]={0,0,0};
+  int32 nDataID;
+  int32 nStat;
+  double ****dVarData=new double***[nNumVars];
+  for(int n=0;n<nNumVars;n++){
+    
+    nGhostCellsX=1;
+    if(nVarInfo[n][0]==-1){
+      nGhostCellsX=0;
+    }
+    nGhostCellsY=1;
+    if(nVarInfo[n][1]==-1){
+      nGhostCellsY=0;
+    }
+    nGhostCellsZ=1;
+    if(nVarInfo[n][2]==-1){
+      nGhostCellsZ=0;
+    }
+    
+    //make some space to hold the variables
+    dVarData[n]=new double**[nSize[n][0]+nGhostCellsX*2*nNumGhostCells];
+    nSizeY=nSize[n][1]+nGhostCellsY*2*nNumGhostCells;//assume y and z are always periodic
+    nSizeZ=nSize[n][2]+nGhostCellsZ*2*nNumGhostCells;
+    //read in 1D part of the grid
+    nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);//may be need to +1 if only one proc and variable is interface centered
+    if (nVarInfo[n][0]==1&&nPeriodic[0]==0){
+      nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
+    }
+    double dTemp;
+    for(i=0;i<nSizeX1;i++){
+      dVarData[n][i]=new double*[nSizeY];
+      ifFile.read((char*)(&dTemp),sizeof(double));//only read one for every j,k set
+      for(j=0;j<nSizeY;j++){
+        dVarData[n][i][j]=new double[nSizeZ];
+        for(k=0;k<nSizeZ;k++){
+          dVarData[n][i][j][k]=dTemp;
+        }
+      }
+    }
+    
+    //read in the rest of the grid
+    nSizeX2=nSize[n][0]+nGhostCellsX*2*nNumGhostCells;
+    for(i=nSizeX1;i<nSizeX2;i++){
+      dVarData[n][i]=new double*[nSizeY];
+      for(j=0;j<nSizeY;j++){
+        dVarData[n][i][j]=new double[nSizeZ];
+        ifFile.read((char*)(dVarData[n][i][j]),nSizeZ*sizeof(double));//read all k values at once
+      }
+    }
+  }
+  
+  //open the HDF file
+  std::stringstream ssHDFFileName;
+  ssHDFFileName<<sFileName<<".hdf";
+  int32 nFileID=SDstart(ssHDFFileName.str().c_str(),DFACC_CREATE);
+  if(nFileID==FAIL){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": error opening the hdf file\""<<ssHDFFileName.str()<<"\"\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //write variables to HDF file
+  nStartY=0;
+  nStartZ=0;
+  for(int n=0;n<nNumVars;n++){
+    
+    nGhostCellsX=1;
+    if(nVarInfo[n][0]==-1){
+      nGhostCellsX=0;
+    }
+    nGhostCellsY=1;
+    if(nVarInfo[n][1]==-1||!bIncludeBoundaries){
+      nGhostCellsY=0;
+    }
+    nGhostCellsZ=1;
+    if(nVarInfo[n][2]==-1||!bIncludeBoundaries){
+      nGhostCellsZ=0;
+    }
+    if(!bIncludeBoundaries){
+      nStartY=nNumGhostCells;
+      nStartZ=nNumGhostCells;
+      if(nVarInfo[n][1]==-1){
+        nStartY=0;
+      }
+      if(nVarInfo[n][2]==-1){
+        nStartZ=0;
+      }
+    }
+    int nStartX=nCutZone;
+    if (nVarInfo[n][0]==1&&nPeriodic[0]==0){
+      nStartX++;//if interface centered cut off a inner edge
+    }
+    if (nVarInfo[n][0]==-1){
+      nStartX=0;
+    }
+    
+    //make some space to hold the variables
+    nSizeY=nSize[n][1]+nGhostCellsY*2*nNumGhostCells;//assume y and z are always periodic
+    nSizeZ=nSize[n][2]+nGhostCellsZ*2*nNumGhostCells;
+    //read in 1D part of the grid
+    nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);//may be need to +1 if only one proc and variable is interface centered
+    if (nVarInfo[n][0]==1&&nPeriodic[0]==0){
+      nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
+    }
+    nSizeX2=nSize[n][0]+nGhostCellsX*2*nNumGhostCells;
+  
+    std::string sVarName="unknown varible name";
+    if(n==nM){
+      sVarName="Log10(M_R/M_tot)";
+      
+      //scale
+      for(int i=0;i<nSizeX2;i++){
+        for(int j=0;j<nSizeY;j++){
+          for(int k=0;k<nSizeZ;k++){
+            dVarData[n][i][j][k]=log10(dVarData[n][i][j][k]/dVarData[n][nSizeX2-1][j][k]);
+          }
+        }
+      }
+    }
+    else if(n==nTheta){
+      sVarName="theta scaled to be 0-0.1";
+      
+      //scale
+      double dTempdMin=dVarData[n][nStartX][nStartY][nStartZ];
+      for(int i=nStartX;i<nSizeX2;i++){
+        for(int j=nStartY;j<nSizeY+nStartY;j++){
+          for(int k=nStartZ;k<nSizeZ+nStartZ;k++){
+            dVarData[n][i][j][k]=(dVarData[n][i][j][k]-dTempdMin)
+              /(dVarData[n][i][nSizeY+nStartY-1][k]-dTempdMin)*0.1;
+          }
+        }
+      }
+    }
+    else if(n==nPhi){
+      sVarName="phi scaled to be 0-0.1";
+      
+      //scale
+      double dTempdMin=dVarData[n][nStartX][nStartY][nStartZ];
+      for(int i=nStartX;i<nSizeX2;i++){
+        for(int j=nStartY;j<nSizeY+nStartY;j++){
+          for(int k=nStartZ;k<nSizeZ+nStartZ;k++){
+            dVarData[n][i][j][k]=(dVarData[n][i][j][k]-dTempdMin)
+              /(dVarData[n][i][j][nSizeZ+nStartZ-1]-dTempdMin)*0.1;
+          }
+        }
+      }
+    }
+    else if(n==nDM){
+      sVarName="DM_r[g]";
+    }
+    else if(n==nR){
+      sVarName="R/R_surf";
+      
+      //scale
+      for(int i=0;i<nSizeX2;i++){
+        for(int j=0;j<nSizeY;j++){
+          for(int k=0;k<nSizeZ;k++){
+            dVarData[n][i][j][k]=dVarData[n][i][j][k]/dVarData[n][nSizeX2-1][j][k];
+          }
+        }
+      }
+    }
+    else if(n==nD){
+      sVarName="Rho[g/cm^3]";
+    }
+    else if(n==nU){
+      sVarName="u[cm/s]";
+    }
+    else if(n==nU0){
+      sVarName="u_0[cm/s]";
+    }
+    else if(n==nV){
+      sVarName="v[cm/s]";
+    }
+    else if(n==nW){
+      sVarName="w[cm/s]";
+    }
+    else if(n==nE){
+      sVarName="E[ergs/g]";
+    }
+    else if(n==nT){
+      sVarName="T[K]";
+    }
+    else if(n==nP){
+      sVarName="P[dynes/cm^2]";
+    }
+    else if(n==nQ){
+      sVarName="Q[dynes/cm^2]";
+    }
+    else if(n==nKappa){
+      sVarName="Kappa[cm^2/g]";
+    }
+    else if(n==nGamma){
+      sVarName="Gamma[na]";
+    }
+    else if(n==nL_rad){
+      sVarName="L_rad[L_sun]";
+    }
+    else if(n==nL_con){
+      sVarName="L_con[L_sun]";
+    }
+    else if(n==nKE){
+      sVarName="KE[ergs]";
+    }
+    else if(n==nC){
+      sVarName="C[cm/s]";
+    }
+    
+    nDims[0]=nSizeX2-nStartX;
+    nDims[1]=nSizeY;
+    nDims[2]=nSizeZ;
+    
+    nDataID=SDcreate(nFileID,sVarName.c_str(),DFNT_FLOAT64,nRank,nDims);
+    if(nDataID==FAIL){
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": creating a new HDF data set for variable \""<<sVarName<<"\" failed\n";
+      throw exception2(ssTemp.str(),INPUT);
+    }
+    for(int i=nStartX;i<nSizeX2;i++){
+      for(int j=nStartY;j<nSizeY+nStartY;j++){
+        nStart[0]=i-nStartX;
+        nStart[1]=j-nStartY;
+        nStart[2]=0;
+        nDims[0]=1;
+        nDims[1]=1;
+        nDims[2]=nSizeZ;
+        
+        //prepare data
+        double *dTemp=new double[nSizeZ];
+        for(int k=nStartZ;k<nSizeZ+nStartZ;k++){
+          dTemp[k-nStartZ]=dVarData[n][i][j][k];
+        }
+        
+        nStat=SDwritedata(nDataID,nStart,NULL,nDims,(VOIDP)dTemp);
+        if(nStat==FAIL){
+          std::stringstream ssTemp;
+          ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+            <<": writting variable \""<<sVarName<<"\" to HDF file failed\n";
+          throw exception2(ssTemp.str(),INPUT);
+        }
+        delete [] dTemp;
+      }
+    }
+    
+    //terminate access to the array
+    nStat=SDendaccess(nDataID);
+    if(nStat==FAIL){
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": terminating access to variable \""<<sVarName<<"\" in HDF file failed\n";
+      throw exception2(ssTemp.str(),INPUT);
+    }
+  }
+  
+  
+  
+  nGhostCellsX=1;
+  if(nVarInfo[nU][0]==-1){
+    nGhostCellsX=0;
+  }
+  nGhostCellsY=1;
+  if(nVarInfo[nU][1]==-1||!bIncludeBoundaries){
+    nGhostCellsY=0;
+  }
+  nGhostCellsZ=1;
+  if(nVarInfo[nU][2]==-1||!bIncludeBoundaries){
+    nGhostCellsZ=0;
+  }
+  if(!bIncludeBoundaries){
+    nStartY=nNumGhostCells;
+    nStartZ=nNumGhostCells;
+    if(nVarInfo[nU][1]==-1){
+      nStartY=0;
+    }
+    if(nVarInfo[nU][2]==-1){
+      nStartZ=0;
+    }
+  }
+  
+  //make some space to hold the variables
+  nSizeY=nSize[nU][1]+nGhostCellsY*2*nNumGhostCells;//assume y and z are always periodic
+  nSizeZ=nSize[nU][2]+nGhostCellsZ*2*nNumGhostCells;
+  //read in 1D part of the grid
+  nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);//may be need to +1 if only one proc and variable is interface centered
+  if (nVarInfo[nU][0]==1&&nPeriodic[0]==0){
+    nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
+  }
+  nSizeX2=nSize[nU][0]+nGhostCellsX*2*nNumGhostCells;
+  
+  //write u-u0 to HDF file
+  int nStartX=nCutZone;
+  if (nVarInfo[nU][0]==1&&nPeriodic[0]==0){
+    nStartX++;//if interface centered cut off a inner edge
+  }
+  if (nVarInfo[nU][0]==-1){
+    nStartX=0;
+  }
+  nDims[0]=nSizeX2-nStartX;
+  nDims[1]=nSizeY;
+  nDims[2]=nSizeZ;
+  
+  //create a place to put the data in the HDF file
+  std::string sVarName="u-u_0 [cm/s]";
+  nDataID=SDcreate(nFileID,sVarName.c_str(),DFNT_FLOAT64,nRank,nDims);
+  if(nDataID==FAIL){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": creating a new HDF data set for variable \""<<sVarName<<"\" failed\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  for(int i=nStartX;i<nSizeX2;i++){
+    for(int j=nStartY;j<nSizeY+nStartY;j++){
+      nStart[0]=i-nStartX;
+      nStart[1]=j-nStartY;
+      nStart[2]=0;
+      nDims[0]=1;
+      nDims[1]=1;
+      nDims[2]=nSizeZ;
+      
+      //prepare data
+      double *dTemp=new double[nSizeZ];
+      for(int k=nStartZ;k<nSizeZ+nStartZ;k++){
+        dTemp[k-nStartZ]=dVarData[nU][i][j][k]-dVarData[nU0][i][0][0];
+      }
+      
+      nStat=SDwritedata(nDataID,nStart,NULL,nDims,(VOIDP)dTemp);
+      delete [] dTemp;
+      
+      if(nStat==FAIL){
+        std::stringstream ssTemp;
+        ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+          <<": writting variable \""<<sVarName<<"\" to HDF file failed\n";
+        throw exception2(ssTemp.str(),INPUT);
+      }
+    }
+  }
+  
+  //terminate access to the array
+  nStat=SDendaccess(nDataID);
+  if(nStat==FAIL){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": terminating access to variable \""<<sVarName<<"\" in HDF file failed\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //terminate access to the HDF file
+   nStat=SDend(nFileID);
+  if(nStat==FAIL){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": closing the HDF file \""<<ssHDFFileName.str()<<"\" failed\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  ifFile.close();
+}
+#endif

@@ -86,10 +86,11 @@ int main(int argc, char* argv[]){
         
         //if dumping this time step, then dump
         if(bDump||bFirstIterationDump){
-          bFirstIterationDump=false;
           std::stringstream ssFileNameOut;
+          
           ssFileNameOut<<global.output.sBaseOutputFileName<<"_t"<<std::setfill('0')<<std::setw(8)
             <<global.time.nTimeStepIndex;
+            
           if(global.procTop.nRank==0){
             std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<global.procTop.nRank<<":"
               <<std::endl<<"  Dumping model to file: "<<ssFileNameOut.str()<<std::endl;
@@ -98,6 +99,19 @@ int main(int argc, char* argv[]){
           global.output.nNumTimeStepsSinceLastDump=0;
           global.functions.fpModelWrite(ssFileNameOut.str(), global.procTop,global.grid,global.time
             ,global.parameters);
+          
+          #if DEBUG_EQUATIONS==1
+          if(!bFirstIterationDump){//nothing to print on the first iteration
+            std::stringstream ssFileNameProOut;
+            ssFileNameProOut<<global.parameters.sDebugProfileOutput<<"_t"<<std::setfill('0')
+              <<std::setw(8)<<global.time.nTimeStepIndex<<"_pro.txt";
+            global.parameters.profileDataDebug.toFile(ssFileNameProOut.str(),global.time
+              ,global.procTop);
+            global.parameters.profileDataDebug.clear();
+          }
+          #endif
+          
+          bFirstIterationDump=false;
         }
       }
       
@@ -211,9 +225,22 @@ int main(int argc, char* argv[]){
       
       //calculate horizontally averaged density
       global.functions.fpCalculateAveDensities(global.grid);
+      updateLocalBoundariesNewGrid(global.grid.nDenAve,global.procTop,global.messPass,global.grid);
       
       //calculate new eddy viscosity
       global.functions.fpCalculateNewEddyVisc(global.grid,global.parameters);
+      updateLocalBoundariesNewGrid(global.grid.nEddyVisc,global.procTop,global.messPass
+        ,global.grid);
+      
+      //calculate new artificial viscosity
+      global.functions.fpCalculateNewAV(global.grid,global.parameters);
+      updateLocalBoundariesNewGrid(global.grid.nQ0,global.procTop,global.messPass,global.grid);
+      if(global.grid.nNumDims>1){
+        updateLocalBoundariesNewGrid(global.grid.nQ1,global.procTop,global.messPass,global.grid);
+      }
+      if(global.grid.nNumDims>2){
+        updateLocalBoundariesNewGrid(global.grid.nQ2,global.procTop,global.messPass,global.grid);
+      }
       
       //calculate new energies in explicit region
       global.functions.fpCalculateNewEnergies(global.grid,global.parameters, global.time
@@ -231,14 +258,13 @@ int main(int argc, char* argv[]){
       global.functions.fpImplicitSolve(global.grid,global.implicit,global.parameters,global.time
         ,global.procTop,global.messPass,global.functions);
       
-      //calculate new artificial viscosity
-      global.functions.fpCalculateNewAV(global.grid,global.parameters);
-      
       //calculate timestep
       global.functions.fpCalculateDeltat(global.grid,global.parameters, global.time,global.procTop);
       
       //update boundaries remaining boundaries to old grid and copy new grid to old grid
       updateLocalBoundaries(global.procTop,global.messPass,global.grid);
+      
+      global.parameters.bDEDM_cut_set=false;
     }
     
     global.output.nNumTimeStepsSinceLastDump++;
