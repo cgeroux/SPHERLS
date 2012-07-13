@@ -3239,7 +3239,12 @@ void makeRadialProFromColBin(std::string sFileName){//updated
           nCount++;
         }
       }
-      dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      if(nNumDims>1){
+        dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      }
+      else{
+        dAve[nD][i]=dGrid[nD][i][0][0];
+      }
       dAve[nL_rad][i]=dLSum_rad/dAreaSum*4.0*dPi*dRSq_ip1half;
       dAve[nL_con][i]=dLSum_con/dAreaSum*4.0*dPi*dRSq_ip1half;
       dU_i=(dGrid[nU0][i+1][0][0]+dGrid[nU0][i][0][0])*0.5;

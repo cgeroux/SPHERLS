@@ -1260,7 +1260,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
   //set number of internal variables, and indexes of external and internal variables
   if(parameters.bEOSGammaLaw){
     if(grid.nNumDims==1){
-      grid.nNumIntVars=2;
+      grid.nNumIntVars=4;
       
       grid.nM                 = 0;
       grid.nDM                = 1;
@@ -1271,6 +1271,8 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
       grid.nE                 = 6;
       grid.nP                 = grid.nNumVars+0;
       grid.nQ0                = grid.nNumVars+1;
+      grid.nDenAve            = grid.nNumVars+2;
+      grid.nDonorCellFrac     = grid.nNumVars+3;
     }
     else if(grid.nNumDims==2){
       grid.nNumIntVars=9;
@@ -1292,7 +1294,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
       grid.nDTheta            = grid.nNumVars+5;
       grid.nSinThetaIJK       = grid.nNumVars+6;
       grid.nSinThetaIJp1halfK = grid.nNumVars+7;
-      grid.nDonorCellFrac    = grid.nNumVars+8;
+      grid.nDonorCellFrac     = grid.nNumVars+8;
     }
     else if(grid.nNumDims==3){
       grid.nNumIntVars=13;
@@ -1326,7 +1328,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
   else{
     if(parameters.nTypeTurbulanceMod>0){//uses a turbulance model
       if(grid.nNumDims==1){
-        grid.nNumIntVars=6;
+        grid.nNumIntVars=8;
         
         grid.nM                 = 0;
         grid.nDM                = 1;
@@ -1340,7 +1342,9 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
         grid.nE                 = grid.nNumVars+2;
         grid.nKappa             = grid.nNumVars+3;
         grid.nGamma             = grid.nNumVars+4;
-        grid.nEddyVisc          = grid.nNumVars+5;
+        grid.nDenAve            = grid.nNumVars+5;
+        grid.nEddyVisc          = grid.nNumVars+6;
+        grid.nDonorCellFrac     = grid.nNumVars+7;
       }
       else if(grid.nNumDims==2){
         grid.nNumIntVars=15;
@@ -1405,7 +1409,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
     }
     else{//no turulance model
       if(grid.nNumDims==1){
-        grid.nNumIntVars=5;
+        grid.nNumIntVars=6;
         
         grid.nM                 = 0;
         grid.nDM                = 1;
@@ -1419,6 +1423,7 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
         grid.nE                 = grid.nNumVars+2;
         grid.nKappa             = grid.nNumVars+3;
         grid.nGamma             = grid.nNumVars+4;
+        grid.nDonorCellFrac     = grid.nNumVars+5;
       }
       else if(grid.nNumDims==2){
         grid.nNumIntVars=12;
