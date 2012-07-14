@@ -191,7 +191,6 @@ def createTestCalcNA(subDir,numProcs,options):
     log.close()
     return False
   
-  
   #make SPHERLS.xml file
   log.write("making \"SPHERLS.xml\" ...")
   configFile=os.path.dirname(ref_calcs.refCalcs[subDir][0])+"/SPHERLS.xml"
@@ -398,24 +397,15 @@ def createRefCalcNA(subDir,numProcs,options):
         print "    not as good as manually setting them up."
         return False
     else:#else no SPHERLS.xml
-      if os.access(tmpDir+"/SPHERLSgen.xml",os.F_OK):#if SPHERLSgen.xml is already there
-        #make starting model
-        #make SPHERLS.xml
-        print "FAILED"
-        print "    Building reference calculations from scratch isn't yet supported, and probalby "
-        print "    not as good as manually setting them up."
-        return False
-      else:#else no SPHERLSgen.xml
-        #remake all (SPHERLS.xml, SPHERLSgen.xml, starting model)
-        print "FAILED"
-        print "    Building reference calculations from scratch isn't yet supported, and probalby "
-        print "    not as good as manually setting them up."
-        return False
+      print "FAILED"
+      message="    file \"SPHERLS.xml\" not found in directory \""+tmpDir+"\""
+      log.write(message)
+      print message
   else:#else
     #make SPHERLS.xml, SPHERLSgen.xml, and starting model
     print "FAILED"
-    print "    Building reference calculations from scratch isn't yet supported, and probalby "
-    print "    not as good as manually setting them up."
+    message="    directory \""+tmpDir+"\" not found."
+    print message
     return False
     
     '''

@@ -232,16 +232,6 @@ int main(int argc, char* argv[]){
       updateLocalBoundariesNewGrid(global.grid.nEddyVisc,global.procTop,global.messPass
         ,global.grid);
       
-      //calculate new artificial viscosity
-      global.functions.fpCalculateNewAV(global.grid,global.parameters);
-      updateLocalBoundariesNewGrid(global.grid.nQ0,global.procTop,global.messPass,global.grid);
-      if(global.grid.nNumDims>1){
-        updateLocalBoundariesNewGrid(global.grid.nQ1,global.procTop,global.messPass,global.grid);
-      }
-      if(global.grid.nNumDims>2){
-        updateLocalBoundariesNewGrid(global.grid.nQ2,global.procTop,global.messPass,global.grid);
-      }
-      
       //calculate new energies in explicit region
       global.functions.fpCalculateNewEnergies(global.grid,global.parameters, global.time
         ,global.procTop);
@@ -257,6 +247,9 @@ int main(int argc, char* argv[]){
       //implicityly solve for T, and update (E,Kappa,P,Gamma) via equation of state in implicit region
       global.functions.fpImplicitSolve(global.grid,global.implicit,global.parameters,global.time
         ,global.procTop,global.messPass,global.functions);
+      
+      //calculate new artificial viscosity
+      global.functions.fpCalculateNewAV(global.grid,global.parameters);
       
       //calculate timestep
       global.functions.fpCalculateDeltat(global.grid,global.parameters, global.time,global.procTop);

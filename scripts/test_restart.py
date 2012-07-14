@@ -140,6 +140,7 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
         <frequency type="timeSteps">1</frequency>
       </dumps>
       <eos>
+        <eosFile>'''+paths.EOSPath+'''</eosFile>
         <tolerance>5e-14</tolerance>
         <max-iterations>50</max-iterations>
       </eos>

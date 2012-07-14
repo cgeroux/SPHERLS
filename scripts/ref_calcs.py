@@ -27,17 +27,17 @@ refCalcs={
   ,paths.ref_calcs+"2DNA/2DNARef_t00137895"
   ,paths.ref_calcs+"2DNA/2DNARef_t00137896"]
   ,'3DNA':
-  [paths.ref_calcs+"3DNA/T6500_5x5_t00090143"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090144"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090145"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090146"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090147"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090148"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090149"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090150"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090151"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090152"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090153"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090154"
-  ,paths.ref_calcs+"3DNA/T6500_5x5_t00090155"]
+  [paths.ref_calcs+"3DNA/3DNARef_t00172486"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172487"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172488"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172489"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172490"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172491"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172492"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172493"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172494"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172495"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172496"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172497"
+  ,paths.ref_calcs+"3DNA/3DNARef_t00172498"]
   }

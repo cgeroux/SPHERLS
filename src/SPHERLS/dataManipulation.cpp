@@ -88,7 +88,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   XMLNode xEOS=getXMLNode(xData,"eos",0);
   
   //read in file name for equation of state, to override starting model's eos file
-  getXMLValueNoThrow(xEOS,"eos",0,parameters.sEOSFileName);
+  getXMLValueNoThrow(xEOS,"eosFile",0,parameters.sEOSFileName);
   
   //get if using the turbulance model or not
   XMLNode xTurbModel=getXMLNode(xData,"turbMod",0);

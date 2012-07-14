@@ -17,14 +17,16 @@
     <frequency type="timeSteps">1</frequency>
   </dumps>
   <eos>
+    <eosFile>../../eos/eosY240Z002</eosFile>
     <tolerance>5e-14</tolerance>
     <max-iterations>50</max-iterations>
   </eos>
   <av>1.4</av>
   <av-threshold>0.01</av-threshold>
   <time>
-    <endTime>977996.868276651</endTime>
+    <endTimeStep>137895</endTimeStep>
     <timeStepFactor>0.25</timeStepFactor>
+    <percentChangePerTimeStep>5.0e-2</percentChangePerTimeStep>
   </time>
   <adiabatic>false</adiabatic>
   <turbMod>

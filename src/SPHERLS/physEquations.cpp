@@ -11752,8 +11752,8 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
           /grid.dLocalGridOld[grid.nKappa][i][j][k]);
         dP_ijk_n=grid.dLocalGridOld[grid.nP][i][j][k];
         #if VISCOUS_ENERGY_EQ==1
-          dP_ijk_n=dP_ijk_n+grid.dLocalGridNew[grid.nQ0][i][j][k]
-            +grid.dLocalGridNew[grid.nQ1][i][j][k]+grid.dLocalGridNew[grid.nQ2][i][j][k];
+          dP_ijk_n=dP_ijk_n+grid.dLocalGridOld[grid.nQ0][i][j][k]
+            +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
         #endif
         
         //Calcuate dA1
@@ -14783,7 +14783,6 @@ void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
       -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
     //calculate threshold compression to turn viscosity on at
-    /**\todo should use new P and rho*/
     dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
       /grid.dLocalGridOld[grid.nD][i][0][0]);
     dDVDtThreshold=parameters.dAVThreshold*dC;
@@ -21027,8 +21026,8 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
     ,dRho_ijk_np1half);
   #if VISCOUS_ENERGY_EQ==1
-  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridNew[grid.nQ0][i][j][k]
-    +grid.dLocalGridNew[grid.nQ1][i][j][k]+grid.dLocalGridNew[grid.nQ2][i][j][k];
+  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
+    +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
   #endif
   
   double dKappa_ip1jk_np1half=parameters.eosTable.dGetOpacity(dT_ip1jk_np1half,dRho_ip1jk_np1half);
@@ -21451,8 +21450,8 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half,dRho_ijk_np1half);
   #if VISCOUS_ENERGY_EQ==1
-  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridNew[grid.nQ0][i][j][k]
-    +grid.dLocalGridNew[grid.nQ1][i][j][k]+grid.dLocalGridNew[grid.nQ2][i][j][k];
+  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
+    +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
   #endif
   
   double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half,dRho_ijk_np1half);
