@@ -1,0 +1,206 @@
+2012-07-14 19:00:17.168409
+directory "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/3DNA" found
+checking for needed files ...
+found "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/3DNA/SPHERLS.xml"
+found start model "3DNARef_t00172486"
+
+RUNNING SPHERLS
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172486
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172486 at time t=2.00000756829571e+06 [s] with time step dt=1.34466e+01 [s]
+    * max( (Del Rho)_t/Rho )   =0.00000e+00
+    * max( (Del T)_t/T )       =0.00000e+00
+    * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
+    * max( (Del V)_t/V )       =0.00000e+00
+    * max( (Del W)_t/W )       =0.00000e+00
+    * max(convective velocity) =1.68259e+01 [km/s]
+  : Over last 0 time steps :
+    * Largest number of iterations for temperature calculation was 0
+    * Largest relative error in calculation of temperature was     0.00000e+00
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172487
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172487 at time t=2.00002128383832e+06 [s] with time step dt=1.37155e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.68917e-03
+    * max( (Del T)_t/T )       =8.80691e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.09241e-02
+    * max( (Del V)_t/V )       =4.77314e-02
+    * max( (Del W)_t/W )       =3.23658e-02
+    * max(convective velocity) =1.68246e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     5.82431e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172488
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172488 at time t=2.00003527369178e+06 [s] with time step dt=1.39899e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.72610e-03
+    * max( (Del T)_t/T )       =9.05835e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.19898e-02
+    * max( (Del V)_t/V )       =4.89387e-02
+    * max( (Del W)_t/W )       =3.28696e-02
+    * max(convective velocity) =1.68232e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.86184e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172489
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172489 at time t=2.00004954334232e+06 [s] with time step dt=1.42697e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.76402e-03
+    * max( (Del T)_t/T )       =9.31434e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.30846e-02
+    * max( (Del V)_t/V )       =5.02014e-02
+    * max( (Del W)_t/W )       =3.33937e-02
+    * max(convective velocity) =1.68218e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.63345e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172490
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172490 at time t=2.00006409838586e+06 [s] with time step dt=1.45550e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.80290e-03
+    * max( (Del T)_t/T )       =9.57561e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.42005e-02
+    * max( (Del V)_t/V )       =5.15022e-02
+    * max( (Del W)_t/W )       =3.39336e-02
+    * max(convective velocity) =1.68204e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.05168e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172491
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172491 at time t=2.00007894453027e+06 [s] with time step dt=1.48461e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.84251e-03
+    * max( (Del T)_t/T )       =9.84253e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.53423e-02
+    * max( (Del V)_t/V )       =5.28400e-02
+    * max( (Del W)_t/W )       =3.44794e-02
+    * max(convective velocity) =1.68189e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.12623e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172492
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172492 at time t=2.00009381640911e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.88299e-03
+    * max( (Del T)_t/T )       =1.01154e-03
+    * max( (Del UmU0)_t/UmU0 ) =5.65092e-02
+    * max( (Del V)_t/V )       =5.42153e-02
+    * max( (Del W)_t/W )       =3.50338e-02
+    * max(convective velocity) =1.68173e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.68929e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172493
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172493 at time t=2.00010868828797e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.88990e-03
+    * max( (Del T)_t/T )       =9.89928e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.71791e-02
+    * max( (Del V)_t/V )       =5.51278e-02
+    * max( (Del W)_t/W )       =3.52995e-02
+    * max(convective velocity) =1.68156e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.42124e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172494
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172494 at time t=2.00012356016686e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.89363e-03
+    * max( (Del T)_t/T )       =9.74342e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.72878e-02
+    * max( (Del V)_t/V )       =5.55013e-02
+    * max( (Del W)_t/W )       =3.52067e-02
+    * max(convective velocity) =1.68140e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     5.56502e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172495
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172495 at time t=2.00013843204577e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.89748e-03
+    * max( (Del T)_t/T )       =9.82850e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.73536e-02
+    * max( (Del V)_t/V )       =5.58274e-02
+    * max( (Del W)_t/W )       =3.50743e-02
+    * max(convective velocity) =1.68123e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.22848e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172496
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172496 at time t=2.00015330392472e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.90353e-03
+    * max( (Del T)_t/T )       =9.91046e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.74149e-02
+    * max( (Del V)_t/V )       =5.61511e-02
+    * max( (Del W)_t/W )       =3.49365e-02
+    * max(convective velocity) =1.68106e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.54308e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172497
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172497 at time t=2.00016817580369e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.91741e-03
+    * max( (Del T)_t/T )       =9.98497e-04
+    * max( (Del UmU0)_t/UmU0 ) =5.74754e-02
+    * max( (Del V)_t/V )       =5.64755e-02
+    * max( (Del W)_t/W )       =3.47951e-02
+    * max(convective velocity) =1.68090e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 5
+    * Largest relative error in calculation of temperature was     6.90164e-15
+src/SPHERLS/main.cpp:main:95:0:
+  Dumping model to file: 3DNARef_t00172498
+src/SPHERLS/main.cpp:main:144:0:
+  For current time step 172498 at time t=2.00018304768268e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.92580e-03
+    * max( (Del T)_t/T )       =1.00625e-03
+    * max( (Del UmU0)_t/UmU0 ) =5.75360e-02
+    * max( (Del V)_t/V )       =5.67977e-02
+    * max( (Del W)_t/W )       =3.50992e-02
+    * max(convective velocity) =1.68073e+01 [km/s]
+  : Over last 1 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.47206e-15
+src/SPHERLS/dataManipulation.cpp:fin:658:0:
+  Dumping model to file: 3DNARef_t00172499
+src/SPHERLS/dataManipulation.cpp:fin:660:0:
+  For current time step 172499 at time t=2.00019791956169e+06 [s] with time step dt=1.48719e+01 [s]
+    * max( (Del Rho)_t/Rho )   =1.93437e-03
+    * max( (Del T)_t/T )       =1.01382e-03
+    * max( (Del UmU0)_t/UmU0 ) =5.75963e-02
+    * max( (Del V)_t/V )       =5.71207e-02
+    * max( (Del W)_t/W )       =3.64364e-02
+    * max(convective velocity) =1.68056e+01 [km/s]
+  : Over last 0 time steps :
+    * Largest number of iterations for temperature calculation was 4
+    * Largest relative error in calculation of temperature was     6.01647e-15
+Run time for proc 0 is 1.1529393911e+01 [s]
+
+combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
+__main__:combine_bin_files: combining "./3DNARef_t00172486" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172487" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172488" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172489" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172490" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172491" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172492" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172493" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172494" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172495" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172496" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172497" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172498" and removing distributed binaries ...
+__main__:combine_bin_files: combining "./3DNARef_t00172499" and removing distributed binaries ...
