@@ -84,8 +84,8 @@ class Curve:
     self.capsize=1.0
     
     #set curve style
-    if element.get("style")!=None:
-      self.style=element.get("style")
+    if element.get("line")!=None:
+      self.style=element.get("line")
       
     #set curve marker
     if element.get("marker")!=None:

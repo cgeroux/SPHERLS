@@ -21329,7 +21329,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j+1][k]
     +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
   double dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j-1][k])*.05;/*+grid.dLocalGridNew[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
     +grid.dLocalGridNew[grid.nD][i][j-1][k])*0.25;*/
   double dRho_ijkp1half_np1half=(grid.dLocalGridOld[grid.nD][i][j][k+1]
     +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k+1]
@@ -21478,7 +21478,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dA1UpWindGrad=0.0;
   double dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
   if(dU_U0_Diff<0.0){//moving in the negative radial direction
-    dA1UpWindGrad=dA1UpWindGrad;/**\BC Using centered gradient for upwind gradient when motion is 
+    dA1UpWindGrad=dA1CenGrad;/**\BC Using centered gradient for upwind gradient when motion is 
       into the star at the surface*/
   }
   else{//moving in the postive radial direction

@@ -11,8 +11,15 @@ T_ijk[K](15)          , T_rel_dif_hor_ave(16)   , P_ijk[dynes/cm^2](17) , P_rel_
 Q_ijk[dynes/cm^2](19) , Q_rel_dif_hor_ave(20)   , Kap_ij[cm^2/g](21)    , Kap_rel_dif_hor_ave(22),
 Gam_ijk[na](23)       , Gam_rel_dif_hor_ave(24)
 
-r from (0,0,0)
-t measured from +z axis down
+z
+^
+|
++-> x
+
+y into page for R.H. system
+
+r from (x,y,z)=(0,0,0)
+t measured from +z axis down toward x-y plane
 p in xy plane
 
 Usefull geometric transforms for:
@@ -86,16 +93,16 @@ p^=-       sin(p)*x^+       cos(p)*y^
   </plane>
   
   <!-- TP-plane with combined v and w vectors, transform, set let y->x, z->y-->
-  <plane type="tp" index="304">
-    <xaxis label="phi [cm]">#1*sin($2)*sin($3)</xaxis>
-    <yaxis label="theta [cm]">#1*cos($2)</yaxis>
+  <plane type="tp" index="308">
+    <xaxis label="phi [cm]">#1*sin($4)*sin($6)</xaxis>
+    <yaxis label="theta [cm]">#1*cos($4)</yaxis>
     <scalor pallet="jet" label="$T_{eff}$ [K]">$12</scalor>
     <vector color="k" scale="1.0">
       <label xpos="0.15" ypos="0.95">$\mathbf{w}$ \scale [km/s]</label>
-      <xposition>#1*sin(#2)*sin(#3)</xposition>
-      <yposition>#1*cos(#2)</yposition>
-      <xcomponent>#6*cos(#2)*sin(#3)+#7*cos(#3)</xcomponent>
-      <ycomponent>-1.0*#6*sin(#2)</ycomponent>
+      <xposition>#1*sin(#4)*sin(#6)</xposition>
+      <yposition>#1*cos(#4)</yposition>
+      <xcomponent>#9*cos(#4)*sin(#6)+#10*cos(#6)</xcomponent>
+      <ycomponent>-1.0*#9*sin(#4)</ycomponent>
     </vector>
   </plane>
 </figure>

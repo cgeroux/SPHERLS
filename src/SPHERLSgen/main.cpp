@@ -419,9 +419,8 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       getXMLValue(xIndepVar,"M-delta-init",0,dMDelta);
       
       //get method for determining % change in delta mass
-      xMDeltaPicking=getXMLNodeNoThrow(xIndepVar,"M-delta-picking",0);
+      xMDeltaPicking=getXMLNode(xIndepVar,"M-delta-picking",0);
       if(!xMDeltaPicking.isEmpty()){
-        
         std::string sDeltaMPicking;
         getXMLAttribute(xMDeltaPicking,"type",sDeltaMPicking);
         if(sDeltaMPicking.compare("auto")==0){
@@ -482,6 +481,13 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
           nCount2++;
           xMDeltaDelta=getXMLNodeNoThrow(xMDeltaPicking, "M-delta-delta",nCount2);
         }
+      }
+      else{
+        std::stringstream ssTemp;
+        ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+          <<": M-delta-picking node type is \"auto\" unfortunately this mode is not yet support,"
+          <<" only manual picking of M-delta-delta is supported.\n";
+        throw exception2(ssTemp.str(),INPUT);
       }
       //get dAlpha
       getXMLValue(xIndepVar,"alpha",0,dAlpha);
