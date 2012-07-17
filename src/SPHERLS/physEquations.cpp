@@ -21252,6 +21252,38 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS6));
     
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_jp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_jm1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jm1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_jp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_jm1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jm1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_kp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_kp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_km1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_km1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_kp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_kp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_km1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_km1half_np1half);
+    
     //add EV
     parameters.profileDataDebug.setMaxAbs("E_EV"
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
@@ -21485,8 +21517,44 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
-  double dA1=dU_U0_Diff*dRSq_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+
+double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  #if DEDEM_CLAMP==1
+  
+  /*
+  //static DE/DM clamp
+  //5700 CTEOS, at a temperature of 2.2e4
+  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
+    dDEDM=-1.796596699553508e-14;
+  }
+  //T6500 CTEOS, at a temperature of 2.2e4
+  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732445236012e+33){
+    dDEDM=-3.795837002744412e-14;
+  }*/
+  
+  //5700 CTEOS, at a temperature of 2.2e4
+  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
+    dDEDM=-1.796596699553508e-14;
+  }
+  
+  //dynamic DE/DM clamp
+  /*
+  if( grid.dLocalGridOld[grid.nT][i][j][k]>=parameters.dT_cut
+    &&grid.dLocalGridOld[grid.nT][i+1][j][k]<=parameters.dT_cut
+    &&!parameters.bDEDM_cut_set){
+    parameters.dDEDM_cut=dDEDM;
+    parameters.nDEDM_cut_zone=i;
+    parameters.bDEDM_cut_set=true;
+  }
+  if(parameters.bDEDM_cut_set&&i>=parameters.nDEDM_cut_zone&&fabs(dDEDM)>fabs(parameters.dDEDM_cut)){
+    //if the DEDM_cut has been set, and we are above where DEDM_cut was set, and the current 
+    //DEDM<DEDM_cut.
+    dDEDM=parameters.dDEDM_cut;
+  }*/
+  #endif
+  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
   
   //Calcualte dA2
   double dA2CenGrad=(dE_ijp1halfk_np1half-dE_ijm1halfk_np1half)
@@ -21635,6 +21703,39 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     parameters.profileDataDebug.setMaxAbs("E_S6"
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS6));
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_jp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_jm1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jm1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_jp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_jm1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jm1half_np1half);
+      
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_kp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_kp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_TGrad_km1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_km1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_kp1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_kp1half_np1half);
+    
+    parameters.profileDataDebug.setMaxAbs("E_Grad_km1half_np1half"
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_km1half_np1half);
     
     //add EV
     parameters.profileDataDebug.setMaxAbs("E_EV"

@@ -350,8 +350,11 @@ class Axis:
     '''This function loads the values needed for the x-axis data from the fileData argument'''
     
     if self.bTime:#add time
-      fileHeader=fileData.sHeader.split()
-      self.x.append(float(fileHeader[1]))
+      
+      #these are required in case the time isn't space seperated
+      fileHeader=fileData.sHeader.split("=")
+      indexBracket=fileHeader[1].find("[s]")
+      self.x.append(float(fileHeader[1][0:indexBracket]))
       
       #set phase
       if self.period!=None:

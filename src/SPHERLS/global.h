@@ -65,7 +65,7 @@
   If 1 will write out in the form of a profile file, all the horizontal maximum values of all terms
   in all equations.
   */
-#define DEDEM_CLAMP 0/**<
+#define DEDEM_CLAMP 1/**<
   If 1 a clamp on the DEDM gradient will be used to limit how large DE/DM becomes in the advection
   term in the energy equation.
   */

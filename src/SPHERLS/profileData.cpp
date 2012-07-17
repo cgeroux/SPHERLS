@@ -292,7 +292,7 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
     }
     
     //print header
-    ofOut<<"time="<<time.dt<<"[s]"<<std::endl;
+    ofOut<<"time= "<<time.dt<<" [s]"<<std::endl;
     
     //print all integer names
     for(i=0;i<sIntColumnNames.size();i++){
