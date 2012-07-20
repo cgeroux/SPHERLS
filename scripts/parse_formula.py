@@ -25,7 +25,7 @@ def getFormula(text):
           nRowShift.append(1)
         elif columnAndFormula[1][0:4] =="_im1":
           columnAndFormula[1]=columnAndFormula[1][4:]
-          self.nRowShift.append(-1)
+          nRowShift.append(-1)
         elif columnAndFormula[1][0:2] =="_i":
           columnAndFormula[1]=columnAndFormula[1][2:]
           nRowShift.append(0)
@@ -93,4 +93,10 @@ def getY(nRowShift,nColumn,fileData,code,i):
           return None
         else:
           a.append(fileData.fColumnValues[i+nRowShift[j]][nColumn[j]])
-  return eval(code)
+    try:
+      return eval(code)
+    except ValueError as anException:
+      
+      #imporve error message
+      message=str(anException)+" in row "+str(i+nRowShift[j])+" of file"
+      raise ValueError(message)

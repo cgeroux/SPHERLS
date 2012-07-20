@@ -3660,6 +3660,15 @@ void initUpdateLocalBoundaries(ProcTop &procTop, Grid &grid, MessPass &messPass,
         }
       }
     }
+    
+    //start in a few zones when updating v and w
+    if((n==grid.nV||n==grid.nW)&&procTop.nCoords[procTop.nRank][0]==1){
+      grid.nStartUpdateExplicit[n][0]=grid.nStartUpdateExplicit[n][0]
+        +grid.nNumZones1DBoundaryZeroHorizontalVelocity;
+      if (grid.nStartUpdateExplicit[n][0]>grid.nEndUpdateExplicit[n][0]){
+        grid.nStartUpdateExplicit[n][0]=grid.nEndUpdateExplicit[n][0];
+      }
+    }
   }
   
   //set radial neighbors

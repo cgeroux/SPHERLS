@@ -724,28 +724,48 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
           
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add M_r
-        parameters.profileDataDebug.setMax("M_r"
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
         
         //add A1
-        parameters.profileDataDebug.setMax("U_R_A1"
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1));
           
         //add S1
-        parameters.profileDataDebug.setMax("U_R_S1"
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dS1));
         
         //add S4
-        parameters.profileDataDebug.setMax("U_R_S4"
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
         ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dS4);
         
         //add DuDt
-        parameters.profileDataDebug.setMax("U_R_DuDt"
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
           /time.dDeltat_n);
@@ -811,28 +831,48 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
         
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add M_r
-        parameters.profileDataDebug.setMax("M_r"
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
         
         //add A1
-        parameters.profileDataDebug.setMax("U_R_A1"
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1));
           
         //add S1
-        parameters.profileDataDebug.setMax("U_R_S1"
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dS1));
         
         //add S4
-        parameters.profileDataDebug.setMax("U_R_S4"
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
         ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
-        ,-1.0*dS4);
+          ,-1.0*dS4);
         
         //add DuDt
-        parameters.profileDataDebug.setMax("U_R_DuDt"
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
           /time.dDeltat_n);
@@ -2783,53 +2823,83 @@ void calNewU_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add M_r
-        parameters.profileDataDebug.setMaxAbs("M_r"
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
         
         //add A1
-        parameters.profileDataDebug.setMax("U_RTP_LES_A1"
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1));
           
         //add S1
-        parameters.profileDataDebug.setMax("U_RTP_LES_S1"
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dS1));
         
         //add A2
-        parameters.profileDataDebug.setMax("U_RTP_LES_A2"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dA2);
           
         //add S2
-        parameters.profileDataDebug.setMax("U_RTP_LES_S2"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,dS2);
           
         //add A3
-        parameters.profileDataDebug.setMax("U_RTP_LES_A3"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dA3);
           
         //add S3
-        parameters.profileDataDebug.setMax("U_RTP_LES_S3"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,dS3);
           
         //add S4
-        parameters.profileDataDebug.setMax("U_RTP_LES_S4"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dS4);
           
         //add dEddyViscosityTerms
-        parameters.profileDataDebug.setMax("U_RTP_LES_EV"
+        ssName.str("");
+        ssName<<"U_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
         ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dEddyViscosityTerms);
         
         //add DuDt
-        parameters.profileDataDebug.setMax("U_RTP_LES_DuDt"
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
           /time.dDeltat_n);
@@ -3124,66 +3194,86 @@ void calNewU_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add M_r
-        parameters.profileDataDebug.setMax("M_r"
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
         
         //add A1
-        parameters.profileDataDebug.setMax("U_RTP_LES_A1"
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1));
           
         //add S1
-        parameters.profileDataDebug.setMax("U_RTP_LES_S1"
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dS1));
         
         //add A2
-        parameters.profileDataDebug.setMax("U_RTP_LES_A2"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dA2);
           
         //add S2
-        parameters.profileDataDebug.setMax("U_RTP_LES_S2"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,dS2);
           
         //add A3
-        parameters.profileDataDebug.setMax("U_RTP_LES_A3"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dA3);
           
         //add S3
-        parameters.profileDataDebug.setMax("U_RTP_LES_S3"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,dS3);
           
         //add S4
-        parameters.profileDataDebug.setMax("U_RTP_LES_S4"
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dS4);
           
         //add dEddyViscosityTerms
-        parameters.profileDataDebug.setMax("U_RTP_LES_EV"
+        ssName.str("");
+        ssName<<"U_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
         ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dEddyViscosityTerms);
         
         //add DuDt
-        parameters.profileDataDebug.setMax("U_RTP_LES_DuDt"
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
           /time.dDeltat_n);
-        
-        //add DT^n
-        parameters.profileDataDebug.set("Deltat_n"
-          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
-          ,time.dDeltat_n);
-        
-        //add DT^{n+1/2}
-        parameters.profileDataDebug.set("Deltat_np1half"
-          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
-          ,time.dDeltat_np1half);
         #endif
       }
     }
@@ -4792,43 +4882,69 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add A1
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A1"
+        ssName.str("");
+        ssName<<"V_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add S1
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S1"
+        ssName.str("");
+        ssName<<"V_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS1);
         
         //add A2
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A2"
+        ssName.str("");
+        ssName<<"V_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA2);
         
         //add S2
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S2"
+        ssName.str("");
+        ssName<<"V_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS2);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A3"
+        ssName.str("");
+        ssName<<"V_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA3);
         
         //add S3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S3"
+        ssName.str("");
+        ssName<<"V_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS3);
         
         //add EV
-        parameters.profileDataDebug.setMaxAbs("V_RTP_EV"
+        ssName.str("");
+        ssName<<"V_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_DvDt"
+        ssName.str("");
+        ssName<<"V_DvDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nV][i][j][k]-grid.dLocalGridOld[grid.nV][i][j][k])
           /time.dDeltat_n);
@@ -5139,43 +5255,69 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add A1
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A1"
+        ssName.str("");
+        ssName<<"V_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add S1
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S1"
+        ssName.str("");
+        ssName<<"V_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS1);
         
         //add A2
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A2"
+        ssName.str("");
+        ssName<<"V_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA2);
         
         //add S2
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S2"
+        ssName.str("");
+        ssName<<"V_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS2);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_A3"
+        ssName.str("");
+        ssName<<"V_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA3);
         
         //add S3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_S3"
+        ssName.str("");
+        ssName<<"V_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS3);
         
         //add EV
-        parameters.profileDataDebug.setMaxAbs("V_RTP_EV"
+        ssName.str("");
+        ssName<<"V_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_DvDt"
+        ssName.str("");
+        ssName<<"V_DvDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nV][i][j][k]-grid.dLocalGridOld[grid.nV][i][j][k])
           /time.dDeltat_n);
@@ -5993,43 +6135,69 @@ void calNewW_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add A1
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A1"
+        ssName.str("");
+        ssName<<"W_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add S1
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S1"
+        ssName.str("");
+        ssName<<"W_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS1);
         
         //add A2
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A2"
+        ssName.str("");
+        ssName<<"W_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA2);
         
         //add S2
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S2"
+        ssName.str("");
+        ssName<<"W_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS2);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A3"
+        ssName.str("");
+        ssName<<"W_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA3);
         
         //add S3
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S3"
+        ssName.str("");
+        ssName<<"W_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS3);
         
         //add EV
-        parameters.profileDataDebug.setMaxAbs("W_RTP_EV"
+        ssName.str("");
+        ssName<<"W_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_DvDt"
+        ssName.str("");
+        ssName<<"W_DwDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nW][i][j][k]-grid.dLocalGridOld[grid.nW][i][j][k])
           /time.dDeltat_n);
@@ -6348,43 +6516,69 @@ void calNewW_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add A1
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A1"
+        ssName.str("");
+        ssName<<"W_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add S1
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S1"
+        ssName.str("");
+        ssName<<"W_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS1);
         
         //add A2
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A2"
+        ssName.str("");
+        ssName<<"W_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA2);
         
         //add S2
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S2"
+        ssName.str("");
+        ssName<<"W_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS2);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("W_RTP_A3"
+        ssName.str("");
+        ssName<<"W_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA3);
         
         //add S3
-        parameters.profileDataDebug.setMaxAbs("W_RTP_S3"
+        ssName.str("");
+        ssName<<"W_S3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dS3);
         
         //add EV
-        parameters.profileDataDebug.setMaxAbs("W_RTP_EV"
+        ssName.str("");
+        ssName<<"W_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("V_RTP_DvDt"
+        ssName.str("");
+        ssName<<"W_DwDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nW][i][j][k]-grid.dLocalGridOld[grid.nW][i][j][k])
           /time.dDeltat_n);
@@ -7403,18 +7597,34 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
           nGhostCells=0;
         }
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add rho
-        parameters.profileDataDebug.setMaxAbs("rho"
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nD][i][j][k]);
         
         //add DeltaRhoDt_R
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_R"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
         
         //add DeltaRhoDt_Vol
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_Vol"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
         #endif
@@ -8173,28 +8383,48 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add rho
-        parameters.profileDataDebug.setMaxAbs("rho"
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nD][i][j][k]);
         
         //add DeltaRhoDt_R
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_R"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
         
         //add DeltaRhoDt_T
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_T"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_T"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoTheta)/dV_np1);
         
         //add DeltaRhoDt_P
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_P"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_P"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoPhi)/dV_np1);
         
         //add DeltaRhoDt_Vol
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_Vol"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
         #endif
@@ -8353,28 +8583,48 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         
         #if DEBUG_EQUATIONS==1
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add rho
-        parameters.profileDataDebug.setMaxAbs("rho"
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nD][i][j][k]);
         
         //add DeltaRhoDt_R
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_R"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
         
         //add DeltaRhoDt_T
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_T"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_T"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoTheta)/dV_np1);
         
         //add DeltaRhoDt_P
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_P"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_P"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoPhi)/dV_np1);
         
         //add DeltaRhoDt_Vol
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_Vol"
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
         #endif
@@ -8826,28 +9076,48 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
           nGhostCells=0;
         }
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add E
-        parameters.profileDataDebug.setMaxAbs("E"
+        ssName.str("");
+        ssName<<"E"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nE][i][j][k]);
         
         //add A1
-        parameters.profileDataDebug.setMaxAbs("E_A1"
+        ssName.str("");
+        ssName<<"E_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add PDV
-        parameters.profileDataDebug.setMaxAbs("E_PDV"
+        ssName.str("");
+        ssName<<"E_PDV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
-          ,dPDV);
+          ,dPDV/time.dDeltat_np1half);
         
         //add S4
-        parameters.profileDataDebug.setMaxAbs("E_S4"
+        ssName.str("");
+        ssName<<"E_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
         
         //add DEDt
-        parameters.profileDataDebug.setMaxAbs("E_DEDt"
+        ssName.str("");
+        ssName<<"E_DEDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
           /time.dDeltat_np1half);
@@ -11887,54 +12157,85 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
           +dS6)-dEddyViscosityTerms);
         
         #if DEBUG_EQUATIONS==1
-          
+        
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add E
-        parameters.profileDataDebug.setMaxAbs("E"
+        ssName.str("");
+        ssName<<"E"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nE][i][j][k]);
         
         //add A1
-        parameters.profileDataDebug.setMaxAbs("E_A1"
+        ssName.str("");
+        ssName<<"E_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add A2
-        parameters.profileDataDebug.setMaxAbs("E_A2"
+        ssName.str("");
+        ssName<<"E_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA2);
         
         //add A3
-        parameters.profileDataDebug.setMaxAbs("E_A3"
+        ssName.str("");
+        ssName<<"E_A3"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dA3);
         
         //add PDV
-        parameters.profileDataDebug.setMaxAbs("E_PDV"
+        ssName.str("");
+        ssName<<"E_PDV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,dPDV);
         
         //add S4
-        parameters.profileDataDebug.setMaxAbs("E_S4"
+        ssName.str("");
+        ssName<<"E_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
         
         //add S5
-        parameters.profileDataDebug.setMaxAbs("E_S5"
+        ssName.str("");
+        ssName<<"E_S5"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
         
         //add S6
-        parameters.profileDataDebug.setMaxAbs("E_S6"
+        ssName.str("");
+        ssName<<"E_S6"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS6));
         
         //add EV
-        parameters.profileDataDebug.setMaxAbs("E_EV"
+        ssName.str("");
+        ssName<<"E_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,dEddyViscosityTerms);
         
         //add DEDt
-        parameters.profileDataDebug.setMaxAbs("E_DEDt"
+        ssName.str("");
+        ssName<<"E_DEDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
           /time.dDeltat_np1half);
@@ -21211,86 +21512,140 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
+        
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
     
     //add E
-    parameters.profileDataDebug.setMaxAbs("E"
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,grid.dLocalGridOld[grid.nE][i][j][k]);
     
     //add A1
-    parameters.profileDataDebug.setMaxAbs("E_A1"
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add A2
-    parameters.profileDataDebug.setMaxAbs("E_A2"
+    ssName.str("");
+    ssName<<"E_A2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-dA2);
     
     //add A3
-    parameters.profileDataDebug.setMaxAbs("E_A3"
+    ssName.str("");
+    ssName<<"E_A3"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-dA3);
     
     //add PDV
-    parameters.profileDataDebug.setMaxAbs("E_PDV"
+    ssName.str("");
+    ssName<<"E_PDV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,dPDV);
+      ,dPDV/time.dDeltat_np1half);
     
     //add S4
-    parameters.profileDataDebug.setMaxAbs("E_S4"
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
     
     //add S5
-    parameters.profileDataDebug.setMaxAbs("E_S5"
+    ssName.str("");
+    ssName<<"E_S5"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
     
     //add S6
-    parameters.profileDataDebug.setMaxAbs("E_S6"
+    ssName.str("");
+    ssName<<"E_S6"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS6));
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_jp1half_np1half"
+    //add E_TGrad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_jp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_jm1half_np1half"
+    //add E_TGrad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_jm1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_jp1half_np1half"
+    //add E_Grad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_jp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_jm1half_np1half"
+    //add E_Grad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_jm1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_kp1half_np1half"
+    //add E_TGrad_kp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_kp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_kp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_km1half_np1half"
+    //add E_TGrad_km1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_km1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_km1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_kp1half_np1half"
+    //add E_Grad_kp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_kp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_kp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_km1half_np1half"
+    //add E_Grad_km1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_km1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_km1half_np1half);
     
     //add EV
-    parameters.profileDataDebug.setMaxAbs("E_EV"
+    ssName.str("");
+    ssName<<"E_EV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dEddyViscosityTerms);
     
-    //add A3
-    parameters.profileDataDebug.setMaxAbs("E_DEDt"
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
       /time.dDeltat_np1half);
@@ -21663,87 +22018,139 @@ double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
     
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
     
     //add E
-    parameters.profileDataDebug.setMaxAbs("E"
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,grid.dLocalGridOld[grid.nE][i][j][k]);
     
     //add A1
-    parameters.profileDataDebug.setMaxAbs("E_A1"
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*dRhoAve_i_np1half*(dA1));
     
     //add A2
-    parameters.profileDataDebug.setMaxAbs("E_A2"
+    ssName.str("");
+    ssName<<"E_A2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-dA2);
     
     //add A3
-    parameters.profileDataDebug.setMaxAbs("E_A3"
+    ssName.str("");
+    ssName<<"E_A3"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-dA3);
     
     //add PDV
-    parameters.profileDataDebug.setMaxAbs("E_PDV"
+    ssName.str("");
+    ssName<<"E_PDV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,dPDV);
+      ,dPDV/time.dDeltat_np1half);
     
     //add S4
-    parameters.profileDataDebug.setMaxAbs("E_S4"
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS4));
     
     //add S5
-    parameters.profileDataDebug.setMaxAbs("E_S5"
+    ssName.str("");
+    ssName<<"E_S5"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS5));
     
     //add S6
-    parameters.profileDataDebug.setMaxAbs("E_S6"
+    ssName.str("");
+    ssName<<"E_S6"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS6));
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_jp1half_np1half"
+    //add E_TGrad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_jp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_jm1half_np1half"
+    //add E_TGrad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_jm1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_jp1half_np1half"
+    //add E_Grad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jp1hf_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_jp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_jm1half_np1half"
+    //add E_Grad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_jm1half_np1half);
-      
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_kp1half_np1half"
+    //add E_TGrad_kp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_kp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_kp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_TGrad_km1half_np1half"
+    //add E_TGrad_km1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_km1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dTGrad_km1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_kp1half_np1half"
+    //add E_Grad_kp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_kp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_kp1half_np1half);
     
-    parameters.profileDataDebug.setMaxAbs("E_Grad_km1half_np1half"
+    //add E_Grad_km1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_km1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_km1half_np1half);
     
-    //add EV
-    parameters.profileDataDebug.setMaxAbs("E_EV"
+    //add E_EV
+    ssName.str("");
+    ssName<<"E_EV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dEddyViscosityTerms);
     
-    //add A3
-    parameters.profileDataDebug.setMaxAbs("E_DEDt"
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
       /time.dDeltat_np1half);

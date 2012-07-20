@@ -134,59 +134,62 @@ class Curve:
       =parse_formula.getFormula(element.text)
   def load(self,fileData,options):
     '''This method adds a y value and index to the curve for the current fileData.'''
-    
-    if self.zone=="max":
-      #find largest value in column and use that
-      nIndex=0
-      while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
-        nIndex=nIndex+1
-      yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-      yIndexTemp=0
-      for i in range(nIndex,len(fileData.fColumnValues)-1):
-        yTest=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i)
-        if yTest>yTemp:
-          yTemp=yTest
-          yIndexTemp=i
-      self.y.append(yTemp)
-      self.index.append(yIndexTemp)
-    elif self.zone=="min":
-      #find smallest value in column and use that
-      nIndex=0
-      while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
-        nIndex=nIndex+1
-      yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-      yIndexTemp=0
-      for i in range(nIndex,len(fileData.fColumnValues)-1):
-        testY=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-        if testY<yTemp:
-          yTemp=testY
-          yIndexTemp=i
-      self.y.append(yTemp)
-      self.index.append(yIndexTemp)
-    elif self.zone==None and self.bTime==False:#this will be a series of y's as a function of time,
-      #creating a 2D list instead of a 1D list
-      yTemp=[]
-      for i in range(len(fileData.fColumnValues)):
-        yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
-      self.y.append(yTemp)
-      
-    elif self.zone==None:
-      print "If zone=",self.zone," is \"None\" then it shouldn't be a time curve and thus the if "\
-        +"above should have been flagged first, something strange is going on here"
-    elif self.zone.isdigit():
-      if not self.testZoneAdjust:
-        if not options.zoneIndexFromCenter:
-          zone=len(fileData.fColumnValues)-1-int(self.zone)
-          
-          #if right at the surface, and the zone is a non-interface, should move in
-          while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,zone)==None:
-            zone=zone-1
-          self.zone=str(zone)
-        self.testZoneAdjust=True
-      self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(self.zone)))
-      self.index.append(int(self.zone))
-    else:#I don't know what to do ??
-      print "unknown zone spedificiation \"",zone,"\""
+    try:
+      if self.zone=="max":
+        #find largest value in column and use that
+        nIndex=0
+        while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
+          nIndex=nIndex+1
+        yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+        yIndexTemp=0
+        for i in range(nIndex,len(fileData.fColumnValues)-1):
+          yTest=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i)
+          if yTest>yTemp:
+            yTemp=yTest
+            yIndexTemp=i
+        self.y.append(yTemp)
+        self.index.append(yIndexTemp)
+      elif self.zone=="min":
+        #find smallest value in column and use that
+        nIndex=0
+        while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
+          nIndex=nIndex+1
+        yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+        yIndexTemp=0
+        for i in range(nIndex,len(fileData.fColumnValues)-1):
+          testY=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+          if testY<yTemp:
+            yTemp=testY
+            yIndexTemp=i
+        self.y.append(yTemp)
+        self.index.append(yIndexTemp)
+      elif self.zone==None and self.bTime==False:#this will be a series of y's as a function of time,
+        #creating a 2D list instead of a 1D list
+        yTemp=[]
+        for i in range(len(fileData.fColumnValues)):
+          yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
+        self.y.append(yTemp)
+      elif self.zone==None:
+        print "If zone=",self.zone," is \"None\" then it shouldn't be a time curve and thus the if "\
+          +"above should have been flagged first, something strange is going on here"
+      elif self.zone.isdigit():
+        if not self.testZoneAdjust:
+          if not options.zoneIndexFromCenter:
+            zone=len(fileData.fColumnValues)-1-int(self.zone)
+            
+            #if right at the surface, and the zone is a non-interface, should move in
+            while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,zone)==None:
+              zone=zone-1
+            self.zone=str(zone)
+          self.testZoneAdjust=True
+        self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(self.zone)))
+        self.index.append(int(self.zone))
+      else:#I don't know what to do ??
+        print "unknown zone spedificiation \"",zone,"\""
+    except ValueError as anException:
+      print "ValueError:", anException
+      print "In curve formula:",self.formulaOrig
+      quit()
 class Plot:
   '''This class holds all the information for a single plot, namely the list of curves for that plot.'''
   

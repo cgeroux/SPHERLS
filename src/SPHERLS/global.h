@@ -379,6 +379,10 @@ class Grid{
       The location at which the local grid starts in the global grid. This starts at 0, for the 
       inner most cell, including ghost zones.
       */
+    int nNumZones1DBoundaryZeroHorizontalVelocity;/**
+      sets how many zones out from the 1D-multi-D boundary that theta/phi velocities are not updated
+      and thus kept at zero.
+      */
     Grid(); /**<
       Constructor for the class \ref Grid.
       */
@@ -679,13 +683,15 @@ class Parameters{
     std::string sDebugProfileOutput;/**<
       output file name for debuging profile, only used if DEBUG_EQUATIONS is set to 1
     */
-    
     #if DEBUG_EQUATIONS==1
     profileData profileDataDebug;/**<
       tracks and writes out profile data useful for debugging
       */
     bool bSetThisCall;/**<
       if true will call set function, if not it won't
+      */
+    bool bEveryJK;/**<
+      if true every JK will have their own values set
       */
     #endif
     Parameters(); /**<

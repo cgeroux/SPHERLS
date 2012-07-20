@@ -59,6 +59,7 @@ Grid::Grid(){
   nDCosThetaIJK=-1;
   nEddyVisc=-1;
   nDonorCellFrac=-1;
+  nNumZones1DBoundaryZeroHorizontalVelocity=5;
 }
 Parameters::Parameters(){
   dPi=3.1415926535897932384626433832795;
@@ -77,6 +78,7 @@ Parameters::Parameters(){
   bDEDM_cut_set=false;
   #if DEBUG_EQUATIONS==1
   bSetThisCall=false;
+  bEveryJK=true;
   #endif
 }
 Output::Output(){
