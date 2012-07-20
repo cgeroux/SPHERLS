@@ -19417,9 +19417,7 @@ double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
   double dA1UpWindGrad=0.0;
   double dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
   if(dU_U0_Diff<0.0){//moving in the negative direction
-    dA1UpWindGrad=dA1CenGrad;/**\BC grid.dLocalGridOld[grid.nDM][i+1][0][0] and 
-      grid.dLocalGridOld[grid.nE][i+1][j][k] missing in the calculation of upwind gradient in 
-      dA1. Using the centered gradient instead.*/
+    dA1UpWindGrad=0.0;/**\BC A1 upwind set to zero as no material is flowing into the star*/
   }
   else{//moving in the postive direction*/
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
@@ -20677,10 +20675,8 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*0.5;
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-  double dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-    +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;
-  double dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-    +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+  double dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
   double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
   double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
   double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
@@ -20935,10 +20931,8 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     +grid.dLocalGridOld[grid.nDTheta][0][j+1][0])*0.5;
   double dDelTheta_jm1half=(grid.dLocalGridOld[grid.nDTheta][0][j][0]
     +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*0.5;
-  double dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-    +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;
-  double dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-    +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+  double dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
   double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
   double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
   double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
@@ -21865,8 +21859,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dA1UpWindGrad=0.0;
   double dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
   if(dU_U0_Diff<0.0){//moving in the negative radial direction
-    dA1UpWindGrad=dA1CenGrad;/**\BC Using centered gradient for upwind gradient when motion is 
-      into the star at the surface*/
+    dA1UpWindGrad=0.0;/**\BC A1 upwind set to zero as no material is flowing into the star*/
   }
   else{//moving in the postive radial direction
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
