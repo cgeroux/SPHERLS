@@ -1053,6 +1053,7 @@ def createPlots(settings,parsed):
     fileNames=[]
     for plane in settings['planes']:
       ax.append(plt.subplot(len(settings['planes']),1,nPlaneCount))
+      #ax.append(fig.add_subplot(len(settings['planes']),1,nPlaneCount,projection='3d'))
       [time,index]=plot_plane(plane['files'][i],nCount,fig,ax[nPlaneCount],plane,settings['planes'])
       fileNames.append(plane['files'][i])
       nPlaneCount+=1
@@ -1091,6 +1092,8 @@ def plot_plane(fileName,nCount,fig,ax,plane,planes):
   #plot scalor data if it is set
   if plane['scalorFormula']!=None:
     [X,Y,C,max,min]=makeScalorPlotData(slice2D,plane)
+    
+    
     cmap=plane['scalorPallet']
     if cmap==None:
       cmap="jet"
@@ -1101,6 +1104,10 @@ def plot_plane(fileName,nCount,fig,ax,plane,planes):
     ax.set_xlabel(plane['xLabel'])
     ax.set_ylabel(plane['yLabel'])
     
+    #wire mesh plot, rest needs to be commented out, scalor, vectors, boundary lines
+    #scalerMap=ax.plot_wireframe(X,Y,C)
+    #ax.set_xlabel(plane['xLabel'])
+    #ax.set_ylabel(plane['yLabel'])
     
     #plot boundary line
     curve=getBoundarCurve(X,Y,plane)
@@ -1151,21 +1158,45 @@ def getBoundarCurve(X,Y,settings):
   curve.append([])#y-component
   
   shape=X.shape
+  if settings['planeType']=="tp":
+    
+    #top edge
+    for i in range(shape[0]-3,2,-1):
+      curve[0].append(X[i][shape[1]-3])
+      curve[1].append(Y[i][shape[1]-3])
+    
+    #left edge
+    for i in range(shape[1]-3,2,-1):
+      curve[0].append(X[2][i])
+      curve[1].append(Y[2][i])
+    
+    #bottom edge
+    for i in range(2,shape[0]-3):
+      curve[0].append(X[i][2])
+      curve[1].append(Y[i][2])
+    
+    #right edge
+    for i in range(2,shape[1]-2):
+      curve[0].append(X[shape[0]-3][i])
+      curve[1].append(Y[shape[0]-3][i])
+  else:
+    
+    #top edge
+    for i in range(shape[0]-1,2,-1):
+      curve[0].append(X[i][shape[1]-3])
+      curve[1].append(Y[i][shape[1]-3])
+    
+    #left edge
+    for i in range(shape[1]-3,2,-1):
+      curve[0].append(X[2][i])
+      curve[1].append(Y[2][i])
+    
+    #bottom edge
+    for i in range(2,shape[0]):
+      curve[0].append(X[i][2])
+      curve[1].append(Y[i][2])
   
-  #bottom edge
-  for i in range(shape[0]-1,2,-1):
-    curve[0].append(X[i][shape[1]-3])
-    curve[1].append(Y[i][shape[1]-3])
   
-  #left edge
-  for i in range(shape[1]-3,2,-1):
-    curve[0].append(X[2][i])
-    curve[1].append(Y[2][i])
-  
-  #bottom edge
-  for i in range(2,shape[0]):
-    curve[0].append(X[i][2])
-    curve[1].append(Y[i][2])
   return curve
 def getIntersectCurve(X,Y,plane0,plane1):
   

@@ -61,7 +61,7 @@
   Sets the version of the dump file. Should be incremented if changes are made to the information that
   is printed out in a dump.
   */
-#define DEBUG_EQUATIONS 1/**<
+#define DEBUG_EQUATIONS 0/**<
   If 1 will write out in the form of a profile file, all the horizontal maximum values of all terms
   in all equations.
   */
