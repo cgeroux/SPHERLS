@@ -8,7 +8,6 @@ exit;])
 AC_LANG([C++])
 GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
 GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
-
 #
 #common places for fftw libraries and includes
 FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
@@ -220,5 +219,5 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
 #################################################################
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile src/pythonextensions/hdfwrapper/setup.py])
 AC_OUTPUT

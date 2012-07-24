@@ -96,6 +96,7 @@ endif
 if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
+BUILT_SOURCES=hdf.so
 else
 HDF_LDADDS= 
 HDF_CPPFLAGS= 
@@ -122,8 +123,13 @@ SPHERLSgen_CPPFLAGS	=	-Isrc/
 docs:	docs/manuals/SPHERLS_manual.pdf	docs/manuals/SPHERLSgen_manual.pdf	\
 	docs/manuals/SPHERLSanal_manual.pdf
 
+if HDF_ENABLE
+hdf.so:
+	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
+endif
+
 docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
-	(cd	src/SPHERLS;	doxygen)
+	(cd	src/SPHERLS;echo	${PWD};	doxygen)
 	(cd	src/SPHERLS/docs/latex;	make	pdf;)
 	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_manual.pdf)
 

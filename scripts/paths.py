@@ -11,6 +11,7 @@ SPHERLSDATA=BasePath+"/data/"
 EOSPath=BasePath+"/data/eos/eosY240Z002"
 velocityProfilePath=BasePath+"/data/velocity_pro/"
 ref_calcs=BasePath+"/data/ref_calcs/"
+srcPath=BasePath+"/src/"
 
 def check_paths():
   #check paths
