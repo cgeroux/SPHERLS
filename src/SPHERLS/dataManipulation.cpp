@@ -3661,12 +3661,25 @@ void initUpdateLocalBoundaries(ProcTop &procTop, Grid &grid, MessPass &messPass,
       }
     }
     
-    //start in a few zones when updating v and w
-    if((n==grid.nV||n==grid.nW)&&procTop.nCoords[procTop.nRank][0]==1){
-      grid.nStartUpdateExplicit[n][0]=grid.nStartUpdateExplicit[n][0]
+    //start in a few zones from 1D boundary when updating v and w
+    if((n==grid.nV||n==grid.nW)&&procTop.nCoords[procTop.nRank][0]!=0){
+      
+      //get start and end of velocity zering region
+      int nStartV0=grid.nNum1DZones+grid.nNumGhostCells;
+      int nEndV0=grid.nNum1DZones+grid.nNumGhostCells
         +grid.nNumZones1DBoundaryZeroHorizontalVelocity;
-      if (grid.nStartUpdateExplicit[n][0]>grid.nEndUpdateExplicit[n][0]){
-        grid.nStartUpdateExplicit[n][0]=grid.nEndUpdateExplicit[n][0];
+      
+      int nStartGlobal=grid.nStartUpdateExplicit[n][0]+grid.nGlobalGridPositionLocalGrid[0]
+        -grid.nNumGhostCells;
+      int nEndGlobal=grid.nEndUpdateExplicit[n][0]+grid.nGlobalGridPositionLocalGrid[0]
+        -grid.nNumGhostCells;
+      if(nEndGlobal<=nEndV0&&nStartGlobal<nEndV0){
+        grid.nStartUpdateExplicit[n][0]=nEndGlobal-grid.nGlobalGridPositionLocalGrid[0]
+          +grid.nNumGhostCells;
+      }
+      if(nEndGlobal>nEndV0&&nStartGlobal<nEndV0){
+        grid.nStartUpdateExplicit[n][0]=nEndV0-grid.nGlobalGridPositionLocalGrid[0]
+          +grid.nNumGhostCells;
       }
     }
   }

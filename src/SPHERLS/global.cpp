@@ -73,7 +73,7 @@ Parameters::Parameters(){
   dMaxConvectiveVelocity=6.69041282767684e-02;
   dMaxConvectiveVelocity_c=0.0;
   dPrt=0.7;
-  dDonorCellMin=0.05;
+  dDonorCellMin=0.2;
   dT_cut=2.35e4;
   bDEDM_cut_set=false;
   #if DEBUG_EQUATIONS==1
