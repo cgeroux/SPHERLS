@@ -26,7 +26,8 @@ bool walkListAndWriteData(PyObject* list, int* nPosition,int nDepth){
   if(PyList_Size(list)!=nDims[nDepth]){
     std::stringstream ssTemp;
     ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-      <<": size of list given doesn't match dimensions of varible";
+      <<": size of list given "<<PyList_Size(list)
+      <<" doesn't match dimensions of varible previously set as "<<nDims[nDepth];
     PyErr_SetString(HDFError,ssTemp.str().c_str());
     return false;
   }
