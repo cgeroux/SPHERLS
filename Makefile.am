@@ -5,12 +5,19 @@ EXTRA_DIST=data/energy_pro/Epro.dat
 EXTRA_DIST+=data/energy_pro/Epro_mod.dat
 EXTRA_DIST+=data/energy_pro/Epro_points.dat
 
+#OPAL/Alexander Furguson EOS and opacity files
+EXTRA_DIST+=data/OPAL_EOS_2005/EOS5_0*
+EXTRA_DIST+=data/OPAL_OPACITY_GN93/GN93hz
+EXTRA_DIST+=data/AF_OPACITY_GN93_1994/g*.*.tron
+
 #eos files
 EXTRA_DIST+=data/eos/convert.cpp
 EXTRA_DIST+=data/eos/Makefile
 EXTRA_DIST+=data/eos/eosCTOPAC
 EXTRA_DIST+=data/eos/eosY240Z002
 EXTRA_DIST+=data/eos/eosY300Z002
+EXTRA_DIST+=data/eos/eosNewY240Z002_wider_finer
+EXTRA_DIST+=data/eos/eosNewY300Z002_wider_finer
 
 #ref calcs, will include .svn files :(
 EXTRA_DIST+=data/ref_calcs/1DNA/1*

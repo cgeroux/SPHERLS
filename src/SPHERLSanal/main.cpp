@@ -729,6 +729,7 @@ int main(int argc, char *argv[]){
         break;
       }
       case 6:{//make an HDF file
+        #ifdef HDF_ENABLE
         switch(nFromFileType){
           case 5:{//from db
           
@@ -762,6 +763,11 @@ int main(int argc, char *argv[]){
           }
         }
         break;
+        #else
+        std::cout<<"hdf support was disabled during configuration. To enable reconfigure, build "
+          <<"and install with an hdf library\n";
+        return 0;
+        #endif
       }
       default:{
         std::stringstream ssTemp;

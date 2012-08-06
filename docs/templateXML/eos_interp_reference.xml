@@ -1,109 +1,114 @@
 <root>
   <eos>
     <files>
-      <!--equation of state files for the 2D grid defined by the above Xs ant Zs, they don't have
-      to be in any particular order, but they do have to form a ractangular grid in X and Z.-->
-      <file>eos2005/EOS5_00z0x</file>
-      <file>eos2005/EOS5_00z2x</file>
-      <file>eos2005/EOS5_00z4x</file>
-      <file>eos2005/EOS5_00z6x</file>
-      <file>eos2005/EOS5_00z8x</file>
-      <file>eos2005/EOS5_02z0x</file>
-      <file>eos2005/EOS5_02z2x</file>
-      <file>eos2005/EOS5_02z4x</file>
-      <file>eos2005/EOS5_02z6x</file>
-      <file>eos2005/EOS5_02z8x</file>
-      <file>eos2005/EOS5_04z0x</file>
-      <file>eos2005/EOS5_04z2x</file>
-      <file>eos2005/EOS5_04z4x</file>
-      <file>eos2005/EOS5_04z6x</file>
-      <file>eos2005/EOS5_04z8x</file>
+      <!--equation of state files for the 2D grid of Xs and Zs, they don't have
+      to be in any particular order, but they do have to form a ractangular grid in X and Z.
+      
+      if either / or ./ is in front of file name it will be considered an absolute or relative path
+      respectively. If neither / nor ./ are present at the front of the path it will be assumed that
+      these paths are relative to the SPHERLS data folder.
+      -->
+      <file>OPAL_EOS_2005/EOS5_00z0x</file>
+      <file>OPAL_EOS_2005/EOS5_00z2x</file>
+      <file>OPAL_EOS_2005/EOS5_00z4x</file>
+      <file>OPAL_EOS_2005/EOS5_00z6x</file>
+      <file>OPAL_EOS_2005/EOS5_00z8x</file>
+      <file>OPAL_EOS_2005/EOS5_02z0x</file>
+      <file>OPAL_EOS_2005/EOS5_02z2x</file>
+      <file>OPAL_EOS_2005/EOS5_02z4x</file>
+      <file>OPAL_EOS_2005/EOS5_02z6x</file>
+      <file>OPAL_EOS_2005/EOS5_02z8x</file>
+      <file>OPAL_EOS_2005/EOS5_04z0x</file>
+      <file>OPAL_EOS_2005/EOS5_04z2x</file>
+      <file>OPAL_EOS_2005/EOS5_04z4x</file>
+      <file>OPAL_EOS_2005/EOS5_04z6x</file>
+      <file>OPAL_EOS_2005/EOS5_04z8x</file>
     </files>
   </eos>
   <opacity>
     <!-- Uses the OPAL opacities with GN93 mix, and AF94 opacities with GN93 mix -->
     <files>
-      <file id="1">opacity/GN93hz</file>
+      <file id="1">OPAL_OPACITY_GN93/GN93hz</file><!--this single file has opacities at multiple x's and z's-->
       
-      <file id="2">opacity/low_temp_opacity/g0.0.tron</file>
-      <file id="3">opacity/low_temp_opacity/g1.0.tron</file>
-      <file id="4">opacity/low_temp_opacity/g2.0.tron</file>
-      <file id="5">opacity/low_temp_opacity/g35.0.tron</file>
-      <file id="6">opacity/low_temp_opacity/g5.0.tron</file>
-      <file id="7">opacity/low_temp_opacity/g7.0.tron</file>
-      <file id="8">opacity/low_temp_opacity/g8.0.tron</file>
+      <file id="2">AF_OPACITY_GN93_1994/g0.0.tron</file>
+      <file id="3">AF_OPACITY_GN93_1994/g1.0.tron</file>
+      <file id="4">AF_OPACITY_GN93_1994/g2.0.tron</file>
+      <file id="5">AF_OPACITY_GN93_1994/g35.0.tron</file>
+      <file id="6">AF_OPACITY_GN93_1994/g5.0.tron</file>
+      <file id="7">AF_OPACITY_GN93_1994/g7.0.tron</file>
+      <file id="8">AF_OPACITY_GN93_1994/g8.0.tron</file>
       
-      <file id="10">opacity/low_temp_opacity/g0.0001.tron</file>
-      <file id="11">opacity/low_temp_opacity/g1.0001.tron</file>
-      <file id="12">opacity/low_temp_opacity/g2.0001.tron</file>
-      <file id="13">opacity/low_temp_opacity/g35.0001.tron</file>
-      <file id="14">opacity/low_temp_opacity/g5.0001.tron</file>
-      <file id="15">opacity/low_temp_opacity/g7.0001.tron</file>
-      <file id="16">opacity/low_temp_opacity/g8.0001.tron</file>
+      <file id="10">AF_OPACITY_GN93_1994/g0.0001.tron</file>
+      <file id="11">AF_OPACITY_GN93_1994/g1.0001.tron</file>
+      <file id="12">AF_OPACITY_GN93_1994/g2.0001.tron</file>
+      <file id="13">AF_OPACITY_GN93_1994/g35.0001.tron</file>
+      <file id="14">AF_OPACITY_GN93_1994/g5.0001.tron</file>
+      <file id="15">AF_OPACITY_GN93_1994/g7.0001.tron</file>
+      <file id="16">AF_OPACITY_GN93_1994/g8.0001.tron</file>
       
-      <file id="18">opacity/low_temp_opacity/g0.0003.tron</file>
-      <file id="19">opacity/low_temp_opacity/g1.0003.tron</file>
-      <file id="20">opacity/low_temp_opacity/g2.0003.tron</file>
-      <file id="21">opacity/low_temp_opacity/g35.0003.tron</file>
-      <file id="22">opacity/low_temp_opacity/g5.0003.tron</file>
-      <file id="23">opacity/low_temp_opacity/g7.0003.tron</file>
-      <file id="24">opacity/low_temp_opacity/g8.0003.tron</file>
+      <file id="18">AF_OPACITY_GN93_1994/g0.0003.tron</file>
+      <file id="19">AF_OPACITY_GN93_1994/g1.0003.tron</file>
+      <file id="20">AF_OPACITY_GN93_1994/g2.0003.tron</file>
+      <file id="21">AF_OPACITY_GN93_1994/g35.0003.tron</file>
+      <file id="22">AF_OPACITY_GN93_1994/g5.0003.tron</file>
+      <file id="23">AF_OPACITY_GN93_1994/g7.0003.tron</file>
+      <file id="24">AF_OPACITY_GN93_1994/g8.0003.tron</file>
       
-      <file id="26">opacity/low_temp_opacity/g0.001.tron</file>
-      <file id="27">opacity/low_temp_opacity/g1.001.tron</file>
-      <file id="28">opacity/low_temp_opacity/g2.001.tron</file>
-      <file id="29">opacity/low_temp_opacity/g35.001.tron</file>
-      <file id="30">opacity/low_temp_opacity/g5.001.tron</file>
-      <file id="31">opacity/low_temp_opacity/g7.001.tron</file>
-      <file id="32">opacity/low_temp_opacity/g8.001.tron</file>
+      <file id="26">AF_OPACITY_GN93_1994/g0.001.tron</file>
+      <file id="27">AF_OPACITY_GN93_1994/g1.001.tron</file>
+      <file id="28">AF_OPACITY_GN93_1994/g2.001.tron</file>
+      <file id="29">AF_OPACITY_GN93_1994/g35.001.tron</file>
+      <file id="30">AF_OPACITY_GN93_1994/g5.001.tron</file>
+      <file id="31">AF_OPACITY_GN93_1994/g7.001.tron</file>
+      <file id="32">AF_OPACITY_GN93_1994/g8.001.tron</file>
       
-      <file id="34">opacity/low_temp_opacity/g0.002.tron</file>
-      <file id="35">opacity/low_temp_opacity/g1.002.tron</file>
-      <file id="36">opacity/low_temp_opacity/g2.002.tron</file>
-      <file id="37">opacity/low_temp_opacity/g35.002.tron</file>
-      <file id="38">opacity/low_temp_opacity/g5.002.tron</file>
-      <file id="39">opacity/low_temp_opacity/g7.002.tron</file>
-      <file id="40">opacity/low_temp_opacity/g8.002.tron</file>
+      <file id="34">AF_OPACITY_GN93_1994/g0.002.tron</file>
+      <file id="35">AF_OPACITY_GN93_1994/g1.002.tron</file>
+      <file id="36">AF_OPACITY_GN93_1994/g2.002.tron</file>
+      <file id="37">AF_OPACITY_GN93_1994/g35.002.tron</file>
+      <file id="38">AF_OPACITY_GN93_1994/g5.002.tron</file>
+      <file id="39">AF_OPACITY_GN93_1994/g7.002.tron</file>
+      <file id="40">AF_OPACITY_GN93_1994/g8.002.tron</file>
       
-      <file id="42">opacity/low_temp_opacity/g0.004.tron</file>
-      <file id="43">opacity/low_temp_opacity/g1.004.tron</file>
-      <file id="44">opacity/low_temp_opacity/g2.004.tron</file>
-      <file id="45">opacity/low_temp_opacity/g35.004.tron</file>
-      <file id="46">opacity/low_temp_opacity/g5.004.tron</file>
-      <file id="47">opacity/low_temp_opacity/g7.004.tron</file>
-      <file id="48">opacity/low_temp_opacity/g8.004.tron</file>
+      <file id="42">AF_OPACITY_GN93_1994/g0.004.tron</file>
+      <file id="43">AF_OPACITY_GN93_1994/g1.004.tron</file>
+      <file id="44">AF_OPACITY_GN93_1994/g2.004.tron</file>
+      <file id="45">AF_OPACITY_GN93_1994/g35.004.tron</file>
+      <file id="46">AF_OPACITY_GN93_1994/g5.004.tron</file>
+      <file id="47">AF_OPACITY_GN93_1994/g7.004.tron</file>
+      <file id="48">AF_OPACITY_GN93_1994/g8.004.tron</file>
       
-      <file id="50">opacity/low_temp_opacity/g0.01.tron</file>
-      <file id="51">opacity/low_temp_opacity/g1.01.tron</file>
-      <file id="52">opacity/low_temp_opacity/g2.01.tron</file>
-      <file id="53">opacity/low_temp_opacity/g35.01.tron</file>
-      <file id="54">opacity/low_temp_opacity/g5.01.tron</file>
-      <file id="55">opacity/low_temp_opacity/g7.01.tron</file>
-      <file id="56">opacity/low_temp_opacity/g8.01.tron</file>
+      <file id="50">AF_OPACITY_GN93_1994/g0.01.tron</file>
+      <file id="51">AF_OPACITY_GN93_1994/g1.01.tron</file>
+      <file id="52">AF_OPACITY_GN93_1994/g2.01.tron</file>
+      <file id="53">AF_OPACITY_GN93_1994/g35.01.tron</file>
+      <file id="54">AF_OPACITY_GN93_1994/g5.01.tron</file>
+      <file id="55">AF_OPACITY_GN93_1994/g7.01.tron</file>
+      <file id="56">AF_OPACITY_GN93_1994/g8.01.tron</file>
       
-      <file id="58">opacity/low_temp_opacity/g0.02.tron</file>
-      <file id="59">opacity/low_temp_opacity/g1.02.tron</file>
-      <file id="60">opacity/low_temp_opacity/g2.02.tron</file>
-      <file id="61">opacity/low_temp_opacity/g35.02.tron</file>
-      <file id="62">opacity/low_temp_opacity/g5.02.tron</file>
-      <file id="63">opacity/low_temp_opacity/g7.02.tron</file>
-      <file id="64">opacity/low_temp_opacity/g8.02.tron</file>
+      <file id="58">AF_OPACITY_GN93_1994/g0.02.tron</file>
+      <file id="59">AF_OPACITY_GN93_1994/g1.02.tron</file>
+      <file id="60">AF_OPACITY_GN93_1994/g2.02.tron</file>
+      <file id="61">AF_OPACITY_GN93_1994/g35.02.tron</file>
+      <file id="62">AF_OPACITY_GN93_1994/g5.02.tron</file>
+      <file id="63">AF_OPACITY_GN93_1994/g7.02.tron</file>
+      <file id="64">AF_OPACITY_GN93_1994/g8.02.tron</file>
       
-      <file id="66">opacity/low_temp_opacity/g0.03.tron</file>
-      <file id="67">opacity/low_temp_opacity/g1.03.tron</file>
-      <file id="68">opacity/low_temp_opacity/g2.03.tron</file>
-      <file id="69">opacity/low_temp_opacity/g35.03.tron</file>
-      <file id="70">opacity/low_temp_opacity/g5.03.tron</file>
-      <file id="71">opacity/low_temp_opacity/g7.03.tron</file>
-      <file id="72">opacity/low_temp_opacity/g8.03.tron</file>
+      <file id="66">AF_OPACITY_GN93_1994/g0.03.tron</file>
+      <file id="67">AF_OPACITY_GN93_1994/g1.03.tron</file>
+      <file id="68">AF_OPACITY_GN93_1994/g2.03.tron</file>
+      <file id="69">AF_OPACITY_GN93_1994/g35.03.tron</file>
+      <file id="70">AF_OPACITY_GN93_1994/g5.03.tron</file>
+      <file id="71">AF_OPACITY_GN93_1994/g7.03.tron</file>
+      <file id="72">AF_OPACITY_GN93_1994/g8.03.tron</file>
       
-      <file id="74">opacity/low_temp_opacity/g0.04.tron</file>
-      <file id="75">opacity/low_temp_opacity/g1.04.tron</file>
-      <file id="76">opacity/low_temp_opacity/g2.04.tron</file>
-      <file id="77">opacity/low_temp_opacity/g35.04.tron</file>
-      <file id="78">opacity/low_temp_opacity/g5.04.tron</file>
-      <file id="79">opacity/low_temp_opacity/g7.04.tron</file>
-      <file id="80">opacity/low_temp_opacity/g8.04.tron</file>
+      <file id="74">AF_OPACITY_GN93_1994/g0.04.tron</file>
+      <file id="75">AF_OPACITY_GN93_1994/g1.04.tron</file>
+      <file id="76">AF_OPACITY_GN93_1994/g2.04.tron</file>
+      <file id="77">AF_OPACITY_GN93_1994/g35.04.tron</file>
+      <file id="78">AF_OPACITY_GN93_1994/g5.04.tron</file>
+      <file id="79">AF_OPACITY_GN93_1994/g7.04.tron</file>
+      <file id="80">AF_OPACITY_GN93_1994/g8.04.tron</file>
       
     </files>
     <tables>

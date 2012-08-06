@@ -416,13 +416,13 @@ class DataSet:
     #get and sort profiles within range of dataset
     extension="_pro"+".txt"
     filesExistProfiles=glob.glob(self.baseFileName+"*"+extension)
+    filesExistProfiles.sort()
     files=[]
     for i in range(0,len(filesExistProfiles),options.frequency):
       file=filesExistProfiles[i]
       intOfFile=int(file[len(self.baseFileName):len(file)-len(extension)])
       if intOfFile>=self.start and intOfFile<self.end:
         files.append(file)
-    files.sort()
     if len(files)==0:
       print "no files found in range"
       quit()
