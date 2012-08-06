@@ -9109,7 +9109,7 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
         ssName<<"E_S1"<<ssEnd.str();
         parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
-          ,4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dS1));
+          ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dS1));
         
         //add S4
         ssName.str("");
@@ -9254,9 +9254,9 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
           ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
         
         //add S1
-        parameters.profileDataDebug.setMaxAbs("E_PDV"
+        parameters.profileDataDebug.setMaxAbs("E_S1"
           ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
-          ,4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dS1));
+          ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dS1));
         
         //add S4
         parameters.profileDataDebug.setMaxAbs("E_S4"
@@ -12244,7 +12244,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         ssName<<"E_S3"<<ssEnd.str();
         parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-          ,-dS3));
+          ,-dS3);
         
         //add S4
         ssName.str("");
@@ -19393,7 +19393,7 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add S1
-    parameters.profileDataDebug.setMaxAbs("E_PDV"
+    parameters.profileDataDebug.setMaxAbs("E_S1"
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
@@ -19515,7 +19515,7 @@ double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add S1
-    parameters.profileDataDebug.setMaxAbs("E_PDV"
+    parameters.profileDataDebug.setMaxAbs("E_S1"
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
@@ -21744,7 +21744,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   
   //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
-    +4.0*parameters.dPi*dRhoAve_i_np1half*(dA1+dS3)+dA2+dA3+dS2+dS3
+    +4.0*parameters.dPi*dRhoAve_i_np1half*(dA1+dS1)+dA2+dA3+dS2+dS3
     -4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS4+dS5+dS6)
     -dEddyViscosityTerms;
 }

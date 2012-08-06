@@ -78,7 +78,7 @@ Parameters::Parameters(){
   bDEDM_cut_set=false;
   #if DEBUG_EQUATIONS==1
   bSetThisCall=false;
-  bEveryJK=true;
+  bEveryJK=false;
   #endif
 }
 Output::Output(){

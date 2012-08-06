@@ -350,13 +350,13 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     
     //get number of zones at the surface to treat implicitly
     getXMLValue(xImplicit,"numImplicitZones",0,implicit.nNumImplicitZones);
-    if(implicit.nNumImplicitZones>grid.nGlobalGridDims[0]){
-      std::stringstream ssTemp;
-      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
+    if(implicit.nNumImplicitZones>grid.nGlobalGridDims[0]-grid.nNum1DZones){
+      std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
         <<": WARNING: number of implicit zones ("<<implicit.nNumImplicitZones
-        <<") is larger than the total number of radial zones in the model ("<<grid.nGlobalGridDims[0]
-        <<") setting number of implicit zones equal to the number of radial zones.\n";
-      implicit.nNumImplicitZones=grid.nGlobalGridDims[0];
+        <<") is larger than the total number of radial multi-D zones in the model ("
+        <<grid.nGlobalGridDims[0]-grid.nNum1DZones
+        <<") setting number of implicit zones equal to the number of radial zones in multi-D region.\n";
+      implicit.nNumImplicitZones=grid.nGlobalGridDims[0]-grid.nNum1DZones;
     }
     if(implicit.nNumImplicitZones<0){
       std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
