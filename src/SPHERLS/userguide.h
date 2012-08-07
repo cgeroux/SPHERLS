@@ -109,13 +109,15 @@
     
     
   @section usage Using SPHERLS
-    - Generating a starting model (see SPHERLSgen documentation for details)
+    - Generating a starting model (\todo should merge SPHERLSgen and SPHERLSanal documentation)
     - The XML configuration file
-    - Starting a calculation and the "makeFile"
+    - Starting a calculation
     - getting data
       - watchzones
       - model dumps
-    - post calculation analysis (see SPHERLSanal documention for details)
+      - debug information
+    - post calculation analysis
+     - python scripts and plotting
     - Adiabatic Calculations
       - 1D, 2D, and 3D
       - $gamma$-law gas
@@ -125,7 +127,8 @@
       - Tabulate EOS
       - Different versions of the energy equation
       - LES models
-  
+    -creating a new EOS file using eos_interp.py
+    
   @section modding Modifing or Developing SPHERLS
     - Basic layout/design of the code
       - model output
