@@ -11,6 +11,7 @@
 #include "profileData.h"
 #include "fileExists.h"
 #include <cstring>
+#include <stdlib.h>
 
 profileData::profileData(){
   dInitValue=NAN;

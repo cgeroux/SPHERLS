@@ -68,7 +68,7 @@
       -- matplotlib for creating plots
       -- scipy for interpolating in equation of state files
       - fftw3 library for frequency analysis
-      - hdf4 library for converting to hdf4 file format (not yet implemented)
+      - hdf4 library for converting to hdf4 file format
       - Doxygen used to create documentation from source code via "make docs"
     
     @subsection installPETSC Installing PETSC Library
@@ -91,8 +91,7 @@
     
     @subsection installFFTW Installing FFTW Library
       - Download the FFTW Library from the FFTS <a href="http://www.fftw.org/download.html">website</a>. Version fftw-3.2.2 has been tested to work with SPHERLS.
-      - The downloaded FFTW file (e.g. fftw-3.2.2.tar.gz) will need to be unziped to do so type <tt>gunzip fftw-3.2.2.tar.gz</tt>
-      - Then untar it with <tt>tar -xf fftw-3.2.2.tar.gz</tt>
+      - Then untar and unzip the downloaded with something like <tt>tar -xzf fftw-3.2.2.tar.gz</tt>
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
         -# \verbatim ./configure --prefix=<path-to-final-location-of-library> \endverbatim
@@ -100,6 +99,14 @@
         -# \verbatim make install \endverbatim
     
     @subsection installHDF4 Installing HDF4 Library
+      - Download the HDF Library from the hdfgroup <a href="http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/">website</a>. Version hdf-4.2.7 has been tested to work with SPHERLS.
+      - Then untar and unzip the downloaded file with something like <tt>tar -xzf hdf.4.2.7-patch1.tar.gz</tt>
+      - To install the library change into the directory made when you extracted the archive
+        and type the following commands:
+        -# \verbatim ./configure --prefix=<path-to-final-location-of-library> CFLAGS="-fPIC" CXXFLAGS="-fPIC" \endverbatim
+        -# \verbatim make \endverbatim
+        -# \verbatim make install \endverbatim
+        
     @subsection installDoxygen Installing Doxygen
     The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
     @subsection installPython Installing Python

@@ -36,9 +36,13 @@ EXTRA_DIST+=data/velocity_pro/*.dat
 #scripts
 EXTRA_DIST+=scripts/*.py
 
-#docs, problem with creating documentation on lachesis, disabled for now
+#docs
 EXTRA_DIST+=docs/manuals/*.pdf
 EXTRA_DIST+=docs/templateXML/*.xml
+
+#python c++ extensions
+EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
+
 
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(datadir)/$(PACKAGE)/data

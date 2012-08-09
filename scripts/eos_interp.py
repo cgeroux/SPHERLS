@@ -288,7 +288,7 @@ class eosTable:
     logTDel=gridConfig[4]
     numLogT=gridConfig[5]
     
-    print "interpolating to new grid ..."
+    print "  interpolating eos to new grid ..."
     
     #create a new interpolated table
     interpolatedTable=self.__class__()
@@ -315,15 +315,15 @@ class eosTable:
     
     #remove nans from grid
     #this part is slow
-    print "  filling in nans by extrapolating ..."
+    print "    filling in nans by extrapolating (this takes a while) ..."
     [logE,logP]=self.__fillDepNans()
     
     #interpolate to grid
-    print "  creating interpolator ..."
+    print "    creating interpolator ..."
     splineInterpLogP=interpolate.RectBivariateSpline(self.logD[:,0],self.logT[0,:],logP)
     splineInterpLogE=interpolate.RectBivariateSpline(self.logD[:,0],self.logT[0,:],logE)
     
-    print "  interpolating to new grid ..."
+    print "    interpolating to new grid ..."
     for i in range(numLogD):
       for j in range(numLogT):
         logPGas=splineInterpLogP(interpolatedTable.logD[i][j],interpolatedTable.logT[i][j])
@@ -345,7 +345,7 @@ class eosTable:
     #set values outside grid, and near nans on original grid equal to nan in interpolated grid
     if setExtrapolatedToNan:
       
-      print "  setting nans for extrapolated values ..."
+      print "    setting nans for extrapolated values ..."
       
       #get range in logT, and logR
       logTRange=[min(self.logT[0,:]),max(self.logT[0,:])]
@@ -697,7 +697,7 @@ class opacityTable:
     logTDel=gridConfig[4]
     numLogT=gridConfig[5]
     
-    print "interpolating to new grid ..."
+    print "  interpolating opacity to new grid ..."
     
     #create a new interpolated table
     interpolatedTable=self.__class__()
@@ -724,14 +724,14 @@ class opacityTable:
     
     #remove nans from grid
     #this part is slow
-    print "  filling in nans by extrapolating ..."
+    print "    filling in nans by extrapolating ..."
     logK=self.__fillDepNans()
     
     #interpolate to grid
-    print "  creating interpolator ..."
+    print "    creating interpolator ..."
     splineInterpLogK=interpolate.RectBivariateSpline(self.logT[:,0],self.logR[0,:],logK)
     
-    print "  interpolating to new grid ..."
+    print "    interpolating to new grid ..."
     for i in range(numLogD):
       for j in range(numLogT):
         
@@ -745,7 +745,7 @@ class opacityTable:
     #set values outside grid, and near nans on original grid equal to nan in interpolated grid
     if setExtrapolatedToNan:
       
-      print "  setting nans for extrapolated values ..."
+      print "    setting nans for extrapolated values ..."
       
       #get range in logT, and logR
       logTRange=[min(self.logT[:,0]),max(self.logT[:,0])]
@@ -1063,18 +1063,18 @@ class opacityTableManager:
     Z: metal mass fraction
     """
     
-    print "interpolating opacity in composition to (X,Z)=("+str(X)+","+str(Z)+") ..."
+    print "  interpolating opacity in composition to (X,Z)=("+str(X)+","+str(Z)+") ..."
     
     #option for printing all numpy arrays
     np.set_printoptions(threshold='nan')
     
     #if we have enough poitns in X and Z we can do 2D cubic spline interpolation
     if len(self.X)>=4 and len(self.Z)>=4:
-      print "  interpolating in both X and Z ..."
+      print "    interpolating in both X and Z ..."
       interpolatedOpacityTable=self.__bicubicSplineInXZ(X,Z)
       return interpolatedOpacityTable
     else:
-      print "interpolating with fewer than 4 X or Z points is not yet implemented"
+      print "    interpolating with fewer than 4 X or Z points is not yet implemented"
       return None
   def plotGrids(self,opacityIndex):
     """Plot LogR and LogT points that form the opacity grid.
@@ -1744,13 +1744,13 @@ class eosTableManager:
     eosManager with this new set of files which can then be interpolated to the desired rho and 
     T's."""
     
-    print "interpolating eos in composition to (X,Z)=("+str(X)+","+str(Z)+") ..."
+    print "  interpolating eos in composition to (X,Z)=("+str(X)+","+str(Z)+") ..."
     
     #option for printing all numpy arrays
     np.set_printoptions(threshold='nan')
     
     #interpolate to requested Z
-    print "  interpolating in Z ..."
+    print "    interpolating in Z ..."
     if len(self.Z)==3:
       
       '''if self.Z has 3 entries use a quadratic interpolation to interpolate a set of tables to the 
@@ -1778,7 +1778,7 @@ class eosTableManager:
     little near the nans. non-nan elements of logD, logT, logE, and logP are garanteed to be the
     same shape for a given X because of the way Z interpolation was done in __quadInterpInZ.
     only need to keep shape of one. This might not be the case across X's.'''
-    print "  interpolating in X ..."
+    print "    interpolating in X ..."
     return self.__cubicSplineInX(eosManagerInterpZ,X)
   def plotGrid(self,eosIndex):
     """Plot rho and T points that form the grid"""
