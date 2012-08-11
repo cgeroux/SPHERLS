@@ -98,8 +98,8 @@ def main():
           
           print "SUCCESS"
         else:
-          #print "FAILED"
-          print "\n  see \"./test"+haveRef+"Calculation/log.txt\" for details of failure"
+          print "FAILED"
+          print "  see \"./test"+haveRef+"Calculation/log.txt\" for details of failure"
       else:
         print "FAILED"
         print "  \""+haveRef+"\" didn't have pre-calculated reference calculations, can't check"\
@@ -193,9 +193,17 @@ def createTestCalcNA(subDir,numProcs,options):
   
   #make SPHERLS.xml file
   log.write("making \"SPHERLS.xml\" ...")
+  
+  
   configFile=os.path.dirname(ref_calcs.refCalcs[subDir][0])+"/SPHERLS.xml"
-  cmd=["cp",configFile,"./SPHERLS.xml"]
-  result=subprocess.call(cmd,stdout=log,stderr=log)
+  #cmd=["cp",configFile,"./SPHERLS.xml"]
+  #result=subprocess.call(cmd,stdout=log,stderr=log)
+  spherlsConfig=xml.parse(configFile)
+  eosElement=spherlsConfig.findall("eos")
+  eosFileElement=eosElement[0].findall("eosFile")
+  eosFile=os.path.join(paths.EOSPath,os.path.basename(eosFileElement[0].text))
+  eosFileElement[0].text=eosFile
+  spherlsConfig.write("./SPHERLS.xml")
   setSPHERLSStartAndOutputModel("./SPHERLS.xml",ref_calcs.refCalcs[subDir][0],subDir+"Test")
   log.write("SUCCESS\n")
   

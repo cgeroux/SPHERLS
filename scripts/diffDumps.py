@@ -180,7 +180,7 @@ def diffVar(dumpFile0,dumpFile1,var,allowedDifferance,threshold,out):
           numerator=abs(dumpFile0.vars[var][i][j][k]-dumpFile1.vars[var][i][j][k])
           relativeDiffernace=numerator/denomitator
           if relativeDiffernace>allowedDifferance:
-            lineDiff="var "+str(dumpFile0.varIDs[var])+" in zone ("+str(i)+","+str(j)+","+str(k)+\
+            lineDiff="var "+str(dumpFile0.varNames[var])+" in zone ("+str(i)+","+str(j)+","+str(k)+\
               ") has relative difference of {0:.2e} and magnitudes {1:.15e} and {2:.15e}.\n"\
               .format(relativeDiffernace,dumpFile0.vars[var][i][j][k],dumpFile1.vars[var][i][j][k])
             out.write(lineDiff)
@@ -198,7 +198,7 @@ def diffVar(dumpFile0,dumpFile1,var,allowedDifferance,threshold,out):
           numerator=abs(dumpFile0.vars[var][i][j][k]-dumpFile1.vars[var][i][j][k])
           relativeDiffernace=numerator/denomitator
           if relativeDiffernace>allowedDifferance:
-            lineDiff="var "+str(dumpFile0.varIDs[var])+" in zone ("+str(i)+","+str(j)+","+str(k)+\
+            lineDiff="var "+str(dumpFile0.varNames[var])+" in zone ("+str(i)+","+str(j)+","+str(k)+\
               ") has relative difference of {0:.2e} and magnitudes {1:.15e} and {2:.15e}.\n"\
               .format(relativeDiffernace,dumpFile0.vars[var][i][j][k],dumpFile1.vars[var][i][j][k])
             out.write(lineDiff)

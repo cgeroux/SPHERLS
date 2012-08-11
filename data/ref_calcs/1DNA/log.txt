@@ -1,10 +1,14 @@
-2012-07-14 19:00:15.512186
+2012-08-11 16:48:28.237553
 directory "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA" found
 checking for needed files ...
 found "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
 found start model "1DNARef_t00000000"
 
 RUNNING SPHERLS
+src/SPHERLS/dataManipulation.cpp:modelRead:1174:2: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
+src/SPHERLS/dataManipulation.cpp:modelRead:1174:1: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
+src/SPHERLS/dataManipulation.cpp:modelRead:1174:3: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
+src/SPHERLS/dataManipulation.cpp:modelRead:1174:0: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000000
 src/SPHERLS/main.cpp:main:144:0:
@@ -20,102 +24,102 @@ src/SPHERLS/main.cpp:main:95:0:
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 1 at time t=6.70048421105859e+00 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43699e-05
-    * max( (Del T)_t/T )       =1.11701e-05
+    * max( (Del T)_t/T )       =1.11702e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.23103e-15
+    * Largest relative error in calculation of temperature was     4.95730e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000002
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 2 at time t=1.34009683742773e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43702e-05
-    * max( (Del T)_t/T )       =1.12632e-05
+    * max( (Del T)_t/T )       =1.12633e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.82959e-15
+    * Largest relative error in calculation of temperature was     7.15641e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000003
 src/SPHERLS/main.cpp:main:144:0:
-  For current time step 3 at time t=2.01014524933422e+01 [s] with time step dt=6.70048e+00 [s]
+  For current time step 3 at time t=2.01014524933423e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43700e-05
-    * max( (Del T)_t/T )       =1.24386e-05
+    * max( (Del T)_t/T )       =1.24387e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.36830e-15
+    * Largest relative error in calculation of temperature was     6.39333e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000004
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 4 at time t=2.68019365732548e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43693e-05
-    * max( (Del T)_t/T )       =1.47702e-05
+    * max( (Del T)_t/T )       =1.47703e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     4.78545e-15
+    * Largest relative error in calculation of temperature was     5.42356e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000005
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 5 at time t=3.35024206197781e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43680e-05
-    * max( (Del T)_t/T )       =1.67254e-05
+    * max( (Del T)_t/T )       =1.67255e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.01766e-15
+    * Largest relative error in calculation of temperature was     5.37303e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000006
 src/SPHERLS/main.cpp:main:144:0:
-  For current time step 6 at time t=4.02029046388305e+01 [s] with time step dt=6.70048e+00 [s]
+  For current time step 6 at time t=4.02029046388306e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43662e-05
-    * max( (Del T)_t/T )       =1.82826e-05
+    * max( (Del T)_t/T )       =1.82827e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.19992e-15
+    * Largest relative error in calculation of temperature was     5.03578e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000007
 src/SPHERLS/main.cpp:main:144:0:
-  For current time step 7 at time t=4.69033886359067e+01 [s] with time step dt=6.70048e+00 [s]
+  For current time step 7 at time t=4.69033886359068e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43639e-05
-    * max( (Del T)_t/T )       =1.95700e-05
+    * max( (Del T)_t/T )       =1.95701e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.00305e-15
+    * Largest relative error in calculation of temperature was     6.32368e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000008
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 8 at time t=5.36038726156008e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43611e-05
-    * max( (Del T)_t/T )       =2.06804e-05
+    * max( (Del T)_t/T )       =2.06805e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.05142e-15
+    * Largest relative error in calculation of temperature was     6.24939e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000009
 src/SPHERLS/main.cpp:main:144:0:
   For current time step 9 at time t=6.03043565812874e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43577e-05
-    * max( (Del T)_t/T )       =2.16805e-05
+    * max( (Del T)_t/T )       =2.16806e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.89746e-15
+    * Largest relative error in calculation of temperature was     6.35144e-15
 src/SPHERLS/dataManipulation.cpp:fin:658:0:
   Dumping model to file: 1DNARef_t00000010
 src/SPHERLS/dataManipulation.cpp:fin:660:0:
-  For current time step 10 at time t=6.70048405349972e+01 [s] with time step dt=6.70048e+00 [s]
+  For current time step 10 at time t=6.70048405349971e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43538e-05
-    * max( (Del T)_t/T )       =2.26128e-05
+    * max( (Del T)_t/T )       =2.26130e-05
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.64455e-15
-Run time for proc 0 is 2.8016304970e-01 [s]
+    * Largest relative error in calculation of temperature was     6.07572e-15
+Run time for proc 0 is 1.2981081009e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...
