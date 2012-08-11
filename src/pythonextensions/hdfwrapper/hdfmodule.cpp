@@ -122,6 +122,7 @@ static PyObject* close(PyObject* self, PyObject* args){
   if(nFileIDLoc==FAIL){//if a file ID wasn't given
     if(nFileID==FAIL){//check to see if a file has been opened previously and use that file it has
       //nothing to be done
+      Py_INCREF(Py_None);
       return Py_None;
     }
     else{
@@ -137,6 +138,7 @@ static PyObject* close(PyObject* self, PyObject* args){
     return NULL;
   }
   nFileID=FAIL;
+  Py_INCREF(Py_None);
   return Py_None;
 }
 static PyObject* openData(PyObject* self, PyObject* args){
@@ -227,6 +229,7 @@ static PyObject* writeData(PyObject* self, PyObject* args){
   }
   
   //nStat=SDwritedata(nDataID,nStart,NULL,nDims,(VOIDP)dTemp);
+  Py_INCREF(Py_None);
   return Py_None;
 }
 static PyObject* closeData(PyObject* self, PyObject* args){
@@ -247,6 +250,7 @@ static PyObject* closeData(PyObject* self, PyObject* args){
   if(nDataIDLoc==FAIL){//if a data ID wasn't given
     if(nDataID==FAIL){//check to see if a file has been opened previously and use that file it has
       //nothing to do
+      Py_INCREF(Py_None);
       return Py_None;
     }
     else{
@@ -262,6 +266,7 @@ static PyObject* closeData(PyObject* self, PyObject* args){
     return NULL;
   }
   nDataID=FAIL;
+  Py_INCREF(Py_None);
   return Py_None;
 }
 static PyMethodDef HDFMethods[] ={

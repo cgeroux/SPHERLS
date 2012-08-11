@@ -114,6 +114,18 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     parameters.nTypeTurbulanceMod=0;//not using a turbulance model
   }
   
+  //switch to dedm node if there is one
+  XMLNode xDEDM=getXMLNodeNoThrow(xData,"dedm",0);
+  if(!xDEDM.isEmpty()){
+    parameters.bDEDMClampValue=true
+    
+    //get temperature to set DEDM clamp
+    getXMLValue(xTurbModel,"temperature",0,paramters.dEDMClampTemperature);
+  }
+  else{
+    parameters.bDEDMClampValue=false
+  }
+  
   //read in model
   modelRead(sStartModel,procTop,grid,time,parameters);
   

@@ -8,6 +8,9 @@ import paths
 import multiprocessing
 import time
 import random
+import mywarnings
+import warnings
+
 def main():
   
   parser=op.OptionParser(usage="Usage: %prog [options]"
@@ -136,6 +139,8 @@ def main():
         cmd="qsub "+script
         os.system(cmd)
       if i+1>=options.n:# if the maximum number of jobs are exceed stop
+        warnings.warn("Maximum number of jobs reached ("+string(options.n)
+          +") before all jobs submitted, use -n to increast limit")
         break
 def runAverage(outputFileName,logFile,options):
   cmd=os.path.join(paths.scriptPaths,"average_PKE.py")

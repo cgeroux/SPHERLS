@@ -14,7 +14,7 @@ import combine_bins
 from math import *
 sys.path.append(paths.srcPath+"/pythonextensions/lib/python/")
 import hdf
-
+import os.path
 
 class fileSet:
   def __init__(self,element):
@@ -34,10 +34,51 @@ class fileSet:
     
     #get timeFile Name
     self.timeFile=element.get("timeFile")
+    if self.timeFile==None:
+      self.timeFile="timeFile.hdf"
     
     #get frequency
     self.frequency=1
     self.frequency=int(element.get("frequency"))
+    
+    #get output path
+    self.outputPath=element.get("outputpath")
+    
+    #get radialCutZone element text
+    elementRadialCutZone=element.findall("radialCutZone")
+    if len(elementRadialCutZone)>1:
+      warnings.warn("more than one \"radialCutZone\" node ignoring all but first node")
+    self.__checkSuppotedNodeAttributes(elementRadialCutZone[0])
+    if elementRadialCutZone[0].text!=None or elementRadialCutZone[0].text!="":
+      self.radialCutZone=int(elementRadialCutZone[0].text)
+    else:
+      raise Exception("must have a \"radialCutZone\" node in a \"fileSet\" node with an integer value")
+    
+    #get includeBoundaries element text
+    elementIncludeBoundaries=element.findall("includeBoundaries")
+    if len(elementIncludeBoundaries)>1:
+      warnings.warn("more than one \"includeBoundaries\" node ignoring all but first node")
+    self.__checkSuppotedNodeAttributes(elementIncludeBoundaries[0])
+    if elementIncludeBoundaries[0]!=None:
+      if elementIncludeBoundaries[0].text in ["true","yes","y","t","1"]:
+        self.includeBoundaries=True
+      elif elementIncludeBoundaries[0].text in ["false","no","n","n","0"]:
+        self.includeBoundaries=False
+      else:
+        raise Exception("\"includeBoundaries\" node expects \"true\" or \"false\"")
+    else:
+      raise Exception("must have a \"includeBoundaries\" node in a \"fileSet\" node")
+    
+    #get numRInterp element text
+    elementRadialCutZone=element.findall("numRInterp")
+    if len(elementRadialCutZone)>1:
+      warnings.warn("more than one \"numRInterp\" node ignoring all but first node")
+    self.__checkSuppotedNodeAttributes(elementRadialCutZone[0])
+    if elementRadialCutZone[0].text!=None or elementRadialCutZone[0]!="":
+      self.numRInterp=int(elementRadialCutZone[0].text)
+    else:
+      raise Exception("must have a \"numRInterp\" node in a \"fileSet\" node with an integer value")
+      
     '''
     #get dataPerFile node
     dataPerFile=element.findall("dataPerFile")
@@ -91,17 +132,16 @@ class fileSet:
     self.supportedNodeAttributes={}
     
     #for a fileSet Node
-    self.supportedNodeAttributes["fileSet"]=["fileRange","timeFile"]
+    self.supportedNodeAttributes["fileSet"]=["fileRange","timeFile","outputpath","frequency"]
     
     #for a dataPerFile Node
-    self.supportedNodeAttributes["dataPerFile"]=[]
+    self.supportedNodeAttributes["radialCutZone"]=[]
     
     #for variable node
-    self.supportedNodeAttributes["variable"]=["indep0","indep1","indep2"\
-      ,"fillValue"]
+    self.supportedNodeAttributes["includeBoundaries"]=[]
     
     #for interpVar
-    self.supportedNodeAttributes["interpVar"]=["numPoints","name"]
+    self.supportedNodeAttributes["numRInterp"]=[]
   def makeHDFFiles(self,options):
     """Makes HDF files specified by settings"""
     
@@ -141,16 +181,20 @@ class fileSet:
     """Converts a dump ifle to an hdf file formated in the way sepcified in the 
     xml configuration file"""
     
-    nRadialCutZone=125
-    bIncludeBoundaries=False
-    numRInterp=20
+    nRadialCutZone=self.radialCutZone
+    bIncludeBoundaries=self.includeBoundaries
+    numRInterp=self.numRInterp
     
     self.getDataFromDump(dump,nRadialCutZone,bIncludeBoundaries)
     self.setAdditionalVariables(numRInterp)
+    if self.outputPath!=None:
+      file=os.path.join(self.outputPath,os.path.basename(dump.fileName)+".hdf")
+    else:
+      file=dump.fileName+".hdf"
     
-    hdf.open(dump.fileName+".hdf")
+    hdf.open(file)
     n=0
-    print "writting to hdf file \""+dump.fileName+".hdf\" ..."
+    print "writting to hdf file \""+file+"\" ..."
     for data in self.data:
       #print "  writting \""+self.dataNames[n]+"\" to file ..."
       hdf.openData(self.dataNames[n],hdf.DFNT_FLOAT64,self.dataShape[n])
@@ -307,15 +351,14 @@ class fileSet:
             
           
           #V Scaled
-          [value,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nV,rScale
+          [valueV,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nV,rScale
             ,iLowerLast,j,k)
-          dataKVScaled.append(value*thetaScale/r*rScale)
+          dataKVScaled.append(valueV*thetaScale/r*rScale)
           
           #W Scaled
-          [value,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nW,rScale
+          [valueW,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nW,rScale
             ,iLowerLast,j,k)
-          dataKWScaled.append(value/(r*sin(self.data[nTheta][0][j][0]))*rScale\
-            *phiScale)
+          dataKWScaled.append(valueW/(r*sin(self.data[nTheta][0][j][0]))*phiScale*rScale)
           
           #U-U0 
           [valueU,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nU,rScale
@@ -325,14 +368,10 @@ class fileSet:
           dataKUmU0.append((valueU-valueU0))
           
           #V 
-          [value,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nV,rScale
-            ,iLowerLast,j,k)
-          dataKV.append(value)
+          dataKV.append(valueV)
           
           #W 
-          [value,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nW,rScale
-            ,iLowerLast,j,k)
-          dataKW.append(value)
+          dataKW.append(valueW)
           
         dataJT.append(dataKT)
         dataJRho.append(dataKRho)

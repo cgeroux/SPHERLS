@@ -74,8 +74,11 @@ Parameters::Parameters(){
   dMaxConvectiveVelocity_c=0.0;
   dPrt=0.7;
   dDonorCellMin=0.2;
-  dT_cut=2.35e4;
-  bDEDM_cut_set=false;
+  dDEDMClampValue=1.0;//this value indicates that it has not been set yet
+  dDEDMClampMr=-1.0;//this value indicates that it has not been set yet
+  dEDMClampTemperature=-1.0;//this value indicates that it has not been set yet
+  bDEDMClamp=false;
+  
   #if DEBUG_EQUATIONS==1
   bSetThisCall=false;
   bEveryJK=false;

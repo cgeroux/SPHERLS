@@ -423,13 +423,14 @@ def plot(dataSets,options,title):
             print "only hex strings are accepted for colors other than "+basicMatPlotColors
             quit()
           if curve.label!=None and curve.label!="":
-            lines.append(temp)
+            lines.append(temp[0])
             labels.append(curve.label)
           curveCount=curveCount+1
         ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
         ax[nTotalPlotCount-1].set_ylim(plot.limits)
         
         #set legend
+        print lines
         if len(lines)>0:
           ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
         

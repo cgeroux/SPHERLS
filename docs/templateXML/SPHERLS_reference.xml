@@ -32,7 +32,10 @@
     <watchZone x0="125" x1="0" x2="0"></watchZone><!--15,10,6,6-->
     <watchZone x0="126" x1="0" x2="0"></watchZone><!--15,10,6,6-->
   </watchZones>
-  <peakKE>true</peakKE><!-- true=track peak KE, false=don't track it -->
+  <dedm temperature="2.35e4"></dedm><!-- if this node is present it clamps the dE/dM_r gradient in the
+    radial advection term in the energy equation to the value in the static model at temperature 
+    lower that specified. This helps maintain the correct energy output after the sudden onset of
+    convection. It can usually be removed after convection is fully established. -->
   <prints type="normal"><!-- aviable types are "normal" where info about the gernal progress of the 
     code is printed "timeStepInfo" where information about the timestep is printed out in column 
     form specifically for identifying prolems with timestep selection-->

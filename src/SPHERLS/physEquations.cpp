@@ -20873,31 +20873,27 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
   
-  //steep DE/DM gradient fix
-  /**
-  //5700 CTEOS
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
-    dA1UpWindGrad=-1.796596699553508e-14;
-    dA1CenGrad=-1.796596699553508e-14;
-  }
-  //6100 CTEOS
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732392703405e+33){
-    dA1UpWindGrad=-2.381754669392478e-14;
-    dA1CenGrad=-2.381754669392478e-14;
-  }
-  //T6500 CTEOS
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732445236012e+33){
-    dA1UpWindGrad=-3.795837002744412e-14;
-    dA1CenGrad=-3.795837002744412e-14;
-  }
-  */
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732445236012e+33){
-    dA1UpWindGrad=-3.795837002744412e-14;
-    dA1CenGrad=-3.795837002744412e-14;
+  double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+    *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
   }
   
-  double dA1=dU_U0_Diff*dRSq_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
-    *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
   
   //calculate dS1
   double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
@@ -21116,8 +21112,26 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
-  double dA1=dU_U0_Diff*dRSq_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
+  }
+  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
   
   //calculate dS1
   double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
@@ -21433,39 +21447,23 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  #if DEDEM_CLAMP==1
-  
-  /*
-  //static DE/DM clamp
-  //5700 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
-    dDEDM=-1.796596699553508e-14;
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
   }
-  //T6500 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732445236012e+33){
-    dDEDM=-3.795837002744412e-14;
-  }*/
   
-  //5700 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
-    dDEDM=-1.796596699553508e-14;
-  }
-  
-  //dynamic DE/DM clamp
-  /*
-  if( grid.dLocalGridOld[grid.nT][i][j][k]>=parameters.dT_cut
-    &&grid.dLocalGridOld[grid.nT][i+1][j][k]<=parameters.dT_cut
-    &&!parameters.bDEDM_cut_set){
-    parameters.dDEDM_cut=dDEDM;
-    parameters.nDEDM_cut_zone=i;
-    parameters.bDEDM_cut_set=true;
-  }
-  if(parameters.bDEDM_cut_set&&i>=parameters.nDEDM_cut_zone&&fabs(dDEDM)>fabs(parameters.dDEDM_cut)){
-    //if the DEDM_cut has been set, and we are above where DEDM_cut was set, and the current 
-    //DEDM<DEDM_cut.
-    dDEDM=parameters.dDEDM_cut;
-  }*/
-  #endif
   double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
   
   //calculate dS1
@@ -21749,7 +21747,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     -dEddyViscosityTerms;
 }
 double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time &time
-  ,double dTemps[],int i,int j,int k){//needs terms
+  ,double dTemps[],int i,int j,int k){
   double dT_ijk_np1=dTemps[0];
   double dT_im1jk_np1=dTemps[1];
   double dT_ijp1k_np1=dTemps[2];
@@ -21962,42 +21960,26 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
 
-double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  #if DEDEM_CLAMP==1
-  
-  /*
-  //static DE/DM clamp
-  //5700 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
-    dDEDM=-1.796596699553508e-14;
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
   }
-  //T6500 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732445236012e+33){
-    dDEDM=-3.795837002744412e-14;
-  }*/
   
-  //5700 CTEOS, at a temperature of 2.2e4
-  if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=1.143732280336595e+33){
-    dDEDM=-1.796596699553508e-14;
-  }
-  
-  //dynamic DE/DM clamp
-  /*
-  if( grid.dLocalGridOld[grid.nT][i][j][k]>=parameters.dT_cut
-    &&grid.dLocalGridOld[grid.nT][i+1][j][k]<=parameters.dT_cut
-    &&!parameters.bDEDM_cut_set){
-    parameters.dDEDM_cut=dDEDM;
-    parameters.nDEDM_cut_zone=i;
-    parameters.bDEDM_cut_set=true;
-  }
-  if(parameters.bDEDM_cut_set&&i>=parameters.nDEDM_cut_zone&&fabs(dDEDM)>fabs(parameters.dDEDM_cut)){
-    //if the DEDM_cut has been set, and we are above where DEDM_cut was set, and the current 
-    //DEDM<DEDM_cut.
-    dDEDM=parameters.dDEDM_cut;
-  }*/
-  #endif
   double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
   
   //calculate dS1

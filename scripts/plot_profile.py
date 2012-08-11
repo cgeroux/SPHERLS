@@ -577,7 +577,7 @@ def plot(dataSets,options,title):
                   if options.file:
                     plotDataForFile.append([axisMine.phase,curve.y])
                   if curve.label!=None and curve.label!="":
-                    lines.append(temp)
+                    lines.append(temp[0])
                     labels.append(curve.label)
                   if bNonTimeAxisAny:#only need bar, if there are non-time axes in dataSet
                     limits=ax[nTotalPlotCount-1].axis()
@@ -596,7 +596,7 @@ def plot(dataSets,options,title):
                   if options.file:
                     plotDataForFile.append([axisMine.x,curve.y])
                   if curve.label!=None and curve.label!="":
-                    lines.append(temp)
+                    lines.append(temp[0])
                     labels.append(curve.label)
                   if bNonTimeAxisAny:#only need bar, if there are non-time axes in any of the dataSets
                     limits=ax[nTotalPlotCount-1].axis()
@@ -620,7 +620,7 @@ def plot(dataSets,options,title):
                 if options.file:
                   plotDataForFile.append([axisMine.x[i],curve.y[i]])
                 if curve.label!=None and curve.label!="":
-                  lines.append(temp)
+                  lines.append(temp[0])
                   labels.append(curve.label)
                 curveCount=curveCount+1
             ax[nTotalPlotCount-1].set_xlim(axisMine.limits)

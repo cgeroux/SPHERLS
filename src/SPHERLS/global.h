@@ -668,21 +668,25 @@ class Parameters{
       Cloutman in "The LUVD11 Large Eddy Simulation Model" April 15, 1991 a Lawrence Livermore 
       National Labratory report.
       */
-    double dT_cut;/**<
-      The temperature at which to cut the DEDM gradient back
+    double dDEDMClampValue;/**<
+      The value to use for DEDM in energy conservation equation when \ref Parameters::bDEDMClamp is
+      true.
     */
-    double dDEDM_cut;/**<
-      The value to use for DEDM in energy conservation quation when DEDM becomes too large.
+    double dDEDMClampMr;/**<
+      The mass above which the DEDM clamp is applied.
     */
-    int nDEDM_cut_zone;/**<
-      The zone at which the DEDM cut was made
+    double dEDMClampTemperature;/**<
+      The temperature at which to chose \ref Parameters::dDEDMClampMr from the stating model.
     */
-    bool bDEDM_cut_set;/**<
-      If \ref Paramters::dDEDM_cut  has been set for this time step it will be true.
+    bool bDEDMClamp;/**<
+      Specifies if a DEDM clamp should be used. This should only be used when starting from a model
+      with out any sizable convection. It could give undesirable results if used when starting a
+      calculation from a model with already established convection.
     */
     std::string sDebugProfileOutput;/**<
       output file name for debuging profile, only used if DEBUG_EQUATIONS is set to 1
     */
+    
     #if DEBUG_EQUATIONS==1
     profileData profileDataDebug;/**<
       tracks and writes out profile data useful for debugging
