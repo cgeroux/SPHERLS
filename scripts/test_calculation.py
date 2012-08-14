@@ -199,6 +199,11 @@ def createTestCalcNA(subDir,numProcs,options):
   #cmd=["cp",configFile,"./SPHERLS.xml"]
   #result=subprocess.call(cmd,stdout=log,stderr=log)
   spherlsConfig=xml.parse(configFile)
+  root=spherlsConfig.getroot()
+  
+  #if want to add dedm clamp
+  #root.append(xml.fromstring("<dedm temperature=\"2.35e4\"></dedm>"))
+  
   eosElement=spherlsConfig.findall("eos")
   eosFileElement=eosElement[0].findall("eosFile")
   eosFile=os.path.join(paths.EOSPath,os.path.basename(eosFileElement[0].text))

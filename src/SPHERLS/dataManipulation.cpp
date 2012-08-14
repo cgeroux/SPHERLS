@@ -120,7 +120,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     parameters.bDEDMClamp=true;
     
     //get temperature to set DEDM clamp
-    getXMLValue(xTurbModel,"temperature",0,parameters.dEDMClampTemperature);
+    getXMLAttribute(xDEDM,"temperature",parameters.dEDMClampTemperature);
   }
   else{
     parameters.bDEDMClamp=false;

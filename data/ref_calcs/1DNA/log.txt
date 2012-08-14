@@ -1,14 +1,10 @@
-2012-08-11 16:48:28.237553
+2012-08-14 14:50:31.616077
 directory "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA" found
 checking for needed files ...
 found "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
 found start model "1DNARef_t00000000"
 
 RUNNING SPHERLS
-src/SPHERLS/dataManipulation.cpp:modelRead:1174:2: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
-src/SPHERLS/dataManipulation.cpp:modelRead:1174:1: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
-src/SPHERLS/dataManipulation.cpp:modelRead:1174:3: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
-src/SPHERLS/dataManipulation.cpp:modelRead:1174:0: WARNING the equation of state file specified in the model, "/home/cgeroux/WORK/SPHERLS/data/eos/eosY240Z002" is not the same as that specified in the configuration file, "../../eos/eosY240Z002". Using file given in configuration file for EOS.
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000000
 src/SPHERLS/main.cpp:main:144:0:
@@ -109,9 +105,9 @@ src/SPHERLS/main.cpp:main:144:0:
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.35144e-15
-src/SPHERLS/dataManipulation.cpp:fin:658:0:
+src/SPHERLS/dataManipulation.cpp:fin:670:0:
   Dumping model to file: 1DNARef_t00000010
-src/SPHERLS/dataManipulation.cpp:fin:660:0:
+src/SPHERLS/dataManipulation.cpp:fin:672:0:
   For current time step 10 at time t=6.70048405349971e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43538e-05
     * max( (Del T)_t/T )       =2.26130e-05
@@ -119,7 +115,7 @@ src/SPHERLS/dataManipulation.cpp:fin:660:0:
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.07572e-15
-Run time for proc 0 is 1.2981081009e-01 [s]
+Run time for proc 0 is 1.2434887886e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...
