@@ -1,0 +1,59 @@
+**calNewE_RT_NA_LES:
+-moved radii form time centered values to values at n
+-found an error in the surface boundary condition where
+ dRho_iph1halfjk_n was being set by accessing a rho at i+1, which
+ doesn't exist, this was in the 2D explicit region, so it probably
+ wouldn't ever effect the calculation unless no implicit calculation
+ was being done. (this change resulted in a very small change in the
+ dump files, the relative temperature differences were on the order of
+ 1e-12 at the largest)
+ 
+calNewE_RTP_NA_LES:
+-fixed a surface boundary condition for dEGrad_ip1halfjk_np1half, it
+ should be set to zero. But this should not make any difference unless
+ the calculation is done without an implicit region at the surface
+ (made no difference in dumps)
+
+****calNewEddyVisc_RTP_SM,calNewEddyVisc_RT_SM:
+-changed R at np1 to np1half, it should be properly time centered.
+ Could this have something to do with the 3D/1D instability? (both had
+ caused a relative temperature difference of at most 1e-8 and was
+ largest near the hydrogen ionization zone)
+
+calNewU_R:
+-when calculating u_ijk_nm1half it was from
+ (u[i+1][j][k]+u[i][j][k])*0.5 when it should have been 
+ (u[i][j][k]+u[i-1][j][k])*0.5, it shouldn't make any differnece as it
+ was used in the A1 term, which should be always zero.
+-removing dA1 from calculation, as it should be zero all the time.
+ (found a small difference in dump files ~1e-9, checked out to make
+ sure that dA1 was zero all the time, it wasn't quite, u-u_0 seems to
+ be non-zero at the 1e-9 level, and dA1 is non-zero at the 1e-36 level)
+
+****calNewV_RT_LES:
+-missed a factor of pi in the radial eddy viscosity term
+-missed a factor of pi in the a1 term
+ (relative differences in the theta velocities as large as 1e-3.
+ Largest reltative differences are in the hydrogen ionization zone,
+ this effected the other variables aswell)
+
+dImplicitEnergyFunction_R_SB:
+-when calculating dE_im1jk_np1half from equation of state, I used rho_i
+ instead of rho_im1, but this is only used in the A1 term which for a
+ 1D calculation will always be zero (made no difference in dumps)
+
+****dImplicitEnergyFunction_R:
+-it added Q0 twice to the pressure, this could cause s1 to be larger
+ than it should when there is compression (didn't notice any difference
+ in the dumps, probably means that the 1D reference calculations are
+ pretty tame, and the artificial viscosity isn't playing a role.
+ Perhaps I should get a better set of 1D reference calculations)
+
+calNewU0_RT:
+-removed terms including flow in theta direction, slight relative
+ changes in u_0 and u at and near the surface respectively of ~1e-14.
+
+dImplicitEnergyFunction_RTP_LES:
+-updating this caused relative differences in the velocities of the
+ model dump with the largest 1e-9 but most were around 1e-14. The
+ larger relative differences were for smaller velocities (1e-2 ish).

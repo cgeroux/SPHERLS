@@ -1,4 +1,4 @@
-2012-08-14 14:50:31.616077
+2012-08-14 17:51:00.846648
 directory "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA" found
 checking for needed files ...
 found "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
@@ -34,7 +34,7 @@ src/SPHERLS/main.cpp:main:144:0:
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     7.15641e-15
+    * Largest relative error in calculation of temperature was     7.15651e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000003
 src/SPHERLS/main.cpp:main:144:0:
@@ -54,7 +54,7 @@ src/SPHERLS/main.cpp:main:144:0:
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.42356e-15
+    * Largest relative error in calculation of temperature was     5.42354e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000005
 src/SPHERLS/main.cpp:main:144:0:
@@ -64,7 +64,7 @@ src/SPHERLS/main.cpp:main:144:0:
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     5.37303e-15
+    * Largest relative error in calculation of temperature was     5.37299e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000006
 src/SPHERLS/main.cpp:main:144:0:
@@ -94,7 +94,7 @@ src/SPHERLS/main.cpp:main:144:0:
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.24939e-15
+    * Largest relative error in calculation of temperature was     6.24936e-15
 src/SPHERLS/main.cpp:main:95:0:
   Dumping model to file: 1DNARef_t00000009
 src/SPHERLS/main.cpp:main:144:0:
@@ -114,8 +114,8 @@ src/SPHERLS/dataManipulation.cpp:fin:672:0:
     * max( (Del UmU0)_t/UmU0 ) =0.00000e+00
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
-    * Largest relative error in calculation of temperature was     6.07572e-15
-Run time for proc 0 is 1.2434887886e-01 [s]
+    * Largest relative error in calculation of temperature was     6.07563e-15
+Run time for proc 0 is 1.5621209145e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...

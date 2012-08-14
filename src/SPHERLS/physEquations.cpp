@@ -655,72 +655,56 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
   int k;
   int nICen;
   double dRho_ip1halfjk_n;
+  double dP_ip1jk_n;
+  double dP_ijk_n;
+  double dA1CenGrad;
+  double dA1UpWindGrad;
+  double dA1;
+  double dS1;
+  double dS4;
+  double dU_U0_Diff;
   double dU_ip1jk_nm1half;
   double dU_ijk_nm1half;
   double dU_ip1halfjk_nm1half;
   double dU0_ip1half_nm1half;
-  double dP_ip1jk_n;
-  double dP_ijk_n;
-  double dA1;
-  double dS1;
   double dRSq_ip1half_n;
-  double dS4;
-  double dA1CenGrad;
-  double dA1UpWindGrad;
-  double dU_U0_Diff;
+  double dDM_ip1half;
   double dDonorFrac_ip1half;
   for(i=grid.nStartUpdateExplicit[grid.nU][0];i<grid.nEndUpdateExplicit[grid.nU][0];i++){
     
     //calculate i of centered quantities
     nICen=i-grid.nCenIntOffset[0];
     dU0_ip1half_nm1half=grid.dLocalGridOld[grid.nU0][i][0][0];
+    dRSq_ip1half_n=grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0];
+    dDM_ip1half=(grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
+      +grid.dLocalGridOld[grid.nDM][nICen][0][0])*0.5;
     dDonorFrac_ip1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen+1][0][0]
       +grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])*0.5;
     
     for(j=grid.nStartUpdateExplicit[grid.nU][1];j<grid.nEndUpdateExplicit[grid.nU][1];j++){
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
         
-        //calculate interpolated quantities
-        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][nICen+1][j][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
+        //CALCULATE INTERPOLATED QUANTITIES
         dU_ip1jk_nm1half=(grid.dLocalGridOld[grid.nU][i+1][j][k]
           +grid.dLocalGridOld[grid.nU][i][j][k])*0.5;
-        dU_ijk_nm1half=(grid.dLocalGridOld[grid.nU][i+1][j][k]
-          +grid.dLocalGridOld[grid.nU][i][j][k])*0.5;
-        dU_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k];
+        dU_ijk_nm1half=(grid.dLocalGridOld[grid.nU][i][j][k]
+          +grid.dLocalGridOld[grid.nU][i-1][j][k])*0.5;
+        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][nICen+1][j][k]
+          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
         dP_ip1jk_n=grid.dLocalGridOld[grid.nP][nICen+1][j][k]
           +grid.dLocalGridOld[grid.nQ0][nICen+1][j][k];
         dP_ijk_n=grid.dLocalGridOld[grid.nP][nICen][j][k]
           +grid.dLocalGridOld[grid.nQ0][nICen][j][k];
-        dRSq_ip1half_n=grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0];
         
-        //Calculate dA1
-        dA1CenGrad=(dU_ip1jk_nm1half-dU_ijk_nm1half)
-          /(grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
-          +grid.dLocalGridOld[grid.nDM][nICen][0][0])*2.0;
-        dA1UpWindGrad=0.0;
-        dU_U0_Diff=grid.dLocalGridOld[grid.nU][i][j][k]
-          -grid.dLocalGridOld[grid.nU0][i][0][0];
-        if(dU_U0_Diff<0.0){//moving from outside in
-          dA1UpWindGrad=(grid.dLocalGridOld[grid.nU][i+1][j][k]
-            -grid.dLocalGridOld[grid.nU][i][j][k])
-            /grid.dLocalGridOld[grid.nDM][nICen+1][0][0];
-        }
-        else{//moving from inside out
-          dA1UpWindGrad=(grid.dLocalGridOld[grid.nU][i][j][k]
-            -grid.dLocalGridOld[grid.nU][i-1][j][k])
-            /grid.dLocalGridOld[grid.nDM][nICen][0][0];
-        }
-        dA1=dU_U0_Diff*((1.0-dDonorFrac_ip1half)*dA1CenGrad+dDonorFrac_ip1half*dA1UpWindGrad);
+        //calculate dS1
+        dS1=(dP_ip1jk_n-dP_ijk_n)/(dDM_ip1half*dRho_ip1halfjk_n);
         
-        //calculate source terms in x1-direction
-        dS1=(dP_ip1jk_n-dP_ijk_n)/(grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
-          +grid.dLocalGridOld[grid.nDM][nICen][0][0])*2.0/dRho_ip1halfjk_n;
+        //Calculate dS4
         dS4=parameters.dG*grid.dLocalGridOld[grid.nM][i][0][0]/dRSq_ip1half_n;
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
-          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1+dS1)+dS4);
+          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dS1)+dS4);
           
         #if DEBUG_EQUATIONS==1
         
@@ -740,13 +724,6 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
         parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
-        
-        //add A1
-        ssName.str("");
-        ssName<<"U_A1"<<ssEnd.str();
-        parameters.profileDataDebug.setMaxAbs(ssName.str()
-          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
-          ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1));
           
         //add S1
         ssName.str("");
@@ -759,7 +736,7 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
         ssName.str("");
         ssName<<"U_S4"<<ssEnd.str();
         parameters.profileDataDebug.setMaxAbs(ssName.str()
-        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,-1.0*dS4);
         
         //add DuDt
@@ -775,11 +752,16 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
   }
   
   //ghost region 0, outter most ghost region in x1 direction
-  for(i=grid.nStartGhostUpdateExplicit[grid.nU][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU][0][0];
-    i++){
+  for(i=grid.nStartGhostUpdateExplicit[grid.nU][0][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nU][0][0];i++){
     
     //calculate i of centered quantities
     nICen=i-grid.nCenIntOffset[0];
+    dRSq_ip1half_n=grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0];
+    dDM_ip1half=(grid.dLocalGridOld[grid.nDM][nICen][0][0])*(0.5+parameters.dAlpha
+      +parameters.dAlphaExtra);/**\BC Missing grid.dLocalGridOld[grid.nDM][i+1][0][0] in calculation
+      of \f$S_1\f$ using \ref Parameters.dAlpha *grid.dLocalGridOld[grid.nDM][nICen][0][0] instead.
+      */
     dDonorFrac_ip1half=grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0];
     
     for(j=grid.nStartGhostUpdateExplicit[grid.nU][0][1];
@@ -787,47 +769,26 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
       for(k=grid.nStartGhostUpdateExplicit[grid.nU][0][2];
         k<grid.nEndGhostUpdateExplicit[grid.nU][0][2];k++){
         
-        //calculate interpolated quantities
-        dRho_ip1halfjk_n=(0.0+grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;/**\BC Missing 
-          grid.dLocalGridOld[grid.nD][nICen+1][j][k] in calculation of \f$\rho_{i+1/2}\f$, setting
-           it to 0.0*/
+        //CALCULATE INTERPOLATED QUANTITIES
         dU_ip1jk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k];
-        dU_ijk_nm1half=(grid.dLocalGridOld[grid.nU][i][j][k]+grid.dLocalGridOld[grid.nU][i-1][j][k])
-          *0.5;
+        dU_ijk_nm1half=(grid.dLocalGridOld[grid.nU][i][j][k]
+          +grid.dLocalGridOld[grid.nU][i-1][j][k])*0.5;
+        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;/**\BC Missing density 
+          outside model, setting it to zero. */
+        dP_ijk_n=grid.dLocalGridOld[grid.nP][nICen][j][k]
+          +grid.dLocalGridOld[grid.nQ0][nICen][j][k];
+        dP_ip1jk_n=-1.0*dP_ijk_n;/**\BC Missing pressure outside surface setting it equal to 
+          negative pressure in the center of the first cell so that it will be zero at surface.*/
         
-        //calculate advection term in x1-direction
-        dP_ijk_n=grid.dLocalGridOld[grid.nP][nICen][j][k]+grid.dLocalGridOld[grid.nQ0][nICen][j][k];
+        //calculate dS1
+        dS1=(dP_ip1jk_n-dP_ijk_n)/(dDM_ip1half*dRho_ip1halfjk_n);
         
-        dP_ip1jk_n=-1.0*dP_ijk_n;/**\BC Missing grid.dLocalGridOld[grid.nP][nICen+1][j][k] in 
-          calculation of \f$S_1\f$, setting it to -1.0*grid.dLocalGridOld[grid.nP][nICen][j][k].*/
-        
-        //Calculate dA1
-        dA1CenGrad=(dU_ip1jk_nm1half-dU_ijk_nm1half)/grid.dLocalGridOld[grid.nDM][nICen][0][0]*2.0;
-          /**\BC Missing grid.dLocalGridOld[grid.nDM][nICen+1][0][0] in calculation of centered 
-          \f$A_1\f$ gradient, setting it to zero.*/
-        dA1UpWindGrad=0.0;
-        if(grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0]<0.0){//moving from outside in
-          dA1UpWindGrad=dA1CenGrad;/**\BC Missing grid.dLocalGridOld[grid.nU][i+1][j][k] and 
-            grid.dLocalGridOld[grid.nDM][nICen+1][0][0] in calculation of upwind gradient, when 
-            moving inward. Using centered gradient instead.*/
-        }
-        else{//moving from inside out
-          dA1UpWindGrad=(grid.dLocalGridOld[grid.nU][i][j][k]
-            -grid.dLocalGridOld[grid.nU][i-1][j][k])/grid.dLocalGridOld[grid.nDM][nICen][0][0];
-        }
-        dA1=(grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0])
-          *((1.0-dDonorFrac_ip1half)*dA1CenGrad+dDonorFrac_ip1half*dA1UpWindGrad);
-        
-        //calculate source terms in x1-direction
-        dS1=(dP_ip1jk_n-dP_ijk_n)/(grid.dLocalGridOld[grid.nDM][nICen][0][0]*(0.5+parameters.dAlpha
-        +parameters.dAlphaExtra))
-          /dRho_ip1halfjk_n;
-        dRSq_ip1half_n=grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0];
+        //Calculate dS4
         dS4=parameters.dG*grid.dLocalGridOld[grid.nM][i][0][0]/dRSq_ip1half_n;
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
-          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1+dS1)+dS4);
+          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dS1)+dS4);
         
         #if DEBUG_EQUATIONS==1
         
@@ -847,13 +808,6 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
         parameters.profileDataDebug.setMaxAbs(ssName.str()
           ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
           ,grid.dLocalGridOld[grid.nM][i][0][0]);
-        
-        //add A1
-        ssName.str("");
-        ssName<<"U_A1"<<ssEnd.str();
-        parameters.profileDataDebug.setMaxAbs(ssName.str()
-          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
-          ,-4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1));
           
         //add S1
         ssName.str("");
@@ -909,9 +863,6 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
           +grid.dLocalGridOld[grid.nQ0][nICen+1][j][k];
         dP_ijk_n=grid.dLocalGridOld[grid.nP][nICen][j][k]
           +grid.dLocalGridOld[grid.nQ0][nICen][j][k];
-        dA1=(dU_ip1halfjk_nm1half-dU0_ip1half_nm1half)*(dU_ip1jk_nm1half-dU_ijk_nm1half)/
-          (grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
-          +grid.dLocalGridOld[grid.nDM][nICen][0][0])*2.0;
         
         //calculate source terms in x1-direction
         dS1=(dP_ip1jk_n-dP_ijk_n)/(grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
@@ -921,7 +872,7 @@ void calNewU_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop){
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
-          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dA1+dS1)+dS4);
+          -time.dDeltat_n*(4.0*parameters.dPi*dRho_ip1halfjk_n*dRSq_ip1half_n*(dS1)+dS4);
       }
     }
   }
@@ -1777,6 +1728,76 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1+dS1)
           +dA2-dS2+dS4+dEddyViscosityTerms);
+        
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add M_r
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,grid.dLocalGridOld[grid.nM][i][0][0]);
+        
+        //add A1
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1));
+          
+        //add S1
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dS1));
+        
+        //add A2
+        ssName.str("");
+        ssName<<"U_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dA2);
+          
+        //add S2
+        ssName.str("");
+        ssName<<"U_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,dS2);
+          
+        //add S4
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dS4);
+          
+        //add dEddyViscosityTerms
+        ssName.str("");
+        ssName<<"U_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dEddyViscosityTerms);
+        
+        //add DuDt
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
+          /time.dDeltat_n);
+        #endif
       }
     }
   }
@@ -1992,6 +2013,76 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1+dS1)
           +dA2-dS2+dS4+dEddyViscosityTerms);
+        
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add M_r
+        ssName.str("");
+        ssName<<"M_r";
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,grid.dLocalGridOld[grid.nM][i][0][0]);
+        
+        //add A1
+        ssName.str("");
+        ssName<<"U_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1));
+          
+        //add S1
+        ssName.str("");
+        ssName<<"U_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dS1));
+        
+        //add A2
+        ssName.str("");
+        ssName<<"U_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dA2);
+          
+        //add S2
+        ssName.str("");
+        ssName<<"U_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,dS2);
+          
+        //add S4
+        ssName.str("");
+        ssName<<"U_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dS4);
+          
+        //add dEddyViscosityTerms
+        ssName.str("");
+        ssName<<"U_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+        ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,-1.0*dEddyViscosityTerms);
+        
+        //add DuDt
+        ssName.str("");
+        ssName<<"U_DuDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]+grid.nCenIntOffset[0]-1
+          ,(grid.dLocalGridNew[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU][i][j][k])
+          /time.dDeltat_n);
+        #endif
       }
     }
   }
@@ -2531,7 +2622,7 @@ void calNewU_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
     dU0_i_nm1half=(grid.dLocalGridOld[grid.nU0][i][0][0]
       +grid.dLocalGridOld[grid.nU0][i-1][0][0])*0.5;
     dDonorFrac_ip1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen+1][0][0]
-          +grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])*0.5;
+      +grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])*0.5;
     
     for(j=grid.nStartUpdateExplicit[grid.nU][1];j<grid.nEndUpdateExplicit[grid.nU][1];j++){
       
@@ -3184,14 +3275,12 @@ void calNewU_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         
         dEddyViscosityTerms=-4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dTA1+dTS1)-dTA2
           -dTA3+dEddyVisc_ip1halfjk_n/dRhoR_ip1halfjk_n*(dTS2+dTS3+dTS4);
-        //dEddyViscosityTerms=0.0;
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridOld[grid.nU][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRhoAve_ip1half_n*dRSq_ip1half_n*(dA1+dS1)
           +dA2-dS2+dA3-dS3+dS4+dEddyViscosityTerms);
-          
-          
+        
         #if DEBUG_EQUATIONS==1
         
         //if we don't want zone by zone, set ssEnd.str("")
@@ -3747,7 +3836,7 @@ void calNewV_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
         dV_R_ip1halfjp1halfk_n=dV_ip1halfjp1halfk_nm1half/grid.dLocalGridOld[grid.nR][nIInt][0][0];
         dV_R_im1halfjp1halfk_n=dV_im1halfjp1halfk_nm1half
           /grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-  
+        
         //calculate A1
         dA1CenGrad=(dV_ip1halfjp1halfk_nm1half-dV_im1halfjp1halfk_nm1half)
           /grid.dLocalGridOld[grid.nDM][i][0][0];
@@ -3855,13 +3944,70 @@ void calNewV_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
           *grid.dLocalGridOld[grid.nCotThetaIJp1halfK][0][j][0]
           *grid.dLocalGridOld[grid.nCotThetaIJp1halfK][0][j][0]/dR_i_n;
         
-        dEddyViscosityTerms=-4.0*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dTA1+dTS1)
-          -dTA2-dEddyVisc_ijp1halfk_n/(dRho_ijp1halfk_n*dR_i_n)*(dTS2-dTS4);
+        dEddyViscosityTerms=-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
+          *(dTA1+dTS1)-dTA2-dEddyVisc_ijp1halfk_n/(dRho_ijp1halfk_n*dR_i_n)*(dTS2-dTS4);
         
         //calculate new velocity
         grid.dLocalGridNew[grid.nV][i][j][k]=grid.dLocalGridOld[grid.nV][i][j][k]
-          -time.dDeltat_n*(4.0*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1)
-          +dS1+dA2+dS2+dEddyViscosityTerms);
+          -time.dDeltat_n*(4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
+          *(dA1)+dS1+dA2+dS2+dEddyViscosityTerms);
+        
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add A1
+        ssName.str("");
+        ssName<<"V_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
+        
+        //add S1
+        ssName.str("");
+        ssName<<"V_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dS1);
+        
+        //add A2
+        ssName.str("");
+        ssName<<"V_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dA2);
+        
+        //add S2
+        ssName.str("");
+        ssName<<"V_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dS2);
+        
+        //add EV
+        ssName.str("");
+        ssName<<"V_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dEddyViscosityTerms);
+        
+        //add V_DvDt
+        ssName.str("");
+        ssName<<"V_DvDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,(grid.dLocalGridNew[grid.nV][i][j][k]-grid.dLocalGridOld[grid.nV][i][j][k])
+          /time.dDeltat_n);
+        #endif
+        
       }
     }
   }
@@ -4076,6 +4222,64 @@ void calNewV_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
         grid.dLocalGridNew[grid.nV][i][j][k]=grid.dLocalGridOld[grid.nV][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dA1)+dS1+dA2+dS2+dEddyViscosityTerms);
+        
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add A1
+        ssName.str("");
+        ssName<<"V_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
+        
+        //add S1
+        ssName.str("");
+        ssName<<"V_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dS1);
+        
+        //add A2
+        ssName.str("");
+        ssName<<"V_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dA2);
+        
+        //add S2
+        ssName.str("");
+        ssName<<"V_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dS2);
+        
+        
+        
+        //add EV
+        ssName.str("");
+        ssName<<"V_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dEddyViscosityTerms);
+        
+        //add V_DvDt
+        ssName.str("");
+        ssName<<"V_DvDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,(grid.dLocalGridNew[grid.nV][i][j][k]-grid.dLocalGridOld[grid.nV][i][j][k])
+          /time.dDeltat_n);
+        #endif
       }
     }
   }
@@ -4879,7 +5083,7 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         grid.dLocalGridNew[grid.nV][i][j][k]=grid.dLocalGridOld[grid.nV][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dA1)+dS1+dA2+dS2+dA3+dS3+dEddyViscosityTerms);
-          
+        
         #if DEBUG_EQUATIONS==1
         
         //if we don't want zone by zone, set ssEnd.str("")
@@ -4941,7 +5145,7 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
-        //add A3
+        //add V_DvDt
         ssName.str("");
         ssName<<"V_DvDt"<<ssEnd.str();
         parameters.profileDataDebug.setMaxAbs(ssName.str()
@@ -5252,7 +5456,7 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
         grid.dLocalGridNew[grid.nV][i][j][k]=grid.dLocalGridOld[grid.nV][i][j][k]
           -time.dDeltat_n*(4.0*parameters.dPi*dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dA1)+dS1+dA2+dS2+dA3+dS3+dEddyViscosityTerms);
-          
+        
         #if DEBUG_EQUATIONS==1
         
         //if we don't want zone by zone, set ssEnd.str("")
@@ -5314,7 +5518,7 @@ void calNewV_RTP_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procT
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,-dEddyViscosityTerms);
         
-        //add A3
+        //add V_DvDt
         ssName.str("");
         ssName<<"V_DvDt"<<ssEnd.str();
         parameters.profileDataDebug.setMaxAbs(ssName.str()
@@ -6594,11 +6798,11 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
     decomposition instead of a purely radial domain decomposition.
   */
   
-  int i;
   //post a blocking recieve from inner radial neighbour
+  int i;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
-      current processor has a radial neighbor at inside post a recieve*/
+      current processor has a radial neighbor at inside, post a recieve*/
       MPI::COMM_WORLD.Recv(grid.dLocalGridNew,1
         ,messPass.typeRecvNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -6626,53 +6830,12 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
   double dUmU0_im1halfjk_np1half;
   double dDonorFrac_ip1half;
   double dDonorFrac_im1half;
-
+  
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
     
-    //calculate i of centered quantities
-    nICen=i-grid.nCenIntOffset[0];
-    
-    //calculate ratio of area at i-1/2 to area at i+1/2
-    dARatio=grid.dLocalGridOld[grid.nR][i-1][0][0]*grid.dLocalGridOld[grid.nR][i-1][0][0]
-      /(grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0]);
-    
-    //calculate difference between U and U0
-    dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][0][0]
-      -grid.dLocalGridOld[grid.nU0][i][0][0];
-    
-    dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][0][0]
-      -grid.dLocalGridNew[grid.nU0][i-1][0][0];
-    dDonorFrac_ip1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen+1][0][0]
-      +grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])*0.5;
-    dDonorFrac_im1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-      +grid.dLocalGridOld[grid.nDonorCellFrac][nICen-1][0][0])*0.5;
-    
-    //calculate rho at i-1/2, not time centered
-    dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])*0.5;
-    if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
-    }
-    else{//moving from inside out
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][0][0];
-    }
-    dRho_im1half=((1.0-dDonorFrac_im1half)*dRho_cen_im1half+dDonorFrac_im1half*dRho_upwind_im1half);
-    
-    //calculate rho at i+1/2, not time centered
-    dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen+1][0][0])*0.5;
-    if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
-      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen+1][0][0];
-    }
-    else{//moving from inside out
-      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
-    }
-    dRho_ip1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half*dRho_upwind_ip1half);
-    
     //calculate new grid velocity
-    grid.dLocalGridNew[grid.nU0][i][0][0]=dUmU0_im1halfjk_np1half*dARatio*dRho_im1half/dRho_ip1half
-      +grid.dLocalGridNew[grid.nU][i][0][0];
+    grid.dLocalGridNew[grid.nU0][i][0][0]=grid.dLocalGridNew[grid.nU][i][0][0];
   }
   
   //post a blocking send to outer radial neighbour
@@ -6717,50 +6880,7 @@ void calNewU0_R(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,Me
   for(i=grid.nStartGhostUpdateExplicit[grid.nU][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU][0][0]
     ;i++){
     
-    //calculate i of centered quantities
-    nICen=i-grid.nCenIntOffset[0];
-    
-    //calculate ratio of area at i-1/2 to area at i+1/2
-    dARatio=grid.dLocalGridOld[grid.nR][i-1][0][0]*grid.dLocalGridOld[grid.nR][i-1][0][0]
-      /(grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nR][i][0][0]);
-    
-    //calculate difference between U and U0
-    dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][0][0]
-      -grid.dLocalGridOld[grid.nU0][i][0][0];
-    
-    dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][i-1][0][0]
-      -grid.dLocalGridNew[grid.nU0][i-1][0][0];
-    dDonorFrac_ip1half=grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0];
-    dDonorFrac_im1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-      +grid.dLocalGridOld[grid.nDonorCellFrac][nICen-1][0][0])*0.5;
-    
-    //calculate rho at i-1/2, not time centered
-    dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]
-      +grid.dLocalGridOld[grid.nD][nICen-1][0][0])*0.5;
-    if(dUmU0_im1halfjk_np1half<0.0){//moving from outside in
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
-    }
-    else{//moving from inside out
-      dRho_upwind_im1half=grid.dLocalGridOld[grid.nD][nICen-1][0][0];
-    }
-    dRho_im1half=((1.0-dDonorFrac_im1half)*dRho_cen_im1half+dDonorFrac_im1half*dRho_upwind_im1half);
-    
-    //calculate rho at i+1/2, not time centered
-    /**\BC assuming density outside the star is 0 for the purposes of calculating the grid velocity.
-    This boundary condition works, but is probably not strictly correct. The proper condition can
-    be calculated by knowing that the mass conservation is independent of u0_ip1half at the surface.
-    This allows one to simply use the new densities and calculate the grid velocity from them.*/
-    dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][0][0]+0.0)*0.5;
-    if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
-      dRho_upwind_ip1half=0.0;
-    }
-    else{//moving from inside out
-      dRho_upwind_ip1half=grid.dLocalGridOld[grid.nD][nICen][0][0];
-    }
-    dRho_ip1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half*dRho_upwind_ip1half);
-    
-    grid.dLocalGridNew[grid.nU0][i][0][0]=dUmU0_im1halfjk_np1half*dARatio*dRho_im1half/dRho_ip1half
-      +grid.dLocalGridNew[grid.nU][i][0][0];
+    grid.dLocalGridNew[grid.nU0][i][0][0]=grid.dLocalGridNew[grid.nU][i][0][0];
     
   }
   
@@ -6781,8 +6901,7 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
   int i;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
-      current processor has a radial neighbor at inside post a recieve*/
-      
+      current processor has a radial neighbor at inside, post a recieve*/
       MPI::COMM_WORLD.Recv(grid.dLocalGridNew,1
         ,messPass.typeRecvNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -6829,6 +6948,7 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
   double dRho_upwind_jp1half;
   double dDonorFrac_ip1half;
   double dDonorFrac_im1half;
+  double dTemp;
   
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
@@ -6852,15 +6972,12 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
       //calculate j of interface quantities
       nJInt=j+grid.nCenIntOffset[1];
       
-      //calculate areas only dependent on i and j
-      dA_im1halfjk_np1half=dRSq_im1half_np1half*grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-      dA_ip1halfjk_np1half=dRSq_ip1half_np1half*grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-      dA_ijm1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-        *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
-      dA_ijp1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-        *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
-      
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
+        
+        
+        dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
+        dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
+        dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
         
         //calculate difference between U and U0
         dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
@@ -6892,40 +7009,10 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
         dRho_ip1halfjk_np1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half
           *dRho_upwind_ip1half);
         
-        //calculte rho at j-1/2
-        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
-        }
-        dRho_ijm1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jm1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jm1half);
-        
-        //calculte rho at j+1/2
-        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
-        }
-        else{
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijp1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jp1half);
-        
         //calculate sum
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half
-          +grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]*dA_ijm1halfk_np1half
-          *dRho_ijm1halfk_np1half
-          -grid.dLocalGridNew[grid.nV][nICen][nJInt][k]*dA_ijp1halfk_np1half
-          *dRho_ijp1halfk_np1half;
+          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
         dARhoSum+=dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
       }
     }
@@ -6968,7 +7055,8 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
   }
   
   //calculate outermost grid velocity
-  for(i=grid.nStartGhostUpdateExplicit[grid.nU0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU0][0][0];i++){
+  for(i=grid.nStartGhostUpdateExplicit[grid.nU0][0][0];i<grid.nEndGhostUpdateExplicit[grid.nU0][0][0]
+    ;i++){
     dCSum=0.0;
     dARhoSum=0.0;
     
@@ -6978,7 +7066,6 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
     dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][i][0][0];
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
     dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-    d1half_RSq_ip1half_m_RSq_im1half=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half);
     dDonorFrac_ip1half=grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0];
     dDonorFrac_im1half=(grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
       +grid.dLocalGridOld[grid.nDonorCellFrac][nICen-1][0][0])*0.5;
@@ -6988,14 +7075,13 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
       //calculate j of interface quantities
       nJInt=j+grid.nCenIntOffset[1];
       
-      dA_im1halfjk_np1half=dRSq_im1half_np1half*grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-      dA_ip1halfjk_np1half=dRSq_ip1half_np1half*grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-      dA_ijm1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-        *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j-1][0];
-      dA_ijp1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-        *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0];
-      
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
+        
+        
+        dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
+        
+        dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
+        dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
         
         //calculate difference between U and U0
         dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
@@ -7027,46 +7113,16 @@ void calNewU0_RT(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,M
         dRho_ip1halfjk_np1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half
           *dRho_upwind_ip1half);
         
-        //calculte rho at j-1/2
-        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
-        }
-        dRho_ijm1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jm1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jm1half);
-        
-        //calculte rho at j+1/2
-        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
-        }
-        else{
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijp1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jp1half);
-        
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half
-          +grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]*dA_ijm1halfk_np1half
-          *dRho_ijm1halfk_np1half
-          -grid.dLocalGridNew[grid.nV][nICen][nJInt][k]*dA_ijp1halfk_np1half
-          *dRho_ijp1halfk_np1half;
+          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
         dARhoSum+=dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
       }
     }
     grid.dLocalGridNew[grid.nU0][i][0][0]=-1.0*dCSum/dARhoSum;
     
     //set U equal to U0 at surface
-   for(j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
+    for(j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
       for(k=0;k<grid.nLocalGridDims[procTop.nRank][grid.nU][2];k++){
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridNew[grid.nU0][i][0][0];
       }
@@ -7089,8 +7145,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   //post a blocking recieve from inner radial neighbour
   int i;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
-    if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      if current processor has a radial neighbor inside post a recieve*/
+    if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
+      current processor has a radial neighbor at inside, post a recieve*/
       MPI::COMM_WORLD.Recv(grid.dLocalGridNew,1
         ,messPass.typeRecvNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -7110,17 +7166,16 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   double dARhoSum;
   int nICen;
   int j;
-  int k;
   int nJInt;
+  int k;
   int nKInt;
   double dR_im1half_np1half;
   double dR_ip1half_np1half;
   double dRSq_im1half_np1half;
   double dRSq_ip1half_np1half;
-  double d1half_RSq_ip1half_m_RSq_im1half;
-  double dTemp;
-  double dA_ip1halfjk_np1half;
   double dA_im1halfjk_np1half;
+  double dA_ip1halfjk_np1half;
+  double d1half_RSq_ip1half_m_RSq_im1half;
   double dA_ijm1halfk_np1half;
   double dA_ijp1halfk_np1half;
   double dA_ijkm1half_np1half;
@@ -7147,6 +7202,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   double dRho_upwind_kp1half;
   double dDonorFrac_ip1half;
   double dDonorFrac_im1half;
+  double dTemp;
   
   for(i=grid.nStartUpdateExplicit[grid.nU0][0];i<grid.nEndUpdateExplicit[grid.nU0][0];i++){/*nU0
     needs to be 1D*/
@@ -7155,7 +7211,6 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
     
     //calculate i of centered quantities
     nICen=i-grid.nCenIntOffset[0];
-    
     dR_im1half_np1half=grid.dLocalGridOld[grid.nR][i-1][0][0];
     dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][i][0][0];
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
@@ -7179,15 +7234,6 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
         dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
-        dA_ijm1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-          *grid.dLocalGridOld[grid.nDPhi][0][0][k]
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
-         dA_ijp1halfk_np1half=d1half_RSq_ip1half_m_RSq_im1half
-          *grid.dLocalGridOld[grid.nDPhi][0][0][k]
-          *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
-        dA_ijkm1half_np1half=d1half_RSq_ip1half_m_RSq_im1half
-          *grid.dLocalGridOld[grid.nDTheta][0][j][0];
-        dA_ijkp1half_np1half=dA_ijkm1half_np1half;
         
         //calculate difference between U and U0
         dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
@@ -7219,68 +7265,10 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
         dRho_ip1halfjk_np1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half
           *dRho_upwind_ip1half);
         
-        //calculte rho at j-1/2
-        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
-        }
-        dRho_ijm1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jm1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jm1half);
-        
-        //calculte rho at j+1/2
-        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
-        }
-        else{
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijp1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jp1half);
-        
-        //calculte rho at k-1/2
-        dRho_cen_km1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt-1]<0.0){
-          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k-1];
-        }
-        dRho_ijkm1half_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_km1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_km1half);
-        
-        //calculte rho at k+1/2
-        dRho_cen_kp1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt]<0.0){
-          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k+1];
-        }
-        else{
-          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijkp1half_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_kp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_kp1half);
-        
+        //calculate sum
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half/*
-          +grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]*dA_ijm1halfk_np1half
-          *dRho_ijm1halfk_np1half
-          -grid.dLocalGridNew[grid.nV][nICen][nJInt][k]*dA_ijp1halfk_np1half
-          *dRho_ijp1halfk_np1half
-          +grid.dLocalGridNew[grid.nW][nICen][j][k-1]*dA_ijkm1half_np1half
-          *dRho_ijkm1half_np1half-grid.dLocalGridNew[grid.nW][nICen][j][k]*dA_ijkp1half_np1half
-          *dRho_ijkp1half_np1half*/;
+          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
         dARhoSum+=dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
       }
     }
@@ -7290,8 +7278,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   //post a blocking send to outer radial neighbour
   int nNumRecieves=0;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
-    if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      if current processor has a radial neighbor at inside post a recieve*/
+    if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
+      current processor has a radial neighbor at inside post a recieve*/
       MPI::COMM_WORLD.Send(grid.dLocalGridNew,1
         ,messPass.typeSendNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -7303,8 +7291,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   MPI::Request *requestTempRecv=new MPI::Request[nNumRecieves];
   int nCount=0;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
-    if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      if current processor has a radial neighbor at inside post a recieve*/
+    if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
+      current processor has a radial neighbor at inside post a recieve*/
       requestTempRecv[nCount]=MPI::COMM_WORLD.Irecv(grid.dLocalGridNew,1
         ,messPass.typeRecvNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -7314,8 +7302,8 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
   
   //post a blocking recieve for inner radial neighbour
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
-    if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      if current processor has a radial neighbor at inside post a recieve*/
+    if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*if
+      current processor has a radial neighbor at inside post a recieve*/
       MPI::COMM_WORLD.Send(grid.dLocalGridNew,1
         ,messPass.typeSendNewVar[procTop.nRadialNeighborNeighborIDs[i]][grid.nU0]
         ,procTop.nRadialNeighborRanks[i],2);
@@ -7344,19 +7332,14 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
       nJInt=j+grid.nCenIntOffset[1];
       
       for(k=grid.nStartUpdateExplicit[grid.nU][2];k<grid.nEndUpdateExplicit[grid.nU][2];k++){
-      
+        
         nKInt=k+grid.nCenIntOffset[2];
+        
         dTemp=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
+        
         dA_im1halfjk_np1half=dRSq_im1half_np1half*dTemp;
         dA_ip1halfjk_np1half=dRSq_ip1half_np1half*dTemp;
-        dTemp=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half)
-          *grid.dLocalGridOld[grid.nDPhi][0][0][k];
-        dA_ijm1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j-1][0];
-        dA_ijp1halfk_np1half=dTemp*grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][j][0];
-        dA_ijkm1half_np1half=0.5*(dRSq_ip1half_np1half-dRSq_im1half_np1half)
-          *grid.dLocalGridOld[grid.nDTheta][0][j][0];
-        dA_ijkp1half_np1half=dA_ijkm1half_np1half;
         
         //calculate difference between U and U0
         dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][i][j][k]
@@ -7377,6 +7360,7 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
           *dRho_upwind_im1half);
         
         //calculate rho at i+1/2, not time centered
+        /**\BC grid.dLocalGridOld[grid.nD][i+1][j][k] is missing*/
         dRho_cen_ip1half=(grid.dLocalGridOld[grid.nD][nICen][j][k]+0.0)*0.5;
         if(dUmU0_ip1halfjk_nm1half<0.0){//moving from outside in
           dRho_upwind_ip1half=0.0;
@@ -7387,75 +7371,15 @@ void calNewU0_RTP(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTop,
         dRho_ip1halfjk_np1half=((1.0-dDonorFrac_ip1half)*dRho_cen_ip1half+dDonorFrac_ip1half
           *dRho_upwind_ip1half);
         
-        //calculte rho at j-1/2
-        dRho_cen_jm1half=(grid.dLocalGridOld[grid.nD][nICen][j-1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]<0.0){
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][nICen][j-1][k];
-        }
-        dRho_ijm1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jm1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jm1half);
-        
-        //calculte rho at j+1/2
-        dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][nICen][j+1][k]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nV][nICen][nJInt][k]<0.0){
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j+1][k];
-        }
-        else{
-          dRho_upwind_jp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijp1halfk_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_jp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_jp1half);
-        
-        //calculte rho at k-1/2
-        dRho_cen_km1half=(grid.dLocalGridOld[grid.nD][nICen][j][k-1]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt-1]<0.0){
-          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        else{
-          dRho_upwind_km1half=grid.dLocalGridOld[grid.nD][nICen][j][k-1];
-        }
-        dRho_ijkm1half_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_km1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_km1half);
-        
-        //calculte rho at j+1/2
-        dRho_cen_kp1half=(grid.dLocalGridOld[grid.nD][nICen][j][k+1]
-          +grid.dLocalGridOld[grid.nD][nICen][j][k])*0.5;
-        if(grid.dLocalGridNew[grid.nW][nICen][j][nKInt]<0.0){
-          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k+1];
-        }
-        else{
-          dRho_upwind_kp1half=grid.dLocalGridOld[grid.nD][nICen][j][k];
-        }
-        dRho_ijkp1half_np1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0])
-          *dRho_cen_kp1half+grid.dLocalGridOld[grid.nDonorCellFrac][nICen][0][0]
-          *dRho_upwind_kp1half);
-        
         dCSum+=(grid.dLocalGridNew[grid.nU][i-1][j][k]-grid.dLocalGridNew[grid.nU0][i-1][0][0])
           *dA_im1halfjk_np1half*dRho_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half/*
-          +grid.dLocalGridNew[grid.nV][nICen][nJInt-1][k]*dA_ijm1halfk_np1half
-          *dRho_ijm1halfk_np1half
-          -grid.dLocalGridNew[grid.nV][nICen][nJInt][k]*dA_ijp1halfk_np1half
-          *dRho_ijp1halfk_np1half
-          +grid.dLocalGridNew[grid.nW][nICen][j][k-1]*dA_ijkm1half_np1half
-          *dRho_ijkm1half_np1half
-          -grid.dLocalGridNew[grid.nW][nICen][j][k]*dA_ijkp1half_np1half
-          *dRho_ijkp1half_np1half*/;
+          -grid.dLocalGridNew[grid.nU][i][j][k]*dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
         dARhoSum+=dA_ip1halfjk_np1half*dRho_ip1halfjk_np1half;
       }
     }
     grid.dLocalGridNew[grid.nU0][i][0][0]=-1.0*dCSum/dARhoSum;
     
-    //set U equal to U0
+    //set U equal to U0 at surface
     for(j=0;j<grid.nLocalGridDims[procTop.nRank][grid.nU][1]+2*grid.nNumGhostCells;j++){
       for(k=0;k<grid.nLocalGridDims[procTop.nRank][grid.nU][2]+2*grid.nNumGhostCells;k++){
         grid.dLocalGridNew[grid.nU][i][j][k]=grid.dLocalGridNew[grid.nU0][i][0][0];
@@ -7498,6 +7422,7 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
   double dRSq_ip1half_np1half;
   double dRSq_im1half_np1half;
   double dDelRSq_i_np1half;
+  double dDelCosThetaDelPhi;
   double dV_np1;
   double dA_im1half;
   double dA_ip1half;
@@ -7509,12 +7434,13 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
   double dRho_upwind_ip1half;
   double dDeltaRhoR;
   double dVr_np1;
-  double dUmU0_ip1halfjk_np1half;
-  double dUmU0_ip1halfjk_nm1half;
-  double dUmU0_im1halfjk_np1half;
   double d1Thrid=0.333333333333333333333333333333;
+  double dUmU0_ip1halfjk_np1half;
+  double dUmU0_im1halfjk_np1half;
+  double dUmU0_ip1halfjk_nm1half;
   double dDonorFrac_ip1half;
   double dDonorFrac_im1half;
+  
   for(i=grid.nStartUpdateExplicit[grid.nD][0];i<grid.nEndUpdateExplicit[grid.nD][0];i++){
     
     //calculate i for interface centered quantities
@@ -7523,8 +7449,8 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
           -pow(grid.dLocalGridOld[grid.nR][nIInt-1][0][0],3.0));
     dDelRCu_i_np1=(pow(grid.dLocalGridNew[grid.nR][nIInt][0][0],3.0)
           -pow(grid.dLocalGridNew[grid.nR][nIInt-1][0][0],3.0));
-    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];//could be time centered
-    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];//could be time centered
+    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
     dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
     dDelRSq_i_np1half=dRSq_ip1half_np1half-dRSq_im1half_np1half;
@@ -7551,10 +7477,8 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
         //calculate difference between U and U0
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0];
-        
         dUmU0_ip1halfjk_nm1half=grid.dLocalGridOld[grid.nU][nIInt][j][k]
           -grid.dLocalGridOld[grid.nU0][nIInt][0][0];
-        
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
         
@@ -7654,8 +7578,8 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
           -pow(grid.dLocalGridOld[grid.nR][nIInt-1][0][0],3.0));
     dDelRCu_i_np1=(pow(grid.dLocalGridNew[grid.nR][nIInt][0][0],3.0)
           -pow(grid.dLocalGridNew[grid.nR][nIInt-1][0][0],3.0));
-    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];//could be time centered
-    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];//could be time centered
+    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
     dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
     dDelRSq_i_np1half=dRSq_ip1half_np1half-dRSq_im1half_np1half;
@@ -7705,19 +7629,35 @@ void calNewD_R(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop){
           nGhostCells=0;
         }
         
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
         //add rho
-        parameters.profileDataDebug.setMaxAbs("rho"
-          ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,grid.dLocalGridOld[grid.nD][i][j][k]);
         
         //add DeltaRhoDt_R
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_R"
-          ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
         
         //add DeltaRhoDt_Vol
-        parameters.profileDataDebug.setMaxAbs("DeltaRhoDt_Vol"
-          ,i+grid.nGlobalGridPositionLocalGrid[0]-nGhostCells*grid.nNumGhostCells
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
         #endif
         
@@ -7811,7 +7751,7 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
   double dRSq_ip1half_np1half;
   double dRSq_im1half_np1half;
   double dDelRSq_i_np1half;
-  double dDelCosTheta;
+  double dDelCosThetaDelPhi;
   double dV_np1;
   double dA_im1half;
   double dA_ip1half;
@@ -7838,6 +7778,7 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
   double dUmU0_ip1halfjk_nm1half;
   double dDonorFrac_ip1half;
   double dDonorFrac_im1half;
+  
   for(i=grid.nStartUpdateExplicit[grid.nD][0];i<grid.nEndUpdateExplicit[grid.nD][0];i++){
     
     //calculate i for interface centered quantities
@@ -7846,8 +7787,8 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
           -pow(grid.dLocalGridOld[grid.nR][nIInt-1][0][0],3.0));
     dDelRCu_i_np1=(pow(grid.dLocalGridNew[grid.nR][nIInt][0][0],3.0)
           -pow(grid.dLocalGridNew[grid.nR][nIInt-1][0][0],3.0));
-    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];//could be time centered
-    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];//could be time centered
+    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
     dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
     dDelRSq_i_np1half=dRSq_ip1half_np1half-dRSq_im1half_np1half;
@@ -7861,20 +7802,20 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
-      dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
       
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
         
-        dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosTheta;
+        dDelCosThetaDelPhi=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
+        dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosThetaDelPhi;
         
         
         //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
         
         //calculate area at i-1/2
-        dA_im1half=dRSq_im1half_np1half*dDelCosTheta;
+        dA_im1half=dRSq_im1half_np1half*dDelCosThetaDelPhi;
         
         //calculate area at i+1/2
-        dA_ip1half=dRSq_ip1half_np1half*dDelCosTheta;
+        dA_ip1half=dRSq_ip1half_np1half*dDelCosThetaDelPhi;
         
         //calculate difference between U and U0
         dUmU0_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]
@@ -7956,6 +7897,47 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
         grid.dLocalGridNew[grid.nD][i][j][k]=dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]
           +time.dDeltat_np1half*(dDeltaRhoR+dDeltaRhoTheta)/dV_np1;
         
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add rho
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nD][i][j][k]);
+        
+        //add DeltaRhoDt_R
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
+        
+        //add DeltaRhoDt_T
+        ssName.str("");
+        ssName<<"DeltaRhoDt_T"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,time.dDeltat_np1half*(dDeltaRhoTheta)/dV_np1);
+        
+        //add DeltaRhoDt_Vol
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
+        #endif
+        
         if(grid.dLocalGridNew[grid.nD][i][j][k]<0.0){
           
           #if SIGNEGDEN==1
@@ -7981,8 +7963,8 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
           -pow(grid.dLocalGridOld[grid.nR][nIInt-1][0][0],3.0));
     dDelRCu_i_np1=(pow(grid.dLocalGridNew[grid.nR][nIInt][0][0],3.0)
           -pow(grid.dLocalGridNew[grid.nR][nIInt-1][0][0],3.0));
-    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];//could be time centered
-    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];//could be time centered
+    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
     dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
     dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
     dDelRSq_i_np1half=dRSq_ip1half_np1half-dRSq_im1half_np1half;
@@ -7996,18 +7978,17 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
       nJInt=j+grid.nCenIntOffset[1];
       
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
+        dDelCosThetaDelPhi=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
+        dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosThetaDelPhi;
+          
+        //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
         
-        dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-        dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosTheta;
+        //calculate area at i-1/2
+        dA_im1half=dRSq_im1half_np1half*dDelCosThetaDelPhi;
         
         //calculate difference between U and U0
         dUmU0_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0];
-        
-        //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
-        
-        //calculate area at i-1/2
-        dA_im1half=dRSq_im1half_np1half*dDelCosTheta;
         
         //calculate rho at i-1/2, not time centered
         dRho_cen_im1half=(grid.dLocalGridOld[grid.nD][i][j][k]
@@ -8068,6 +8049,47 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
         grid.dLocalGridNew[grid.nD][i][j][k]=dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]
           +time.dDeltat_np1half*(dDeltaRhoR+dDeltaRhoTheta)/dV_np1;
         
+        #if DEBUG_EQUATIONS==1
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add rho
+        ssName.str("");
+        ssName<<"rho"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nD][i][j][k]);
+        
+        //add DeltaRhoDt_R
+        ssName.str("");
+        ssName<<"DeltaRhoDt_R"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,time.dDeltat_np1half*(dDeltaRhoR)/dV_np1);
+        
+        //add DeltaRhoDt_T
+        ssName.str("");
+        ssName<<"DeltaRhoDt_T"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,time.dDeltat_np1half*(dDeltaRhoTheta)/dV_np1);
+        
+        //add DeltaRhoDt_Vol
+        ssName.str("");
+        ssName<<"DeltaRhoDt_Vol"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dVRatio*grid.dLocalGridOld[grid.nD][i][j][k]);
+        #endif
+        
         if(grid.dLocalGridNew[grid.nD][i][j][k]<0.0){
           
           #if SIGNEGDEN==1
@@ -8111,14 +8133,13 @@ void calNewD_RT(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop)
         for(k=grid.nStartGhostUpdateExplicit[grid.nD][1][2];
           k<grid.nEndGhostUpdateExplicit[grid.nD][1][2];k++){
           
-          
-          dDelCosTheta=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
-          dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosTheta;
+          dDelCosThetaDelPhi=grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0];
+          dV_np1=d1Thrid*dDelRCu_i_np1*dDelCosThetaDelPhi;
             
           //CALCULATE RATE OF CHANGE IN RHO IN RADIAL DIRECTION
           
           //calculate area at i+1/2
-          dA_ip1half=dRSq_ip1half_np1half*dDelCosTheta;
+          dA_ip1half=dRSq_ip1half_np1half*dDelCosThetaDelPhi;
           
           //calculate rho at i+1/2, not time centered
           dRho_ip1half=(grid.dLocalGridOld[grid.nD][i][j][k]+grid.dLocalGridOld[grid.nD][i+1][j][k])
@@ -8321,8 +8342,9 @@ void calNewD_RTP(Grid &grid, Parameters &parameters, Time &time,ProcTop &procTop
         else{
           dRho_upwind_jm1half=grid.dLocalGridOld[grid.nD][i][j-1][k];
         }
-        dRho_jm1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dRho_cen_jm1half
-          +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dRho_upwind_jm1half);
+        dRho_jm1half=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+          *dRho_cen_jm1half+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]
+          *dRho_upwind_jm1half);
         
         //calculte rho at j+1/2
         dRho_cen_jp1half=(grid.dLocalGridOld[grid.nD][i][j+1][k]
@@ -8949,28 +8971,28 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
   double dR_im1half_n;
   double dR_ip1half_n;
   double dRSq_i_n;
-  double dRSq_ip1half;
-  double dR4_ip1half;
-  double dR_im1half_sq;
-  double dR_im1half_4;
-  double dRhoAve_ip1half;
-  double dRhoAve_im1half;
-  double dRho_ip1halfjk;
-  double dRho_im1halfjk;
+  double dRSq_ip1half_n;
+  double dR4_ip1half_n;
+  double dRSq_im1half_n;
+  double dR4_im1half_n;
+  double dUmU0_ijk_np1half;
+  double dUR2_im1halfjk_np1half;
+  double dUR2_ip1halfjk_np1half;
+  double dRhoAve_ip1half_n;
+  double dRhoAve_im1half_n;
+  double dRho_ip1halfjk_n;
+  double dRho_im1halfjk_n;
   double dTSq_ip1jk_n;
-  double dT4_ip1jk_n;
   double dTSq_ijk_n;
-  double dT4_ijk_n;
   double dTSq_im1jk_n;
+  double dT4_ip1jk_n;
+  double dT4_ijk_n;
   double dT4_im1jk_n;
   double dKappa_ip1halfjk_n;
   double dKappa_im1halfjk_n;
   double dA1CenGrad;
   double dA1UpWindGrad;
-  double dU_U0_Diff;
   double dA1;
-  double dUR2_im1half_np1half;
-  double dUR2_ip1half_np1half;
   double dP_ijk_n;
   double dS1;
   double dTGrad_ip1half;
@@ -8978,27 +9000,25 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
   double dGrad_ip1half;
   double dGrad_im1half;
   double dS4;
-  double dPDV;
-  
+  double dPiSq=parameters.dPi*parameters.dPi;
   for(i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
+    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
+    dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+    dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+    dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+    dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nD][i][0][0]
+      +grid.dLocalGridOld[grid.nD][i+1][0][0])*0.5;
+    dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nD][i][0][0]
+      +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-    dR_i_n=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])
-      *0.5;
-    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-    dRSq_i_n=dR_i_n*dR_i_n;
-    dRSq_ip1half=dR_ip1half_n*dR_ip1half_n;
-    dR4_ip1half=dRSq_ip1half*dRSq_ip1half;
-    dR_im1half_sq=dR_im1half_n*dR_im1half_n;
-    dR_im1half_4=dR_im1half_sq*dR_im1half_sq;
-    dRhoAve_ip1half=(grid.dLocalGridOld[grid.nD][i+1][0][0]
-      +grid.dLocalGridOld[grid.nD][i][0][0])*0.5;
-    dRhoAve_im1half=(grid.dLocalGridOld[grid.nD][i][0][0]
-      +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
     
     for(j=grid.nStartUpdateExplicit[grid.nE][1];j<grid.nEndUpdateExplicit[grid.nE][1];j++){
       
@@ -9011,10 +9031,14 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
           +grid.dLocalGridOld[grid.nE][i][j][k])*0.5;
         dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]
           +grid.dLocalGridOld[grid.nE][i-1][j][k])*0.5;
-        dRho_ip1halfjk=(grid.dLocalGridOld[grid.nD][i+1][j][k]+grid.dLocalGridOld[grid.nD][i][j][k])
-          *0.5;
-        dRho_im1halfjk=(grid.dLocalGridOld[grid.nD][i][j][k]+grid.dLocalGridOld[grid.nD][i-1][j][k])
-          *0.5;
+        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i+1][j][k]
+          +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+        dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+          +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+
+        //calculate derived quantities
+        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
         dTSq_ip1jk_n=grid.dLocalGridOld[grid.nT][i+1][j][k]*grid.dLocalGridOld[grid.nT][i+1][j][k];
         dT4_ip1jk_n=dTSq_ip1jk_n*dTSq_ip1jk_n;
         dTSq_ijk_n=grid.dLocalGridOld[grid.nT][i][j][k]*grid.dLocalGridOld[grid.nT][i][j][k];
@@ -9029,13 +9053,13 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
           /grid.dLocalGridOld[grid.nKappa][i-1][j][k]);
         dP_ijk_n=grid.dLocalGridOld[grid.nP][i][j][k];
         #if VISCOUS_ENERGY_EQ==1
-          dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k];
+          dP_ijk_n=dP_ijk_n+grid.dLocalGridOld[grid.nQ0][i][j][k];
         #endif
-          
+        
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
-        if(dU_U0_Diff<0.0){//moving in the negative direction
+        dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
+        if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i+1][j][k]
             -grid.dLocalGridOld[grid.nE][i][j][k])/(grid.dLocalGridOld[grid.nDM][i+1][0][0]
             +grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
@@ -9045,33 +9069,30 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
             -grid.dLocalGridOld[grid.nE][i-1][j][k])/(grid.dLocalGridOld[grid.nDM][i][0][0]
             +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         }
-        dA1=dU_U0_Diff*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA1CenGrad
-          +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+        dA1=dUmU0_ijk_np1half*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+          *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+        
+        //calculate dS1
+        dS1=dP_ijk_n/grid.dLocalGridOld[grid.nD][i][j][k]
+          *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
         //Calculate dS4
         dTGrad_ip1half=(dT4_ip1jk_n-dT4_ijk_n)/(grid.dLocalGridOld[grid.nDM][i+1][0][0]
           +grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
         dTGrad_im1half=(dT4_ijk_n-dT4_im1jk_n)/(grid.dLocalGridOld[grid.nDM][i][0][0]
           +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-        dGrad_ip1half=dRhoAve_ip1half*dR4_ip1half/(dKappa_ip1halfjk_n*dRho_ip1halfjk)
-          *dTGrad_ip1half;
-        dGrad_im1half=dRhoAve_im1half*dR_im1half_4/(dKappa_im1halfjk_n*dRho_im1halfjk)
-          *dTGrad_im1half;
-        dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]
+        dGrad_ip1half=dRhoAve_ip1half_n*dR4_ip1half_n/(dKappa_ip1halfjk_n
+          *dRho_ip1halfjk_n)*dTGrad_ip1half;
+        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_n
+          *dRho_im1halfjk_n)*dTGrad_im1half;
+        dS4=16.0*dPiSq*grid.dLocalGridOld[grid.nD][i][0][0]
           *(dGrad_ip1half-dGrad_im1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        
-        //calculate dS1
-        dUR2_im1half_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dR_im1half_n
-          *dR_im1half_n;
-        dUR2_ip1half_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dR_ip1half_n
-          *dR_ip1half_n;
-        dS1=dP_ijk_n/grid.dLocalGridOld[grid.nD][i][j][k]
-          *(dUR2_ip1half_np1half-dUR2_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
         //calculate new energy
         grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
-          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dA1+dS1)
-          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]
+          *(dA1+dS1)-4.0*parameters.dSigma/(3.0
+          *grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
         
         #if DEBUG_EQUATIONS==1
         
@@ -9149,18 +9170,17 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
+    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
+    dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+    dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+    dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nD][i][0][0]
+      +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-    dR_i_n=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-    dRSq_i_n=dR_i_n*dR_i_n;
-    dRSq_ip1half=dR_ip1half_n*dR_ip1half_n;
-    dR_im1half_sq=dR_im1half_n*dR_im1half_n;
-    dR_im1half_4=dR_im1half_sq*dR_im1half_sq;
-    dRhoAve_im1half=(grid.dLocalGridOld[grid.nD][i][0][0]
-      +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
     
     for(j=grid.nStartGhostUpdateExplicit[grid.nE][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nE][0][1];j++){
@@ -9171,69 +9191,63 @@ void calNewE_R_NA(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
         //Calculate interpolated quantities
         dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
           +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
-        dE_ip1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]);/**\BC Missing
-          grid.dLocalGridOld[grid.nE][i+1][j][k] in calculation of \f$E_{i+1/2,j,k}\f$ 
-          setting it equal to value at i.*/
-        dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]
-          +grid.dLocalGridOld[grid.nE][i-1][j][k])*0.5;
-        dRho_im1halfjk=(grid.dLocalGridOld[grid.nD][i][j][k]
+        dE_ip1halfjk_n=grid.dLocalGridOld[grid.nE][i][j][k];/**\BC Setting energy at surface equal 
+          to energy in last zone.*/
+        dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]+grid.dLocalGridOld[grid.nE][i-1][j][k])
+          *0.5;
+        dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
-        dTSq_ijk_n=grid.dLocalGridOld[grid.nT][i][j][k]
-          *grid.dLocalGridOld[grid.nT][i][j][k];
+        
+        //calculate derived quantities
+        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
+        dTSq_ijk_n=grid.dLocalGridOld[grid.nT][i][j][k]*grid.dLocalGridOld[grid.nT][i][j][k];
         dT4_ijk_n=dTSq_ijk_n*dTSq_ijk_n;
-        dTSq_im1jk_n=grid.dLocalGridOld[grid.nT][i-1][j][k]
-          *grid.dLocalGridOld[grid.nT][i-1][j][k];
+        dTSq_im1jk_n=grid.dLocalGridOld[grid.nT][i-1][j][k]*grid.dLocalGridOld[grid.nT][i-1][j][k];
         dT4_im1jk_n=dTSq_im1jk_n*dTSq_im1jk_n;
-        dKappa_im1halfjk_n=(dT4_im1jk_n+dT4_ijk_n)
-          /(dT4_ijk_n/grid.dLocalGridOld[grid.nKappa][i][j][k]
-          +dT4_im1jk_n/grid.dLocalGridOld[grid.nKappa][i-1][j][k]);
+        dKappa_im1halfjk_n=(dT4_im1jk_n+dT4_ijk_n)/(dT4_ijk_n
+          /grid.dLocalGridOld[grid.nKappa][i][j][k]+dT4_im1jk_n
+          /grid.dLocalGridOld[grid.nKappa][i-1][j][k]);
         dP_ijk_n=grid.dLocalGridOld[grid.nP][i][j][k];
         #if VISCOUS_ENERGY_EQ==1
-          dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k];
+        dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k];
         #endif
         
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
-        if(dU_U0_Diff<0.0){//moving in the negative direction
-          dA1UpWindGrad=dA1CenGrad;/**\BC grid.dLocalGridOld[grid.nDM][i+1][0][0] and 
-            grid.dLocalGridOld[grid.nE][i+1][j][k] missing in the calculation of upwind gradient in 
-            dA1. Using the centered gradient instead.*/
+        dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
+        if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
+          dA1UpWindGrad=0.0;/**\BC Upwind gradient in dA1 term should be zero as there is no flow
+           into the star.*/
         }
-        else{//moving in the postive direction*/
+        else{//moving in the postive direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i][j][k]
             -grid.dLocalGridOld[grid.nE][i-1][j][k])/(grid.dLocalGridOld[grid.nDM][i][0][0]
             +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         }
-        dA1=dU_U0_Diff*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA1CenGrad
-          +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+        dA1=dUmU0_ijk_np1half*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+          *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+        
+        //calculate dS1
+        dS1=dP_ijk_n/grid.dLocalGridOld[grid.nD][i][j][k]
+          *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
         //Calculate dS4
         dTGrad_im1half=(dT4_ijk_n-dT4_im1jk_n)/(grid.dLocalGridOld[grid.nDM][i][0][0]
           +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-        dGrad_ip1half=-3.0*dRSq_ip1half*dT4_ijk_n/(8.0*parameters.dPi);/**\BC
-          Missing grid.dLocalGridOld[grid.nT][i+1][0][0]*/
-        dGrad_im1half=dRhoAve_im1half*dR_im1half_4/(dKappa_im1halfjk_n*dRho_im1halfjk)
+        dGrad_ip1half=-3.0*dRSq_ip1half_n*dT4_ijk_n/(8.0*parameters.dPi);/**\BC
+          Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at 
+          surface.*/
+        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_n*dRho_im1halfjk_n)
           *dTGrad_im1half;
         dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]
           *(dGrad_ip1half-dGrad_im1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
-        //calculate PDV
-        dPDV=-1.0*dP_ijk_n*(1.0/grid.dLocalGridNew[grid.nD][i][j][k]
-          -1.0/grid.dLocalGridOld[grid.nD][i][j][k]);
-        
-        //calculate dS1
-        dUR2_im1half_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dR_im1half_n
-          *dR_im1half_n;
-        dUR2_ip1half_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dR_ip1half_n
-          *dR_ip1half_n;
-        dS1=dP_ijk_n/grid.dLocalGridOld[grid.nD][i][j][k]
-          *(dUR2_ip1half_np1half-dUR2_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        
         //calculate new energy
         grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
-          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dA1+dS1)
-          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dA1
+          +dS1)-4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])
+          *(dS4));
         
         
         #if DEBUG_EQUATIONS==1
@@ -10337,21 +10351,19 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dE_im1halfjk_n;
   double dE_ijp1halfk_n;
   double dE_ijm1halfk_n;
-  double dR_ip1_np1half;
-  double dRSq_ip1_np1half;
-  double dR_i_np1half;
-  double dR_im1half_np1half;
-  double dR_ip1half_np1half;
-  double dRSq_i_np1half;
-  double dR_im1_np1half;
-  double dRSq_im1_np1half;
-  double dRSq_ip1half_np1half;
-  double dR4_ip1half_np1half;
-  double dRSq_im1half_np1half;
-  double dR4_im1half_np1half;
+  double dR_i_n;
+  double dR_im1half_n;
+  double dR_ip1half_n;
+  double dRSq_i_n;
+  double dRSq_ip1half_n;
+  double dR4_ip1half_n;
+  double dRSq_im1half_n;
+  double dR4_im1half_n;
   double dUmU0_ijk_np1half;
   double dVSinTheta_ijp1halfk_np1half;
   double dVSinTheta_ijm1halfk_np1half;
+  double dUR2_im1halfjk_np1half;
+  double dUR2_ip1halfjk_np1half;
   double dRhoAve_ip1half_n;
   double dRhoAve_im1half_n;
   double dRho_ip1halfjk_n;
@@ -10372,15 +10384,13 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dKappa_im1halfjk_n;
   double dKappa_ijp1halfk_n;
   double dKappa_ijm1halfk_n;
-  double dUR2_im1halfjk_np1half;
-  double dUR2_ip1halfjk_np1half;
   double dA1CenGrad;
   double dA1UpWindGrad;
+  double dA1;
+  double dP_ijk_n;
   double dA2CenGrad;
   double dA2UpWindGrad;
   double dA2;
-  double dA1;
-  double dP_ijk_n;
   double dS1;
   double dS2;
   double dTGrad_ip1half;
@@ -10400,36 +10410,23 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dEGrad_im1halfjk_np1half;
   double dEGrad_ijp1halfk_np1half;
   double dEGrad_ijm1halfk_np1half;
-  double dE_ip1jk_np1half;
-  double dE_ijk_np1half;
-  double dE_im1jk_np1half;
-  double dEddyVisc_ip1halfjk_n;
-  double dEddyVisc_im1halfjk_n;
-  double dEddyVisc_ijp1halfk_n;
-  double dEddyVisc_ijm1halfk_n;
+  double dEddyVisc_ip1halfjk_np1half;
+  double dEddyVisc_im1halfjk_np1half;
+  double dEddyVisc_ijp1halfk_np1half;
+  double dEddyVisc_ijm1halfk_np1half;
   double dPiSq=parameters.dPi*parameters.dPi;
   for(i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_ip1_np1half=(grid.dLocalGridOld[grid.nR][nIInt+1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt+1][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.25;
-    dRSq_ip1_np1half=dR_ip1_np1half*dR_ip1_np1half;
-    dR_im1_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-2][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt-2][0][0])*0.25;
-    dRSq_im1_np1half=dR_im1_np1half*dR_im1_np1half;
-    dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-    dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-    dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-    dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-    dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
+    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
+    dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+    dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+    dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+    dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
     dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
       +grid.dLocalGridOld[grid.nDenAve][i+1][0][0])*0.5;
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -10483,15 +10480,22 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
         dRho_ijm1halfk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;
-        dEddyVisc_ip1halfjk_n=(grid.dLocalGridOld[grid.nEddyVisc][i+1][j][k]
-          +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-        dEddyVisc_im1halfjk_n=(grid.dLocalGridOld[grid.nEddyVisc][i-1][j][k]
-          +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-        dEddyVisc_ijp1halfk_n=(grid.dLocalGridOld[grid.nEddyVisc][i][j+1][k]
-        +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-        dEddyVisc_ijm1halfk_n=(grid.dLocalGridOld[grid.nEddyVisc][i][j-1][k]
-          +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-          
+        dEddyVisc_ip1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i+1][j][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_im1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i-1][j][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_ijp1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j+1][k]
+        +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_ijm1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j-1][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        
+        //calculate derived quantities
+        dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
+          *grid.dLocalGridNew[grid.nV][i][nJInt][k];
+        dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
+          *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
+        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
         dTSq_ip1jk_n=grid.dLocalGridOld[grid.nT][i+1][j][k]*grid.dLocalGridOld[grid.nT][i+1][j][k];
         dT4_ip1jk_n=dTSq_ip1jk_n*dTSq_ip1jk_n;
         dTSq_ijk_n=grid.dLocalGridOld[grid.nT][i][j][k]*grid.dLocalGridOld[grid.nT][i][j][k];
@@ -10520,17 +10524,8 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
             +grid.dLocalGridOld[grid.nQ1][i][j][k];
         #endif
         
-        //calculate derived quantities
-        dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-          *grid.dLocalGridNew[grid.nV][i][nJInt][k];
-        dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-          *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
-        
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dA1UpWindGrad=0.0;
         dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
         if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i+1][j][k]
@@ -10542,7 +10537,7 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
             -grid.dLocalGridOld[grid.nE][i-1][j][k])/(grid.dLocalGridOld[grid.nDM][i][0][0]
             +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         }
-        dA1=dUmU0_ijk_np1half*dRSq_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+        dA1=dUmU0_ijk_np1half*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
           *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
         
         //calculate dS1
@@ -10561,11 +10556,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
             -grid.dLocalGridOld[grid.nE][i][j-1][k])/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
             +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
         }
-        dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+        dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
           *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
           
         //Calcualte dS2
-        dS2=dP_ijk_n/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+        dS2=dP_ijk_n/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
           *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
         
@@ -10574,9 +10569,9 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           +grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
         dTGrad_im1half=(dT4_ijk_n-dT4_im1jk_n)/(grid.dLocalGridOld[grid.nDM][i][0][0]
           +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-        dGrad_ip1half=dRhoAve_ip1half_n*dR4_ip1half_np1half/(dKappa_ip1halfjk_n
+        dGrad_ip1half=dRhoAve_ip1half_n*dR4_ip1half_n/(dKappa_ip1halfjk_n
           *dRho_ip1halfjk_n)*dTGrad_ip1half;
-        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_np1half/(dKappa_im1halfjk_n
+        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_n
           *dRho_im1halfjk_n)*dTGrad_im1half;
         dS4=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dGrad_ip1half-dGrad_im1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
@@ -10591,28 +10586,28 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dGrad_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
           /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;
         dS5=(dGrad_jp1half-dGrad_jm1half)/(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-          *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+          *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
         //calculate dT1
-        dEGrad_ip1halfjk_np1half=dR4_ip1half_np1half*dEddyVisc_ip1halfjk_n*dRhoAve_ip1half_n
+        dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_np1half*dRhoAve_ip1half_n
           *(grid.dLocalGridOld[grid.nE][i+1][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
           /(dRho_ip1halfjk_n*dDM_ip1half);
-        dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_n*dRhoAve_im1half_n
+        dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half*dRhoAve_im1half_n
           *(grid.dLocalGridOld[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i-1][j][k])
           /(dRho_im1halfjk_n*dDM_im1half);
         dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
           -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
         //calculate dT2
-        dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_n
+        dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
           *(grid.dLocalGridOld[grid.nE][i][j+1][k]-grid.dLocalGridOld[grid.nE][i][j][k])
-          /(dRho_ijp1halfk_n*dR_i_np1half*dDelTheta_jp1half);
-        dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_n
+          /(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
+        dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
           *(grid.dLocalGridOld[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j-1][k])
-          /(dRho_ijm1halfk_n*dR_i_np1half*dDelTheta_jm1half);
-        dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+          /(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+        dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
@@ -10620,10 +10615,87 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
         
         //calculate new energy
-        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]-time.dDeltat_np1half
-          *(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
-          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
-          -dEddyViscosityTerms);
+        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
+          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
+          *(dA1+dS1)+dA2+dS2-4.0*parameters.dSigma/(3.0
+          *grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)-dEddyViscosityTerms);
+        
+        #if DEBUG_EQUATIONS==1
+        
+        
+        //if we don't want zone by zone, set ssEnd.str("")
+        std::stringstream ssName;
+        std::stringstream ssEnd;
+        if(parameters.bEveryJK){
+          ssEnd<<"_"<<j<<"_"<<k;
+        }
+        else{
+          ssEnd.str("");
+        }
+        
+        //add E
+        ssName.str("");
+        ssName<<"E"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nE][i][j][k]);
+        
+        //add A1
+        ssName.str("");
+        ssName<<"E_A1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
+        
+        //add A2
+        ssName.str("");
+        ssName<<"E_A2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dA2);
+        
+        //add S1
+        ssName.str("");
+        ssName<<"E_S1"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
+          
+        //add S2
+        ssName.str("");
+        ssName<<"E_S2"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,-dS2);
+        
+        //add S4
+        ssName.str("");
+        ssName<<"E_S4"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+        
+        //add S5
+        ssName.str("");
+        ssName<<"E_S5"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
+        //add EV
+        ssName.str("");
+        ssName<<"E_EV"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dEddyViscosityTerms);
+        
+        //add DEDt
+        ssName.str("");
+        ssName<<"E_DEDt"<<ssEnd.str();
+        parameters.profileDataDebug.setMaxAbs(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
+          /time.dDeltat_np1half);
+        #endif
         
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
@@ -10647,23 +10719,16 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_ip1_np1half=dR_ip1half_np1half;
-    dRSq_ip1_np1half=dR_ip1_np1half*dR_ip1_np1half;
-    dR_im1_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-2][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridNew[grid.nR][nIInt-2][0][0])*0.25;
-    dRSq_im1_np1half=dR_im1_np1half*dR_im1_np1half;
-    dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-    dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-    dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-    dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-    dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
-    dRhoAve_ip1half_n=grid.dLocalGridOld[grid.nDenAve][i][0][0]*0.5;
+    dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+    dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
+    dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+    dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+    dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+    dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dRhoAve_ip1half_n=grid.dLocalGridOld[grid.nDenAve][i][0][0]*0.5;/*\BC missing average density
+      outside model setting it to zero*/
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
       +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
@@ -10672,10 +10737,11 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
       +parameters.dAlphaExtra);/**\BC Missing \f$\Delta M_r\f$ outside model using 
       \ref Parameters.dAlpha times \f$\Delta M_r\f$ in the last zone instead.*/
     dDM_im1half=(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*0.5;
+    
     for(j=grid.nStartGhostUpdateExplicit[grid.nE][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nE][0][1];j++){
       
-      //calculate i for interface centered quantities
+      //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       dDelTheta_jp1half=(grid.dLocalGridOld[grid.nDTheta][0][j][0]
         +grid.dLocalGridOld[grid.nDTheta][0][j+1][0])*0.5;
@@ -10708,20 +10774,30 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           *0.5;
         dE_ijm1halfk_n=(grid.dLocalGridOld[grid.nE][i][j][k]+grid.dLocalGridOld[grid.nE][i][j-1][k])
           *0.5;
+        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/**\BC missing density outside
+          model, setting it to zero*/
         dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
         dRho_ijp1halfk_n=(grid.dLocalGridOld[grid.nD][i][j+1][k]
           +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
         dRho_ijm1halfk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;
-        dEddyVisc_ip1halfjk_n=(grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;/**\BC missing 
+        dEddyVisc_ip1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;/**\BC missing 
           eddy viscosity outside the model setting it to zero*/
-        dEddyVisc_im1halfjk_n=(grid.dLocalGridOld[grid.nEddyVisc][i-1][j][k]
-          +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-        dEddyVisc_ijp1halfk_n=(grid.dLocalGridOld[grid.nEddyVisc][i][j+1][k]
-        +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
-        dEddyVisc_ijm1halfk_n=(grid.dLocalGridOld[grid.nEddyVisc][i][j-1][k]
-          +grid.dLocalGridOld[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_im1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i-1][j][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_ijp1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j+1][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        dEddyVisc_ijm1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j-1][k]
+          +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+        
+        //calculate derived quantities
+        dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
+          *grid.dLocalGridNew[grid.nV][i][nJInt][k];
+        dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
+          *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
+        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
         dTSq_ijk_n=grid.dLocalGridOld[grid.nT][i][j][k]*grid.dLocalGridOld[grid.nT][i][j][k];
         dT4_ijk_n=dTSq_ijk_n*dTSq_ijk_n;
         dTSq_im1jk_n=grid.dLocalGridOld[grid.nT][i-1][j][k]*grid.dLocalGridOld[grid.nT][i-1][j][k];
@@ -10741,31 +10817,23 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           /grid.dLocalGridOld[grid.nKappa][i][j-1][k]);
         dP_ijk_n=grid.dLocalGridOld[grid.nP][i][j][k];
         #if VISCOUS_ENERGY_EQ==1
-          dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k];
-          dP_ijk_n+=grid.dLocalGridOld[grid.nQ1][i][j][k];
+        dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k]
+          +grid.dLocalGridOld[grid.nQ1][i][j][k];
         #endif
-        
-        //calculate derived quantities
-        dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-          *grid.dLocalGridNew[grid.nV][i][nJInt][k];
-        dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-          *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-        dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-        dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
         
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dA1UpWindGrad=0.0;
         dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
         if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
-          dA1UpWindGrad=dA1CenGrad;
+          dA1UpWindGrad=0.0;/**\BC Upwind gradient in dA1 term should be zero as there is no flow
+           into the star.*/
         }
         else{//moving in the postive direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i][j][k]
             -grid.dLocalGridOld[grid.nE][i-1][j][k])/(grid.dLocalGridOld[grid.nDM][i][0][0]
             +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         }
-        dA1=dUmU0_ijk_np1half*dRSq_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+        dA1=dUmU0_ijk_np1half*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
           *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
         
         //calculate dS1
@@ -10774,7 +10842,6 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         
         //Calcualte dA2
         dA2CenGrad=(dE_ijp1halfk_n-dE_ijm1halfk_n)/grid.dLocalGridOld[grid.nDTheta][0][j][0];
-        dA2UpWindGrad=0.0;
         if(dV_ijk_np1half<0.0){//moving in the negative direction
           dA2UpWindGrad=(grid.dLocalGridOld[grid.nE][i][j+1][k]
             -grid.dLocalGridOld[grid.nE][i][j][k])/(grid.dLocalGridOld[grid.nDTheta][0][j+1][0]
@@ -10785,22 +10852,22 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
             -grid.dLocalGridOld[grid.nE][i][j-1][k])/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
             +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
         }
-        dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+        dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
           *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
-          
+        
         //Calcualte dS2
-        dS2=dP_ijk_n/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+        dS2=dP_ijk_n/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
           *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
         
         //Calculate dS4
         dTGrad_im1half=(dT4_ijk_n-dT4_im1jk_n)/(grid.dLocalGridOld[grid.nDM][i][0][0]
           +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-        dGrad_ip1half=-3.0*dRSq_ip1half_np1half*dT4_ijk_n/(8.0*parameters.dPi);/**\BC
+        dGrad_ip1half=-3.0*dRSq_ip1half_n*dT4_ijk_n/(8.0*parameters.dPi);/**\BC
           Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at 
           surface.*/
-        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_np1half/(dKappa_im1halfjk_n
-          *dRho_im1halfjk_n)*dTGrad_im1half;
+        dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_n*dRho_im1halfjk_n)
+          *dTGrad_im1half;
         dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
           *(dGrad_ip1half-dGrad_im1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
@@ -10814,27 +10881,27 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dGrad_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
           /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;
         dS5=(dGrad_jp1half-dGrad_jm1half)/(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-          *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+          *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
         //calculate dT1
         dEGrad_ip1halfjk_np1half=0.0;/**\BC missing energy outside the model, assuming it is the 
           same as that in the last zone. That causes this term to be zero.*/
-        dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_n*dRhoAve_im1half_n
+        dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half*dRhoAve_im1half_n
           *(grid.dLocalGridOld[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i-1][j][k])
           /(dRho_im1halfjk_n*dDM_im1half);
         dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
           -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
         
         //calculate dT2
-        dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_n
+        dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
           *(grid.dLocalGridOld[grid.nE][i][j+1][k]-grid.dLocalGridOld[grid.nE][i][j][k])
-          /(dRho_ijp1halfk_n*dR_i_np1half*dDelTheta_jp1half);
-        dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_n
+          /(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
+        dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_np1half
           *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
           *(grid.dLocalGridOld[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j-1][k])
-          /(dRho_ijm1halfk_n*dR_i_np1half*dDelTheta_jm1half);
-        dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+          /(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+        dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
@@ -10842,10 +10909,10 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
         
         //calculate new energy
-        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]-time.dDeltat_np1half
-          *(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
-          -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
-          -dEddyViscosityTerms);
+        grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
+          -time.dDeltat_np1half*(4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1
+          +dS1)+dA2+dS2-4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])
+          *(dS4+dS5)-dEddyViscosityTerms);
         
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
@@ -11758,6 +11825,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dU_ijk_np1half;
   double dU_ijp1halfk_np1half;
   double dU_ijm1halfk_np1half;
+  double dU0_i_np1half;
   double dU_ijkp1half_np1half;
   double dU_ijkm1half_np1half;
   double dV_ijk_np1half;
@@ -11772,30 +11840,25 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dW_im1halfjk_np1half;
   double dW_ijp1halfk_np1half;
   double dW_ijm1halfk_np1half;
-  double dU0_i_np1half;
   double dE_ip1halfjk_n;
   double dE_im1halfjk_n;
-  double dR_ip1_n;
-  double dRSq_ip1_n;
+  double dE_ijp1halfk_n;
+  double dE_ijm1halfk_n;
+  double dE_ijkp1half_n;
+  double dE_ijkm1half_n;
   double dR_i_n;
   double dR_im1half_n;
   double dR_ip1half_n;
   double dRSq_i_n;
-  double dR_im1_n;
-  double dRSq_im1_n;
   double dRSq_ip1half_n;
   double dR4_ip1half_n;
   double dRSq_im1half_n;
   double dR4_im1half_n;
-  double dE_ijp1halfk_n;
-  double dE_ijm1halfk_n;
   double dUmU0_ijk_np1half;
   double dVSinTheta_ijp1halfk_np1half;
   double dVSinTheta_ijm1halfk_np1half;
   double dUR2_im1halfjk_np1half;
   double dUR2_ip1halfjk_np1half;
-  double dE_ijkp1half_n;
-  double dE_ijkm1half_n;
   double dRhoAve_ip1half_n;
   double dRhoAve_im1half_n;
   double dRho_ip1halfjk_n;
@@ -11804,19 +11867,19 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dRho_ijm1halfk_n;
   double dRho_ijkp1half_n;
   double dRho_ijkm1half_n;
-  double dTSq_ip1jk_n;
-  double dT4_ip1jk_n;
-  double dTSq_ijk_n;
-  double dT4_ijk_n;
-  double dTSq_im1jk_n;
-  double dT4_im1jk_n;
   double dTSq_ijp1k_n;
-  double dT4_ijp1k_n;
   double dTSq_ijm1k_n;
-  double dT4_ijm1k_n;
+  double dTSq_ip1jk_n;
+  double dTSq_ijk_n;
+  double dTSq_im1jk_n;
   double dTSq_ijkp1_n;
-  double dT4_ijkp1_n;
   double dTSq_ijkm1_n;
+  double dT4_ip1jk_n;
+  double dT4_ijk_n;
+  double dT4_im1jk_n;
+  double dT4_ijp1k_n;
+  double dT4_ijm1k_n;
+  double dT4_ijkp1_n;
   double dT4_ijkm1_n;
   double dKappa_ip1halfjk_n;
   double dKappa_im1halfjk_n;
@@ -11826,7 +11889,6 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dKappa_ijkm1half_n;
   double dA1CenGrad;
   double dA1UpWindGrad;
-  double dU_U0_Diff;
   double dA1;
   double dP_ijk_n;
   double dA2CenGrad;
@@ -11835,16 +11897,20 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dA3CenGrad;
   double dA3UpWindGrad;
   double dA3;
+  double dS1;
+  double dS2;
+  double dS3;
   double dTGrad_ip1half;
   double dTGrad_im1half;
-  double dGrad_ip1half;
-  double dGrad_im1half;
-  double dS4;
   double dTGrad_jp1half;
   double dTGrad_jm1half;
+  double dGrad_ip1half;
+  double dGrad_im1half;
   double dGrad_jp1half;
   double dGrad_jm1half;
+  double dS4;
   double dS5;
+  double dEddyViscosityTerms;
   double dTGrad_kp1half;
   double dTGrad_km1half;
   double dGrad_kp1half;
@@ -11865,25 +11931,13 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dEddyVisc_ijm1halfk_np1half;
   double dEddyVisc_ijkm1half_np1half;
   double dEddyVisc_ijkp1half_np1half;
-  double VSinTheta_ijp1halfk_np1half;
-  double dEddyViscosityTerms;
   double dPiSq=parameters.dPi*parameters.dPi;
-  double dS1;
-  double dS2;
-  double dS3;
-  
   for(i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
     dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
     dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_ip1_n=(grid.dLocalGridOld[grid.nR][nIInt+1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dRSq_ip1_n=dR_ip1_n*dR_ip1_n;
-    dR_im1_n=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-2][0][0])*0.5;
-    dRSq_im1_n=dR_im1_n*dR_im1_n;
     dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
     dRSq_i_n=dR_i_n*dR_i_n;
     dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
@@ -12046,7 +12100,6 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dA1UpWindGrad=0.0;
         dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
         if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i+1][j][k]
@@ -12286,7 +12339,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
           #if SIGNEGENG==1
-            raise(SIGINT);
+          raise(SIGINT);
           #endif
           
           std::stringstream ssTemp;
@@ -12307,16 +12360,13 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
     nIInt=i+grid.nCenIntOffset[0];
     dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
     dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_im1_n=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-2][0][0])*0.5;
-    dRSq_im1_n=dR_im1_n*dR_im1_n;
     dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
     dRSq_i_n=dR_i_n*dR_i_n;
     dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
     dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
     dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
     dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
-    dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/*\BC missing average density
+    dRhoAve_ip1half_n=grid.dLocalGridOld[grid.nDenAve][i][0][0]*0.5;/*\BC missing average density
       outside model setting it to zero*/
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
       +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;
@@ -12330,7 +12380,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
     for(j=grid.nStartGhostUpdateExplicit[grid.nE][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nE][0][1];j++){
       
-      //calculate i for interface centered quantities
+      //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       dDelTheta_jp1half=(grid.dLocalGridOld[grid.nDTheta][0][j][0]
         +grid.dLocalGridOld[grid.nDTheta][0][j+1][0])*0.5;
@@ -12389,9 +12439,8 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         dW_ijm1halfk_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
           +grid.dLocalGridNew[grid.nW][i][j][nKInt-1]+grid.dLocalGridNew[grid.nW][i][j-1][nKInt]
           +grid.dLocalGridNew[grid.nW][i][j-1][nKInt-1])*0.25;
-        dE_ip1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]);/**\BC Missing
-          grid.dLocalGridOld[grid.nE][i+1][j][k] in calculation of \f$E_{i+1/2,j,k}\f$ 
-          setting it equal to the value at i.*/
+        dE_ip1halfjk_n=grid.dLocalGridOld[grid.nE][i][j][k];/**\BC Setting energy at surface equal 
+          to energy in last zone.*/
         dE_im1halfjk_n=(grid.dLocalGridOld[grid.nE][i][j][k]+grid.dLocalGridOld[grid.nE][i-1][j][k])
           *0.5;
         dE_ijp1halfk_n=(grid.dLocalGridOld[grid.nE][i][j+1][k]+grid.dLocalGridOld[grid.nE][i][j][k])
@@ -12402,7 +12451,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
           *0.5;
         dE_ijkm1half_n=(grid.dLocalGridOld[grid.nE][i][j][k-1]+grid.dLocalGridOld[grid.nE][i][j][k])
           *0.5;
-        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i+1][j][k])*0.5;/**\BC missing density outside
+        dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/**\BC missing density outside
           model, setting it to zero*/
         dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
           +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
@@ -12463,24 +12512,23 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
           /grid.dLocalGridOld[grid.nKappa][i][j][k]);
         dP_ijk_n=grid.dLocalGridOld[grid.nP][i][j][k];
         #if VISCOUS_ENERGY_EQ==1
-          dP_ijk_n=dP_ijk_n+grid.dLocalGridOld[grid.nQ0][i][j][k]
-            +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
+        dP_ijk_n+=grid.dLocalGridOld[grid.nQ0][i][j][k]
+          +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
         #endif
         
         //Calcuate dA1
         dA1CenGrad=(dE_ip1halfjk_n-dE_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][i][0][0];
-        dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
-        if(dU_U0_Diff<0.0){//moving in the negative direction
-          dA1UpWindGrad=dA1CenGrad;/**\BC grid.dLocalGridOld[grid.nDM][i+1][0][0] and 
-            grid.dLocalGridOld[grid.nE][i+1][j][k] missing in the calculation of upwind gradient in 
-            dA1. Using the centered gradient instead.*/
+        dUmU0_ijk_np1half=(dU_ijk_np1half-dU0_i_np1half);
+        if(dUmU0_ijk_np1half<0.0){//moving in the negative direction
+          dA1UpWindGrad=0.0;/**\BC Upwind gradient in dA1 term should be zero as there is no flow
+           into the star.*/
         }
-        else{//moving in the postive direction*/
+        else{//moving in the postive direction
           dA1UpWindGrad=(grid.dLocalGridOld[grid.nE][i][j][k]
             -grid.dLocalGridOld[grid.nE][i-1][j][k])/(grid.dLocalGridOld[grid.nDM][i][0][0]
             +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         }
-        dA1=dU_U0_Diff*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+        dA1=dUmU0_ijk_np1half*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
           *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
         
         //calculate dS1
@@ -12532,7 +12580,8 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         dTGrad_im1half=(dT4_ijk_n-dT4_im1jk_n)/(grid.dLocalGridOld[grid.nDM][i][0][0]
           +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
         dGrad_ip1half=-3.0*dRSq_ip1half_n*dT4_ijk_n/(8.0*parameters.dPi);/**\BC
-          Missing grid.dLocalGridOld[grid.nT][i+1][0][0]*/
+          Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at 
+          surface.*/
         dGrad_im1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_n*dRho_im1halfjk_n)
           *dTGrad_im1half;
         dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -12546,7 +12595,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         dGrad_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
           /(dKappa_ijp1halfk_n*dRho_ijp1halfk_n)*dTGrad_jp1half;
         dGrad_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;;
+          /(dKappa_ijm1halfk_n*dRho_ijm1halfk_n)*dTGrad_jm1half;
         dS5=(dGrad_jp1half-dGrad_jm1half)/(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
@@ -12562,9 +12611,8 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k]);
         
         //calculate dT1
-        dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_np1half*dRhoAve_ip1half_n
-          *(grid.dLocalGridOld[grid.nE][i+1][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
-          /(dRho_ip1halfjk_n*dDM_ip1half);
+        dEGrad_ip1halfjk_np1half=0.0;/**\BC missing energy outside the model, assuming it is the 
+          same as that in the last zone. That causes this term to be zero.*/
         dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half*dRhoAve_im1half_n
           *(grid.dLocalGridOld[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i-1][j][k])
           /(dRho_im1halfjk_n*dDM_im1half);
@@ -12607,7 +12655,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
           
           #if SIGNEGENG==1
-            raise(SIGINT);
+          raise(SIGINT);
           #endif
           
           std::stringstream ssTemp;
@@ -12893,41 +12941,48 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
   double dDVDt;
   double dA_ip1half;
   double dA_im1half;
-  double dR_i;
+  double dR_i_n;
   int nIInt;
   double dC;
   double dDVDtThreshold;
-  double dR_i_sq;
+  double dRSq_i_n;
   double dDVDt_mthreshold;
   int i;
+  int j;
+  int k;
   
   //in the main grid
   for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    
-    //calculate volume change
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
-    dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][0][0]
-      -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
-    //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridNew[grid.nP][i][0][0])
-      /grid.dLocalGridNew[grid.nD][i][0][0]);
-    dDVDtThreshold=parameters.dAVThreshold*dC;
-    
-    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-      grid.dLocalGridNew[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][0][0]
-        *dDVDt_mthreshold*dDVDt_mthreshold;
-    }
-    else{
-      grid.dLocalGridNew[grid.nQ0][i][0][0]=0.0;
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+      
+      for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
+        }
+      }
     }
   }
   
@@ -12937,28 +12992,34 @@ void calNewQ0_R_TEOS(Grid& grid,Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    
-    //calculate volume change
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
-    dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][0][0]
-      -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
-    //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][0][0]*(grid.dLocalGridNew[grid.nP][i][0][0])
-      /grid.dLocalGridNew[grid.nD][i][0][0]);
-    dDVDtThreshold=parameters.dAVThreshold*dC;
-    
-    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-      grid.dLocalGridNew[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][0][0]
-        *dDVDt_mthreshold*dDVDt_mthreshold;
-    }
-    else{
-      grid.dLocalGridNew[grid.nQ0][i][0][0]=0.0;
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
+        }
+      }
     }
   }
 }
@@ -13078,23 +13139,24 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
   double dA_jp1half;
   double dA_jm1half;
   double dA_j;
-  double dR_i;
+  double dR_i_n;
   int nIInt;
   int nJInt;
   double dC;
   double dDVDtThreshold;
-  double dR_i_sq;
+  double dRSq_i_n;
   double dDVDt_mthreshold;
   int i;
   int j;
+  int k;
   
   //in the main grid
   for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
@@ -13103,42 +13165,40 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
-      
-      //calculate Q0
-      //calculate volume change
-      dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][0]
-        -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
-      
-      //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridNew[grid.nP][i][j][0])
-        /grid.dLocalGridNew[grid.nD][i][j][0]);
-      dDVDtThreshold=parameters.dAVThreshold*dC;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;//need to add it since dVDt will be negative
-        grid.dLocalGridNew[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridNew[grid.nQ0][i][j][0]=0.0;
-      }
-      
-      //calculate Q1
-      //calculate volume change
       dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][0]
-        -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][0])/dA_j;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridNew[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridNew[grid.nQ1][i][j][0]=0.0;
+      for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
+        }
+        
+        //calculate Q1
+        dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=0.0;
+        }
       }
     }
   }
@@ -13149,8 +13209,8 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
@@ -13160,42 +13220,41 @@ void calNewQ0Q1_RT_TEOS(Grid& grid,Parameters &parameters){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
-      
-      //calculate Q0
-      //calculate volume change
-      dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][0]
-        -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][0])/dR_i_sq;
-      
-      //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][0]*(grid.dLocalGridNew[grid.nP][i][j][0])
-        /grid.dLocalGridNew[grid.nD][i][j][0]);
-      dDVDtThreshold=parameters.dAVThreshold*dC;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridNew[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridNew[grid.nQ0][i][j][0]=0.0;
-      }
-      
-      //calculate Q1
-      //calculate volume change
       dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][0]
-        -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][0])/dA_j;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridNew[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridNew[grid.nQ1][i][j][0]=0.0;
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
+        }
+        
+        //calculate Q1
+        dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=0.0;
+        }
       }
     }
   }
@@ -13393,19 +13452,19 @@ void calNewQ0Q1_RT_GL(Grid& grid,Parameters &parameters){
 void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
   
   double dA_sq=parameters.dA*parameters.dA;
-  double dDVDt;/*Rate of change of the volume*/
+  double dDVDt;
   double dA_ip1half;
   double dA_im1half;
   double dA_jp1half;
   double dA_jm1half;
   double dA_j;
-  double dR_i;
+  double dR_i_n;
   int nIInt;
   int nJInt;
   int nKInt;
   double dC;
   double dDVDtThreshold;
-  double dR_i_sq;
+  double dRSq_i_n;
   double dDVDt_mthreshold;
   int i;
   int j;
@@ -13416,8 +13475,8 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
@@ -13441,7 +13500,7 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
         
         //calculate Q0
         dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
-          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
           dDVDt_mthreshold=dDVDt+dDVDtThreshold;
           grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
@@ -13474,7 +13533,6 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
         else{
           grid.dLocalGridNew[grid.nQ2][i][j][k]=0.0;
         }
-        
       }
     }
   }
@@ -13485,8 +13543,8 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
+    dR_i_n=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dRSq_i_n=dR_i_n*dR_i_n;
     dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
@@ -13512,7 +13570,7 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
         
         //calculate Q0
         dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
-          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dRSq_i_n;
         if(dDVDt<-1.0*dDVDtThreshold){//being compressed
           dDVDt_mthreshold=dDVDt+dDVDtThreshold;
           grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
@@ -13551,75 +13609,75 @@ void calNewQ0Q1Q2_RTP_TEOS(Grid& grid,Parameters &parameters){
   
   //inner ghost region
   #if SEDOV==1
-    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
-      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+  for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+    i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+    
+    //calculate i for interface centered quantities
+    nIInt=i+grid.nCenIntOffset[0];
+    dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
+    dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
       
-      //calculate i for interface centered quantities
-      nIInt=i+grid.nCenIntOffset[0];
-      dR_i=(grid.dLocalGridNew[grid.nR][nIInt][0][0]+grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;
-      dR_i_sq=dR_i*dR_i;
-      dA_ip1half=grid.dLocalGridNew[grid.nR][nIInt][0][0]*grid.dLocalGridNew[grid.nR][nIInt][0][0];
-      dA_im1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-        *grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+      //calculate j for interface centered quantities
+      nJInt=j+grid.nCenIntOffset[1];
+      dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+      dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+      dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
-        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
+      for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
         
-        //calculate j for interface centered quantities
-        nJInt=j+grid.nCenIntOffset[1];
-        dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
-        dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
-        dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+        nKInt=k+grid.nCenIntOffset[2];
         
-        for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
-          k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
-          
-          nKInt=k+grid.nCenIntOffset[2];
-          
-          //calculate threshold compression to turn viscosity on at
-          dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
-            /grid.dLocalGridNew[grid.nD][i][j][k]);
-          dDVDtThreshold=parameters.dAVThreshold*dC;
-          
-          //calculate Q0
-          dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
-            -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dR_i_sq;
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
-              *dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
-          }
-          
-          //calculate Q1
-          dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][k]
-            -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][k])/dA_j;
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            grid.dLocalGridNew[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
-              *dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            grid.dLocalGridNew[grid.nQ1][i][j][k]=0.0;
-          }
-          
-          //calculate Q2
-          dDVDt=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
-            -grid.dLocalGridNew[grid.nW][i][j][nKInt-1]);
-          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-            grid.dLocalGridNew[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
-              *dDVDt_mthreshold*dDVDt_mthreshold;
-          }
-          else{
-            grid.dLocalGridNew[grid.nQ2][i][j][k]=0.0;
-          }
-
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridNew[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridNew[grid.nU][nIInt-1][j][k])/dR_i_sq;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
         }
+        else{
+          grid.dLocalGridNew[grid.nQ0][i][j][k]=0.0;
+        }
+        
+        //calculate Q1
+        dDVDt=(dA_jp1half*grid.dLocalGridNew[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridNew[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ1][i][j][k]=0.0;
+        }
+        
+        //calculate Q2
+        dDVDt=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
+          -grid.dLocalGridNew[grid.nW][i][j][nKInt-1]);
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridNew[grid.nQ2][i][j][k]=dA_sq*grid.dLocalGridNew[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridNew[grid.nQ2][i][j][k]=0.0;
+        }
+
       }
     }
+  }
   #endif
 }
 void calNewQ0Q1Q2_RTP_GL(Grid& grid,Parameters &parameters){
@@ -14029,8 +14087,9 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
   int j;
   int k;
   int nIInt;//i+1/2 index
-  double d1;//term 1
+  double d1;
   double dA;
+  double dTerms;
   double dR_ip1half_np1half;
   double dR_im1half_np1half;
   double dR_i_np1half;
@@ -14039,8 +14098,6 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
   double dDelR_i_np1half;
   double dConstantSq=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
   double dLengthScaleSq;
-  double dTerms;
-  double dRho_ijk_np1half;
   
   //main grid explicit
   for(i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
@@ -14048,8 +14105,10 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     
@@ -14063,15 +14122,16 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
         //interpolate
         dU_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k];
         dU_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k];
-        dRho_ijk_np1half=grid.dLocalGridNew[grid.nD][i][j][k];
         
-        //calculate dA term
-        d1=(dU_ip1halfjk_np1half-dU_im1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
+        //term 1
+        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
+          -(dU_im1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))
+          /(dR_ip1half_np1half-dR_im1half_np1half);
         dA=2.0*d1*d1;
         
         dTerms=dA;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq*dRho_ijk_np1half
-          *pow(dTerms,0.5);
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
+          *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
   }
@@ -14079,32 +14139,35 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
   //outter radial ghost cells,explicit
   for(i=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][0];i++){
-      
+    
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
-    dLengthScaleSq=dDelR_i_np1half*dDelR_i_np1half;
     for(j=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][1];j++){
       for(k=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][2];
         k<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][2];k++){
         
+        dLengthScaleSq=dDelR_i_np1half*dDelR_i_np1half;
         
         //interpolate
         dU_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k];
         dU_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k];
-        dRho_ijk_np1half=grid.dLocalGridNew[grid.nD][i][j][k];
         
-        //calculate dA term
-        d1=(dU_ip1halfjk_np1half-dU_im1halfjk_np1half)/(dR_ip1half_np1half-dR_im1half_np1half);
+        //term 1
+        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
+          -(dU_im1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))
+          /(dR_ip1half_np1half-dR_im1half_np1half);
         dA=2.0*d1*d1;
         
         dTerms=dA;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq*dRho_ijk_np1half
-          *pow(dTerms,0.5);
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
+          *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
   }
@@ -14116,20 +14179,22 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
   int k;
   int nIInt;//i+1/2 index
   int nJInt;//j+1/2 index
-  double d1;//term 1
-  double d2;//term 2
-  double d3;//term 3
-  double d7;//term 7
-  double d8;//term 8
-  double d9;//term 9
-  double dA;//term A
-  double dB;//term B
-  double dD;//term D
-  double dE;//term E
+  double d1;
+  double d2;
+  double d3;
+  double d7;
+  double d8;
+  double d9;
+  double dA;
+  double dB;
+  double dD;
+  double dE;
   double dTerms;
   double dR_ip1half_np1half;
   double dR_im1half_np1half;
   double dR_i_np1half;
+  double dRSq_i_np1half;
+  double dU0_i_np1half;
   double dU_ip1halfjk_np1half;
   double dU_im1halfjk_np1half;
   double dU_ijp1halfk_np1half;
@@ -14144,7 +14209,6 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
   double dD_ijk_np1half;
   double dConstantSq=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
   double dLengthScaleSq;
-  double dU0_i_np1half;
   
   //main grid explicit
   for(i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
@@ -14152,9 +14216,12 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
+    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
@@ -14167,7 +14234,8 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
       for(k=grid.nStartUpdateExplicit[grid.nEddyVisc][2];
         k<grid.nEndUpdateExplicit[grid.nEddyVisc][2];k++){
         
-        dLengthScaleSq=dDelR_i_np1half*dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+        
+        dLengthScaleSq=dR_i_np1half*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
         
         //interpolate
         dU_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k];
@@ -14190,7 +14258,6 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
           +grid.dLocalGridNew[grid.nV][i-1][nJInt-1][k])*0.25;
         dV_ijp1halfk_np1half=grid.dLocalGridNew[grid.nV][i][nJInt][k];
         dV_ijm1halfk_np1half=grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-        dD_ijk_np1half=grid.dLocalGridNew[grid.nD][i][j][k];
         
         //term 1
         d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
@@ -14228,8 +14295,8 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dE=2.0*dE*dE;
         
         dTerms=dA+dB+dD+dE;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq*dD_ijk_np1half
-          *pow(dTerms,0.5);
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
+          *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
   }
@@ -14237,12 +14304,15 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
   //outter radial ghost cells,explicit
   for(i=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][0];i++){
-      
+    
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
+    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
@@ -14255,7 +14325,7 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
       for(k=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][2];
         k<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][2];k++){
         
-        dLengthScaleSq=dDelR_i_np1half*dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+        dLengthScaleSq=dR_i_np1half*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
         
         //interpolate
         dU_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k];
@@ -14271,13 +14341,13 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dV_ijk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.5;
         dV_ip1halfjk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
-          +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.25;
+          +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.5;/**\BC assuming that theta velocity
+          is constant across surface*/
         dV_im1halfjk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k]+grid.dLocalGridNew[grid.nV][i-1][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i-1][nJInt-1][k])*0.25;
         dV_ijp1halfk_np1half=grid.dLocalGridNew[grid.nV][i][nJInt][k];
         dV_ijm1halfk_np1half=grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-        dD_ijk_np1half=grid.dLocalGridNew[grid.nD][i][j][k];
         
         //term 1
         d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
@@ -14315,8 +14385,8 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dE=2.0*dE*dE;
         
         dTerms=dA+dB+dD+dE;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq*dD_ijk_np1half
-          *pow(dTerms,0.5);
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
+          *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
   }
@@ -14355,7 +14425,7 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
   double dR_ip1half_np1half;
   double dR_im1half_np1half;
   double dR_i_np1half;
-  double dR_i_np1half_Sq;
+  double dRSq_i_np1half;
   double dU0_i_np1half;
   double dU_ip1halfjk_np1half;
   double dU_im1halfjk_np1half;
@@ -14371,29 +14441,33 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
   double dV_ijm1halfk_np1half;
   double dV_ijkp1half_np1half;
   double dV_ijkm1half_np1half;
+  double dW_im1halfjk_np1half;
   double dW_ijk_np1half;
   double dW_ip1halfjk_np1half;
+  double dW_ijm1halfk_np1half;
   double dW_ijp1halfk_np1half;
   double dW_ijkp1half_np1half;
   double dW_ijkm1half_np1half;
   double dDelR_i_np1half;
-  double dConstant=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
+  double dConstantSq=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
   double dLengthScaleSq;
-  double dW_im1halfjk_np1half;
-  double dW_ijm1halfk_np1half;
-  //main grid
+  
+  //main grid explicit
   for(i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
     i<grid.nEndUpdateExplicit[grid.nEddyVisc][0];i++){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-    dR_i_np1half_Sq=dR_i_np1half*dR_i_np1half;
+    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
+    
     for(j=grid.nStartUpdateExplicit[grid.nEddyVisc][1];
       j<grid.nEndUpdateExplicit[grid.nEddyVisc][1];j++){
       
@@ -14403,8 +14477,10 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         k<grid.nEndUpdateExplicit[grid.nEddyVisc][2];k++){
         
         nKInt=k+grid.nCenIntOffset[2];
-        dLengthScaleSq=dR_i_np1half_Sq*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+        
+        dLengthScaleSq=dRSq_i_np1half*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
+        
         dLengthScaleSq=pow(dLengthScaleSq,0.666666666666666);
         
         //interpolate
@@ -14464,8 +14540,9 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dW_ijkm1half_np1half=grid.dLocalGridNew[grid.nW][i][j][nKInt-1];
         
         //term 1
-        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])-(dU_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))/(dR_ip1half_np1half-dR_im1half_np1half);
+        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
+          -(dU_im1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))
+          /(dR_ip1half_np1half-dR_im1half_np1half);
         
         //term 2
         d2=1.0/dR_i_np1half*(dU_ijp1halfk_np1half-dU_ijm1halfk_np1half)
@@ -14542,7 +14619,7 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dI=2.0*dI*dI;
         
         dTerms=dA+dB+dC+dD+dE+dF+dG+dH+dI;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstant*dLengthScaleSq
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
@@ -14554,10 +14631,12 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
-    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
+    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
+      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-    dR_i_np1half_Sq=dR_i_np1half*dR_i_np1half;
+    dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
       +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
@@ -14571,7 +14650,7 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         k<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][2];k++){
         
         nKInt=k+grid.nCenIntOffset[2];
-        dLengthScaleSq=dR_i_np1half_Sq*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+        dLengthScaleSq=dRSq_i_np1half*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
         dLengthScaleSq=pow(dLengthScaleSq,0.666666666666666);
         
@@ -14631,8 +14710,9 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dW_ijkm1half_np1half=grid.dLocalGridNew[grid.nW][i][j][nKInt-1];
         
         //term 1
-        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])-(dU_im1halfjk_np1half
-          -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))/(dR_ip1half_np1half-dR_im1half_np1half);
+        d1=((dU_ip1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt][0][0])
+          -(dU_im1halfjk_np1half-grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))
+          /(dR_ip1half_np1half-dR_im1half_np1half);
         
         //term 2
         d2=1.0/dR_i_np1half*(dU_ijp1halfk_np1half-dU_ijm1halfk_np1half)
@@ -14709,7 +14789,7 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dI=2.0*dI*dI;
         
         dTerms=dA+dB+dC+dD+dE+dF+dG+dH+dI;
-        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstant*dLengthScaleSq
+        grid.dLocalGridNew[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridNew[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
@@ -14743,7 +14823,8 @@ void calOldDenave_RT(Grid &grid){
   
   //EXPLICIT REGION
   //most ghost cell, since we don't have R at outer interface. This should be ok in most cases
-  for(int i=grid.nStartUpdateExplicit[grid.nDenAve][0];i<grid.nEndUpdateExplicit[grid.nDenAve][0];i++){
+  for(int i=grid.nStartUpdateExplicit[grid.nDenAve][0];i<grid.nEndUpdateExplicit[grid.nDenAve][0];
+    i++){
     
     //calculate i for interface centered quantities
     int nIInt=i+grid.nCenIntOffset[0];
@@ -14858,10 +14939,10 @@ void calOldDenave_RTP(Grid &grid){
     grid.dLocalGridOld[grid.nDenAve][i][0][0]=dSum/dVolume;
   }
   
-  //IMPLICT REGION
+  //IMPLICIT REGION
   //most ghost cell, since we don't have R at outer interface. This should be ok in most cases
-  for(int i=grid.nStartUpdateImplicit[grid.nDenAve][0];i<grid.nEndUpdateImplicit[grid.nDenAve][0];
-    i++){
+  for(int i=grid.nStartUpdateImplicit[grid.nDenAve][0];
+    i<grid.nEndUpdateImplicit[grid.nDenAve][0];i++){
     
     //calculate i for interface centered quantities
     int nIInt=i+grid.nCenIntOffset[0];
@@ -14887,8 +14968,8 @@ void calOldDenave_RTP(Grid &grid){
     double dVolume=0.0;
     double dRFactor=0.33333333333333333*(pow(grid.dLocalGridOld[grid.nR][i][0][0],3.0)
       -pow(grid.dLocalGridOld[grid.nR-1][i][0][0],3.0));
-    for(int j=grid.nStartUpdateExplicit[grid.nD][1];j<grid.nEndUpdateExplicit[grid.nD][1];j++){
-      for(int k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
+    for(int j=grid.nStartUpdateImplicit[grid.nD][1];j<grid.nEndUpdateImplicit[grid.nD][1];j++){
+      for(int k=grid.nStartUpdateImplicit[grid.nD][2];k<grid.nEndUpdateImplicit[grid.nD][2];k++){
         double dVolumeTemp=dRFactor*grid.dLocalGridOld[grid.nDCosThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k];
         dSum+=dVolumeTemp*grid.dLocalGridOld[grid.nD][i][j][k];
@@ -14897,7 +14978,6 @@ void calOldDenave_RTP(Grid &grid){
     }
     grid.dLocalGridOld[grid.nDenAve][i][0][0]=dSum/dVolume;
   }
-
 }
 void calOldP_GL(Grid& grid,Parameters &parameters){
   for(int i=grid.nStartUpdateExplicit[grid.nP][0];i<grid.nEndUpdateExplicit[grid.nP][0];i++){
@@ -15121,34 +15201,40 @@ void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
   double dR_i_sq;
   double dDVDt_mthreshold;
   int i;
+  int j;
+  int k;
   
   //in the main grid
   for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    
-    //calculate volume change
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
     dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
-    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
-      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
-    //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
-    dDVDtThreshold=parameters.dAVThreshold*dC;
-    
-    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
-        *dDVDt_mthreshold*dDVDt_mthreshold;
-    }
-    else{
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
+    for(j=grid.nStartUpdateExplicit[grid.nQ0][1];j<grid.nEndUpdateExplicit[grid.nQ0][1];j++){
+      for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+        }
+      }
     }
   }
   
@@ -15158,30 +15244,77 @@ void calOldQ0_R_TEOS(Grid& grid, Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    
-    //calculate volume change
+    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_i_sq=dR_i*dR_i;
     dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
     dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
       *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-    dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-    dR_i_sq=dR_i*dR_i;
-    dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][0][0]
-      -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][0][0])/dR_i_sq;
     
-    //calculate threshold compression to turn viscosity on at
-    dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][0][0]*(grid.dLocalGridOld[grid.nP][i][0][0])
-      /grid.dLocalGridOld[grid.nD][i][0][0]);
-    dDVDtThreshold=parameters.dAVThreshold*dC;
-    
-    if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-      dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][0][0]
-        *dDVDt_mthreshold*dDVDt_mthreshold;
-    }
-    else{
-      grid.dLocalGridOld[grid.nQ0][i][0][0]=0.0;
+    for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][0][1];
+      j<grid.nEndGhostUpdateExplicit[grid.nQ0][0][1];j++){
+      
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+        }
+      }
     }
   }
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+      
+      //calculate i for interface centered quantities
+      nIInt=i+grid.nCenIntOffset[0];
+      dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+      dR_i_sq=dR_i*dR_i;
+      dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+      dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+        *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+      
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
+        
+        for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+          k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
+          
+          //calculate threshold compression to turn viscosity on at
+          dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+            /grid.dLocalGridOld[grid.nD][i][j][k]);
+          dDVDtThreshold=parameters.dAVThreshold*dC;
+          
+          //calculate Q0
+          dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+          }
+        }
+      }
+    }
+  #endif
 }
 void calOldQ0Q1_RT_GL(Grid& grid, Parameters &parameters){
   
@@ -15391,6 +15524,7 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
   double dDVDt_mthreshold;
   int i;
   int j;
+  int k;
   
   //in the main grid
   for(i=grid.nStartUpdateExplicit[grid.nQ0][0];i<grid.nEndUpdateExplicit[grid.nQ0][0];i++){
@@ -15408,41 +15542,40 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
       
-      //calculate Q0
-      //calculate volume change
-      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
-        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
-      
-      //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
-      dDVDtThreshold=parameters.dAVThreshold*dC;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;//need to add it since dVDt will be negative
-        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
-      }
-      
-      //calculate Q1
-      //calculate volume change
       dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
-        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      for(k=grid.nStartUpdateExplicit[grid.nQ0][2];k<grid.nEndUpdateExplicit[grid.nQ0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+        }
+        
+        //calculate Q1
+        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
+        }
       }
     }
   }
@@ -15464,45 +15597,103 @@ void calOldQ0Q1_RT_TEOS(Grid& grid, Parameters &parameters){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
-      
-      //calculate Q0
-      //calculate volume change
-      dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][0]
-        -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][0])/dR_i_sq;
-      
-      //calculate threshold compression to turn viscosity on at
-      dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][0]*(grid.dLocalGridOld[grid.nP][i][j][0])
-        /grid.dLocalGridOld[grid.nD][i][j][0]);
-      dDVDtThreshold=parameters.dAVThreshold*dC;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridOld[grid.nQ0][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ0][i][j][0]=0.0;
-      }
-      
-      //calculate Q1
-      //calculate volume change
       dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
       
-      dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][0]
-        -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][0])/dA_j;
-      
-      if(dDVDt<-1.0*dDVDtThreshold){//being compressed
-        dDVDt_mthreshold=dDVDt+dDVDtThreshold;
-        grid.dLocalGridOld[grid.nQ1][i][j][0]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][0]
-          *dDVDt_mthreshold*dDVDt_mthreshold;
-      }
-      else{
-        grid.dLocalGridOld[grid.nQ1][i][j][0]=0.0;
+      for(k=grid.nStartGhostUpdateExplicit[grid.nQ0][0][2];
+        k<grid.nEndGhostUpdateExplicit[grid.nQ0][0][2];k++){
+        
+        //calculate threshold compression to turn viscosity on at
+        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        dDVDtThreshold=parameters.dAVThreshold*dC;
+        
+        //calculate Q0
+        dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+          -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+        }
+        
+        //calculate Q1
+        dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+          -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+        if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+          dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+            *dDVDt_mthreshold*dDVDt_mthreshold;
+        }
+        else{
+          grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
+        }
       }
     }
   }
+  
+  //inner ghost region
+  #if SEDOV==1
+    for(i=grid.nStartGhostUpdateExplicit[grid.nQ0][1][0];
+      i<grid.nEndGhostUpdateExplicit[grid.nQ0][1][0];i++){
+      
+      //calculate i for interface centered quantities
+      nIInt=i+grid.nCenIntOffset[0];
+      dR_i=(grid.dLocalGridOld[grid.nR][nIInt][0][0]+grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+      dR_i_sq=dR_i*dR_i;
+      dA_ip1half=grid.dLocalGridOld[grid.nR][nIInt][0][0]*grid.dLocalGridOld[grid.nR][nIInt][0][0];
+      dA_im1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0]
+        *grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+      
+      for(j=grid.nStartGhostUpdateExplicit[grid.nQ0][1][1];
+        j<grid.nEndGhostUpdateExplicit[grid.nQ0][1][1];j++){
+        
+        //calculate j for interface centered quantities
+        nJInt=j+grid.nCenIntOffset[1];
+        dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
+        dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
+        dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
+        
+        for(int k=grid.nStartGhostUpdateExplicit[grid.nQ0][1][2];
+          k<grid.nEndGhostUpdateExplicit[grid.nQ0][1][2];k++){
+          
+          
+          //calculate threshold compression to turn viscosity on at
+          dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k])
+            /grid.dLocalGridOld[grid.nD][i][j][k]);
+          dDVDtThreshold=parameters.dAVThreshold*dC;
+          
+          //calculate Q0
+          dDVDt=(dA_ip1half*grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -dA_im1half*grid.dLocalGridOld[grid.nU][nIInt-1][j][k])/dR_i_sq;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ0][i][j][k]=0.0;
+          }
+          
+          //calculate Q1
+          dDVDt=(dA_jp1half*grid.dLocalGridOld[grid.nV][i][nJInt][k]
+            -dA_jm1half*grid.dLocalGridOld[grid.nV][i][nJInt-1][k])/dA_j;
+          if(dDVDt<-1.0*dDVDtThreshold){//being compressed
+            dDVDt_mthreshold=dDVDt+dDVDtThreshold;
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=dA_sq*grid.dLocalGridOld[grid.nD][i][j][k]
+              *dDVDt_mthreshold*dDVDt_mthreshold;
+          }
+          else{
+            grid.dLocalGridOld[grid.nQ1][i][j][k]=0.0;
+          }
+        }
+      }
+    }
+  #endif
 }
 void calOldQ0Q1Q2_RTP_GL(Grid& grid, Parameters &parameters){
   
@@ -15732,7 +15923,7 @@ void calOldQ0Q1Q2_RTP_GL(Grid& grid, Parameters &parameters){
 void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
   
   double dA_sq=parameters.dA*parameters.dA;
-  double dDVDt;/*Rate of change of the volume*/
+  double dDVDt;
   double dA_ip1half;
   double dA_im1half;
   double dA_jp1half;
@@ -15765,6 +15956,7 @@ void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
       
       //calculate j for interface centered quantities
       nJInt=j+grid.nCenIntOffset[1];
+      
       dA_jp1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0];
       dA_jm1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0];
       dA_j=grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0];
@@ -15955,7 +16147,6 @@ void calOldQ0Q1Q2_RTP_TEOS(Grid& grid, Parameters &parameters){
           else{
             grid.dLocalGridOld[grid.nQ2][i][j][k]=0.0;
           }
-
         }
       }
     }
@@ -16251,23 +16442,28 @@ void calOldEddyVisc_R_SM(Grid &grid, Parameters &parameters){
   }
 }
 void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
-  
+  int i;
+  int j;
+  int k;
   int nIInt;//i+1/2 index
   int nJInt;//j+1/2 index
-  double d1;//term 1
-  double d2;//term 2
-  double d3;//term 3
-  double d7;//term 7
-  double d8;//term 8
-  double d9;//term 9
-  double dA;//term A
-  double dB;//term B
-  double dD;//term D
-  double dE;//term E
+  double d1;
+  double d2;
+  double d3;
+  double d7;
+  double d8;
+  double d9;
+  double dA;
+  double dB;
+  double dD;
+  double dE;
   double dTerms;
   double dR_ip1half_np1half;
   double dR_im1half_np1half;
   double dR_i_np1half;
+  double dU0_ip1half_np1half;
+  double dU0_im1half_np1half;
+  double dU0_i_np1half;
   double dU_ip1halfjk_np1half;
   double dU_im1halfjk_np1half;
   double dU_ijp1halfk_np1half;
@@ -16281,12 +16477,9 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
   double dDelR_i_np1half;
   double dConstantSq=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
   double dLengthScaleSq;
-  double dU0_i_np1half;
-  double dU0_ip1half_np1half;
-  double dU0_im1half_np1half;
   
   //main grid explicit
-  for(int i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
+  for(i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
     i<grid.nEndUpdateExplicit[grid.nEddyVisc][0];i++){
       
     //calculate i for interface centered quantities
@@ -16299,16 +16492,18 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
     dU0_im1half_np1half=grid.dLocalGridOld[grid.nU0][nIInt-1][0][0];
     dU0_i_np1half=(grid.dLocalGridOld[grid.nU0][nIInt][0][0]
       +grid.dLocalGridOld[grid.nU0][nIInt-1][0][0])*0.5;
-      
-    for(int j=grid.nStartUpdateExplicit[grid.nEddyVisc][1];
+    
+    for(j=grid.nStartUpdateExplicit[grid.nEddyVisc][1];
       j<grid.nEndUpdateExplicit[grid.nEddyVisc][1];j++){
       
       nJInt=j+grid.nCenIntOffset[1];
       
-      for(int k=grid.nStartUpdateExplicit[grid.nEddyVisc][2];
+      for(k=grid.nStartUpdateExplicit[grid.nEddyVisc][2];
         k<grid.nEndUpdateExplicit[grid.nEddyVisc][2];k++){
         
+        
         dLengthScaleSq=dDelR_i_np1half*dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+        
         
         //interpolate
         dU_ip1halfjk_np1half=grid.dLocalGridOld[grid.nU][nIInt][j][k];
@@ -16366,20 +16561,18 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dE=d8+d9;
         dE=2.0*dE*dE;
         
-        //term F
-        
         dTerms=dA+dB+dD+dE;
-        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq
+        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridOld[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
   }
   
   //inner radial ghost cells, set to zero
-  for(int i=0;i<grid.nNumGhostCells;i++){
-    for(int j=grid.nStartUpdateExplicit[grid.nEddyVisc][1];
+  for(i=0;i<grid.nNumGhostCells;i++){
+    for(j=grid.nStartUpdateExplicit[grid.nEddyVisc][1];
       j<grid.nEndUpdateExplicit[grid.nEddyVisc][1];j++){
-      for(int k=grid.nStartUpdateExplicit[grid.nEddyVisc][2];
+      for(k=grid.nStartUpdateExplicit[grid.nEddyVisc][2];
         k<grid.nEndUpdateExplicit[grid.nEddyVisc][2];k++){
         grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=0.0;
       }
@@ -16387,9 +16580,9 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
   }
   
   //outter radial ghost cells,explicit
-  for(int i=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][0];
+  for(i=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][0];
     i<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][0];i++){
-      
+    
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
     dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
@@ -16401,12 +16594,12 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
     dU0_i_np1half=(grid.dLocalGridOld[grid.nU0][nIInt][0][0]
       +grid.dLocalGridOld[grid.nU0][nIInt-1][0][0])*0.5;
     
-    for(int j=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][1];
+    for(j=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][1];
       j<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][1];j++){
       
       nJInt=j+grid.nCenIntOffset[1];
       
-      for(int k=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][2];
+      for(k=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][2];
         k<grid.nEndGhostUpdateExplicit[grid.nEddyVisc][0][2];k++){
         
         dLengthScaleSq=dDelR_i_np1half*dR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0];
@@ -16425,7 +16618,8 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dV_ijk_np1half=(grid.dLocalGridOld[grid.nV][i][nJInt][k]
           +grid.dLocalGridOld[grid.nV][i][nJInt-1][k])*0.5;
         dV_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nV][i][nJInt][k]
-          +grid.dLocalGridOld[grid.nV][i][nJInt-1][k])*0.25;
+          +grid.dLocalGridOld[grid.nV][i][nJInt-1][k])*0.5;/**\BC assuming that theta velocity
+          is constant across surface*/
         dV_im1halfjk_np1half=(grid.dLocalGridOld[grid.nV][i][nJInt][k]
           +grid.dLocalGridOld[grid.nV][i][nJInt-1][k]+grid.dLocalGridOld[grid.nV][i-1][nJInt][k]
           +grid.dLocalGridOld[grid.nV][i-1][nJInt-1][k])*0.25;
@@ -16467,7 +16661,7 @@ void calOldEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
         dE=2.0*dE*dE;
         
         dTerms=dA+dB+dD+dE;
-        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dLengthScaleSq*dConstantSq
+        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridOld[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
@@ -16533,10 +16727,10 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
   double dW_ijkm1half_np1half;
   double dDelR_i_np1half;
   double dR_i_np1half_sq;
-  double dConstant=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
+  double dConstantSq=parameters.dEddyViscosity*parameters.dEddyViscosity/pow(2.0,0.5);
   double dLengthScaleSq;
   
-  //main grid
+  //main grid explicit
   for(i=grid.nStartUpdateExplicit[grid.nEddyVisc][0];
     i<grid.nEndUpdateExplicit[grid.nEddyVisc][0];i++){
       
@@ -16561,6 +16755,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         k<grid.nEndUpdateExplicit[grid.nEddyVisc][2];k++){
         
         nKInt=k+grid.nCenIntOffset[2];
+        
         dLengthScaleSq=dR_i_np1half_sq*dDelR_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
         dLengthScaleSq=pow(dLengthScaleSq,0.666666666666666);
@@ -16686,7 +16881,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dE=d8+d9;
         dE=2.0*dE*dE;
         
-        //term dF
+        //term F
         dF=(d10+d11-d12)*(d11-d12);
         
         //term dG
@@ -16700,7 +16895,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dI=2.0*dI*dI;
         
         dTerms=dA+dB+dC+dD+dE+dF+dG+dH+dI;
-        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstant*dLengthScaleSq
+        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridOld[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
@@ -16880,7 +17075,7 @@ void calOldEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
         dI=2.0*dI*dI;
         
         dTerms=dA+dB+dC+dD+dE+dF+dG+dH+dI;
-        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstant*dLengthScaleSq
+        grid.dLocalGridOld[grid.nEddyVisc][i][j][k]=dConstantSq*dLengthScaleSq
           *grid.dLocalGridOld[grid.nD][i][j][k]*pow(dTerms,0.5);
       }
     }
@@ -17049,7 +17244,8 @@ void calDelt_R_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &procT
 void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &procTop){
   
   int nShellWithSmallestDT=-1;
-  int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0],grid.nEndUpdateExplicit[grid.nD][0]);
+  int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0]
+    ,grid.nEndUpdateExplicit[grid.nD][0]);
   int i;
   int j;
   int k;
@@ -17058,9 +17254,9 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   double dDelR;
   double dC;
   double dTTestR;
+  double dVelToSetTimeStep;
   double dTest_ConVelOverSoundSpeed_R;
   double dTest_ConVelOverSoundSpeed=0.0;
-  double dVelToSetTimeStep;
   double dUmdU0_ijk_nm1half;
   double dDelRho_t_Rho_max;
   double dDelRho_t_Rho_max_test;
@@ -17069,11 +17265,12 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   double dDelT_t_T_max_test;
   double dDelT_t_T_max_local=0.0;
   double dDelUmU0_t_UmU0_max=0.0;
+  double dDelUmU0_t_UmU0_max_test;
   double dDelUmU0_t_UmU0_max_local=0.0;
   double dDelV_t_V_max=0.0;
   double dDelV_t_V_max_local=0.0;
-  double dDelW_t_W_max;
   double dDelW_t_W_max_local=0.0;
+  double dDelW_t_W_max;
   double dMaxChange;
   double dTest_ConVel_R;
   double dTest_ConVel=0.0;
@@ -17082,17 +17279,20 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dDelR=grid.dLocalGridNew[grid.nR][nIInt][0][0]-grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
+    dDelR=grid.dLocalGridNew[grid.nR][nIInt][0][0]
+      -grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     dTest_ConVelOverSoundSpeed=0.0;
     
     for(j=grid.nStartUpdateExplicit[grid.nD][1];j<grid.nEndUpdateExplicit[grid.nD][1];j++){
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
         
-        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]*(grid.dLocalGridNew[grid.nP][i][j][k]
-          +grid.dLocalGridNew[grid.nQ0][i][j][k])/grid.dLocalGridNew[grid.nD][i][j][k]);
+        dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]
+          *(grid.dLocalGridNew[grid.nP][i][j][k]+grid.dLocalGridNew[grid.nQ0][i][j][k])
+          /grid.dLocalGridNew[grid.nD][i][j][k]);
         dUmdU0_ijk_nm1half=((grid.dLocalGridNew[grid.nU][nIInt][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt][0][0])+(grid.dLocalGridNew[grid.nU][nIInt-1][j][k]
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))*0.5;
+        
         dVelToSetTimeStep=sqrt(dC*dC+dUmdU0_ijk_nm1half*dUmdU0_ijk_nm1half);
         dTTestR=dDelR/dVelToSetTimeStep;
         
@@ -17107,14 +17307,14 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
           nShellWithSmallestDT=i;
         }
         
-        //keep largest convective velocity over sound speed
-        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
-        }
-        
         //keep largest convective velocity
         if(dTest_ConVel_R>dTest_ConVel){
           dTest_ConVel=dTest_ConVel_R;
+        }
+        
+        //keep largest convective velocity over sound speed
+        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
         }
         
         //keep max change in rho
@@ -17129,6 +17329,23 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
           -grid.dLocalGridNew[grid.nT][i][j][k])/grid.dLocalGridNew[grid.nT][i][j][k]);
         if(dDelT_t_T_max_test>dDelT_t_T_max_local){
           dDelT_t_T_max_local=dDelT_t_T_max_test;
+        }
+        
+        //keep max change in U-U0
+        if(fabs(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+            -grid.dLocalGridNew[grid.nU0][nIInt][0][0])<1.0e4){
+          dDelUmU0_t_UmU0_max_test=fabs( ((grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -grid.dLocalGridOld[grid.nU0][nIInt][0][0])-(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+            -grid.dLocalGridNew[grid.nU0][nIInt][0][0]))/1.0e4);
+        }
+        else{
+          dDelUmU0_t_UmU0_max_test=fabs( ((grid.dLocalGridOld[grid.nU][nIInt][j][k]
+            -grid.dLocalGridOld[grid.nU0][nIInt][0][0])-(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+            -grid.dLocalGridNew[grid.nU0][nIInt][0][0]))/(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+            -grid.dLocalGridNew[grid.nU0][nIInt][0][0]));
+        }
+        if(dDelUmU0_t_UmU0_max_test>dDelUmU0_t_UmU0_max_local){
+          dDelUmU0_t_UmU0_max_local=dDelUmU0_t_UmU0_max_test;
         }
       }
     }
@@ -17148,7 +17365,6 @@ void calDelt_R_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pro
   
   //use MPI::allreduce to send the smallest of all calculated time steps to all procs.
   double dTemp2;
-  double dTest_ConVelOverSoundSpeed2;
   MPI::COMM_WORLD.Allreduce(&dTemp,&dTemp2,1,MPI::DOUBLE,MPI_MIN);
   if(dTemp<=0.0){//current processor found negative time step
     std::stringstream ssTemp;
@@ -17433,7 +17649,8 @@ void calDelt_RT_GL(Grid &grid, Parameters &parameters, Time &time, ProcTop &proc
 }
 void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &procTop){
   int nShellWithSmallestDT=-1;
-  int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0],grid.nEndUpdateExplicit[grid.nD][0]);
+  int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0]
+    ,grid.nEndUpdateExplicit[grid.nD][0]);
   int i;
   int j;
   int k;
@@ -17453,17 +17670,17 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
   double dV_ijk_nm1half;
   double dDelRho_t_Rho_max;
   double dDelRho_t_Rho_max_test;
-  double dDelRho_t_Rho_max_local=-1.0;
+  double dDelRho_t_Rho_max_local=0.0;
   double dDelT_t_T_max;
   double dDelT_t_T_max_test;
-  double dDelT_t_T_max_local=-1.0;
-  double dDelUmU0_t_UmU0_max;
+  double dDelT_t_T_max_local=0.0;
+  double dDelUmU0_t_UmU0_max=0.0;
   double dDelUmU0_t_UmU0_max_test;
-  double dDelUmU0_t_UmU0_max_local=-1.0;
-  double dDelV_t_V_max;
+  double dDelUmU0_t_UmU0_max_local=0.0;
+  double dDelV_t_V_max=0.0;
   double dDelV_t_V_max_test;
-  double dDelV_t_V_max_local=-1.0;
-  double dDelW_t_W_max_local=-1.0;
+  double dDelV_t_V_max_local=0.0;
+  double dDelW_t_W_max_local=0.0;
   double dDelW_t_W_max;
   double dMaxChange;
   double dTest_ConVel_R;
@@ -17493,9 +17710,9 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
           -grid.dLocalGridNew[grid.nU0][nIInt-1][0][0]))*0.5;
         dV_ijk_nm1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.5;
+        
         dVelToSetTimeStep=sqrt(dC*dC+dUmdU0_ijk_nm1half*dUmdU0_ijk_nm1half+dV_ijk_nm1half
           *dV_ijk_nm1half);
-        
         dTTestR=dDelR/dVelToSetTimeStep;
         dTTestTheta=dRMid*grid.dLocalGridOld[grid.nDTheta][0][j][0]/dVelToSetTimeStep;
         
@@ -17516,20 +17733,20 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
           nShellWithSmallestDT=i;
         }
         
-        //keep largest convective velocity over sound speed
-        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
-        }
-        if(dTest_ConVelOverSoundSpeed_T>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_T;
-        }
-        
         //keep largest convective velocity
         if(dTest_ConVel_R>dTest_ConVel){
           dTest_ConVel=dTest_ConVel_R;
         }
         if(dTest_ConVel_T>dTest_ConVel){
           dTest_ConVel=dTest_ConVel_T;
+        }
+        
+        //keep largest convective velocity over sound speed
+        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
+        }
+        if(dTest_ConVelOverSoundSpeed_T>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_T;
         }
         
         //keep max change in rho
@@ -17564,15 +17781,16 @@ void calDelt_RT_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &pr
         }
         
         //keep max change in V
-        if(fabs(grid.dLocalGridNew[grid.nV][i][nJInt][k])<1.0e4){
-        dDelV_t_V_max_test=fabs((grid.dLocalGridOld[grid.nV][i][nJInt][k]
-          -grid.dLocalGridNew[grid.nV][i][nJInt][k])/1.0e4);
+        if(fabs(grid.dLocalGridNew[grid.nV][i][nJInt][k])<1.0e4){/* prevents really large value near
+          0 which isn't desirable */
+          dDelV_t_V_max_test=fabs((grid.dLocalGridOld[grid.nV][i][nJInt][k]
+            -grid.dLocalGridNew[grid.nV][i][nJInt][k])/1.0e4);
         }
         else{
           dDelV_t_V_max_test=fabs((grid.dLocalGridOld[grid.nV][i][nJInt][k]
             -grid.dLocalGridNew[grid.nV][i][nJInt][k])/grid.dLocalGridNew[grid.nV][i][nJInt][k]);
         }
-        if(dDelV_t_V_max_test>dDelV_t_V_max_local){
+        if(dDelV_t_V_max_test>dDelV_t_V_max_local){/* select largest value */
           dDelV_t_V_max_local=dDelV_t_V_max_test;
         }
       }
@@ -17949,15 +18167,15 @@ void calDelt_RTP_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &p
   double dDelT_t_T_max;
   double dDelT_t_T_max_test;
   double dDelT_t_T_max_local=0.0;
-  double dDelUmU0_t_UmU0_max;
+  double dDelUmU0_t_UmU0_max=0.0;
   double dDelUmU0_t_UmU0_max_test;
   double dDelUmU0_t_UmU0_max_local=0.0;
-  double dDelV_t_V_max;
+  double dDelV_t_V_max=0.0;
   double dDelV_t_V_max_test;
   double dDelV_t_V_max_local=0.0;
+  double dDelW_t_W_max_local=0.0;
   double dDelW_t_W_max;
   double dDelW_t_W_max_test;
-  double dDelW_t_W_max_local=0.0;
   double dMaxChange;
   double dTest_ConVel_R;
   double dTest_ConVel_T;
@@ -17977,6 +18195,7 @@ void calDelt_RTP_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &p
     for(j=grid.nStartUpdateExplicit[grid.nD][1];j<grid.nEndUpdateExplicit[grid.nD][1];j++){
       nJInt=j+grid.nCenIntOffset[1];
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
+        
         nKInt=k+grid.nCenIntOffset[2];
         dC=sqrt(grid.dLocalGridNew[grid.nGamma][i][j][k]
           *(grid.dLocalGridNew[grid.nP][i][j][k]+grid.dLocalGridNew[grid.nQ0][i][j][k]
@@ -17989,6 +18208,7 @@ void calDelt_RTP_TEOS(Grid &grid, Parameters &parameters, Time &time, ProcTop &p
           +grid.dLocalGridNew[grid.nV][i][nJInt-1][k])*0.5;
         dW_ijk_nm1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
           +grid.dLocalGridNew[grid.nW][i][j][nKInt-1])*0.5;
+        
         dVelToSetTimeStep=sqrt(dC*dC+dUmdU0_ijk_nm1half*dUmdU0_ijk_nm1half+dV_ijk_nm1half
           *dV_ijk_nm1half+dW_ijk_nm1half*dW_ijk_nm1half);
         
@@ -18210,15 +18430,14 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
   int nI;
   int nJ;
   int nK;
+  double dTemps[3];
   double dF_ijk_Tijk;
-  double dF_ijk_Ti1;
+  double *dValues;
   double dF_ijk_Tijk1;
   double dF_ijk_Tip1;
   double dF_ijk_Tim1;
-  double dTemps[]={0,0,0};
-  double *dValues;
-  double dRelTErrorLocal;
   double dTemp2;
+  double dRelTErrorLocal;
   while(dRelTError>implicit.dTolerance
     &&nNumIterations<implicit.nMaxNumIterations){
     //CALCULATE COEFFECIENT MATRIX AND RHS
@@ -18232,6 +18451,7 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
       dTemps[1]=grid.dLocalGridNew[grid.nT][nI+1][nJ][nK];
       dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+      
       #if DEBUG_EQUATIONS==1
       if(dRelTError<implicit.dTolerance*2.0e6){
         parameters.bSetThisCall=true;
@@ -18241,6 +18461,7 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       #if DEBUG_EQUATIONS==1
       parameters.bSetThisCall=false;
       #endif
+      
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -18295,12 +18516,14 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       
       dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
       dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+      
       #if DEBUG_EQUATIONS==1
       if(dRelTError<implicit.dTolerance*2.0e6){
         parameters.bSetThisCall=true;
       }
       #endif
-      dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
+      dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
+        ,nI,nJ,nK);
       #if DEBUG_EQUATIONS==1
       parameters.bSetThisCall=false;
       #endif
@@ -18311,19 +18534,17 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
         
         switch(implicit.nTypeDer[i][j]){
           case 0 :{//calculate derivative of energy equation wrt. T at i
-            dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK]*(1.0
-              +implicit.dDerivativeStepFraction);
+            dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK]*(1.0+implicit.dDerivativeStepFraction);
             dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
-            dF_ijk_Ti1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
-            dValues[j]=(dF_ijk_Ti1-dF_ijk_Tijk)
+            dF_ijk_Tijk1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
+            dValues[j]=(dF_ijk_Tijk1-dF_ijk_Tijk)
               /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
             break;
           }
-          //no case for i+1 at surface boundary
+          //case 1: no i+1 at surface
           case 2 :{//calculate derivative of energy equation wrt. T at i-1
             dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
-            dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK]*(1.0
-              +implicit.dDerivativeStepFraction);
+            dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK]*(1.0+implicit.dDerivativeStepFraction);
             dF_ijk_Tim1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
             dValues[j]=(dF_ijk_Tim1-dF_ijk_Tijk)
               /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI-1][nJ][nK]);
@@ -18470,8 +18691,8 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
   int nI;
   int nJ;
   int nK;
-  double dF_ijk_Tijk;
   double dTemps[5];
+  double dF_ijk_Tijk;
   double *dValues;
   double dF_ijk_Tijk1;
   double dF_ijk_Tip1;
@@ -18496,7 +18717,17 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
       dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
       dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+      
+      #if DEBUG_EQUATIONS==1
+      if(dRelTError<implicit.dTolerance*2.0e6){
+        parameters.bSetThisCall=true;
+      }
+      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
+      #if DEBUG_EQUATIONS==1
+      parameters.bSetThisCall=false;
+      #endif
+      
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -18597,8 +18828,17 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
       dTemps[2]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
       dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+      
+      #if DEBUG_EQUATIONS==1
+      if(dRelTError<implicit.dTolerance*2.0e6){
+        parameters.bSetThisCall=true;
+      }
+      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
         ,nI,nJ,nK);
+      #if DEBUG_EQUATIONS==1
+      parameters.bSetThisCall=false;
+      #endif
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -18610,8 +18850,8 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
             dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
             dTemps[2]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
             dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
-            dF_ijk_Ti1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
-            dValues[j]=(dF_ijk_Ti1-dF_ijk_Tijk)
+            dF_ijk_Tijk1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
+            dValues[j]=(dF_ijk_Tijk1-dF_ijk_Tijk)
               /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
             break;
           }
@@ -18730,7 +18970,6 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
     MPI::COMM_WORLD.Allreduce(&dRelTErrorLocal,&dRelTError,1,MPI::DOUBLE,MPI_MAX);
     
     VecRestoreArray(implicit.vecTCorrectionsLocal,&dValues);
-    
     nNumIterations++;
   }
   
@@ -18806,15 +19045,16 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
   double dTemps[7];
   double dF_ijk_Tijk;
   double *dValues;
-  double dF_ijk_Ti1;
+  double dF_ijk_Tijk1;
   double dF_ijk_Tip1;
   double dF_ijk_Tim1;
   double dF_ijk_Tjp1;
   double dF_ijk_Tjm1;
   double dF_ijk_Tkp1;
   double dF_ijk_Tkm1;
-  double dRelTErrorLocal;
+  double dF_ijk_Ti1;
   double dTemp2;
+  double dRelTErrorLocal;
   while(dRelTError>implicit.dTolerance
     &&nNumIterations<implicit.nMaxNumIterations){
     //CALCULATE COEFFECIENT MATRIX AND RHS
@@ -18857,9 +19097,9 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
             dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
             dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
             dTemps[6]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
-            dF_ijk_Ti1=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
-            dValues[j]=(dF_ijk_Ti1-dF_ijk_Tijk)
-                /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
+            dF_ijk_Tijk1=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
+            dValues[j]=(dF_ijk_Tijk1-dF_ijk_Tijk)
+              /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
             break;
           }
           case 1 :{//calculate derivative of energy equation wrt. T at i+1
@@ -19008,7 +19248,8 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
         parameters.bSetThisCall=true;
       }
       #endif
-      dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
+      dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
+        ,nI,nJ,nK);
       #if DEBUG_EQUATIONS==1
       parameters.bSetThisCall=false;
       #endif
@@ -19025,12 +19266,12 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
             dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
             dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
             dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
-            dF_ijk_Ti1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
-            dValues[j]=(dF_ijk_Ti1-dF_ijk_Tijk)
+            dF_ijk_Tijk1=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps,nI,nJ,nK);
+            dValues[j]=(dF_ijk_Tijk1-dF_ijk_Tijk)
               /(implicit.dDerivativeStepFraction*grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
             break;
           }
-          //case 1 : no i+1 at surface
+          //case 1: no i+1 at surface
           case 2 :{//calculate derivative of energy equation wrt. T at i-1
             dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
             dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK]*(1.0+implicit.dDerivativeStepFraction);
@@ -19152,17 +19393,9 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
     VecAssemblyEnd(implicit.vecRHS);
     MatAssemblyEnd(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
-    //print out RHS
-    //VecView(implicit.vecRHS,PETSC_VIEWER_STDOUT_WORLD);
-    
-    //print out matrix
-    //MatView(implicit.matCoeff,PETSC_VIEWER_STDOUT_WORLD);
-    
     //solve system
     KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff,SAME_NONZERO_PATTERN);
     KSPSolve(implicit.kspContext,implicit.vecRHS,implicit.vecTCorrections);
-    //print out solution
-    //VecView(implicit.vecTCorrections,PETSC_VIEWER_STDOUT_WORLD);
     
     //get distributed corrections
     VecScatterBegin(implicit.vecscatTCorrections,implicit.vecTCorrections
@@ -19277,41 +19510,44 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
   double dT_ip1jk_np1=dTemps[1];
   double dT_im1jk_np1=dTemps[2];
   
-  //Calculate interpolated quantities
+  double dPiSq=parameters.dPi*parameters.dPi;
+  
+  //calculate i,j,k for interface centered quantities
   int nIInt=i+grid.nCenIntOffset[0];
-  double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
-    +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
+  
+  //Calculate interpolated quantities
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-  double dR_i_n=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-    +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
   double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
   double dRSq_i_n=dR_i_n*dR_i_n;
-  double dRSq_ip1half=dR_ip1half_n*dR_ip1half_n;
-  double dR4_ip1half=dRSq_ip1half*dRSq_ip1half;
-  double dR_im1half_sq=dR_im1half_n*dR_im1half_n;
-  double dR_im1half_4=dR_im1half_sq*dR_im1half_sq;
-  double dRhoAve_ip1half=(grid.dLocalGridOld[grid.nD][i+1][0][0]
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nD][i+1][0][0]
     +grid.dLocalGridOld[grid.nD][i][0][0])*0.5;
-  double dRhoAve_im1half=(grid.dLocalGridOld[grid.nD][i][0][0]
+  double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nD][i][0][0]
     +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
-  double dRho_ip1halfjk=(grid.dLocalGridOld[grid.nD][i+1][j][k]
+  double dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i+1][j][k]
     +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
-  double dRho_im1halfjk=(grid.dLocalGridOld[grid.nD][i][j][k]
+  double dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
     +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+  double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+    +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
   
   double dT_ip1jk_np1half=(dT_ip1jk_np1+grid.dLocalGridOld[grid.nT][i+1][j][k])*0.5;
-  double dT_ip1jk_np1half_sq=dT_ip1jk_np1half*dT_ip1jk_np1half;
-  double dT_ip1jk_np1half_4=dT_ip1jk_np1half_sq*dT_ip1jk_np1half_sq;
+  double dTSq_ip1jk_np1half=dT_ip1jk_np1half*dT_ip1jk_np1half;
+  double dT4_ip1jk_np1half=dTSq_ip1jk_np1half*dTSq_ip1jk_np1half;
   
   double dT_ijk_np1half=(dT_ijk_np1+grid.dLocalGridOld[grid.nT][i][j][k])*0.5;
-  double dT_ijk_np1half_sq=dT_ijk_np1half*dT_ijk_np1half;
-  double dT_ijk_np1half_4=dT_ijk_np1half_sq*dT_ijk_np1half_sq;
+  double dTSq_ijk_np1half=dT_ijk_np1half*dT_ijk_np1half;
+  double dT4_ijk_np1half=dTSq_ijk_np1half*dTSq_ijk_np1half;
   
   double dT_im1jk_np1half=(dT_im1jk_np1+grid.dLocalGridOld[grid.nT][i-1][j][k])*0.5;
-  double dT_im1jk_np1half_sq=dT_im1jk_np1half*dT_im1jk_np1half;
-  double dT_im1jk_np1half_4=dT_im1jk_np1half_sq*dT_im1jk_np1half_sq;
+  double dTSq_im1jk_np1half=dT_im1jk_np1half*dT_im1jk_np1half;
+  double dT4_im1jk_np1half=dTSq_im1jk_np1half*dTSq_im1jk_np1half;
   
   double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1
     ,grid.dLocalGridNew[grid.nD][i][j][k]);
@@ -19323,10 +19559,10 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
     ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
   
   double dE_ip1halfjk_np1half=(dE_ip1jk_np1half+dE_ijk_np1half)*0.5;
-  double dE_im1halfjk_np1half=(dE_ijk_np1half+dE_im1jk_np1half)*0.5;
+  double dE_im1halfjk_np1half=(dE_im1jk_np1half+dE_ijk_np1half)*0.5;
   
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
-    ,grid.dLocalGridOld[grid.nD][i][j][k])+grid.dLocalGridOld[grid.nQ0][i][j][k];
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
   #if VISCOUS_ENERGY_EQ==1
     dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k];
   #endif
@@ -19338,11 +19574,11 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
   double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half
     ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
   
-  double dKappa_ip1halfjk_n_np1half=(dT_ip1jk_np1half_4+dT_ijk_np1half_4)
-    /(dT_ijk_np1half_4/dKappa_ijk_np1half+dT_ip1jk_np1half_4/dKappa_ip1jk_np1half);
-  double dKappa_im1halfjk_n_np1half=(dT_im1jk_np1half_4+dT_ijk_np1half_4)
-    /(dT_ijk_np1half_4/dKappa_ijk_np1half+dT_im1jk_np1half_4/dKappa_im1jk_np1half);
-    
+  double dKappa_ip1halfjk_np1half=(dT4_ip1jk_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
+    /dKappa_ijk_np1half+dT4_ip1jk_np1half/dKappa_ip1jk_np1half);
+  double dKappa_im1halfjk_np1half=(dT4_im1jk_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
+    /dKappa_ijk_np1half+dT4_im1jk_np1half/dKappa_im1jk_np1half);
+  
   //Calcuate dA1
   double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
     /grid.dLocalGridOld[grid.nDM][i][0][0];
@@ -19356,177 +19592,266 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
-  double dA1=dU_U0_Diff*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA1CenGrad
-    +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+    *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
+  }
+  
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
-  double dUR2_im1half_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dR_im1half_n
-    *dR_im1half_n;
-  double dUR2_ip1half_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dR_ip1half_n
-    *dR_ip1half_n;
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
-    *(dUR2_ip1half_np1half-dUR2_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
+    *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //Calculate dS4
-  double dTGrad_ip1half_np1half=(dT_ip1jk_np1half_4-dT_ijk_np1half_4)
+  double dTGrad_ip1half_np1half=(dT4_ip1jk_np1half-dT4_ijk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i+1][0][0]+grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
-  double dTGrad_im1half_np1half=(dT_ijk_np1half_4-dT_im1jk_np1half_4)
+  double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=dRhoAve_ip1half*dR4_ip1half
-    /(dKappa_ip1halfjk_n_np1half*dRho_ip1halfjk)*dTGrad_ip1half_np1half;
-  double dGrad_im1half_np1half=dRhoAve_im1half*dR_im1half_4
-    /(dKappa_im1halfjk_n_np1half*dRho_im1halfjk)*dTGrad_im1half_np1half;
-  double dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]
+  double dGrad_ip1half_np1half=dRhoAve_ip1half_n*dR4_ip1half_n/(dKappa_ip1halfjk_np1half
+    *dRho_ip1halfjk_n)*dTGrad_ip1half_np1half;
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
+    *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
+  double dS4=16.0*dPiSq*grid.dLocalGridOld[grid.nD][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
+        
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
     
     //add E
-    parameters.profileDataDebug.setMaxAbs("E"
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,grid.dLocalGridOld[grid.nE][i][j][k]);
     
     //add A1
-    parameters.profileDataDebug.setMaxAbs("E_A1"
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add S1
-    parameters.profileDataDebug.setMaxAbs("E_S1"
+    ssName.str("");
+    ssName<<"E_S1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
     //add S4
-    parameters.profileDataDebug.setMaxAbs("E_S4"
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+    
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      /time.dDeltat_np1half);
   }
   #endif
   
-  //calculate new energy
+  //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
     +4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dA1+dS1)
     -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*dS4;
 }
-double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time,double dTemps[]
-  ,int i,int j,int k){
+double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
+  ,double dTemps[],int i,int j,int k){
   
   double dT_ijk_np1=dTemps[0];
   double dT_im1jk_np1=dTemps[1];
   int nIInt=i+grid.nCenIntOffset[0];
   
   //Calculate interpolated quantities
-  double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
-    +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
+  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+  double dRSq_i_n=dR_i_n*dR_i_n;
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/**\BC missing density
+    outside model assuming it is zero*/
+  double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nD][i][0][0]
+    +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
+  double dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/**\BC missing desnity outside
+    model assuming it is zero*/
+  double dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-  double dR_i_n=(grid.dLocalGridOld[grid.nR][nIInt][0][0]
-    +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
-  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-  double dRSq_i_n=dR_i_n*dR_i_n;
-  double dRSq_ip1half=dR_ip1half_n*dR_ip1half_n;
-  double dR_im1half_sq=dR_im1half_n*dR_im1half_n;
-  double dR_im1half_4=dR_im1half_sq*dR_im1half_sq;
-  double dRhoAve_im1half=(grid.dLocalGridOld[grid.nD][i][0][0]
-    +grid.dLocalGridOld[grid.nD][i-1][0][0])*0.5;
-  double dRho_im1halfjk=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+  double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
+    +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
   
   double dT_ijk_np1half=(dT_ijk_np1+grid.dLocalGridOld[grid.nT][i][j][k])*0.5;
-  double dT_ijk_np1half_sq=dT_ijk_np1half*dT_ijk_np1half;
-  double dT_ijk_np1half_4=dT_ijk_np1half_sq*dT_ijk_np1half_sq;
+  double dTSq_ijk_np1half=dT_ijk_np1half*dT_ijk_np1half;
+  double dT4_ijk_np1half=dTSq_ijk_np1half*dTSq_ijk_np1half;
   
   double dT_im1jk_np1half=(dT_im1jk_np1+grid.dLocalGridOld[grid.nT][i-1][j][k])*0.5;
-  double dT_im1jk_np1half_sq=dT_im1jk_np1half*dT_im1jk_np1half;
-  double dT_im1jk_np1half_4=dT_im1jk_np1half_sq*dT_im1jk_np1half_sq;
+  double dTSq_im1jk_np1half=dT_im1jk_np1half*dT_im1jk_np1half;
+  double dT4_im1jk_np1half=dTSq_im1jk_np1half*dTSq_im1jk_np1half;
   
   double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1
     ,grid.dLocalGridNew[grid.nD][i][j][k]);
   double dE_ijk_np1half=parameters.eosTable.dGetEnergy(dT_ijk_np1half
     ,grid.dLocalGridOld[grid.nD][i][j][k]);
   double dE_im1jk_np1half=parameters.eosTable.dGetEnergy(dT_im1jk_np1half
-    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+    ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
+  double dE_ip1halfjk_np1half=dE_ijk_np1half;/**\BC Assuming energy outside model is the same as
+    the energy in the last zone inside the model.*/
+  double dE_im1halfjk_np1half=(dE_im1jk_np1half+dE_ijk_np1half)*0.5;
   
-  double dE_ip1halfjk_np1half=dE_ijk_np1half;/**\BC Missing
-    grid.dLocalGridOld[grid.nE][i+1][j][k] in calculation of \f$E_{i+1/2,j,k}\f$ 
-    setting it equal to value at i.*/
-  double dE_im1halfjk_np1half=(dE_ijk_np1half+dE_im1jk_np1half)*0.5;
+  double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+  #if VISCOUS_ENERGY_EQ==1
+  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k];
+  #endif
   
   double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half
     ,grid.dLocalGridOld[grid.nD][i][j][k]);
   double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half
     ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
-  
-  double dKappa_im1halfjk_n_np1half=(dT_im1jk_np1half_4+dT_ijk_np1half_4)
-    /(dT_ijk_np1half_4/dKappa_ijk_np1half+dT_im1jk_np1half_4/dKappa_im1jk_np1half);
-    
-  double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
-    ,grid.dLocalGridOld[grid.nD][i][j][k]);
-  #if VISCOUS_ENERGY_EQ==1
-    dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k];
-  #endif
+  double dKappa_im1halfjk_np1half=(dT4_im1jk_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
+    /dKappa_ijk_np1half+dT4_im1jk_np1half/dKappa_im1jk_np1half);
   
   //Calcuate dA1
   double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
     /grid.dLocalGridOld[grid.nDM][i][0][0];
   double dA1UpWindGrad=0.0;
   double dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
-  if(dU_U0_Diff<0.0){//moving in the negative direction
+  if(dU_U0_Diff<0.0){//moving in the negative radial direction
     dA1UpWindGrad=0.0;/**\BC A1 upwind set to zero as no material is flowing into the star*/
   }
-  else{//moving in the postive direction*/
+  else{//moving in the postive radial direction
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
-  double dA1=dU_U0_Diff*dRSq_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA1CenGrad
-    +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
+  double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+    *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
+  
+  //apply DEDM clamp if set, and above the required mass
+  if(parameters.bDEDMClamp){
+    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
+      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+        dDEDM=parameters.dDEDMClampValue;
+      }
+    }
+    else{//if the clamp hasn't been set lets see if we can set it
+      
+      //this should only be set on the first, static and spherically symetric model
+      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
+        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+        parameters.dDEDMClampValue=dDEDM;
+      }
+    }
+  }
+  
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
+  
+  //calculate dS1
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
+  double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
+    *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   //Calculate dS4
-  double dTGrad_im1half_np1half=(dT_ijk_np1half_4-dT_im1jk_np1half_4)
+  double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half*dT_ijk_np1half_4/(8.0*parameters.dPi);/**\BC
-    Missing grid.dLocalGridOld[grid.nT][i+1][0][0]*/
-  double dGrad_im1half_np1half=dRhoAve_im1half*dR_im1half_4/(dKappa_im1halfjk_n_np1half
-    *dRho_im1halfjk)*dTGrad_im1half_np1half;
+  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half_n*dT4_ijk_np1half/(8.0*parameters.dPi);/**\BC 
+    Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at surface.*/
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
+    *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
   double dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
-  //calculate dS1
-  double dUR2_im1half_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dR_im1half_n
-    *dR_im1half_n;
-  double dUR2_ip1half_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dR_ip1half_n
-    *dR_ip1half_n;
-  double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
-    *(dUR2_ip1half_np1half-dUR2_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
     
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
+    
     //add E
-    parameters.profileDataDebug.setMaxAbs("E"
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,grid.dLocalGridOld[grid.nE][i][j][k]);
     
     //add A1
-    parameters.profileDataDebug.setMaxAbs("E_A1"
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
     
     //add S1
-    parameters.profileDataDebug.setMaxAbs("E_S1"
+    ssName.str("");
+    ssName<<"E_S1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
     
     //add S4
-    parameters.profileDataDebug.setMaxAbs("E_S4"
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+    
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      /time.dDeltat_np1half);
   }
   #endif
-
-  //calculate new energy
+  
+  //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
     +4.0*parameters.dPi*grid.dLocalGridOld[grid.nD][i][0][0]*(dA1+dS1)
     -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*dS4;
@@ -20745,14 +21070,14 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*0.5;
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-  double dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-  double dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-  double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-  double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-  double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-  double dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-  double dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-  double dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
+  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+  double dRSq_i_n=dR_i_n*dR_i_n;
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i+1][0][0]
     +grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -20781,18 +21106,18 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dV_im1halfjk_np1half=(grid.dLocalGridNew[grid.nV][i][nJInt][k]
     +grid.dLocalGridNew[grid.nV][i][nJInt-1][k]+grid.dLocalGridNew[grid.nV][i-1][nJInt][k]
     +grid.dLocalGridNew[grid.nV][i-1][nJInt-1][k])*0.25;
+  double dEddyVisc_ip1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i+1][j][k]
+    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+  double dEddyVisc_im1halfjk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i-1][j][k]
+    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+  double dEddyVisc_ijp1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j+1][k]
+  +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
+  double dEddyVisc_ijm1halfk_np1half=(grid.dLocalGridNew[grid.nEddyVisc][i][j-1][k]
+    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
   double dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt][k];
   double dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-  double dEddyVisc_ip1halfjk_n=(grid.dLocalGridNew[grid.nEddyVisc][i+1][j][k]
-    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
-  double dEddyVisc_im1halfjk_n=(grid.dLocalGridNew[grid.nEddyVisc][i-1][j][k]
-    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
-  double dEddyVisc_ijp1halfk_n=(grid.dLocalGridNew[grid.nEddyVisc][i][j+1][k]
-  +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
-  double dEddyVisc_ijm1halfk_n=(grid.dLocalGridNew[grid.nEddyVisc][i][j-1][k]
-    +grid.dLocalGridNew[grid.nEddyVisc][i][j][k])*0.5;
   
   double dT_ip1jk_np1half=(dT_ip1jk_np1+grid.dLocalGridOld[grid.nT][i+1][j][k])*0.5;
   double dTSq_ip1jk_np1half=dT_ip1jk_np1half*dT_ip1jk_np1half;
@@ -20804,7 +21129,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   
   double dT_im1jk_np1half=(dT_im1jk_np1+grid.dLocalGridOld[grid.nT][i-1][j][k])*0.5;
   double dTSq_im1jk_np1half=dT_im1jk_np1half*dT_im1jk_np1half;
-  double dT4_im1jk_np1half = dTSq_im1jk_np1half*dTSq_im1jk_np1half;
+  double dT4_im1jk_np1half=dTSq_im1jk_np1half*dTSq_im1jk_np1half;
   
   double dT_ijp1k_np1half=(dT_ijp1k_np1+grid.dLocalGridOld[grid.nT][i][j+1][k])*0.5;
   double dTSq_ijp1k_np1half=dT_ijp1k_np1half*dT_ijp1k_np1half;
@@ -20893,11 +21218,11 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     }
   }
   
-  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
-  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
@@ -20913,11 +21238,11 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     dA2UpWindGrad=(dE_ijk_np1half-dE_ijm1k_np1half)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
       +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   }
-  double dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
-    
+  
   //Calcualte dS2
-  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
   
@@ -20926,11 +21251,11 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     /(grid.dLocalGridOld[grid.nDM][i+1][0][0]+grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
   double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=dRhoAve_ip1half_n*dR4_ip1half_np1half/(dKappa_ip1halfjk_np1half
+  double dGrad_ip1half_np1half=dRhoAve_ip1half_n*dR4_ip1half_n/(dKappa_ip1halfjk_np1half
     *dRho_ip1halfjk_n)*dTGrad_ip1half_np1half;
-  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_np1half/(dKappa_im1halfjk_np1half
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
     *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
-  double dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
+  double dS4=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //Calculate dS5
@@ -20944,34 +21269,142 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_n)*dTGrad_jm1half_np1half;
   double dS5=(dGrad_jp1half_np1half-dGrad_jm1half_np1half)
     /(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-    *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+    *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //calculate dT1
-  double dEGrad_ip1halfjk_np1half=dR4_ip1half_np1half*dEddyVisc_ip1halfjk_n*dRhoAve_ip1half_n
-    *(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_n*dDM_ip1half);
-  double dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_n*dRhoAve_im1half_n
-    *(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_n*dDM_im1half);
+  double dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_np1half
+    *dRhoAve_ip1half_n*(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_n*dDM_ip1half);
+  double dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half
+    *dRhoAve_im1half_n*(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_n*dDM_im1half);
   double dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
     -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //calculate dT2
-  double dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_n
+  double dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_np1half*dDelTheta_jp1half);
-  double dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_n
+    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
+  double dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_np1half*dDelTheta_jm1half);
-  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //eddy viscosity terms
   double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
   
+  #if DEBUG_EQUATIONS==1
+  if(parameters.bSetThisCall){
+        
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
+    
+    //add E
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nE][i][j][k]);
+    
+    //add A1
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
+    
+    //add A2
+    ssName.str("");
+    ssName<<"E_A2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-dA2);
+    
+    //add S1
+    ssName.str("");
+    ssName<<"E_S1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
+    
+    //add S2
+    ssName.str("");
+    ssName<<"E_S2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-dS2);
+    
+    //add S4
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+    
+    //add S5
+    ssName.str("");
+    ssName<<"E_S5"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
+    
+    //add E_TGrad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jp1half_np1half);
+    
+    //add E_TGrad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jm1half_np1half);
+    
+    //add E_Grad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jp1half_np1half);
+    
+    //add E_Grad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jm1half_np1half);
+    
+    //add EV
+    ssName.str("");
+    ssName<<"E_EV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms);
+    
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      /time.dDeltat_np1half);
+  }
+  #endif
+  
   //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
     +4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
-    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)-dEddyViscosityTerms;
+    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
+    -dEddyViscosityTerms;
 }
 double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time &time
   ,double dTemps[],int i,int j,int k){
@@ -20997,14 +21430,14 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     +grid.dLocalGridOld[grid.nDTheta][0][j+1][0])*0.5;
   double dDelTheta_jm1half=(grid.dLocalGridOld[grid.nDTheta][0][j][0]
     +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*0.5;
-  double dR_ip1half_np1half=grid.dLocalGridOld[grid.nR][nIInt][0][0];
-  double dR_im1half_np1half=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
-  double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-  double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-  double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-  double dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-  double dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-  double dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
+  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+  double dRSq_i_n=dR_i_n*dR_i_n;
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/**\BC missing density
     outside model assuming it is zero*/
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -21080,8 +21513,8 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
     ,grid.dLocalGridOld[grid.nD][i][j][k]);
   #if VISCOUS_ENERGY_EQ==1
-    dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
-      +grid.dLocalGridOld[grid.nQ1][i][j][k];
+  dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
+    +grid.dLocalGridOld[grid.nQ1][i][j][k];
   #endif
   
   double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half
@@ -21105,13 +21538,13 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dA1UpWindGrad=0.0;
   double dU_U0_Diff=(dU_ijk_np1half-dU0_i_np1half);
   if(dU_U0_Diff<0.0){//moving in the negative radial direction
-    dA1UpWindGrad=dA1UpWindGrad;/**\BC Using centered gradient for upwind gradient when motion is 
-      into the star at the surface*/
+    dA1UpWindGrad=0.0;/**\BC A1 upwind set to zero as no material is flowing into the star*/
   }
   else{//moving in the postive radial direction
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
+  
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
@@ -21131,11 +21564,12 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
       }
     }
   }
-  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
+  
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
-  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
@@ -21151,7 +21585,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     dA2UpWindGrad=(dE_ijk_np1half-dE_ijm1k_np1half)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
       +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   }
-  double dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
     
   //Calcualte dS2
@@ -21159,16 +21593,16 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     *grid.dLocalGridNew[grid.nV][i][nJInt][k];
   double dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
   
   //Calculate dS4
   double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half_np1half*dT4_ijk_np1half/(8.0*parameters.dPi);/**\BC 
+  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half_n*dT4_ijk_np1half/(8.0*parameters.dPi);/**\BC 
     Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at surface.*/
-  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_np1half/(dKappa_im1halfjk_np1half
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
     *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
   double dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
@@ -21184,12 +21618,12 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_n)*dTGrad_jm1half_np1half;
   double dS5=(dGrad_jp1half_np1half-dGrad_jm1half_np1half)
     /(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-    *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+    *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //calculate dT1
-  double dEGrad_ip1halfjk_np1half=dR4_ip1half_np1half*dEddyVisc_ip1halfjk_n*dRhoAve_ip1half_n
+  double dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_n*dRhoAve_ip1half_n
     *(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_n*dDM_ip1half);
-  double dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_n*dRhoAve_im1half_n
+  double dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_n*dRhoAve_im1half_n
     *(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_n*dDM_im1half);
   double dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
     -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
@@ -21197,21 +21631,130 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   //calculate dT2
   double dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_n
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_np1half*dDelTheta_jp1half);
+    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
   double dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_n
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_np1half*dDelTheta_jm1half);
-  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //eddy viscosity terms
   double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
   
+  #if DEBUG_EQUATIONS==1
+  if(parameters.bSetThisCall){
+    
+    //if we don't want zone by zone, set ssEnd.str("")
+    std::stringstream ssName;
+    std::stringstream ssEnd;
+    if(parameters.bEveryJK){
+      ssEnd<<"_"<<j<<"_"<<k;
+    }
+    else{
+      ssEnd.str("");
+    }
+    
+    //add E
+    ssName.str("");
+    ssName<<"E"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nE][i][j][k]);
+    
+    //add A1
+    ssName.str("");
+    ssName<<"E_A1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
+    
+    //add A2
+    ssName.str("");
+    ssName<<"E_A2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-dA2);
+    
+    //add S1
+    ssName.str("");
+    ssName<<"E_S1"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
+    
+    //add S2
+    ssName.str("");
+    ssName<<"E_S2"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,-dS2);
+    
+    //add S4
+    ssName.str("");
+    ssName<<"E_S4"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
+    
+    //add S5
+    ssName.str("");
+    ssName<<"E_S5"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
+    
+    
+    //add E_TGrad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jp1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jp1half_np1half);
+    
+    //add E_TGrad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_TGrad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dTGrad_jm1half_np1half);
+    
+    //add E_Grad_jp1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jp1hf_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jp1half_np1half);
+    
+    //add E_Grad_jm1half_np1half
+    ssName.str("");
+    ssName<<"E_Grad_jm1h_np1h"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dGrad_jm1half_np1half);
+    
+    //add E_EV
+    ssName.str("");
+    ssName<<"E_EV"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms);
+    
+    //add E_DEDt
+    ssName.str("");
+    ssName<<"E_DEDt"<<ssEnd.str();
+    parameters.profileDataDebug.setMaxAbs(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      /time.dDeltat_np1half);
+  }
+  #endif
+  
   //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
     +4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2
-    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)-dEddyViscosityTerms;
+    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5)
+    -dEddyViscosityTerms;
 }
 double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &time,double dTemps[]
   ,int i,int j,int k){
@@ -21230,7 +21773,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   int nIInt=i+grid.nCenIntOffset[0];
   int nJInt=j+grid.nCenIntOffset[1];
   int nKInt=k+grid.nCenIntOffset[2];
-    
+  
   //Calculate interpolated quantities
   double dDM_ip1half=(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i+1][0][0])
     *0.5;
@@ -21246,56 +21789,30 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     +grid.dLocalGridOld[grid.nDPhi][0][0][k-1])*0.5;
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
-  double dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]);/*
-    +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;*/
-  double dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);/*
-    +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;*/
-  double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-  double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-  double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-  double dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-  double dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-  double dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
-  double dRhoAve_ip1half_np1half=(grid.dLocalGridOld[grid.nDenAve][i+1][0][0]
-    +grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/*+grid.dLocalGridNew[grid.nDenAve][i+1][0][0]
-    +grid.dLocalGridNew[grid.nDenAve][i][0][0])*0.25;*/
-  double dRhoAve_im1half_np1half=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
-    +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;/*+grid.dLocalGridNew[grid.nDenAve][i][0][0]
-    +grid.dLocalGridNew[grid.nDenAve][i-1][0][0])*0.25;*/
-  double dRhoAve_i_np1half=(grid.dLocalGridOld[grid.nDenAve][i][0][0]);/*
-    +grid.dLocalGridNew[grid.nDenAve][i][0][0])*0.5;*/
-  double dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][i+1][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i+1][j][k]
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
-  double dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i-1][j][k])*0.25;*/
-  double dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][i][j+1][k]
-    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j+1][k]
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
-  double dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i][j-1][k])*0.25;*/
-  double dRho_ijkp1half_np1half=(grid.dLocalGridOld[grid.nD][i][j][k+1]
-    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k+1]
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
-  double dRho_ijkm1half_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j][k-1])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i][j][k-1])*0.25;*/
-  double dRho_ijk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.5;*/
-  double dRho_ip1jk_np1half=(grid.dLocalGridOld[grid.nD][i+1][j][k]);/*
-    +grid.dLocalGridNew[grid.nD][i+1][j][k])*0.5;*/
-  double dRho_im1jk_np1half=(grid.dLocalGridOld[grid.nD][i-1][j][k]);/*
-    +grid.dLocalGridNew[grid.nD][i-1][j][k])*0.5;*/
-  double dRho_ijp1k_np1half=(grid.dLocalGridOld[grid.nD][i][j+1][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j+1][k])*0.5;*/
-  double dRho_ijm1k_np1half=(grid.dLocalGridOld[grid.nD][i][j-1][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j-1][k])*0.5;*/
-  double dRho_ijkp1_np1half=(grid.dLocalGridOld[grid.nD][i][j][k+1]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k+1])*0.5;*/
-  double dRho_ijkm1_np1half=(grid.dLocalGridOld[grid.nD][i][j][k-1]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k-1])*0.5;*/
+  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+  double dRSq_i_n=dR_i_n*dR_i_n;
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i+1][0][0]
+    +grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;
+  double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
+    +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;
+  double dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i+1][j][k]
+    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+  double dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+  double dRho_ijp1halfk_n=(grid.dLocalGridOld[grid.nD][i][j+1][k]
+    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+  double dRho_ijm1halfk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;
+  double dRho_ijkp1half_n=(grid.dLocalGridOld[grid.nD][i][j][k+1]
+    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+  double dRho_ijkm1half_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i][j][k-1])*0.5;
   double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
     +grid.dLocalGridNew[grid.nU][nIInt-1][j][k])*0.5;
   double dU_ijp1halfk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j+1][k]
@@ -21368,7 +21885,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   
   double dT_im1jk_np1half=(dT_im1jk_np1+grid.dLocalGridOld[grid.nT][i-1][j][k])*0.5;
   double dTSq_im1jk_np1half=dT_im1jk_np1half*dT_im1jk_np1half;
-  double dT4_im1jk_np1half = dTSq_im1jk_np1half*dTSq_im1jk_np1half;
+  double dT4_im1jk_np1half=dTSq_im1jk_np1half*dTSq_im1jk_np1half;
   
   double dT_ijp1k_np1half=(dT_ijp1k_np1+grid.dLocalGridOld[grid.nT][i][j+1][k])*0.5;
   double dTSq_ijp1k_np1half=dT_ijp1k_np1half*dT_ijp1k_np1half;
@@ -21386,14 +21903,22 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dTSq_ijkm1_np1half=dT_ijkm1_np1half*dT_ijkm1_np1half;
   double dT4_ijkm1_np1half=dTSq_ijkm1_np1half*dTSq_ijkm1_np1half;
   
-  double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1,grid.dLocalGridNew[grid.nD][i][j][k]);
-  double dE_ip1jk_np1half=parameters.eosTable.dGetEnergy(dT_ip1jk_np1half,dRho_ip1jk_np1half);
-  double dE_ijk_np1half=parameters.eosTable.dGetEnergy(dT_ijk_np1half,dRho_ijk_np1half);
-  double dE_im1jk_np1half=parameters.eosTable.dGetEnergy(dT_im1jk_np1half,dRho_im1jk_np1half);
-  double dE_ijp1k_np1half=parameters.eosTable.dGetEnergy(dT_ijp1k_np1half,dRho_ijp1k_np1half);
-  double dE_ijm1k_np1half=parameters.eosTable.dGetEnergy(dT_ijm1k_np1half,dRho_ijm1k_np1half);
-  double dE_ijkp1_np1half=parameters.eosTable.dGetEnergy(dT_ijkp1_np1half,dRho_ijkp1_np1half);
-  double dE_ijkm1_np1half=parameters.eosTable.dGetEnergy(dT_ijkm1_np1half,dRho_ijkm1_np1half);
+  double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1
+    ,grid.dLocalGridNew[grid.nD][i][j][k]);
+  double dE_ip1jk_np1half=parameters.eosTable.dGetEnergy(dT_ip1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i+1][j][k]);
+  double dE_ijk_np1half=parameters.eosTable.dGetEnergy(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+  double dE_im1jk_np1half=parameters.eosTable.dGetEnergy(dT_im1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
+  double dE_ijp1k_np1half=parameters.eosTable.dGetEnergy(dT_ijp1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j+1][k]);
+  double dE_ijm1k_np1half=parameters.eosTable.dGetEnergy(dT_ijm1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j-1][k]);
+  double dE_ijkp1_np1half=parameters.eosTable.dGetEnergy(dT_ijkp1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k+1]);
+  double dE_ijkm1_np1half=parameters.eosTable.dGetEnergy(dT_ijkm1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k-1]);
   
   double dE_ip1halfjk_np1half=(dE_ip1jk_np1half+dE_ijk_np1half)*0.5;
   double dE_im1halfjk_np1half=(dE_im1jk_np1half+dE_ijk_np1half)*0.5;
@@ -21403,19 +21928,26 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dE_ijkm1half_np1half=(dE_ijkm1_np1half+dE_ijk_np1half)*0.5;
   
   double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
-    ,dRho_ijk_np1half);
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
   #if VISCOUS_ENERGY_EQ==1
   dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
     +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
   #endif
   
-  double dKappa_ip1jk_np1half=parameters.eosTable.dGetOpacity(dT_ip1jk_np1half,dRho_ip1jk_np1half);
-  double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half,dRho_ijk_np1half);
-  double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half,dRho_im1jk_np1half);
-  double dKappa_ijp1k_np1half=parameters.eosTable.dGetOpacity(dT_ijp1k_np1half,dRho_ijp1k_np1half);
-  double dKappa_ijm1k_np1half=parameters.eosTable.dGetOpacity(dT_ijm1k_np1half,dRho_ijm1k_np1half);
-  double dKappa_ijkp1_np1half=parameters.eosTable.dGetOpacity(dT_ijkp1_np1half,dRho_ijkp1_np1half);
-  double dKappa_ijkm1_np1half=parameters.eosTable.dGetOpacity(dT_ijkm1_np1half,dRho_ijkm1_np1half);
+  double dKappa_ip1jk_np1half=parameters.eosTable.dGetOpacity(dT_ip1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i+1][j][k]);
+  double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+  double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
+  double dKappa_ijp1k_np1half=parameters.eosTable.dGetOpacity(dT_ijp1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j+1][k]);
+  double dKappa_ijm1k_np1half=parameters.eosTable.dGetOpacity(dT_ijm1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j-1][k]);
+  double dKappa_ijkp1_np1half=parameters.eosTable.dGetOpacity(dT_ijkp1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k+1]);
+  double dKappa_ijkm1_np1half=parameters.eosTable.dGetOpacity(dT_ijkm1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k-1]);
   
   double dKappa_ip1halfjk_np1half=(dT4_ip1jk_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
     /dKappa_ijk_np1half+dT4_ip1jk_np1half/dKappa_ip1jk_np1half);
@@ -21464,11 +21996,11 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     }
   }
   
-  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
-  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
@@ -21484,11 +22016,11 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     dA2UpWindGrad=(dE_ijk_np1half-dE_ijm1k_np1half)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
       +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   }
-  double dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
   
   //Calcualte dS2
-  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
   
@@ -21504,12 +22036,12 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     dA3UpWindGrad=(dE_ijk_np1half-dE_ijkm1_np1half)/(grid.dLocalGridOld[grid.nDPhi][0][0][k]
       +grid.dLocalGridOld[grid.nDPhi][0][0][k-1])*2.0;
   }
-  double dA3=dW_ijk_np1half/(dR_i_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0])*
+  double dA3=dW_ijk_np1half/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0])*
     ((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA3CenGrad
     +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA3UpWindGrad);
   
   //Calcualte dS3
-  double dS3=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS3=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k])
     *(dW_ijkp1half_np1half-dW_ijkm1half_np1half);
   
@@ -21518,11 +22050,11 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     /(grid.dLocalGridOld[grid.nDM][i+1][0][0]+grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
   double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=dRhoAve_ip1half_np1half*dR4_ip1half_np1half/(dKappa_ip1halfjk_np1half
-    *dRho_ip1halfjk_np1half)*dTGrad_ip1half_np1half;
-  double dGrad_im1half_np1half=dRhoAve_im1half_np1half*dR4_im1half_np1half/(dKappa_im1halfjk_np1half
-    *dRho_im1halfjk_np1half)*dTGrad_im1half_np1half;
-  double dS4=16.0*dPiSq*dRhoAve_i_np1half
+  double dGrad_ip1half_np1half=dRhoAve_ip1half_n*dR4_ip1half_n/(dKappa_ip1halfjk_np1half
+    *dRho_ip1halfjk_n)*dTGrad_ip1half_np1half;
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
+    *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
+  double dS4=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //Calculate dS5
@@ -21531,12 +22063,12 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dTGrad_jm1half_np1half=(dT4_ijk_np1half-dT4_ijm1k_np1half)
     /(grid.dLocalGridOld[grid.nDTheta][0][j][0]+grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   double dGrad_jp1half_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    /(dKappa_ijp1halfk_np1half*dRho_ijp1halfk_np1half)*dTGrad_jp1half_np1half;
+    /(dKappa_ijp1halfk_np1half*dRho_ijp1halfk_n)*dTGrad_jp1half_np1half;
   double dGrad_jm1half_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_np1half)*dTGrad_jm1half_np1half;
+    /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_n)*dTGrad_jm1half_np1half;
   double dS5=(dGrad_jp1half_np1half-dGrad_jm1half_np1half)
     /(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-    *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+    *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //Calculate dS6
   double dTGrad_kp1half_np1half=(dT4_ijkp1_np1half-dT4_ijk_np1half)
@@ -21544,40 +22076,40 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dTGrad_km1half_np1half=(dT4_ijk_np1half-dT4_ijkm1_np1half)
     /(grid.dLocalGridOld[grid.nDPhi][0][0][k]+grid.dLocalGridOld[grid.nDPhi][0][0][k-1])*2.0;
   double dGrad_kp1half_np1half=dTGrad_kp1half_np1half/(dKappa_ijkp1half_np1half
-    *dRho_ijkp1half_np1half);
+    *dRho_ijkp1half_n);
   double dGrad_km1half_np1half=dTGrad_km1half_np1half/(dKappa_ijkm1half_np1half
-    *dRho_ijkm1half_np1half);
-  double dS6=(dGrad_kp1half_np1half-dGrad_km1half_np1half)/(dRSq_i_np1half
+    *dRho_ijkm1half_n);
+  double dS6=(dGrad_kp1half_np1half-dGrad_km1half_np1half)/(dRSq_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
   //calculate dT1
-  double dEGrad_ip1halfjk_np1half=dR4_ip1half_np1half*dEddyVisc_ip1halfjk_np1half
-    *dRhoAve_ip1half_np1half*(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_np1half*dDM_ip1half);
-  double dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_np1half
-    *dRhoAve_im1half_np1half*(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_np1half*dDM_im1half);
-  double dT1=16.0*dPiSq*dRhoAve_i_np1half*(dEGrad_ip1halfjk_np1half
+  double dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_np1half
+    *dRhoAve_ip1half_n*(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_n*dDM_ip1half);
+  double dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half
+    *dRhoAve_im1half_n*(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_n*dDM_im1half);
+  double dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
     -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //calculate dT2
   double dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_np1half*dR_i_np1half*dDelTheta_jp1half);
+    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
   double dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_np1half*dR_i_np1half*dDelTheta_jm1half);
-  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //calculate dT3
   double dEGrad_ijkp1half_np1half=dEddyVisc_ijkp1half_np1half*(dE_ijkp1_np1half-dE_ijk_np1half)
-    /(dRho_ijkp1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_np1half
+    /(dRho_ijkp1half_n*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_n
     *dDelPhi_kp1half);
   double dEGrad_ijkm1half_np1half=dEddyVisc_ijkm1half_np1half*(dE_ijk_np1half-dE_ijm1k_np1half)
-    /(dRho_ijkm1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_np1half
+    /(dRho_ijkm1half_n*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_n
     *dDelPhi_km1half);
-  double dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_np1half
+  double dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
@@ -21742,12 +22274,13 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   
   //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
-    +4.0*parameters.dPi*dRhoAve_i_np1half*(dA1+dS1)+dA2+dA3+dS2+dS3
-    -4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS4+dS5+dS6)
+    +4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2+dA3+dS3
+    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5+dS6)
     -dEddyViscosityTerms;
 }
 double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time &time
   ,double dTemps[],int i,int j,int k){
+  
   double dT_ijk_np1=dTemps[0];
   double dT_im1jk_np1=dTemps[1];
   double dT_ijp1k_np1=dTemps[2];
@@ -21761,7 +22294,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   int nIInt=i+grid.nCenIntOffset[0];
   int nJInt=j+grid.nCenIntOffset[1];
   int nKInt=k+grid.nCenIntOffset[2];
-    
+  
   //Calculate interpolated quantities
   double dDM_ip1half=(grid.dLocalGridOld[grid.nDM][i][0][0])*(0.5+parameters.dAlpha
     +parameters.dAlphaExtra);/**\BC Missing \f$\Delta M_r\f$ outside model using 
@@ -21772,58 +22305,34 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     +grid.dLocalGridOld[grid.nDTheta][0][j+1][0])*0.5;
   double dDelTheta_jm1half=(grid.dLocalGridOld[grid.nDTheta][0][j][0]
     +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*0.5;
+  double dR_ip1half_n=grid.dLocalGridOld[grid.nR][nIInt][0][0];
+  double dR_im1half_n=grid.dLocalGridOld[grid.nR][nIInt-1][0][0];
   double dDelPhi_kp1half=(grid.dLocalGridOld[grid.nDPhi][0][0][k]
     +grid.dLocalGridOld[grid.nDPhi][0][0][k+1])*0.5;
   double dDelPhi_km1half=(grid.dLocalGridOld[grid.nDPhi][0][0][k]
     +grid.dLocalGridOld[grid.nDPhi][0][0][k-1])*0.5;
-  double dR_ip1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt][0][0]);/*
-    +grid.dLocalGridNew[grid.nR][nIInt][0][0])*0.5;*/
-  double dR_im1half_np1half=(grid.dLocalGridOld[grid.nR][nIInt-1][0][0]);/*
-    +grid.dLocalGridNew[grid.nR][nIInt-1][0][0])*0.5;*/
-  double dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
-  double dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
-  double dRSq_ip1half_np1half=dR_ip1half_np1half*dR_ip1half_np1half;
-  double dRSq_im1half_np1half=dR_im1half_np1half*dR_im1half_np1half;
-  double dR4_ip1half_np1half=dRSq_ip1half_np1half*dRSq_ip1half_np1half;
-  double dR4_im1half_np1half=dRSq_im1half_np1half*dRSq_im1half_np1half;
-  double dRhoAve_ip1half_np1half=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/*
-    +grid.dLocalGridNew[grid.nDenAve][i][0][0])*0.25;*/ /**\BC missing density
+  double dR_i_n=(dR_ip1half_n+dR_im1half_n)*0.5;
+  double dRSq_i_n=dR_i_n*dR_i_n;
+  double dRSq_ip1half_n=dR_ip1half_n*dR_ip1half_n;
+  double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
+  double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
+  double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/**\BC missing density
     outside model assuming it is zero*/
-  double dRhoAve_im1half_np1half=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
-    +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;/*+grid.dLocalGridNew[grid.nDenAve][i][0][0]
-    +grid.dLocalGridNew[grid.nDenAve][i-1][0][0])*0.25;*/
-  double dRhoAve_i_np1half=(grid.dLocalGridOld[grid.nDenAve][i][0][0]);/*
-    +grid.dLocalGridNew[grid.nDenAve][i][0][0])*0.5;*/
-  double dRho_ip1halfjk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*//**\BC missing desnity outside
+  double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
+    +grid.dLocalGridOld[grid.nDenAve][i-1][0][0])*0.5;
+  double dRho_ip1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/**\BC missing desnity outside
     model assuming it is zero*/
-  double dRho_im1halfjk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i-1][j][k])*0.25;*/
-  double dRho_ijp1halfk_np1half=(grid.dLocalGridOld[grid.nD][i][j+1][k]
-    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j+1][k]
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
-  double dRho_ijm1halfk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i][j-1][k])*0.25;*/
+  double dRho_im1halfjk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i-1][j][k])*0.5;
+  double dRho_ijp1halfk_n=(grid.dLocalGridOld[grid.nD][i][j+1][k]
+    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
+  double dRho_ijm1halfk_n=(grid.dLocalGridOld[grid.nD][i][j][k]
+    +grid.dLocalGridOld[grid.nD][i][j-1][k])*0.5;
   double dRho_ijkp1half_np1half=(grid.dLocalGridOld[grid.nD][i][j][k+1]
-    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k+1]
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.25;*/
+    +grid.dLocalGridOld[grid.nD][i][j][k])*0.5;
   double dRho_ijkm1half_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]
-    +grid.dLocalGridOld[grid.nD][i][j][k-1])*0.5;/*+grid.dLocalGridNew[grid.nD][i][j][k]
-    +grid.dLocalGridNew[grid.nD][i][j][k-1])*0.25;*/
-  double dRho_ijk_np1half=(grid.dLocalGridOld[grid.nD][i][j][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k])*0.5;*/
-  double dRho_im1jk_np1half=(grid.dLocalGridOld[grid.nD][i-1][j][k]);/*
-    +grid.dLocalGridNew[grid.nD][i-1][j][k])*0.5;*/
-  double dRho_ijp1k_np1half=(grid.dLocalGridOld[grid.nD][i][j+1][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j+1][k])*0.5;*/
-  double dRho_ijm1k_np1half=(grid.dLocalGridOld[grid.nD][i][j-1][k]);/*
-    +grid.dLocalGridNew[grid.nD][i][j-1][k])*0.5;*/
-  double dRho_ijkp1_np1half=(grid.dLocalGridOld[grid.nD][i][j][k+1]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k+1])*0.5;*/
-  double dRho_ijkm1_np1half=(grid.dLocalGridOld[grid.nD][i][j][k-1]);/*
-    +grid.dLocalGridNew[grid.nD][i][j][k-1])*0.5;*/
+    +grid.dLocalGridOld[grid.nD][i][j][k-1])*0.5;
   double dU0_i_np1half=(grid.dLocalGridNew[grid.nU0][nIInt][0][0]
     +grid.dLocalGridNew[grid.nU0][nIInt-1][0][0])*0.5;
   double dU_ijk_np1half=(grid.dLocalGridNew[grid.nU][nIInt][j][k]
@@ -21856,8 +22365,6 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     +grid.dLocalGridNew[grid.nV][i][nJInt-1][k-1])*0.25;
   double dW_ijk_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
     +grid.dLocalGridNew[grid.nW][i][j][nKInt-1])*0.5;
-  double dW_ijkp1half_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]);
-  double dW_ijkm1half_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt-1]);
   double dW_ip1halfjk_np1half=(grid.dLocalGridNew[grid.nW][i][j][nKInt]
     +grid.dLocalGridNew[grid.nW][i][j][nKInt-1])*0.5;/**\BC assuming W at ip1half is the same as W 
     at i*/
@@ -21906,13 +22413,20 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dTSq_ijkm1_np1half=dT_ijkm1_np1half*dT_ijkm1_np1half;
   double dT4_ijkm1_np1half=dTSq_ijkm1_np1half*dTSq_ijkm1_np1half;
   
-  double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1,grid.dLocalGridNew[grid.nD][i][j][k]);
-  double dE_ijk_np1half=parameters.eosTable.dGetEnergy(dT_ijk_np1half,dRho_ijk_np1half);
-  double dE_im1jk_np1half=parameters.eosTable.dGetEnergy(dT_im1jk_np1half,dRho_im1jk_np1half);
-  double dE_ijp1k_np1half=parameters.eosTable.dGetEnergy(dT_ijp1k_np1half,dRho_ijp1k_np1half);
-  double dE_ijm1k_np1half=parameters.eosTable.dGetEnergy(dT_ijm1k_np1half,dRho_ijm1k_np1half);
-  double dE_ijkp1_np1half=parameters.eosTable.dGetEnergy(dT_ijkp1_np1half,dRho_ijkp1_np1half);
-  double dE_ijkm1_np1half=parameters.eosTable.dGetEnergy(dT_ijkm1_np1half,dRho_ijkm1_np1half);
+  double dE_ijk_np1=parameters.eosTable.dGetEnergy(dT_ijk_np1
+    ,grid.dLocalGridNew[grid.nD][i][j][k]);
+  double dE_ijk_np1half=parameters.eosTable.dGetEnergy(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+  double dE_im1jk_np1half=parameters.eosTable.dGetEnergy(dT_im1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
+  double dE_ijp1k_np1half=parameters.eosTable.dGetEnergy(dT_ijp1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j+1][k]);
+  double dE_ijm1k_np1half=parameters.eosTable.dGetEnergy(dT_ijm1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j-1][k]);
+  double dE_ijkp1_np1half=parameters.eosTable.dGetEnergy(dT_ijkp1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k+1]);
+  double dE_ijkm1_np1half=parameters.eosTable.dGetEnergy(dT_ijkm1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k-1]);
   double dE_ip1jk_np1half=dE_ijk_np1half;/**\BC Assuming energy outside model is the same as
     the energy in the last zone inside the model.*/
   double dE_ip1halfjk_np1half=dE_ijk_np1half;/**\BC Assuming energy outside model is the same as
@@ -21923,18 +22437,25 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dE_ijkp1half_np1half=(dE_ijkp1_np1half+dE_ijk_np1half)*0.5;
   double dE_ijkm1half_np1half=(dE_ijkm1_np1half+dE_ijk_np1half)*0.5;
   
-  double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half,dRho_ijk_np1half);
+  double dP_ijk_np1half=parameters.eosTable.dGetPressure(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
   #if VISCOUS_ENERGY_EQ==1
   dP_ijk_np1half=dP_ijk_np1half+grid.dLocalGridOld[grid.nQ0][i][j][k]
     +grid.dLocalGridOld[grid.nQ1][i][j][k]+grid.dLocalGridOld[grid.nQ2][i][j][k];
   #endif
   
-  double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half,dRho_ijk_np1half);
-  double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half,dRho_im1jk_np1half);
-  double dKappa_ijp1k_np1half=parameters.eosTable.dGetOpacity(dT_ijp1k_np1half,dRho_ijp1k_np1half);
-  double dKappa_ijm1k_np1half=parameters.eosTable.dGetOpacity(dT_ijm1k_np1half,dRho_ijm1k_np1half);
-  double dKappa_ijkp1_np1half=parameters.eosTable.dGetOpacity(dT_ijkp1_np1half,dRho_ijkp1_np1half);
-  double dKappa_ijkm1_np1half=parameters.eosTable.dGetOpacity(dT_ijkm1_np1half,dRho_ijkm1_np1half);
+  double dKappa_ijk_np1half=parameters.eosTable.dGetOpacity(dT_ijk_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k]);
+  double dKappa_im1jk_np1half=parameters.eosTable.dGetOpacity(dT_im1jk_np1half
+    ,grid.dLocalGridOld[grid.nD][i-1][j][k]);
+  double dKappa_ijp1k_np1half=parameters.eosTable.dGetOpacity(dT_ijp1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j+1][k]);
+  double dKappa_ijm1k_np1half=parameters.eosTable.dGetOpacity(dT_ijm1k_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j-1][k]);
+  double dKappa_ijkp1_np1half=parameters.eosTable.dGetOpacity(dT_ijkp1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k+1]);
+  double dKappa_ijkm1_np1half=parameters.eosTable.dGetOpacity(dT_ijkm1_np1half
+    ,grid.dLocalGridOld[grid.nD][i][j][k-1]);
   
   double dKappa_im1halfjk_np1half=(dT4_im1jk_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
     /dKappa_ijk_np1half+dT4_im1jk_np1half/dKappa_im1jk_np1half);
@@ -21959,7 +22480,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
-
+  
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
@@ -21980,11 +22501,11 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     }
   }
   
-  double dA1=dU_U0_Diff*dRSq_i_np1half*dDEDM;
+  double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
-  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_np1half;
-  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_np1half;
+  double dUR2_im1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt-1][j][k]*dRSq_im1half_n;
+  double dUR2_ip1halfjk_np1half=grid.dLocalGridNew[grid.nU][nIInt][j][k]*dRSq_ip1half_n;
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
@@ -22000,20 +22521,20 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     dA2UpWindGrad=(dE_ijk_np1half-dE_ijm1k_np1half)/(grid.dLocalGridOld[grid.nDTheta][0][j][0]
       +grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   }
-  double dA2=dV_ijk_np1half/dR_i_np1half*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
+  double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
   
   //Calcualte dS3
-  double dS3=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS3=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k])
-    *(dW_ijkp1half_np1half-dW_ijkm1half_np1half);
+    *(grid.dLocalGridNew[grid.nW][i][j][nKInt]-grid.dLocalGridNew[grid.nW][i][j][nKInt-1]);
     
   //Calcualte dS2
   double dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt][k];
   double dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt-1][k];
-  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_np1half
+  double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
   
@@ -22029,18 +22550,18 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     dA3UpWindGrad=(dE_ijk_np1half-dE_ijkm1_np1half)/(grid.dLocalGridOld[grid.nDPhi][0][0][k]
       +grid.dLocalGridOld[grid.nDPhi][0][0][k-1])*2.0;
   }
-  double dA3=dW_ijk_np1half/(dR_i_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0])*
+  double dA3=dW_ijk_np1half/(dR_i_n*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0])*
     ((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA3CenGrad
     +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA3UpWindGrad);
   
   //Calculate dS4
   double dTGrad_im1half_np1half=(dT4_ijk_np1half-dT4_im1jk_np1half)
     /(grid.dLocalGridOld[grid.nDM][i][0][0]+grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
-  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half_np1half*dT4_ijk_np1half/(8.0*parameters.dPi);/**\BC 
+  double dGrad_ip1half_np1half=-3.0*dRSq_ip1half_n*dT4_ijk_np1half/(8.0*parameters.dPi);/**\BC 
     Missing grid.dLocalGridOld[grid.nT][i+1][0][0] using flux equals \f$2\sigma T^4\f$ at surface.*/
-  double dGrad_im1half_np1half=dRhoAve_im1half_np1half*dR4_im1half_np1half/(dKappa_im1halfjk_np1half
-    *dRho_im1halfjk_np1half)*dTGrad_im1half_np1half;
-  double dS4=16.0*parameters.dPi*parameters.dPi*dRhoAve_i_np1half
+  double dGrad_im1half_np1half=dRhoAve_im1half_n*dR4_im1half_n/(dKappa_im1halfjk_np1half
+    *dRho_im1halfjk_n)*dTGrad_im1half_np1half;
+  double dS4=16.0*parameters.dPi*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]
     *(dGrad_ip1half_np1half-dGrad_im1half_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //Calculate dS5
@@ -22049,12 +22570,12 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dTGrad_jm1half_np1half=(dT4_ijk_np1half-dT4_ijm1k_np1half)
     /(grid.dLocalGridOld[grid.nDTheta][0][j][0]+grid.dLocalGridOld[grid.nDTheta][0][j-1][0])*2.0;
   double dGrad_jp1half_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    /(dKappa_ijp1halfk_np1half*dRho_ijp1halfk_np1half)*dTGrad_jp1half_np1half;
+    /(dKappa_ijp1halfk_np1half*dRho_ijp1halfk_n)*dTGrad_jp1half_np1half;
   double dGrad_jm1half_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_np1half)*dTGrad_jm1half_np1half;
+    /(dKappa_ijm1halfk_np1half*dRho_ijm1halfk_n)*dTGrad_jm1half_np1half;
   double dS5=(dGrad_jp1half_np1half-dGrad_jm1half_np1half)
     /(grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
-    *dRSq_i_np1half*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+    *dRSq_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //Calculate dS6
   double dTGrad_kp1half_np1half=(dT4_ijkp1_np1half-dT4_ijk_np1half)
@@ -22065,37 +22586,37 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     *dRho_ijkp1half_np1half);
   double dGrad_km1half_np1half=dTGrad_km1half_np1half/(dKappa_ijkm1half_np1half
     *dRho_ijkm1half_np1half);
-  double dS6=(dGrad_kp1half_np1half-dGrad_km1half_np1half)/(dRSq_i_np1half
+  double dS6=(dGrad_kp1half_np1half-dGrad_km1half_np1half)/(dRSq_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
   //calculate dT1
-  double dEGrad_ip1halfjk_np1half=dR4_ip1half_np1half*dEddyVisc_ip1halfjk_np1half
-    *dRhoAve_ip1half_np1half*(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_np1half*dDM_ip1half);
-  double dEGrad_im1halfjk_np1half=dR4_im1half_np1half*dEddyVisc_im1halfjk_np1half
-    *dRhoAve_im1half_np1half*(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_np1half*dDM_im1half);
-  double dT1=16.0*dPiSq*dRhoAve_i_np1half*(dEGrad_ip1halfjk_np1half
+  double dEGrad_ip1halfjk_np1half=dR4_ip1half_n*dEddyVisc_ip1halfjk_np1half*dRhoAve_ip1half_n
+    *(dE_ip1jk_np1half-dE_ijk_np1half)/(dRho_ip1halfjk_n*dDM_ip1half);
+  double dEGrad_im1halfjk_np1half=dR4_im1half_n*dEddyVisc_im1halfjk_np1half*dRhoAve_im1half_n
+    *(dE_ijk_np1half-dE_im1jk_np1half)/(dRho_im1halfjk_n*dDM_im1half);
+  double dT1=16.0*dPiSq*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dEGrad_ip1halfjk_np1half
     -dEGrad_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
   //calculate dT2
   double dEGrad_ijp1halfk_np1half=dEddyVisc_ijp1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
-    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_np1half*dR_i_np1half*dDelTheta_jp1half);
+    *(dE_ijp1k_np1half-dE_ijk_np1half)/(dRho_ijp1halfk_n*dR_i_n*dDelTheta_jp1half);
   double dEGrad_ijm1halfk_np1half=dEddyVisc_ijm1halfk_np1half
     *grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
-    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_np1half*dR_i_np1half*dDelTheta_jm1half);
-  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_np1half
+    *(dE_ijk_np1half-dE_ijm1k_np1half)/(dRho_ijm1halfk_n*dR_i_n*dDelTheta_jm1half);
+  double dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
   //calculate dT3
   double dEGrad_ijkp1half_np1half=dEddyVisc_ijkp1half_np1half*(dE_ijkp1_np1half-dE_ijk_np1half)
-    /(dRho_ijkp1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_np1half
+    /(dRho_ijkp1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_n
       *dDelPhi_kp1half);
   double dEGrad_ijkm1half_np1half=dEddyVisc_ijkm1half_np1half*(dE_ijk_np1half-dE_ijm1k_np1half)
-    /(dRho_ijkm1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_np1half
+    /(dRho_ijkm1half_np1half*grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*dR_i_n
       *dDelPhi_km1half);
-  double dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_np1half
+  double dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
@@ -22127,7 +22648,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     ssName<<"E_A1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*dRhoAve_i_np1half*(dA1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
     
     //add A2
     ssName.str("");
@@ -22148,7 +22669,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     ssName<<"E_S1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*dRhoAve_i_np1half*(dS1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
     
     //add S2
     ssName.str("");
@@ -22169,21 +22690,21 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     ssName<<"E_S4"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS4));
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4));
     
     //add S5
     ssName.str("");
     ssName<<"E_S5"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS5));
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS5));
     
     //add S6
     ssName.str("");
     ssName<<"E_S6"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS6));
+      ,4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS6));
     
     //add E_TGrad_jp1half_np1half
     ssName.str("");
@@ -22260,8 +22781,8 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   
   //calculate energy equation discrepancy
   return (dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])/time.dDeltat_np1half
-    +4.0*parameters.dPi*dRhoAve_i_np1half*(dA1+dS1)+dA2+dS2+dA3+dS3
-    -4.0*parameters.dSigma/(3.0*dRho_ijk_np1half)*(dS4+dS5+dS6)
+    +4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1+dS1)+dA2+dS2+dA3+dS3
+    -4.0*parameters.dSigma/(3.0*grid.dLocalGridOld[grid.nD][i][j][k])*(dS4+dS5+dS6)
     -dEddyViscosityTerms;
 }
 double dEOS_GL(double dRho, double dE, Parameters parameters){
@@ -22350,21 +22871,23 @@ void initDonorFracAndMaxConVel_R_TEOS(Grid &grid, Parameters &parameters){
     for(j=grid.nStartUpdateExplicit[grid.nD][1];j<grid.nEndUpdateExplicit[grid.nD][1];j++){
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
         
-        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]*(grid.dLocalGridOld[grid.nP][i][j][k]
-          +grid.dLocalGridOld[grid.nQ0][i][j][k])/grid.dLocalGridOld[grid.nD][i][j][k]);
-        dTest_ConVelOverSoundSpeed_R=fabs(grid.dLocalGridOld[grid.nU][nIInt][j][k]
-          -grid.dLocalGridOld[grid.nU0][nIInt][0][0])/dC;
+        dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]
+          *(grid.dLocalGridOld[grid.nP][i][j][k]+grid.dLocalGridOld[grid.nQ0][i][j][k])
+          /grid.dLocalGridOld[grid.nD][i][j][k]);
+        
         dTest_ConVel_R=fabs(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           -grid.dLocalGridOld[grid.nU0][nIInt][0][0]);
         
-        //keep largest convective velocity over sound speed
-        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
-        }
+        dTest_ConVelOverSoundSpeed_R=dTest_ConVel_R/dC;
         
         //keep largest convective velocity
         if(dTest_ConVel_R>dTest_ConVel){
           dTest_ConVel=dTest_ConVel_R;
+        }
+        
+        //keep largest convective velocity over sound speed
+        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
         }
       }
     }
@@ -22459,6 +22982,7 @@ void initDonorFracAndMaxConVel_RT_GL(Grid &grid, Parameters &parameters){
   parameters.dMaxConvectiveVelocity=dTest_ConVel2;
 }
 void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
+  
   int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0]
     ,grid.nEndUpdateExplicit[grid.nD][0]);
   int i;
@@ -22489,20 +23013,12 @@ void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
           +grid.dLocalGridOld[grid.nQ1][i][j][k])
           /grid.dLocalGridOld[grid.nD][i][j][k]);
         
-        dTest_ConVelOverSoundSpeed_R=fabs(grid.dLocalGridOld[grid.nU][nIInt][j][k]
-          -grid.dLocalGridOld[grid.nU0][nIInt][0][0])/dC;
-        dTest_ConVelOverSoundSpeed_T=fabs(grid.dLocalGridOld[grid.nV][i][nJInt][k])/dC;
         dTest_ConVel_R=fabs(grid.dLocalGridOld[grid.nU][nIInt][j][k]
           -grid.dLocalGridOld[grid.nU0][nIInt][0][0]);
         dTest_ConVel_T=fabs(grid.dLocalGridOld[grid.nV][i][nJInt][k]);
         
-        //keep largest convective velocity over sound speed
-        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
-        }
-        if(dTest_ConVelOverSoundSpeed_T>dTest_ConVelOverSoundSpeed){
-          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_T;
-        }
+        dTest_ConVelOverSoundSpeed_R=dTest_ConVel_R/dC;
+        dTest_ConVelOverSoundSpeed_T=dTest_ConVel_T/dC;
         
         //keep largest convective velocity
         if(dTest_ConVel_R>dTest_ConVel){
@@ -22510,6 +23026,14 @@ void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
         }
         if(dTest_ConVel_T>dTest_ConVel){
           dTest_ConVel=dTest_ConVel_T;
+        }
+        
+        //keep largest convective velocity over sound speed
+        if(dTest_ConVelOverSoundSpeed_R>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_R;
+        }
+        if(dTest_ConVelOverSoundSpeed_T>dTest_ConVelOverSoundSpeed){
+          dTest_ConVelOverSoundSpeed=dTest_ConVelOverSoundSpeed_T;
         }
       }
     }
@@ -22618,6 +23142,7 @@ void initDonorFracAndMaxConVel_RTP_GL(Grid &grid, Parameters &parameters){
   parameters.dMaxConvectiveVelocity=dTest_ConVel2;
 }
 void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
+  
   int nEndCalc=std::max(grid.nEndGhostUpdateExplicit[grid.nD][0][0]
     ,grid.nEndUpdateExplicit[grid.nD][0]);
   int i;
@@ -22645,6 +23170,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
     for(j=grid.nStartUpdateExplicit[grid.nD][1];j<grid.nEndUpdateExplicit[grid.nD][1];j++){
       nJInt=j+grid.nCenIntOffset[1];
       for(k=grid.nStartUpdateExplicit[grid.nD][2];k<grid.nEndUpdateExplicit[grid.nD][2];k++){
+        
         nKInt=k+grid.nCenIntOffset[2];
         dC=sqrt(grid.dLocalGridOld[grid.nGamma][i][j][k]
           *(grid.dLocalGridOld[grid.nP][i][j][k]+grid.dLocalGridOld[grid.nQ0][i][j][k]
@@ -22655,7 +23181,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
           -grid.dLocalGridOld[grid.nU0][nIInt][0][0]);
         dTest_ConVel_T=fabs(grid.dLocalGridOld[grid.nV][i][nJInt][k]);
         dTest_ConVel_P=fabs(grid.dLocalGridOld[grid.nW][i][j][nKInt]);
-                
+        
         dTest_ConVelOverSoundSpeed_R=dTest_ConVel_R/dC;
         dTest_ConVelOverSoundSpeed_T=dTest_ConVel_T/dC;
         dTest_ConVelOverSoundSpeed_P=dTest_ConVel_P/dC;
