@@ -209,7 +209,7 @@ class Plot:
       yMax=float(element.get("ymax"))
     self.limits=[yMin,yMax]
     
-    #get ledgend location
+    #get legend location
     if element.get("legendloc")!=None and element.get("legendloc")!="":
       self.legendloc=int(element.get("legendloc"))
     
@@ -430,7 +430,6 @@ def plot(dataSets,options,title):
         ax[nTotalPlotCount-1].set_ylim(plot.limits)
         
         #set legend
-        print lines
         if len(lines)>0:
           ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
         

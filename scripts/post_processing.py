@@ -139,7 +139,7 @@ def main():
         cmd="qsub "+script
         os.system(cmd)
       if i+1>=options.n:# if the maximum number of jobs are exceed stop
-        warnings.warn("Maximum number of jobs reached ("+string(options.n)
+        warnings.warn("Maximum number of jobs reached ("+str(options.n)
           +") before all jobs submitted, use -n to increast limit")
         break
 def runAverage(outputFileName,logFile,options):

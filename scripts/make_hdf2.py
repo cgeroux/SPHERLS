@@ -280,9 +280,11 @@ class fileSet:
     dataIT=[]
     dataIRho=[]
     dataIUmU0Scaled=[]
+    dataIUScaled=[]
     dataIVScaled=[]
     dataIWScaled=[]
     dataIUmU0=[]
+    dataIU=[]
     dataIV=[]
     dataIW=[]
     nT=self.dataIDs["T"]
@@ -292,9 +294,11 @@ class fileSet:
     self.dataNames.append("T interpolated to r/R")
     self.dataNames.append("Rho interpolated to r/R")
     self.dataNames.append("u-u_0 interpolated to r/R")
+    self.dataNames.append("u interpolated to r/R")
     self.dataNames.append("v interpolated to r/R")
     self.dataNames.append("w interpolated to r/R")
     self.dataNames.append("scaled u-u_0 interpolated to r/R")
+    self.dataNames.append("scaled u interpolated to r/R")
     self.dataNames.append("scaled v interpolated to r/R")
     self.dataNames.append("scaled w interpolated to r/R")
     
@@ -315,9 +319,11 @@ class fileSet:
       dataJT=[]
       dataJRho=[]
       dataJUmU0=[]
+      dataJU=[]
       dataJV=[]
       dataJW=[]
       dataJUmU0Scaled=[]
+      dataJUScaled=[]
       dataJVScaled=[]
       dataJWScaled=[]
       
@@ -325,9 +331,11 @@ class fileSet:
         dataKT=[]
         dataKRho=[]
         dataKUmU0=[]
+        dataKU=[]
         dataKV=[]
         dataKW=[]
         dataKUmU0Scaled=[]
+        dataKUScaled=[]
         dataKVScaled=[]
         dataKWScaled=[]
         for k in range(shapeT[2]):
@@ -348,7 +356,9 @@ class fileSet:
           [valueU0,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nU0,rScale
             ,iLowerLast,0,0)
           dataKUmU0Scaled.append((valueU-valueU0)*rScale)
-            
+          
+          #U Scaled
+          dataKUScaled.append(valueU*rScale)
           
           #V Scaled
           [valueV,iLowerLast]=self.__interpolateLinearIn1DI(r,nR,nV,rScale
@@ -367,6 +377,9 @@ class fileSet:
             ,iLowerLast,0,0)
           dataKUmU0.append((valueU-valueU0))
           
+          #U
+          dataKU.append(valueU)
+          
           #V 
           dataKV.append(valueV)
           
@@ -376,17 +389,21 @@ class fileSet:
         dataJT.append(dataKT)
         dataJRho.append(dataKRho)
         dataJUmU0.append(dataKUmU0)
+        dataJU.append(dataKU)
         dataJV.append(dataKV)
         dataJW.append(dataKW)
         dataJUmU0Scaled.append(dataKUmU0Scaled)
+        dataJUScaled.append(dataKUScaled)
         dataJVScaled.append(dataKVScaled)
         dataJWScaled.append(dataKWScaled)
       dataIT.append(dataJT)
       dataIRho.append(dataJRho)
       dataIUmU0.append(dataJUmU0)
+      dataIU.append(dataJU)
       dataIV.append(dataJV)
       dataIW.append(dataJW)
       dataIUmU0Scaled.append(dataJUmU0Scaled)
+      dataIUScaled.append(dataJUScaled)
       dataIVScaled.append(dataJVScaled)
       dataIWScaled.append(dataJWScaled)
     
@@ -398,11 +415,15 @@ class fileSet:
     self.dataShape.append(shapeT)
     self.data.append(dataIUmU0)
     self.dataShape.append(shapeT)
+    self.data.append(dataIU)
+    self.dataShape.append(shapeT)
     self.data.append(dataIV)
     self.dataShape.append(shapeT)
     self.data.append(dataIW)
     self.dataShape.append(shapeT)
     self.data.append(dataIUmU0Scaled)
+    self.dataShape.append(shapeT)
+    self.data.append(dataIUScaled)
     self.dataShape.append(shapeT)
     self.data.append(dataIVScaled)
     self.dataShape.append(shapeT)
