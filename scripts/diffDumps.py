@@ -71,13 +71,13 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,out):
     out.write("file \""+dumpFile0.fileName+"\" has eosStringLen \""+str(dumpFile0.eosStringLen)\
       +"\" while file \""+dumpFile1.fileName+"\" has eosStringLen \""\
       +str(dumpFile1.eosStringLen)+"\"\n")
-    headersMatch=False
+    #headersMatch=False
   if dumpFile0.eosStringLen>0:
     if dumpFile0.eosString!=dumpFile1.eosString:
       out.write("file \""+dumpFile0.fileName+"\" has eosString \""+str(dumpFile0.eosString)\
         +"\" while file \""+dumpFile1.fileName+"\" has eosString \""\
         +str(dumpFile1.eosString)+"\"\n")
-      headersMatch=False
+      #headersMatch=False
   else:
     if dumpFile0.gamma!=dumpFile1.gamma:
       out.write("file \""+dumpFile0.fileName+"\" has gamma \""+str(dumpFile0.gamma)\
