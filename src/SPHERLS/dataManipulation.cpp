@@ -117,13 +117,13 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //switch to dedm node if there is one
   XMLNode xDEDM=getXMLNodeNoThrow(xData,"dedm",0);
   if(!xDEDM.isEmpty()){
-    parameters.bDEDMClampValue=true
+    parameters.bDEDMClamp=true;
     
     //get temperature to set DEDM clamp
-    getXMLValue(xTurbModel,"temperature",0,paramters.dEDMClampTemperature);
+    getXMLValue(xTurbModel,"temperature",0,parameters.dEDMClampTemperature);
   }
   else{
-    parameters.bDEDMClampValue=false
+    parameters.bDEDMClamp=false;
   }
   
   //read in model

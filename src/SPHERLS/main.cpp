@@ -257,7 +257,6 @@ int main(int argc, char* argv[]){
       //update boundaries remaining boundaries to old grid and copy new grid to old grid
       updateLocalBoundaries(global.procTop,global.messPass,global.grid);
       
-      global.parameters.bDEDM_cut_set=false;
     }
     
     global.output.nNumTimeStepsSinceLastDump++;
