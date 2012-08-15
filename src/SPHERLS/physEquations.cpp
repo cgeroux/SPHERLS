@@ -14105,10 +14105,8 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     
@@ -14142,10 +14140,8 @@ void calNewEddyVisc_R_SM(Grid &grid, Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
     for(j=grid.nStartGhostUpdateExplicit[grid.nEddyVisc][0][1];
@@ -14216,10 +14212,9 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];/* These need to be at n+1 to be
+      compatiable with restarts since on restart I only have r at n and u at n-1/2.*/
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
@@ -14307,10 +14302,9 @@ void calNewEddyVisc_RT_SM(Grid &grid, Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];/* These need to be at n+1 to be
+      compatiable with restarts since on restart I only have r at n and u at n-1/2.*/
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
@@ -14458,10 +14452,9 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
       
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];/* These need to be at n+1 to be
+      compatiable with restarts since on restart I only have r at n and u at n-1/2.*/
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
@@ -14631,10 +14624,9 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
     
     //calculate i for interface centered quantities
     nIInt=i+grid.nCenIntOffset[0];
-    dR_ip1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt][0][0])*0.5;
-    dR_im1half_np1half=(grid.dLocalGridNew[grid.nR][nIInt-1][0][0]
-      +grid.dLocalGridOld[grid.nR][nIInt-1][0][0])*0.5;
+    dR_ip1half_np1half=grid.dLocalGridNew[grid.nR][nIInt][0][0];
+    dR_im1half_np1half=grid.dLocalGridNew[grid.nR][nIInt-1][0][0];/* These need to be at n+1 to be
+      compatiable with restarts since on restart I only have r at n and u at n-1/2.*/
     dR_i_np1half=(dR_ip1half_np1half+dR_im1half_np1half)*0.5;
     dRSq_i_np1half=dR_i_np1half*dR_i_np1half;
     dDelR_i_np1half=dR_ip1half_np1half-dR_im1half_np1half;
