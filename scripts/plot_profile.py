@@ -12,6 +12,9 @@ import parser
 from math import *
 import xml.etree.ElementTree as xml
 import parse_formula
+import mywarnings
+import warnings
+
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
@@ -140,6 +143,11 @@ class Curve:
         nIndex=0
         while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
           nIndex=nIndex+1
+          if nIndex>len(fileData.fColumnValues)-1:
+            warnings.warn("could find non-empty value in column \""+str(self.nColumn)
+              +"\" of file \""+fileData.sFileName+"\"")
+            break
+          
         yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
         yIndexTemp=0
         for i in range(nIndex,len(fileData.fColumnValues)-1):
@@ -154,6 +162,10 @@ class Curve:
         nIndex=0
         while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
           nIndex=nIndex+1
+          if nIndex>len(fileData.fColumnValues)-1:
+            warnings.warn("could find non-empty value in column \""+str(self.nColumn)
+              +"\" of file \""+fileData.sFileName+"\"")
+            break
         yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
         yIndexTemp=0
         for i in range(nIndex,len(fileData.fColumnValues)-1):
@@ -170,8 +182,9 @@ class Curve:
           yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
         self.y.append(yTemp)
       elif self.zone==None:
-        print "If zone=",self.zone," is \"None\" then it shouldn't be a time curve and thus the if "\
-          +"above should have been flagged first, something strange is going on here"
+        raise Exception("If zone="+str(self.zone)+" is \"None\" then it shouldn't be a time curve"\
+          +" and thus the if above should have been flagged first, something strange is going on"\
+          +" here")
       elif self.zone.isdigit():
         if not self.testZoneAdjust:
           if not options.zoneIndexFromCenter:

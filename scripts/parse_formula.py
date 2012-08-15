@@ -100,3 +100,6 @@ def getY(nRowShift,nColumn,fileData,code,i):
       #imporve error message
       message=str(anException)+" in row "+str(i+nRowShift[j])+" of file"
       raise ValueError(message)
+    except:
+      raise Exception("unexpected error when getting Y value from file \""+fileData.sFileName
+        +"\" at i="+str(i))

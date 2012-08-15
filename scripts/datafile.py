@@ -11,6 +11,7 @@ class DataFile:
     self.fColumnValues=np.zeros( (nNumRows,nNumColumns) )
   def readFile(self,sFileName):
     ''' a wrapper to determine which readFile function should be used'''
+    self.sFileName=sFileName
     if type(self.fColumnValues)==type(None):
       self.readFileUnFixed(sFileName)
     else:
