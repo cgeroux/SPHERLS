@@ -411,7 +411,11 @@ class DataSet:
     
     #make sure that all the combined binary files within range of dataset have profiles made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
-    make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins)
+    failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins)
+    
+    if len(failedFiles)>0:
+      for faildFile in failedFiles:
+        print faildFile
     
     #get and sort profiles within range of dataset
     extension="_pro"+".txt"
@@ -424,8 +428,7 @@ class DataSet:
       if intOfFile>=self.start and intOfFile<self.end:
         files.append(file)
     if len(files)==0:
-      print "no files found in range"
-      quit()
+      raise Exception("no files found in range")
     
     self.nNumFiles=len(files)
     

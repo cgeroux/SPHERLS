@@ -136,9 +136,13 @@ bool bFileExists(std::string strFilename);
 void fpSignalHandler(int nSig);
 void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex);
 void convertBinToLNA(std::string sFileName);
-double dCalRhoAve(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ);/**
+double dCalRhoAve3D(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ);/**
   Calculates a volume weighted average density given the grid varibles, dGrid and the radial
-  index, nI, the start and stop indices in the Y and Z direction.
+  index, nI, the start and stop indices in the Y and Z direction. For the 3D case.
+*/
+double dCalRhoAve2D(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ);/**
+  Calculates a volume weighted average density given the grid varibles, dGrid and the radial
+  index, nI, the start and stop indices in the Y and Z direction. For the 2D case.
 */
 #ifdef FFTW_ENABLE
 void computeFourierTransFromList(std::string sInFileName,std::string sOutFileName);

@@ -3245,8 +3245,11 @@ void makeRadialProFromColBin(std::string sFileName){//updated
           nCount++;
         }
       }
-      if(nNumDims>1){
-        dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      if(nNumDims==3){
+        dAve[nD][i]=dCalRhoAve3D(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      }
+      else if(nNumDims==2){
+        dAve[nD][i]=dCalRhoAve2D(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
       }
       else{
         dAve[nD][i]=dGrid[nD][i][0][0];
@@ -3498,7 +3501,15 @@ void makeRadialProFromColBin(std::string sFileName){//updated
         }
       }
       dU_i=(dGrid[nU0][i+1][0][0]+dGrid[nU0][i][0][0])*0.5;
-      dAve[nD][i]=dCalRhoAve(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      if(nNumDims==3){
+        dAve[nD][i]=dCalRhoAve3D(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      }
+      else if(nNumDims==2){
+        dAve[nD][i]=dCalRhoAve2D(dGrid,i,nStartY,nEndY,nStartZ,nEndZ);
+      }
+      else{
+        dAve[nD][i]=dGrid[nD][i][0][0];
+      }
       dAve[nKE][i]=0.5*dGrid[nDM][i][0][0]*dU_i*dU_i;
       dMax[nP][i]=dMaxP;
       dMin[nP][i]=dMinP;
@@ -6921,7 +6932,7 @@ void convertBinToLNA(std::string sFileName){
   delete [] nSize;
   delete [] nVarInfo;
 }
-double dCalRhoAve(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ){
+double dCalRhoAve3D(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ){
   int j;
   int k;
   double dSum=0.0;
@@ -6936,6 +6947,25 @@ double dCalRhoAve(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int 
     for(k=nStartZ;k<nEndZ;k++){
       dDeltaPhi=dGrid[nPhi][0][0][k]-dGrid[nPhi][0][0][k-1];
       dVolumeTemp=dRFactor*dDeltaCosThetaIJK*dDeltaPhi;
+      dSum+=dVolumeTemp*dGrid[nD][nI][j][k];
+      dVolume+=dVolumeTemp;
+    }
+  }
+  return dSum/dVolume;
+}
+double dCalRhoAve2D(double ****dGrid,int nI,int nStartY,int nEndY,int nStartZ,int nEndZ){
+  int j;
+  int k;
+  double dSum=0.0;
+  double dVolume=0.0;
+  double dRFactor=0.33333333333333333*(pow(dGrid[nR][nI][0][0],3.0)
+    -pow(dGrid[nR][nI-1][0][0],3.0));
+  double dDeltaCosThetaIJK;
+  double dVolumeTemp;
+  for(j=nStartY;j<nEndY;j++){
+    dDeltaCosThetaIJK=cos(dGrid[nTheta][0][j-1][0])-cos(dGrid[nTheta][0][j][0]);
+    for(k=nStartZ;k<nEndZ;k++){
+      dVolumeTemp=dRFactor*dDeltaCosThetaIJK;
       dSum+=dVolumeTemp*dGrid[nD][nI][j][k];
       dVolume+=dVolumeTemp;
     }
