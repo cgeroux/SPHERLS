@@ -23227,6 +23227,7 @@ void setDEDMClamp(Parameters &parameters, double dDEDM, double dM_r){
       <<": file \"./DEDMClamp.dat\" didn't open properly\n";
     throw exception2(ssTemp.str(),INPUT);
   }
+  ofFile.precision(16);
   ofFile<<parameters.dDEDMClampMr<<" "<<parameters.dDEDMClampValue;
   ofFile.close();
 }

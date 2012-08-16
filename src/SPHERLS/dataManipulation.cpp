@@ -138,6 +138,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
       
       //get DEDM of clamp
       ifDEDMClampFile>>parameters.dDEDMClampValue;
+      ifDEDMClampFile.close();
     }
   }
   else{
