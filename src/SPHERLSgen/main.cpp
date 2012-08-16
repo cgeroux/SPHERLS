@@ -346,6 +346,11 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
         //get allowed tolerance
         getXMLValue(xEOS,"tolerance",0,dTolerance);
         
+        //get allowed tolerance
+        if(!getXMLValueNoThrow(xEOS,"maxIterations",0,nNumIters)){
+          nNumIters=1000000;//if not set it big, but not soo big that it sits there for ever
+        }
+        
         //don't use gamma-law EOS
         bGammaLawEOS=false;
       }
@@ -878,7 +883,7 @@ void calculateFirstShell_TEOS(){
   double dDRhoDP;
   
   int nIteration=0;
-  while(dError>dTolerance){
+  while(dError>dTolerance&&nIteration<=nNumIters){
     
     //get pressure, to try to match to dP_N, and derivative of density w.r.t. pressure which used to
     //calculate correction to density
@@ -890,6 +895,10 @@ void calculateFirstShell_TEOS(){
     //how far off was the pressure
     dError=fabs((vecdP[0]-dP)/vecdP[0]);
     nIteration++;
+  }
+  if (nIteration>nNumIters){
+    std::cout<<"maximum number of iterations("<<nNumIters<<") exceeded with error of ="
+      <<dError<<std::endl;
   }
   vecdRho.push_back(dRho);
   
@@ -1023,7 +1032,8 @@ void calculateShell_TEOS(unsigned int nShell){
   double dCorrectionFrac=0.1;
   
   //keep going if error temperature or error in density is too big
-  while(fabs(dRhoError)>dTolerance||fabs(dTError)>dTolerance){
+  int nIteration=0;
+  while( (fabs(dRhoError)>dTolerance||fabs(dTError)>dTolerance) && nIteration<=nNumIters){
     
     //calculate coeffecients of the equations to solve for T and rho corrections
     double dError=10.0;
@@ -1057,6 +1067,11 @@ void calculateShell_TEOS(unsigned int nShell){
     //calculate relative error
     dTError  =dTCorrection  /dT;
     dRhoError=dRhoCorrection/dRho;
+    nIteration++;
+  }
+  if (nIteration>nNumIters){
+    std::cout<<"maximum number of iterations("<<nNumIters<<") exceeded with density error ="
+      <<dRhoError<<" and temperature error ="<<dTError<<std::endl;
   }
   
   //temperature at (nShell)

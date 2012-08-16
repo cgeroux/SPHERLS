@@ -108,6 +108,9 @@ double dTolerance;/**<
   erro is smaller than dTolerance intartions cease. A good value is usually around 5e-15
   (about machine precision).
   */
+int nNumIters;/**<
+  Allowed number of iterations before stop trying to converge temperature.
+  */
 std::string sUDistType="POLY";/**<
   Specifies the method used to generate the radial velocity
   profile. It is set in the configuration file as the "type" attribute in the "<velocityDist>" tag.

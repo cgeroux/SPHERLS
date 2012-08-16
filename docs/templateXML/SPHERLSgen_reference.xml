@@ -80,6 +80,8 @@
       <L>30.0</L><!-- Luminosity [L_sun] -->
       <eosTable>/home/cgeroux/SPHERLS/trunk/eos/eos</eosTable><!-- Equation of state table -->
       <tolerance>5e-15</tolerance><!-- Error allowed when calculating -->
+      <maxIterations>100</maxIterations><!-- how many iterations to before stop trying to converage
+        temperature to within tolerance -->
     </EOS>
     
     <!-- Periodicity, optional, most times it isn't needed and can be ommitted since the code is 
