@@ -411,6 +411,15 @@ class DataSet:
     
     [self.start,self.end,self.baseFileName]=disect_filename.disectFileName(element.attrib["fileRange"])
     
+    #get equation of state file if one specified
+    eosFileElement=element.findall("eosFile")
+    if len(eosFileElement)>1:
+      warnings.warn("more than one \"eosFile\" node, ignoring all but first node")
+    if len(eosFileElement)>0:
+      self.eosFile=eosFileElement[0].text
+    else:
+      self.eosFile=None
+    
     #add axes to dataset
     axisElements=element.findall("axis")
     for axisElement in axisElements:
@@ -424,7 +433,8 @@ class DataSet:
     
     #make sure that all the combined binary files within range of dataset have profiles made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
-    failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins)
+    failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins
+      ,self.eosFile)
     
     if len(failedFiles)>0:
       for faildFile in failedFiles:

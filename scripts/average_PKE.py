@@ -26,6 +26,8 @@ def parseOptions():
     ,help="Will re-sum all model profiles, usefull when files have problems being made from "
     +"corruption and have to be re-made. Other wise should not be used as it takes more time"
     +" [not default].",default=False)
+  parser.add_option("-e",action="store",dest="eosFile"
+    ,help="Overrides the equation of state file set in the model.",default=None)
   
   #parse command line options
   return parser.parse_args()
@@ -38,7 +40,8 @@ def main():
   [start,end,baseFileName]=disect_filename.disectFileName(args[0])
   
   #make sure that all the combined binary files have profiles made
-  failedFiles=make_profiles.make_profiles(options.keep,args[0],options.remake,options.remakeBins)
+  failedFiles=make_profiles.make_profiles(options.keep,args[0],options.remake,options.remakeBins
+    ,options.eosFile)
   
   #compute the average PKE
   averagePKE(start,end,baseFileName,options)

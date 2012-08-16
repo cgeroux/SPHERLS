@@ -24,11 +24,14 @@ def main():
       +"the peaks over 6 peaks/3periods.")
   parser.add_option('-n',default=10,type=int,dest="n",help="Sets the maximum number of jobs/threads "
     +"to submit/run at one time. [default: %default]")
-  parser.add_option('-e',action="append",dest="e",default=None,help="Add extra command to end of "
+  parser.add_option('-E',action="append",dest="E",default=None,help="Add extra command to end of "
     +"submit script. The \"\cwd\" can be used to include the absolute path of the directory in "
     +"which \"SPHERLS.xml\" configuration file was found. Also the macro \"\sp\" can be used for "
     +"the absolute path to the SPHERLS scripts. Note: if any scripts you are running use "
     +"configuration files they should use absolute paths.")
+  parser.add_option('-e',action="store",dest="e",type="string",help="Allows one to overried the "
+    +"equation of state file in the model with the the one specified after this option."
+    ,default=None)
   parser.add_option('-d',action="store_true",dest="d",default=False,help="Perform a dry run. "
     +"It will search directories and let the user know what files it finds but doesn't actually "
     +"create any submit scripts or submit any jobs. [not default]")
@@ -36,13 +39,15 @@ def main():
     +"threading instead of the sun grid engine")
   parser.add_option('-m',action="store_true",dest="m",default=False,help="If set will re-make "
    +"radial profiles even if the already exist.")
+  parser.add_option('-M',action="store_true",dest="M",default=False,help="If set will "
+   +"re-combined binary files even if already combined.")
   parser.add_option('-r',action="store_true",dest="r",default=False,help="If set will re-sum "
    +"the model profiles kinetic energies.")
   parser.add_option('-l',default=None,type=str,dest="l",help="Used to set the runtime of the job, required by some que systems [default: %default]")
   
   #parse command line options
   (options,args)=parser.parse_args()
-  if options.t and options.e!=None:
+  if options.t and options.E!=None:
     print "Adding extra commands in threaded mode not yet supported"
     quit()
   
@@ -129,10 +134,16 @@ def main():
         remake=" --remake "
       if options.r:#use --re-sum option so that all model profiles KE will be re-summed
         resum=" --re-sum "
-      settings['arguments']=[remake,resum,os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
+      if options.M:#remake binaries
+        remake+=" --remake-bins"
+      if options.e:#specify an equation of state
+        eosFile=" -e "+options.e
+        
+      settings['arguments']=[remake,resum,eosFile,os.path.join(outputFilePaths[i]
+        ,outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
       settings['runtime']=options.l
-      script=makeSubScript(settings,options.e)
+      script=makeSubScript(settings,options.E)
       
       #run job
       if not options.d:

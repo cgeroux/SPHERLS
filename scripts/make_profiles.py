@@ -23,6 +23,9 @@ def main():
     ,help="Removes distributed binary files [not default]")
   parser.add_option("-m","--remake",action="store_true",dest="remake"
     ,help="Will remake profiles even if they already exist. [not default].",default=False)
+  parser.add_option("-e",action="store", dest="eosFile",type="string"
+    ,help="Can be used to over ride the equation of state file found in the model dumps"
+    +". [not default].",default=None)
   parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
     ,help="Will remake binaries even if they already exist. [not default].",default=False)
   
@@ -34,8 +37,8 @@ def main():
     parser.error(" need one and one argument only.")
     
   #create profile files, and save list of files
-  make_profiles(options.keep,args[0],options.remake,options.remakeBins)
-def make_profiles(keep,fileName,remake,remakeBins):
+  make_profiles(options.keep,args[0],options.remake,options.remakeBins,options.eosFile)
+def make_profiles(keep,fileName,remake,remakeBins,eosFile):
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
@@ -52,6 +55,9 @@ def make_profiles(keep,fileName,remake,remakeBins):
       files.append(file)
   
   files.sort()
+  if len(files)==0:
+    print "no files found in range"
+    quit()
   for file in files:
       
       #if profile not already made for this combined binary file
@@ -59,7 +65,11 @@ def make_profiles(keep,fileName,remake,remakeBins):
         
         #make profile
         print __name__+":"+make_profiles.__name__+": creating profile from \""+file+"\" ..."
-        success=os.system(paths.SPHERLSanalPath+' -a cb '+file)
+        cmd=paths.SPHERLSanalPath
+        if eosFile!=None:
+          cmd+=" -e "+eosFile
+        cmd+=' -a cb '+file
+        success=os.system(cmd)
         if success==0:
           pass
         else :

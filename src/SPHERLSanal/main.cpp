@@ -399,6 +399,13 @@ int main(int argc, char *argv[]){
               bExtraInfoInProfile=true;
               break;
             }
+            case 'e':{
+              
+              //get equation of state file
+              sEOSFile=argv[i+1];
+              i++;//skip next value since already used
+              break;
+            }
             default:{//default is to display help
               std::stringstream ssTemp;
               ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
@@ -2466,6 +2473,10 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     cBuffer[nGammaLaw]='\0';
     sEOSTable=cBuffer;
     delete [] cBuffer;
+    
+    if(sEOSFile!=""){//overwrite sEOSTable if sEOSFile is set
+      sEOSTable=sEOSFile;
+    }
     eosTable.readBin(sEOSTable);
   }
   
@@ -3965,6 +3976,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     cBuffer[nGammaLaw]='\0';
     sEOSTable=cBuffer;
     delete [] cBuffer;
+    if(sEOSFile!=""){//overwrite sEOSTable if sEOSFile is set
+      sEOSTable=sEOSFile;
+    }
     eosTable.readBin(sEOSTable);
   }
   

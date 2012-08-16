@@ -19,6 +19,7 @@
 #include "dataMonitoring.h"
 #include "physEquations.h"
 #include <string>
+#include "fileExists.h"
 
 void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &parameters
   ,MessPass &messPass,Performance &performance,Implicit &implicit
@@ -119,8 +120,25 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   if(!xDEDM.isEmpty()){
     parameters.bDEDMClamp=true;
     
-    //get temperature to set DEDM clamp
-    getXMLAttribute(xDEDM,"temperature",parameters.dEDMClampTemperature);
+    //check for a ./DEDMClamp.dat file
+    bool bIsDEDMClampfile=bFileExists("./DEDMClamp.dat");
+    if(!bIsDEDMClampfile){
+      
+      //get temperature to set DEDM clamp
+      getXMLAttribute(xDEDM,"temperature",parameters.dEDMClampTemperature);
+    }
+    else{
+      
+      //open file
+      std::ifstream ifDEDMClampFile;
+      ifDEDMClampFile.open("./DEDMClamp.dat");
+      
+      //get M_r to set the clamp at
+      ifDEDMClampFile>>parameters.dDEDMClampMr;
+      
+      //get DEDM of clamp
+      ifDEDMClampFile>>parameters.dDEDMClampValue;
+    }
   }
   else{
     parameters.bDEDMClamp=false;

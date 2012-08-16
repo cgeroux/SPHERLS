@@ -19599,8 +19599,7 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -19768,8 +19767,7 @@ double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -21204,8 +21202,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -21551,8 +21548,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -21982,8 +21978,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -22487,8 +22482,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
       
       //this should only be set on the first, static and spherically symetric model
       if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        parameters.dDEDMClampMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
-        parameters.dDEDMClampValue=dDEDM;
+        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
       }
     }
   }
@@ -23219,4 +23213,20 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
   double dTest_ConVel2;
   MPI::COMM_WORLD.Allreduce(&dTest_ConVel,&dTest_ConVel2,1,MPI::DOUBLE,MPI_MAX);
   parameters.dMaxConvectiveVelocity=dTest_ConVel2;
+}
+void setDEDMClamp(Parameters &parameters, double dDEDM, double dM_r){
+  parameters.dDEDMClampMr=dM_r;
+  parameters.dDEDMClampValue=dDEDM;
+  
+  //open file to store values for restart
+  std::ofstream ofFile;
+  ofFile.open("./DEDMClamp.dat");
+  if(!ofFile.good()){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": file \"./DEDMClamp.dat\" didn't open properly\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  ofFile<<parameters.dDEDMClampMr<<" "<<parameters.dDEDMClampValue;
+  ofFile.close();
 }

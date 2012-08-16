@@ -125,6 +125,9 @@ bool bExtraInfoInProfile=false;/**<
   If true include extra information in radial profile about equation of state and opacity
   derivatives.
 */
+std::string sEOSFile="";/**<
+  path to an equation of state file, used for overriding the path/eos file in the model files.
+  */
 //functions
 void convertDistBinToAscii(std::string sFileNameBase);
 void combineBinFiles(std::string sFileNameBase);
