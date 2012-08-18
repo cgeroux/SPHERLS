@@ -1108,6 +1108,4 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters);/**<
   terms. The maximum convective velocity is used for calculation of constant eddy viscosity
   parameter. This version of the fuction is for 3D, tabulated equation of state calculations.
   */
-void setDEDMClamp(Parameters &parameters,double dDEDM, double dM_r);/**<
-  Sets the DEDMClamp and writes the values of M_r and DEDM to a file for restarsts.*/
 #endif

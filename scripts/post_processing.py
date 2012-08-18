@@ -130,6 +130,7 @@ def main():
       settings['jobName']=jobName
       remake=""
       resum=""
+      eosFile=""
       if options.m:#use --remake option to remake profiles even if they exist already
         remake=" --remake "
       if options.r:#use --re-sum option so that all model profiles KE will be re-summed

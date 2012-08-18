@@ -205,4 +205,8 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
   @param[in] nNumArgs number of command line arguments, PETSc wants them
   @param[in] cArgs a list of command line arguments, PETSc wants them
   */
+void setDEDMClamp(Parameters &parameters,Time &time,Grid &grid,ProcTop &procTop);/**<
+  This function sets the DEDM clamp if starting from an initial model, otherwise it throws an
+  exception.
+  */
 #endif

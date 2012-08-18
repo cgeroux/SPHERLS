@@ -19588,19 +19588,9 @@ double dImplicitEnergyFunction_R(Grid &grid,Parameters &parameters,Time &time,do
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
   
@@ -19756,19 +19746,9 @@ double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
   
@@ -21191,19 +21171,9 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
   
@@ -21539,17 +21509,8 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   
   //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
   
@@ -21967,19 +21928,9 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
   
@@ -22471,22 +22422,11 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dDEDM=((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA1CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA1UpWindGrad);
   
-  //apply DEDM clamp if set, and above the required mass
   if(parameters.bDEDMClamp){
-    if(parameters.dDEDMClampMr!=-1.0){//clamp has been set
-      if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
-        dDEDM=parameters.dDEDMClampValue;
-      }
-    }
-    else{//if the clamp hasn't been set lets see if we can set it
-      
-      //this should only be set on the first, static and spherically symetric model
-      if(grid.dLocalGridOld[grid.nT][i][0][0]<=parameters.dEDMClampTemperature){
-        setDEDMClamp(parameters,dDEDM,grid.dLocalGridOld[grid.nM][nIInt][0][0]);
-      }
+    if(grid.dLocalGridOld[grid.nM][nIInt][0][0]>=parameters.dDEDMClampMr){
+      dDEDM=parameters.dDEDMClampValue;
     }
   }
-  
   double dA1=dU_U0_Diff*dRSq_i_n*dDEDM;
   
   //calculate dS1
@@ -23213,21 +23153,4 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
   double dTest_ConVel2;
   MPI::COMM_WORLD.Allreduce(&dTest_ConVel,&dTest_ConVel2,1,MPI::DOUBLE,MPI_MAX);
   parameters.dMaxConvectiveVelocity=dTest_ConVel2;
-}
-void setDEDMClamp(Parameters &parameters, double dDEDM, double dM_r){
-  parameters.dDEDMClampMr=dM_r;
-  parameters.dDEDMClampValue=dDEDM;
-  
-  //open file to store values for restart
-  std::ofstream ofFile;
-  ofFile.open("./DEDMClamp.dat");
-  if(!ofFile.good()){
-    std::stringstream ssTemp;
-    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-      <<": file \"./DEDMClamp.dat\" didn't open properly\n";
-    throw exception2(ssTemp.str(),INPUT);
-  }
-  ofFile.precision(16);
-  ofFile<<parameters.dDEDMClampMr<<" "<<parameters.dDEDMClampValue;
-  ofFile.close();
 }

@@ -115,36 +115,6 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     parameters.nTypeTurbulanceMod=0;//not using a turbulance model
   }
   
-  //switch to dedm node if there is one
-  XMLNode xDEDM=getXMLNodeNoThrow(xData,"dedm",0);
-  if(!xDEDM.isEmpty()){
-    parameters.bDEDMClamp=true;
-    
-    //check for a ./DEDMClamp.dat file
-    bool bIsDEDMClampfile=bFileExists("./DEDMClamp.dat");
-    if(!bIsDEDMClampfile){
-      
-      //get temperature to set DEDM clamp
-      getXMLAttribute(xDEDM,"temperature",parameters.dEDMClampTemperature);
-    }
-    else{
-      
-      //open file
-      std::ifstream ifDEDMClampFile;
-      ifDEDMClampFile.open("./DEDMClamp.dat");
-      
-      //get M_r to set the clamp at
-      ifDEDMClampFile>>parameters.dDEDMClampMr;
-      
-      //get DEDM of clamp
-      ifDEDMClampFile>>parameters.dDEDMClampValue;
-      ifDEDMClampFile.close();
-    }
-  }
-  else{
-    parameters.bDEDMClamp=false;
-  }
-  
   //read in model
   modelRead(sStartModel,procTop,grid,time,parameters);
   
@@ -422,6 +392,39 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   
   //parse, and initialize watch zones
   initWatchZones(xData, procTop,grid,output,parameters,time);
+  
+  //switch to dedm node if there is one
+  XMLNode xDEDM=getXMLNodeNoThrow(xData,"dedm",0);
+  if(!xDEDM.isEmpty()){
+    parameters.bDEDMClamp=true;
+    
+    //check for a ./DEDMClamp.dat file
+    bool bIsDEDMClampfile=bFileExists("./DEDMClamp.dat");
+    if(!bIsDEDMClampfile){
+      
+      //get temperature to set DEDM clamp
+      getXMLAttribute(xDEDM,"temperature",parameters.dEDMClampTemperature);
+      
+      //set DEDM Clamp
+      setDEDMClamp(parameters,time,grid,procTop);
+    }
+    else{
+      
+      //open file
+      std::ifstream ifDEDMClampFile;
+      ifDEDMClampFile.open("./DEDMClamp.dat");
+      
+      //get M_r to set the clamp at
+      ifDEDMClampFile>>parameters.dDEDMClampMr;
+      
+      //get DEDM of clamp
+      ifDEDMClampFile>>parameters.dDEDMClampValue;
+      ifDEDMClampFile.close();
+    }
+  }
+  else{
+    parameters.bDEDMClamp=false;
+  }
 }
 void setupLocalGrid(ProcTop &procTop, Grid &grid){
   
@@ -4455,4 +4458,87 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
   
   /**\todo isFrom, isTo, matCoeff,vecTCorrections, vecTCorrections,vecRHS,vecTCorrectionsLocal
   ,kspContext,vecscatTCorrections all need to be destroyed before program finishes.*/
+}
+void setDEDMClamp(Parameters &parameters,Time &time,Grid &grid,ProcTop &procTop){
+  
+  //check that this is a model at t=0
+  if(time.nTimeStepIndex!=0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": model is not an initial model, shouldn't be setting a DEDM clamp from a non-initial"
+      <<"model. Either supply a \"DEDMClamp.dat\" file made from the initial model, or turn off "
+      <<"the DEDM clamp be removing the \"dedm\" node from the configuration file.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //if at right temperature
+  double dDEDM=1.0;
+  double dMr=-1.0;
+  int nIInt;
+  int nJ=0;
+  int nK=0;
+  if(grid.nNumDims>=2&&procTop.nRank!=0){
+    nJ=grid.nNumGhostCells;
+  }
+  if(grid.nNumDims==3&&procTop.nRank!=0){
+    nK=grid.nNumGhostCells;
+  }
+  for(int i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
+    nIInt=i+grid.nCenIntOffset[0];
+    if(grid.dLocalGridOld[grid.nT][i][nJ][nK]>parameters.dEDMClampTemperature
+      && grid.dLocalGridOld[grid.nT][i+1][nJ][nK]<=parameters.dEDMClampTemperature){
+      double dE_ijk_np1half=grid.dLocalGridOld[grid.nE][i][nJ][nK];
+      double dE_im1jk_np1half=grid.dLocalGridOld[grid.nE][i-1][nJ][nK];
+      double dE_ip1jk_np1half=grid.dLocalGridOld[grid.nE][i+1][nJ][nK];
+      double dE_ip1halfjk_np1half=(dE_ip1jk_np1half+dE_ijk_np1half)*0.5;
+      double dE_im1halfjk_np1half=(dE_ijk_np1half+dE_im1jk_np1half)*0.5;
+      double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
+        /grid.dLocalGridOld[grid.nDM][i][0][0];
+      double dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
+          +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
+      dDEDM=((1.0-parameters.dDonorCellMin)*dA1CenGrad+parameters.dDonorCellMin*dA1UpWindGrad);
+      dMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+    }
+  }
+  
+  for(int i=grid.nStartUpdateImplicit[grid.nE][0];i<grid.nEndUpdateImplicit[grid.nE][0];i++){
+    nIInt=i+grid.nCenIntOffset[0];
+    if(grid.dLocalGridOld[grid.nT][i][nJ][nK]>parameters.dEDMClampTemperature
+      && grid.dLocalGridOld[grid.nT][i+1][nJ][nK]<=parameters.dEDMClampTemperature){
+      double dE_ijk_np1half=grid.dLocalGridOld[grid.nE][i][nJ][nK];
+      double dE_im1jk_np1half=grid.dLocalGridOld[grid.nE][i-1][nJ][nK];
+      double dE_ip1jk_np1half=grid.dLocalGridOld[grid.nE][i+1][nJ][nK];
+      double dE_ip1halfjk_np1half=(dE_ip1jk_np1half+dE_ijk_np1half)*0.5;
+      double dE_im1halfjk_np1half=(dE_ijk_np1half+dE_im1jk_np1half)*0.5;
+      double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
+        /grid.dLocalGridOld[grid.nDM][i][0][0];
+      double dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
+          +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
+      dDEDM=((1.0-parameters.dDonorCellMin)*dA1CenGrad+parameters.dDonorCellMin*dA1UpWindGrad);
+      dMr=grid.dLocalGridOld[grid.nM][nIInt][0][0];
+    }
+  }
+  
+  //search for the right temperature
+  double dMrGlobal;
+  double dDEDMGlobal;
+  MPI::COMM_WORLD.Allreduce(&dMr,&dMrGlobal,1,MPI::DOUBLE,MPI_MAX);
+  MPI::COMM_WORLD.Allreduce(&dDEDM,&dDEDMGlobal,1,MPI::DOUBLE,MPI_MIN);
+  parameters.dDEDMClampMr=dMrGlobal;
+  parameters.dDEDMClampValue=dDEDMGlobal;
+  
+  if(procTop.nRank==0){
+    //open file to store values for restart
+    std::ofstream ofFile;
+    ofFile.open("./DEDMClamp.dat");
+    if(!ofFile.good()){
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": file \"./DEDMClamp.dat\" didn't open properly\n";
+      throw exception2(ssTemp.str(),INPUT);
+    }
+    ofFile.precision(16);
+    ofFile<<parameters.dDEDMClampMr<<" "<<parameters.dDEDMClampValue;
+    ofFile.close();
+  }
 }
