@@ -3,29 +3,31 @@
 #include <cmath>
 #include "eos.h"
 
-int main(){
+int main(int argc, char* argv[]){
   //read in bob's eos table
   eos eosConvert;
   
+  if (argc!=2){
+    std::cout<<"expecting only one input file name"<<std::endl;
+    return 0;
+  }
   try{
-    //eosConvert.readBobsAscii("ct_opac");
-    //eosConvert.readAscii("Chris_new_EOS_opac");
-    //eosConvert.writeAscii("eos2.txt");
-    //eosConvert.writeBin("eos2");
-    //eosConvert.writeBin("eosCTOPAC");
-    //eosConvert.readAscii("eosCTOPAC_fixed.txt");
-    //eosConvert.readAscii("eosY240Z002.txt");
-    //eosConvert.readBin("eosY240Z002");
-    eosConvert.readBin("eosNewY299Z001");
-    eosConvert.writeAscii("eosNewY299Z001.txt");
-    //eosConvert.readBin("eosCTOPAC_old");
-    //eosConvert.writeAscii("eosCTOPAC_old.txt");
-    //eosConvert.readBin("eosNewY240Z002");
-    //eosConvert.writeAscii("eosNewY240Z002.txt");
-    //eosConvert.readBin("eosY240Z002");
-    //eosConvert.writeAscii("eosY240Z002.txt");
-    //eosConvert.readBin("eosY300Z002");
-    //eosConvert.writeAscii("eosY300Z002.txt");
+    std::string sFileNameFrom=argv[1];
+    std::string sExtension=sFileNameFrom.substr(sFileNameFrom.length()-4,4);
+    if(sExtension!=".txt"){
+      std::string sFileNameTo=sFileNameFrom+".txt";
+      std::cout<<"converting binary eos file \""<<sFileNameFrom<<" to ascii file \""<<sFileNameTo
+        <<"\"\n";
+      eosConvert.readBin(sFileNameFrom);
+      eosConvert.writeAscii(sFileNameTo);
+    }
+    else{
+      std::string sFileNameTo=sFileNameFrom.substr(0,sFileNameFrom.length()-4);
+      std::cout<<"converting ascii eos file \""<<sFileNameFrom<<" to binary file \""<<sFileNameTo
+        <<"\"\n";
+      eosConvert.readAscii(sFileNameFrom);
+      eosConvert.writeBin(sFileNameTo);
+    }
   }
   //error handeling
   catch(exception2& eTemp){

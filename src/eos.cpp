@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include <stdlib.h>
 
 #include "eos.h"
 #include "exception2.h"
@@ -119,22 +120,32 @@ void eos::readAscii(std::string sFileName){
   dLogP=new double*[nNumRho];
   dLogE=new double*[nNumRho];
   dLogKappa=new double*[nNumRho];
+  std::string sLogP;
+  std::string sLogE;
+  std::string sLogKappa;
+  char* cEnd;
   for(int i=0;i<nNumRho;i++){
     dLogP[i]=new double[nNumT];
     dLogE[i]=new double[nNumT];
     dLogKappa[i]=new double[nNumT];
     for(int j=0;j<nNumT;j++){
-      ifIn>>dLogP[i][j]>>dLogE[i][j]>>dLogKappa[i][j];
+      ifIn>>sLogP>>sLogE>>sLogKappa;
+      dLogP[i][j]=strtod(sLogP.c_str(),&cEnd);
+      dLogE[i][j]=strtod(sLogE.c_str(),&cEnd);
+      dLogKappa[i][j]=strtod(sLogKappa.c_str(),&cEnd);
+      
+      //check that reading went ok
+      if(!ifIn.good()){
+        std::cout<<"line="<<(i*j+2)<<std::endl;
+        std::cout<<dLogP[i][j]<<" "<<dLogE[i][j]<<" "<<dLogKappa[i][j]<<std::endl;
+        std::stringstream ssTemp;
+        ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+          <<": error reading from file \""<<sFileName.c_str()<<"\"\n";
+        throw exception2(ssTemp.str(),INPUT);
+      }
     }
   }
   
-  //check that reading went ok
-  if(!ifIn.good()){
-    std::stringstream ssTemp;
-    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-      <<": error reading from file \""<<sFileName.c_str()<<"\"\n";
-    throw exception2(ssTemp.str(),INPUT);
-  }
   ifIn.close();
 }
 void eos::readBobsAscii(std::string sFileName){

@@ -2462,7 +2462,6 @@ class interpTable:
         self.setNans=False
       elif element[0].text.lower() in ['true','1','t','y','yes']:
         self.setNans=True
-        print "self.setNans=",self.setNans
       else:
         self.setNans=False
   def __writeCompleteEOS(self):
