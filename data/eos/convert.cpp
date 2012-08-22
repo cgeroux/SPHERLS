@@ -16,16 +16,16 @@ int main(){
     //eosConvert.readAscii("eosCTOPAC_fixed.txt");
     //eosConvert.readAscii("eosY240Z002.txt");
     //eosConvert.readBin("eosY240Z002");
-    eosConvert.readBin("eosCTOPAC");
-    eosConvert.writeAscii("eosCTOPAC.txt");
-    eosConvert.readBin("eosCTOPAC_old");
-    eosConvert.writeAscii("eosCTOPAC_old.txt");
-    eosConvert.readBin("eosNewY240Z002");
-    eosConvert.writeAscii("eosNewY240Z002.txt");
-    eosConvert.readBin("eosY240Z002");
-    eosConvert.writeAscii("eosY240Z002.txt");
-    eosConvert.readBin("eosY300Z002");
-    eosConvert.writeAscii("eosY300Z002.txt");
+    eosConvert.readBin("eosNewY299Z001");
+    eosConvert.writeAscii("eosNewY299Z001.txt");
+    //eosConvert.readBin("eosCTOPAC_old");
+    //eosConvert.writeAscii("eosCTOPAC_old.txt");
+    //eosConvert.readBin("eosNewY240Z002");
+    //eosConvert.writeAscii("eosNewY240Z002.txt");
+    //eosConvert.readBin("eosY240Z002");
+    //eosConvert.writeAscii("eosY240Z002.txt");
+    //eosConvert.readBin("eosY300Z002");
+    //eosConvert.writeAscii("eosY300Z002.txt");
   }
   //error handeling
   catch(exception2& eTemp){

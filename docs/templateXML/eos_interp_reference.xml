@@ -288,6 +288,7 @@
       <delLogT>0.04</delLogT>
       <numLogT>800</numLogT>
       <outputFile>eosTest</outputFile>
+      <plot>True</plot>
     </table>
   </interpolatedTables>
 </root>

@@ -345,7 +345,7 @@ class eosTable:
     #set values outside grid, and near nans on original grid equal to nan in interpolated grid
     if setExtrapolatedToNan:
       
-      print "    setting nans for extrapolated values ..."
+      print "    setting nans for extrapolated values (this takes a while)..."
       
       #get range in logT, and logR
       logTRange=[min(self.logT[0,:]),max(self.logT[0,:])]
@@ -2079,8 +2079,12 @@ class interpTable:
   """This class reads in and holds data for an equations of state and opacities from a file formated
   in the same was as read to and written by the class defined in eos.h, and implemented in eos.cpp."""
   
-  def interpolate(self,eosSet,opacitySet,withoutNans=False):
+  def interpolate(self,eosSet,opacitySet,withoutNans=None):
       """creates the interpolated table and writes it out"""
+      
+      #if not overriden, use value set in xml, or the default which is False
+      if withoutNans==None:
+        withoutNans=(not self.setNans)
       
       #interpolate in composition
       self.eosAtNewComp=eosSet.interpComp(self.X,self.Z)
@@ -2429,16 +2433,27 @@ class interpTable:
         raise Exception("no \"outputFile\" node found")
       self.outputFile=element[0].text
       
-      #get wether to plot
+      #get wether to plot, if not set, set to False
       element=tableElement.findall("plot")
       if len(element)>1:
         print "WARNING: more than one \"plot\" found using only first node found"
       elif len(element)==0:
-        raise Exception("no \"plot\" node found")
+        self.plot=False
       if element[0].text.lower() in ['true','1','t','y','yes']:
         self.plot=True
       else:
         self.plot=False
+      
+      #get wether to set nans, if not set, set to False
+      element=tableElement.findall("setNans")
+      if len(element)>1:
+        print "WARNING: more than one \"setNans\" found using only first node found"
+      elif len(element)==0:
+        self.setNans=False
+      if element[0].text.lower() in ['true','1','t','y','yes']:
+        self.setNans=True
+      else:
+        self.setNans=False
   def __writeCompleteEOS(self):
     """Writes out an eosTable and and an opacity Table in a form that SPHERLS can read in
     """
@@ -2518,7 +2533,7 @@ class interpTableManager:
     #get interpolatedTables node
     interpolatedTables=root.findall("interpolatedTables")
     if len(interpolatedTables)>1:
-      print "WARNING: more than one \"interpolatedTables\" found using only first node found"
+      print "WARNING: more than one \"interpolatedTables\" found, using only first node found"
     elif len(interpolatedTables)==0:
       raise Exception("no \"interpolatedTables\" node found")
     

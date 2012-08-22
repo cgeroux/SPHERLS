@@ -398,7 +398,7 @@ def plot(dataSets,options,title):
         for curve in plot.curves:
           
           #plot the curve
-          if curve.color in basicMatPlotColors:
+          if curve.color in basicMatPlotColors or isHexColor(curve.color):
             if len(curve.error)==0:
               temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y
                 ,linestyle=curve.style
@@ -420,8 +420,8 @@ def plot(dataSets,options,title):
                 ,capsize=curve.capsize
                 )
           else:
-            print "only hex strings are accepted for colors other than "+basicMatPlotColors
-            quit()
+            raise Exception("only hex strings are accepted for colors other than "
+              +str(basicMatPlotColors)+" string given was \""+curve.color+"\"")
           if curve.label!=None and curve.label!="":
             lines.append(temp[0])
             labels.append(curve.label)
@@ -471,6 +471,34 @@ def isFloat(str):
     return True
   except:
     return False
+def isHexColor(str):
+  """Checks to see if str is a hex color, returns True if it is, else it returns False"""
+  
+  #split up string
+  numberSign=str[0]
+  redHex=str[1:3]
+  greenHex=str[3:5]
+  blueHex=str[5:7]
+  
+  #test for the right format
+  if numberSign!="#":
+    return False
+  try:
+    redDec=int("0x"+redHex,0)
+    greenDec=int("0x"+greenHex,0)
+    blueDec=int("0x"+blueHex,0)
+  except ValueError as e:
+    return False
+  
+  if not (0<=redDec and redDec<=255 ):
+    return False
+  if not (0<=greenDec and redDec<=255 ):
+    return False
+  if not (0<=blueDec and redDec<=255 ):
+    return False
+  
+  #if we got here it passed all the tests
+  return True
 def main():
   
   #parse command line options
