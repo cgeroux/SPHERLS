@@ -289,6 +289,7 @@
       <numLogT>800</numLogT>
       <outputFile>eosTest</outputFile>
       <plot>True</plot>
+      <setNans>True</setNans>
     </table>
   </interpolatedTables>
 </root>

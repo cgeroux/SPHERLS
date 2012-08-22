@@ -215,6 +215,9 @@ class eosTable:
     fig=plt.figure()
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
+      ax.set_xlabel("log10(rho) [g/cm^3]")
+      ax.set_ylabel("log10(T) [K]")
+      ax.set_zlabel("log10(E) [ergs/g]")
       ax.plot_wireframe(self.logD,self.logT,self.logE)
       if otherTables:
         for otherTable in otherTables:
@@ -252,6 +255,9 @@ class eosTable:
     fig=plt.figure()
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
+      ax.set_xlabel("log10(rho) [g/cm^3]")
+      ax.set_ylabel("log10(T) [K]")
+      ax.set_zlabel("log10(P) [dynes/cm^2]")
       ax.plot_wireframe(self.logD,self.logT,self.logP)
       if otherTables:
         for otherTable in otherTables:
@@ -651,6 +657,9 @@ class opacityTable:
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
       ax.plot_wireframe(self.logR,self.logT,self.logK)
+      ax.set_xlabel("log10(R), R=rho/(T/1e6)^3 [g/cm^3]")
+      ax.set_ylabel("log10(T) [K]")
+      ax.set_zlabel("log10(K) [cm^2/g]")
       if otherTables:
         for otherTable in otherTables:
           ax.plot_wireframe(otherTable.logR,otherTable.logT,otherTable.logK,color="green")
@@ -662,6 +671,7 @@ class opacityTable:
       print self.logR[0,l:h]
       ax.plot(self.logT[:,l:h][0],self.logK[:,l:h][0], "bo-")
       counter=1
+      ax.set_xlabel("log10(T)")
       if otherTables:
         for otherTable in otherTables:
           l=logRIndex[counter]
@@ -2091,8 +2101,8 @@ class interpTable:
       self.opacityAtNewComp=opacitySet.interpComp(self.X,self.Z)
       
       #interpolate in logD and logT
-      self.eosTable=self.eosAtNewComp.interpolate(self.gridConfig,(not withoutNans))
-      self.opacityTable=self.opacityAtNewComp.interpolate(self.gridConfig,(not withoutNans))
+      self.eosTable=self.eosAtNewComp.interpolate(self.gridConfig,setExtrapolatedToNan=(not withoutNans))
+      self.opacityTable=self.opacityAtNewComp.interpolate(self.gridConfig,setExtrapolatedToNan=(not withoutNans))
       
       #write out table
       self.__writeCompleteEOS()
@@ -2448,10 +2458,11 @@ class interpTable:
       element=tableElement.findall("setNans")
       if len(element)>1:
         print "WARNING: more than one \"setNans\" found using only first node found"
-      elif len(element)==0:
+      if len(element)==0:
         self.setNans=False
-      if element[0].text.lower() in ['true','1','t','y','yes']:
+      elif element[0].text.lower() in ['true','1','t','y','yes']:
         self.setNans=True
+        print "self.setNans=",self.setNans
       else:
         self.setNans=False
   def __writeCompleteEOS(self):
@@ -2502,7 +2513,7 @@ class interpTable:
       
     f.close()
 class interpTableManager:
-  def createTables(self,withoutNans=False):
+  def createTables(self,withoutNans=None):
     """Creates interpolated tables and write them out."""
     
     for interpTableTemp in self.tables:
