@@ -66,41 +66,41 @@ p^=-       sin(p)*x^+       cos(p)*y^
     grid : can be either both, major, or false to set grid lines at both major and minor tic marks, 
            just major tic marks, or no grid at all.-->
   <plane type="rt" index="0" grid="both">
-    <xaxis min="3.8e1" max="5.2e1" label="[$10^4$ km]" minortics="True">$1*sin($2)/1e10</xaxis>
-    <yaxis min="-4e-1" max="5e-1" label="[$10^4$ km]" minortics="True">$1*cos($2)/1e10</yaxis>
+    <xaxis min="3.8e1" max="5.2e1" label="[$10^4$ km]" minortics="True">$2*sin($4)/1e10</xaxis>
+    <yaxis min="-4e-1" max="5e-1" label="[$10^4$ km]" minortics="True">$2*cos($4)/1e10</yaxis>
     <scalor min="4e3" max="1e5" pallet="stellar" palletFocus="1e4" label="$T_{eff}$ [K]">$12</scalor>
-    <vector color="k" xfrequency="5" yfrequency="1" scale="3">
+    <vector color="k" xfrequency="5" yfrequency="1" scale="3" thickness="1.0">
       <label xpos="0.15" ypos="0.9">$(\mathbf{u}-\mathbf{u}_0+\mathbf{v}$) \scale [km/s]</label>
-      <xposition>#1*sin(#2)/1e10</xposition>
-      <yposition>#1*cos(#2)/1e10</yposition>
-      <xcomponent>((#4-#5)*sin(#2)+#6*cos(#2))/1e5</xcomponent>
-      <ycomponent>((#4-#5)*cos(#2)-#6*sin(#2))/1e5</ycomponent>
+      <xposition>#2*sin(#4)/1e10</xposition>
+      <yposition>#2*cos(#4)/1e10</yposition>
+      <xcomponent>((#7-#8)*sin(#4)+#9*cos(#4))/1e5</xcomponent>
+      <ycomponent>((#7-#8)*cos(#4)-#9*sin(#4))/1e5</ycomponent>
     </vector>
   </plane>
   
   <!-- RP-plane with combined u-u_0 and w vectors, transform: t=pi/2, x->x, y->y -->
   <plane type="rp" index="4">
-    <xaxis min="44" max="52" label="[$10^4$ km]">$1*cos($3)/1e10</xaxis>
-    <yaxis label="[$10^4$ km]">$1*sin($3)/1e10</yaxis>
+    <xaxis min="44" max="52" label="[$10^4$ km]">$2*cos($6)/1e10</xaxis>
+    <yaxis label="[$10^4$ km]">$2*sin($6)/1e10</yaxis>
     <scalor pallet="stellar" palletFocus="1e4" label="$T_{eff}$ [K]">$12</scalor>
-    <vector color="k" xfrequency="4" yfrequency="1" scale="4.0">
+    <vector color="k" xfrequency="4" yfrequency="1" scale="4.0" thickness="1.0">
       <label xpos="0.15" ypos="0.9">$\mathbf{v}$ \scale [km/s]</label>
-      <xposition>#1*cos(#3)/1e10</xposition>
-      <yposition>#1*sin(#3)/1e10</yposition>
-      <xcomponent>((#4-#5)*cos(#3)+#7*sin(#3))/1e5</xcomponent>
-      <ycomponent>((#4-#5)*sin(#3)+#7*cos(#3))/1e5</ycomponent>
+      <xposition>#2*cos(#6)/1e10</xposition>
+      <yposition>#2*sin(#6)/1e10</yposition>
+      <xcomponent>((#7-#8)*cos(#6)+#10*sin(#6))/1e5</xcomponent>
+      <ycomponent>((#7-#8)*sin(#6)+#10*cos(#6))/1e5</ycomponent>
     </vector>
   </plane>
   
   <!-- TP-plane with combined v and w vectors, transform, set let y->x, z->y-->
   <plane type="tp" index="308">
-    <xaxis label="phi [cm]">#1*sin($4)*sin($6)</xaxis>
-    <yaxis label="theta [cm]">#1*cos($4)</yaxis>
+    <xaxis label="phi [cm]">#2*sin($4)*sin($6)</xaxis>
+    <yaxis label="theta [cm]">#2*cos($4)</yaxis>
     <scalor pallet="jet" label="$T_{eff}$ [K]">$12</scalor>
-    <vector color="k" scale="1.0">
+    <vector color="k" scale="1.0"  thickness="1.0">
       <label xpos="0.15" ypos="0.95">$\mathbf{w}$ \scale [km/s]</label>
-      <xposition>#1*sin(#4)*sin(#6)</xposition>
-      <yposition>#1*cos(#4)</yposition>
+      <xposition>#2*sin(#4)*sin(#6)</xposition>
+      <yposition>#2*cos(#4)</yposition>
       <xcomponent>#9*cos(#4)*sin(#6)+#10*cos(#6)</xcomponent>
       <ycomponent>-1.0*#9*sin(#4)</ycomponent>
     </vector>

@@ -405,6 +405,11 @@ def parseXMLFile(fileName):
       vector['scale']=1.0
       if isFloat(vectorElement.get("scale")):
         vector['scale']=float(vectorElement.get("scale"))
+        
+      #get vector thickness
+      vector['thickness']=1.0
+      if isFloat(vectorElement.get("thickness")):
+        vector['thickness']=float(vectorElement.get("thickness"))
       
       #get color
       vector['color']='k'
@@ -473,7 +478,7 @@ def parseXMLFile(fileName):
     #add list of vectors to plane
     plane['vectors']=vectors
     
-    #add plan to list of planes
+    #add plane to list of planes
     planes.append(plane)
   
   #add list of planes to settings
@@ -1131,7 +1136,7 @@ def plot_plane(fileName,nCount,fig,ax,plane,planes):
     
     label=label.replace("\scale",labelScale)
     uvec=ax.quiver(X,Y,U,V,pivot='middle',scale=scale,units='xy',angles='xy'
-      ,width=diag*0.03*vector['scale'],color=vector['color'])
+      ,width=diag*0.03*vector['thickness']*vector['scale'],color=vector['color'])
     qk=ax.quiverkey(uvec,vector['labelXPos'],vector['labelYPos']
       ,scaleNumber,label)
   
