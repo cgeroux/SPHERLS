@@ -10415,6 +10415,9 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
   double dEddyVisc_ijp1halfk_np1half;
   double dEddyVisc_ijm1halfk_np1half;
   double dPiSq=parameters.dPi*parameters.dPi;
+  double dT4;
+  double dLengthScale4;
+  double dDelR_i_n;
   for(i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
@@ -10427,6 +10430,7 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
     dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
     dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
     dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dDelR_i_n=dR_ip1half_n-dR_im1half_n;
     dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
       +grid.dLocalGridOld[grid.nDenAve][i+1][0][0])*0.5;
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -10610,6 +10614,12 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
         dT2=(dEGrad_ijp1halfk_np1half-dEGrad_ijm1halfk_np1half)/(dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
+  
+        //calculate dT4, an additional eddy viscosity term
+        dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+        dLengthScale4=dLengthScale4*dLengthScale4;
+        dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+          ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
         
         //eddy viscosity terms
         dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
@@ -11932,6 +11942,9 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
   double dEddyVisc_ijkm1half_np1half;
   double dEddyVisc_ijkp1half_np1half;
   double dPiSq=parameters.dPi*parameters.dPi;
+  double dLengthScale4;
+  double dT4;
+  double dDelR_i_n;
   for(i=grid.nStartUpdateExplicit[grid.nE][0];i<grid.nEndUpdateExplicit[grid.nE][0];i++){
     
     //calculate i for interface centered quantities
@@ -11944,6 +11957,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
     dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
     dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
     dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dDelR_i_n=dR_ip1half_n-dR_im1half_n;
     dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
       +grid.dLocalGridOld[grid.nDenAve][i+1][0][0])*0.5;
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -12227,9 +12241,16 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
+  
+        //calculate dT4, an additional eddy viscosity term
+        dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+          *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
+        dLengthScale4=pow(dLengthScale4,1.33333333333333333333333);
+        dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+          ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
         
         //eddy viscosity terms
-        dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt;
+        dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt+dT4;
         
         //calculate new energy
         grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
@@ -12366,6 +12387,7 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
     dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
     dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
     dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+    dDelR_i_n=dR_ip1half_n-dR_im1half_n;
     dRhoAve_ip1half_n=grid.dLocalGridOld[grid.nDenAve][i][0][0]*0.5;/*\BC missing average density
       outside model setting it to zero*/
     dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -12642,9 +12664,16 @@ void calNewE_RTP_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop 
         dT3=(dEGrad_ijkp1half_np1half-dEGrad_ijkm1half_np1half)/(dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
           *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
+  
+        //calculate dT4, an additional eddy viscosity term
+        dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+          *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
+        dLengthScale4=pow(dLengthScale4,1.33333333333333333333333);
+        dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+          ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
         
         //eddy viscosity terms
-        dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt;
+        dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt+dT4;
         
         //calculate new energy
         grid.dLocalGridNew[grid.nE][i][j][k]=grid.dLocalGridOld[grid.nE][i][j][k]
@@ -21048,6 +21077,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
   double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
   double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dDelR_i_n=dR_ip1half_n-dR_im1half_n;
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i+1][0][0]
     +grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -21249,8 +21279,14 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
+  //calculate dT4, an additional eddy viscosity term
+  double dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+  dLengthScale4=dLengthScale4*dLengthScale4;
+  double dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+    ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
+  
   //eddy viscosity terms
-  double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
+  double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt+dT4;
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
@@ -21397,6 +21433,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
   double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
   double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dDelR_i_n=(dR_ip1half_n-dR_im1half_n);
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/**\BC missing density
     outside model assuming it is zero*/
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -21588,8 +21625,14 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
   
+  //calculate dT4, an additional eddy viscosity term
+  double dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0];
+  dLengthScale4=dLengthScale4*dLengthScale4;
+  double dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+    ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
+  
   //eddy viscosity terms
-  double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt;
+  double dEddyViscosityTerms=(dT1+dT2)/parameters.dPrt+dT4;
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
@@ -21746,6 +21789,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
   double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
   double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dDelR_i_n=(dR_ip1half_n-dR_im1half_n);
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i+1][0][0]
     +grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -22051,8 +22095,15 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
+  //calculate dT4, an additional eddy viscosity term
+  double dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+    *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
+  dLengthScale4=pow(dLengthScale4,1.33333333333333333333333);
+  double dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+    ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
+  
   //eddy viscosity terms
-  double dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt;
+  double dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt+dT4;
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
@@ -22255,6 +22306,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
   double dRSq_im1half_n=dR_im1half_n*dR_im1half_n;
   double dR4_ip1half_n=dRSq_ip1half_n*dRSq_ip1half_n;
   double dR4_im1half_n=dRSq_im1half_n*dRSq_im1half_n;
+  double dDelR_i_n=(dR_ip1half_n-dR_im1half_n);
   double dRhoAve_ip1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0])*0.5;/**\BC missing density
     outside model assuming it is zero*/
   double dRhoAve_im1half_n=(grid.dLocalGridOld[grid.nDenAve][i][0][0]
@@ -22546,8 +22598,15 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]
     *grid.dLocalGridOld[grid.nDPhi][0][0][k]);
   
+  //calculate dT4, an additional eddy viscosity term
+  double dLengthScale4=dRSq_i_n*dDelR_i_n*grid.dLocalGridOld[grid.nDTheta][0][j][0]
+    *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k];
+  dLengthScale4=pow(dLengthScale4,1.33333333333333333333333);
+  double dT4=dET4(parameters,grid.dLocalGridNew[grid.nEddyVisc][i][j][k]
+    ,grid.dLocalGridOld[grid.nD][i][j][k],dLengthScale4);
+  
   //eddy viscosity terms
-  double dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt;
+  double dEddyViscosityTerms=(dT1+dT2+dT3)/parameters.dPrt+dT4;
   
   #if DEBUG_EQUATIONS==1
   if(parameters.bSetThisCall){
@@ -23153,4 +23212,12 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
   double dTest_ConVel2;
   MPI::COMM_WORLD.Allreduce(&dTest_ConVel,&dTest_ConVel2,1,MPI::DOUBLE,MPI_MAX);
   parameters.dMaxConvectiveVelocity=dTest_ConVel2;
+}
+inline double dET4(Parameters &parameters,double dEddyVisc_ijk_np1half, double dRho_ijk_np1half
+  ,double dLengthScale4_ijk_np1half){
+  
+  //additional turbulance term to go into the energy equation
+  const double dC=874.12;
+  double dTemp=dEddyVisc_ijk_np1half/dRho_ijk_np1half;
+  return dC*pow(dTemp,3.0)/dLengthScale4_ijk_np1half;
 }

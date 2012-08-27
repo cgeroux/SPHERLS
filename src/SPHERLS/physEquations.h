@@ -1108,4 +1108,8 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters);/**<
   terms. The maximum convective velocity is used for calculation of constant eddy viscosity
   parameter. This version of the fuction is for 3D, tabulated equation of state calculations.
   */
+inline double dET4(Parameters &parameters,double dEddyVisc_ijk_np1half, double dRho_ijk_np1half
+  ,double dLengthScale4_ijk_np1half);/**<
+  This is an additional turbulance term to be added to the energy equation.
+  */
 #endif
