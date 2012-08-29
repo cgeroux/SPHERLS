@@ -23217,7 +23217,7 @@ inline double dET4(Parameters &parameters,double dEddyVisc_ijk_np1half, double d
   ,double dLengthScale4_ijk_np1half){
   
   //additional turbulance term to go into the energy equation
-  const double dC=874.12;
+  const double dC=4.420241;//includes D_t/A_t^3/3.75^4, the last factor is for 3.75*lengthScale
   double dTemp=dEddyVisc_ijk_np1half/dRho_ijk_np1half;
   return dC*pow(dTemp,3.0)/dLengthScale4_ijk_np1half;
 }
