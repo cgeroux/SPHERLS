@@ -69,8 +69,10 @@ class Curve:
     self.codeY=None
     self.codeX=None
     self.codeErr=None
-    self.style="-"
+    self.style=" "
     self.color="b"
+    self.markerfacecolor="b"
+    self.markeredgecolor="b"
     self.markersize=2.0
     self.linewidth=1.0
     self.label=None
@@ -90,10 +92,22 @@ class Curve:
     #set curve marker
     if element.get("marker")!=None:
       self.marker=element.get("marker")
-    
+      
     #set curve color
     if element.get("color")!=None:
       self.color=element.get("color")
+    
+    #set curve marker face color
+    if element.get("markerfacecolor")!=None:
+      self.markerfacecolor=element.get("markerfacecolor")
+    elif element.get("color")!=None:#if not set use the color element
+      self.markerfacecolor=element.get("color")
+      
+    #set curve marker edge color
+    if element.get("markeredgecolor")!=None:
+      self.markeredgecolor=element.get("markeredgecolor")
+    elif element.get("color")!=None:#if not set use the color element
+      self.markeredgecolor=element.get("color")
       
     #set curve label
     if element.get("label")!=None:
@@ -212,6 +226,10 @@ class Plot:
     #get legend location
     if element.get("legendloc")!=None and element.get("legendloc")!="":
       self.legendloc=int(element.get("legendloc"))
+    
+    #get legend location
+    if element.get("numlegendpoints")!=None and element.get("numlegendpoints")!="":
+      self.numpoints=int(element.get("numlegendpoints"))
     
     #add curves to plot
     curveElements=element.findall("curve")
@@ -402,17 +420,19 @@ def plot(dataSets,options,title):
             if len(curve.error)==0:
               temp=ax[nTotalPlotCount-1].plot(curve.x,curve.y
                 ,linestyle=curve.style
-                ,marker=curve.marker
                 ,color=curve.color
+                ,marker=curve.marker
+                ,markerfacecolor=curve.markerfacecolor
+                ,markeredgecolor=curve.markeredgecolor
                 ,markersize=curve.markersize
                 ,linewidth=curve.linewidth)
             else:
-              print curve.style,curve.color,curve.marker,curve.markersize,curve.linewidth\
-                ,curve.ecolor,curve.elinewidth,curve.capsize
               temp=ax[nTotalPlotCount-1].errorbar(curve.x,curve.y,yerr=curve.error
                 ,linestyle=curve.style
                 ,color=curve.color
                 ,marker=curve.marker
+                ,markerfacecolor=curve.markerfacecolor
+                ,markeredgecolor=curve.markeredgecolor
                 ,markersize=curve.markersize
                 ,linewidth=curve.linewidth
                 ,ecolor=curve.ecolor
@@ -431,7 +451,7 @@ def plot(dataSets,options,title):
         
         #set legend
         if len(lines)>0:
-          ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc)
+          ax[nTotalPlotCount-1].legend(lines,labels,loc=plot.legendloc,numpoints=plot.numpoints)
         
         #remove x-axis labels
         if nPlotCount!=len(axisMine.plots)-1:
