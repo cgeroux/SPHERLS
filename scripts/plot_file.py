@@ -195,6 +195,7 @@ class Plot:
     self.grid=None
     self.bMinorTics=False
     self.legendloc=1
+    self.numpoints=None
     
     #check for grid setting
     if element.get("grid")!=None:
