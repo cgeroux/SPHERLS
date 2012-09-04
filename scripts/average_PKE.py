@@ -20,6 +20,9 @@ def parseOptions():
     ,help="Removes distributed binary files")
   parser.add_option("-m","--remake",action="store_true",dest="remake"
     ,help="Will remake profiles if they already exist. [not default].",default=False)
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
+    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
+    +" calculating adiabatic gradient.",default=False)
   parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
     ,help="Will remake binaries if they already exist. [not default].",default=False)
   parser.add_option("--re-sum",action="store_true",dest="resum"
@@ -41,7 +44,7 @@ def main():
   
   #make sure that all the combined binary files have profiles made
   failedFiles=make_profiles.make_profiles(options.keep,args[0],options.remake,options.remakeBins
-    ,options.eosFile)
+    ,options.eosFile,options.extraProfileInfo)
   
   #compute the average PKE
   averagePKE(start,end,baseFileName,options)

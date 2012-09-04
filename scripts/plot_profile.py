@@ -36,6 +36,9 @@ def parseOptions():
     ,help="Removes distributed binary files")
   parser.add_option("-m","--remake",action="store_true",dest="remake"
     ,help="Will remake profiles if they already exist. [not default].",default=False)
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
+    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
+    +" calculating adiabatic gradient.",default=False)
   parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
     ,help="Will remake binaries even if they already exist. [not default].",default=False)
   parser.add_option("--dpi",dest="dpi",type="float",default=100
@@ -434,7 +437,7 @@ class DataSet:
     #make sure that all the combined binary files within range of dataset have profiles made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
     failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins
-      ,self.eosFile)
+      ,self.eosFile,options.extraProfileInfo)
     
     if len(failedFiles)>0:
       for faildFile in failedFiles:

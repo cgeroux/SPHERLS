@@ -110,6 +110,10 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
       throw exception2(ssTemp.str(),INPUT);
     }
     getXMLValue(xTurbModel,"eddyVisc",0,parameters.dEddyViscosity);
+    if(parameters.nTypeTurbulanceMod==2){
+      parameters.dEddyViscosity=3.75*parameters.dEddyViscosity;/*this accounts for a factor of 3.75
+        in the length scale. See Cloutman 1991*/
+    }
   }
   else{//if no node found
     parameters.nTypeTurbulanceMod=0;//not using a turbulance model
