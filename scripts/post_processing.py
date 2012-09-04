@@ -39,6 +39,9 @@ def main():
     +"threading instead of the sun grid engine")
   parser.add_option('-m',action="store_true",dest="m",default=False,help="If set will re-make "
    +"radial profiles even if the already exist.")
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
+    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
+    +" calculating adiabatic gradient.",default=False)
   parser.add_option('-M',action="store_true",dest="M",default=False,help="If set will "
    +"re-combined binary files even if already combined.")
   parser.add_option('-r',action="store_true",dest="r",default=False,help="If set will re-sum "
@@ -139,8 +142,9 @@ def main():
         remake+=" --remake-bins"
       if options.e:#specify an equation of state
         eosFile=" -e "+options.e
-        
-      settings['arguments']=[remake,resum,eosFile,os.path.join(outputFilePaths[i]
+      if options.extraProfileInfo:
+        extraProfileInfo=" -v"
+      settings['arguments']=[remake,resum,eosFile,extraProfileInfo,os.path.join(outputFilePaths[i]
         ,outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
       settings['runtime']=options.l

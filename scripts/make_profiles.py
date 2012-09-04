@@ -26,6 +26,9 @@ def main():
   parser.add_option("-e",action="store", dest="eosFile",type="string"
     ,help="Can be used to over ride the equation of state file found in the model dumps"
     +". [not default].",default=None)
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
+    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
+    +" calculating adiabatic gradient.",default=False)
   parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
     ,help="Will remake binaries even if they already exist. [not default].",default=False)
   
@@ -37,8 +40,9 @@ def main():
     parser.error(" need one and one argument only.")
     
   #create profile files, and save list of files
-  make_profiles(options.keep,args[0],options.remake,options.remakeBins,options.eosFile)
-def make_profiles(keep,fileName,remake,remakeBins,eosFile):
+  make_profiles(options.keep,args[0],options.remake,options.remakeBins,options.eosFile
+    ,options.extraProfileInfo)
+def make_profiles(keep,fileName,remake,remakeBins,eosFile,extraProfileInfo):
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
@@ -66,6 +70,8 @@ def make_profiles(keep,fileName,remake,remakeBins,eosFile):
         #make profile
         print __name__+":"+make_profiles.__name__+": creating profile from \""+file+"\" ..."
         cmd=paths.SPHERLSanalPath
+        if extraProfileInfo:
+          cmd+=" -v "
         if eosFile!=None:
           cmd+=" -e "+eosFile
         cmd+=' -a cb '+file
