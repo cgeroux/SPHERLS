@@ -598,7 +598,7 @@ def plot(dataSets,options,title):
             if axisMine.bTime:
               curveCount=0
               for curve in plot.curves:
-              
+                
                 #plot the curve
                 if axisMine.period!=None:#use phase instead of time if period is given
                   temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
