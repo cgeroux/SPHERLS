@@ -6,17 +6,27 @@ import numpy as np
 import math
 import struct
 import paths
+import os
 a=7.56591e-15 #radiation constant [erg cm^{-3} K^{-4}]
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
   
   #setup command line parser
-  parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE"
+  parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE\n"
+    +"       %prog [options] EOSFILE1 EOSFILE2"
     ,version="%prog 1.0",description=r"Interpolates in a set of equation of state files. XMLFILE "
     +"gives all the settings needed to create multiple eos files used in SPHERLS. For an example of"
-    +" a configuration file see eos_interp_reference.xml under docs/templateXML.")
-    
+    +" a configuration file see eos_interp_reference.xml under docs/templateXML. In the second"
+    +" usage case it can be used to compare two equation of state files.")
+  parser.add_option("--rhoIndex1",dest="rho1",type="int",default=0
+    ,help="Sets the index for density in table 1 [default: %default]")
+  parser.add_option("--rhoIndex2",dest="rho2",type="int",default=0
+    ,help="Sets the index for density in table 2 [default: %default]")
+  parser.add_option("--numRho",dest="numRho",type="int",default=1
+    ,help="Sets the number of densities to plot starting at the specified indices [default: %default]")
+  parser.add_option("-o",dest="output",type="string",default=None
+    ,help="Sets the output file name, so that the comparison plot is save to a file [default: %default]")
   #parse command line options
   (options,args)=parser.parse_args()
   if len(args)==0:
@@ -2203,7 +2213,7 @@ class interpTable:
         
     f.close()
   def plotLogE(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True,rstride=1
-    ,cstride=1):
+    ,cstride=1,outputfile=None):
     """Plots LogE
     
     Keywords:
@@ -2217,8 +2227,12 @@ class interpTable:
       wireFrame=False
     from mpl_toolkits.mplot3d import axes3d
     import matplotlib
+    if outputfile!=None:
+      matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig=plt.figure()
+    lines=[]
+    lables=[]
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
       ax.plot_wireframe(self.logD,self.logT,self.logE,rstride=rstride,cstride=cstride)
@@ -2231,9 +2245,11 @@ class interpTable:
       h=logDIndexList[0]+logDRangeList[0]
       print self.sFileName," logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
-        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logE[l:h,:]), "bo-")
+        temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logE[l:h,:]), "b-")
       else:
-        ax.plot(self.logT[l:h,:][0],self.logE[l:h,:][0], "bo-")
+        temp=ax.plot(self.logT[l:h,:][0],self.logE[l:h,:][0], "b-")
+      lines.append(temp)
+      lables.append(self.sFileName)
       counter=1
       if otherTables:
         for otherTable in otherTables:
@@ -2241,12 +2257,30 @@ class interpTable:
           h=logDIndexList[counter]+logDRangeList[counter]
           print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
-            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logE[l:h,:]), "go-")
+            temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logE[l:h,:]), "g-")
           else:
-            ax.plot(otherTable.logT[l:h,:][0],otherTable.logE[l:h,:][0], "go-")
+            temp=ax.plot(otherTable.logT[l:h,:][0],otherTable.logE[l:h,:][0], "g-")
           counter+=1
-    plt.show()
-  def plotLogP(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+          lines.append(temp)
+          lables.append(otherTable.sFileName)
+    
+    #make ledgend
+    #if len(lines)>0:
+      #ax.legend(lines,lables)
+    
+    #show results
+    if outputfile==None:
+      plt.show()
+    else:
+      [path,ext]=os.path.splitext(outputfile)
+      supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
+      if ext[1:] not in supportedFileTypes:
+        print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+        quit()
+      print __name__+":"+main.__name__+": saving figure to file \""+outputfile
+      fig.savefig(path+"_E"+ext,format=ext[1:],transparent=False)#save to file
+  def plotLogP(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True
+    ,outputfile=None):
     """Plots LogP
     
     Keywords:
@@ -2260,8 +2294,12 @@ class interpTable:
       wireFrame=False
     from mpl_toolkits.mplot3d import axes3d
     import matplotlib
+    if outputfile!=None:
+      matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig=plt.figure()
+    lines=[]
+    lables=[]
     if wireFrame:
       ax=fig.add_subplot(111,projection='3d')
       ax.plot_wireframe(self.logD,self.logT,self.logP)
@@ -2274,9 +2312,11 @@ class interpTable:
       h=logDIndexList[0]+logDRangeList[0]
       print self.sFileName," logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
-        ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logP[l:h,:]), "bo-")
+        temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logP[l:h,:]), "b-")
       else:
-        ax.plot(self.logT[l:h,:][0],self.logP[l:h,:][0], "bo-")
+        temp=ax.plot(self.logT[l:h,:][0],self.logP[l:h,:][0], "b-")
+      lines.append(temp)
+      lables.append(self.sFileName)
       counter=1
       if otherTables:
         for otherTable in otherTables:
@@ -2284,12 +2324,28 @@ class interpTable:
           h=logDIndexList[counter]+logDRangeList[counter]
           print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
-            ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logP[l:h,:]), "go-")
+            temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logP[l:h,:]), "g-")
           else:
-            ax.plot(otherTable.logT[l:h,:][0],otherTable.logP[l:h,:][0], "go-")
+            temp=ax.plot(otherTable.logT[l:h,:][0],otherTable.logP[l:h,:][0], "g-")
           counter+=1
-    plt.show()
-  def plotLogK(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True):
+          lines.append(temp)
+          lables.append(otherTable.sFileName)
+    #if len(lines)>0:
+      #ax.legend(lines,lables)
+    
+    #show results
+    if outputfile==None:
+      plt.show()
+    else:
+      [path,ext]=os.path.splitext(outputfile)
+      supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
+      if ext[1:] not in supportedFileTypes:
+        print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+        quit()
+      print __name__+":"+main.__name__+": saving figure to file \""+outputfile
+      fig.savefig(path+"_P"+ext,format=ext[1:],transparent=False)#save to file
+  def plotLogK(self,otherTables=None,logDIndexList=None,logDRangeList=None,wireFrame=True
+    ,outputfile=None):
     """Plots opacity
     
     Keywords:
@@ -2301,6 +2357,8 @@ class interpTable:
       wireFrame=False
     from mpl_toolkits.mplot3d import axes3d
     import matplotlib
+    if outputfile!=None:
+      matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig=plt.figure()
     lines=[]
@@ -2315,12 +2373,12 @@ class interpTable:
       ax=fig.add_subplot(111)
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print self.sFileName," logD=",self.logD[l:h,0]
+      print self.sFileName," logD=",self.logD[l:h,0],logDRangeList[0],l,h
       if logDRangeList[0]>1:
         #fig.suptitle("logD=",str(self.logD[l:h,0]))
-        temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "bo-")
+        temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "b-")
       else:
-        temp=ax.plot(self.logT[l:h,:][0],self.logK[l:h,:][0], "bo-")
+        temp=ax.plot(self.logT[l:h,:][0],self.logK[l:h,:][0], "b-")
       lines.append(temp)
       lables.append(self.sFileName)
       counter=1
@@ -2328,17 +2386,27 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName," logD=",otherTable.logD[l:h,0],logDRangeList[counter],l,h
           if logDRangeList[counter]>1:
-            temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "go-",)
+            temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "g-",)
           else:
-            temp=ax.plot(otherTable.logT[l:h,:][0],otherTable.logK[l:h,:][0], "go-")
+            temp=ax.plot(otherTable.logT[l:h,:][0],otherTable.logK[l:h,:][0], "g-")
           counter+=1
           lines.append(temp)
-          lables.append(self.sFileName)
-    if len(lines)>0:
-      ax.legend(lines,lables,loc="1")
-    plt.show()
+          lables.append(otherTable.sFileName)
+    #if len(lines)>0:
+      #ax.legend(lines,lables)
+    
+    if outputfile==None:
+      plt.show()
+    else:
+      [path,ext]=os.path.splitext(outputfile)
+      supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
+      if ext[1:] not in supportedFileTypes:
+        print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+        quit()
+      print __name__+":"+main.__name__+": saving figure to file \""+outputfile
+      fig.savefig(path+"_kappa"+ext,format=ext[1:],transparent=False)#save to file
   def __init__(self,tableElement=None):
     """Reads in an interpolation table info from from the xml element tableElement."""
     
@@ -2573,13 +2641,13 @@ def main():
     
     table2=interpTable()
     table2.read(args[1])
-    rhoIndex1=40
-    rhoIndex2=140
-    numRho=1
+    rhoIndex1=options.rho1
+    rhoIndex2=options.rho2
+    numRho=options.numRho
     
-    table1.plotLogP([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
-    table1.plotLogE([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
-    table1.plotLogK([table2],[rhoIndex1,rhoIndex2],[numRho,numRho])
+    table1.plotLogP([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
+    table1.plotLogE([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
+    table1.plotLogK([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
     
     #table1.plotLogP([table2])
     #table1.plotLogE([table2])
