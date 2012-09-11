@@ -63,8 +63,8 @@ class Text:
     
     #get y position
     if element.get("y")!=None:
-      if isFloat(element.get("x")):
-        self.x=float(element.get("x"))
+      if isFloat(element.get("y")):
+        self.y=float(element.get("y"))
       else:
         print "\"y\" must be a float, got \"",element.get("y"),"\""
     

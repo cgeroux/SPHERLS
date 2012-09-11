@@ -122,6 +122,7 @@ class DataFile:
       
       #convert columns to floats
       fLineValues=[]
+      
       for i in range(len(self.sColumnNames)):
         if rowTemp[i]=='-' :
           fLineValues.append(None)
