@@ -46,6 +46,30 @@ def parseOptions():
   
   #parse command line options
   return parser.parse_args()
+class Text:
+  '''This class holds informatin for a text object on a plot.'''
+  def __init__(self,element):
+    '''This method initializest a text object from an xml element'''
+    self.x=0
+    self.y=0
+    self.text=None
+    
+    #get x position
+    if element.get("x")!=None:
+      if isFloat(element.get("x")):
+        self.x=float(element.get("x"))
+      else:
+        print "\"x\" must be a float, got \"",element.get("x"),"\""
+    
+    #get y position
+    if element.get("y")!=None:
+      if isFloat(element.get("x")):
+        self.x=float(element.get("x"))
+      else:
+        print "\"y\" must be a float, got \"",element.get("y"),"\""
+    
+    #set text
+    self.text=element.text
 class Curve:
   '''This class holds all the information for a curve on a plot.'''
   def __init__(self,element):
@@ -191,6 +215,7 @@ class Plot:
     
     self.ylabel=None
     self.curves=[]
+    self.texts=[]
     self.limits=None
     self.grid=None
     self.bMinorTics=False
@@ -236,6 +261,11 @@ class Plot:
     curveElements=element.findall("curve")
     for curveElement in curveElements:
       self.curves.append(Curve(curveElement))
+    
+    #add text objects to plot
+    textElements=element.findall("text")
+    for textElement in textElements:
+      self.texts.append(Text(textElement))
   def load(self,files,options):
     '''loads the data for a plot, y-data is stored in the curves, and sets the ylabel from the first
     file read in'''
@@ -449,6 +479,10 @@ def plot(dataSets,options,title):
           curveCount=curveCount+1
         ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
         ax[nTotalPlotCount-1].set_ylim(plot.limits)
+        
+        #for each text in the plot
+        for text in plot.texts:
+          ax[nTotalPlotCount-1].text(text.x,text.y,text.text)
         
         #set legend
         if len(lines)>0:
