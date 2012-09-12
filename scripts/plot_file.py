@@ -221,6 +221,7 @@ class Plot:
     self.bMinorTics=False
     self.legendloc=1
     self.numpoints=None
+    self.weightHeight=1.0
     
     #check for grid setting
     if element.get("grid")!=None:
@@ -236,6 +237,16 @@ class Plot:
       if element.get("yminortics").lower() in ["true","1","t","yes","y"]:
         self.bMinorTics=True
     
+    self.ticks=None
+    
+    #check for manual ticks
+    if element.get("ticks")!=None:
+      tickStrings=element.get("ticks").split()
+      if len(tickStrings)>0:
+        self.ticks=[]
+      for tickString in tickStrings:
+        self.ticks.append(float(tickString))
+    
     #get ylabel
     if element.get("ylabel")!=None and element.get("ylabel")!="":
       self.ylabel=element.get("ylabel")
@@ -249,11 +260,15 @@ class Plot:
       yMax=float(element.get("ymax"))
     self.limits=[yMin,yMax]
     
+    #get weight to use when deciding plot height
+    if element.get("weightHeight")!=None and element.get("weightHeight")!="":
+      self.weightHeight=float(element.get("weightHeight"))
+    
     #get legend location
     if element.get("legendloc")!=None and element.get("legendloc")!="":
       self.legendloc=int(element.get("legendloc"))
     
-    #get legend location
+    #get numlegendpoints
     if element.get("numlegendpoints")!=None and element.get("numlegendpoints")!="":
       self.numpoints=int(element.get("numlegendpoints"))
     
@@ -273,8 +288,7 @@ class Plot:
     for curve in self.curves:
       curve.load(files,options)
 class Axis:
-  '''This class holds all the information needed for a particular x-axis. An axis can either be 
-  either of time, or of some column in the data files.'''
+  '''This class holds all the information needed for a particular x-axis.'''
   
   def __init__(self,element,options):
     '''This function initizalizes the axis object.'''
@@ -283,6 +297,15 @@ class Axis:
     self.xlabel=None
     self.limits=None
     self.bMinorTics=False
+    self.ticks=None
+    
+    #check for manual ticks
+    if element.get("ticks")!=None:
+      tickStrings=element.get("ticks").split()
+      if len(tickStrings)>0:
+        self.ticks=[]
+      for tickString in tickStrings:
+        self.ticks.append(float(tickString))
     
     #check for grid setting
     if element.get("grid")!=None:
@@ -319,6 +342,11 @@ class Axis:
     plotElements=element.findall("plot")
     for plotElement in plotElements:
       self.plots.append(Plot(plotElement))
+    
+    #get plot weightHeight
+    self.plotHeightWeights=[]
+    for plot in self.plots:
+      self.plotHeightWeights.append(plot.weightHeight)
   def load(self,files,options):
     '''This function loads the values needed for the x-axis data from the fileData argument'''
     
@@ -389,7 +417,7 @@ def plot(dataSets,options,title):
   figBottom=options.figBottom
   figTop=options.figTop
   
-  #count number of axes in all plots, this number will be the same for all plots.
+  #count number of axes in all figures, this number will be the same for all figures.
   nNumAxes=0
   for dataSet in dataSets:
     nNumAxes=nNumAxes+len(dataSet.axes)
@@ -414,7 +442,7 @@ def plot(dataSets,options,title):
   nDataSetCount=0
   for dataSet in dataSets:
     for axisMine in dataSet.axes:
-      gs.append(GridSpec(len(axisMine.plots),1))
+      gs.append(GridSpec(len(axisMine.plots),1,height_ratios=axisMine.plotHeightWeights))
       bottom=top-heightPlot*(len(axisMine.plots))
       if options.spaceAxisEvenly:
         top=figTop-axisCount*(heightAxis+axisSpacing)
@@ -427,6 +455,14 @@ def plot(dataSets,options,title):
         
         #create a subplot
         ax.append(plt.subplot(gs[axisCount][nPlotCount,0]))
+        
+        #set ticks if manual
+        if axisMine.ticks!=None:
+          ax[nTotalPlotCount-1].xaxis.set_ticks(axisMine.ticks)
+          
+        #set ticks if manual
+        if plot.ticks!=None:
+          ax[nTotalPlotCount-1].yaxis.set_ticks(plot.ticks)
         
         #set minor axis tics
         if axisMine.bMinorTics:
@@ -498,7 +534,8 @@ def plot(dataSets,options,title):
         ax[nTotalPlotCount-1].set_ylabel(plot.ylabel)
         
         #remove top and bottom y-axis tic labels
-        ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
+        if plot.ticks==None:
+          ax[nTotalPlotCount-1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
         
         #adjust hspace to be 0 so plots for the same x-axis will be tight
         nPlotCount=nPlotCount+1#resets every axis
