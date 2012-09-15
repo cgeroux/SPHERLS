@@ -440,8 +440,8 @@ class DataSet:
       ,self.eosFile,options.extraProfileInfo)
     
     if len(failedFiles)>0:
-      for faildFile in failedFiles:
-        print faildFile
+      for failedFile in failedFiles:
+        print failedFile
     
     #get and sort profiles within range of dataset
     extension="_pro"+".txt"
