@@ -1,0 +1,15 @@
+<lightCurves>
+  <lightCurve>
+    <eosFile></eosFile><!-- allows one to overide the eosFile specified in the model dumps, usefull
+      if the model dumps were moved to a different machine with the eos file in a different
+      location-->
+    <zonesFromSurf>0</zonesFromSurf><!--number of zones in from the surface, if not specified uses 
+      the surface zone-->
+    <boloCorr withAcceleration="false" columnBC="3">table2p3combined.dat</boloCorr><!--assumes
+      it is a rectangular table in Teff and logg, with first column being the Teff's and the second 
+      column being the loggs. If the file name doesn't start with either "./" or "/" it assumes it 
+      is from the atmospheres directory in SPHERLS data subdirectory. -->
+    <inputFiles frequency="5">../output/T6400_20x1_t[3744468-3779629]</inputFiles>
+    <outputFile>light_curve.dat</outputFile>
+  </lightCurve>
+</lightCurves>
