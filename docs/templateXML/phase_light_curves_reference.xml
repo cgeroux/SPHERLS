@@ -1,0 +1,6 @@
+<config>
+  <inputFile>./Corwin-2001-datafile2.txt</inputFile>
+  <stars>
+    <star period="0.6401387" filter="V">v120   </star>
+  </stars>
+</config>
