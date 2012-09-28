@@ -1,15 +1,17 @@
-<figure title="$T_{\rm eff} = 6100$ [K]" outputfile="./PKE_1D3D_T6100.png"
-  axisSpacing="0.05" figBottom="0.05" figTop="0.95" figWidth="10" figHeight="8" dpi="300">
-  <dataSet>
-    <file name="1">/share/scratch2/cgeroux/test_grid_5x5/no_EV_5x5/3D_T6100/output/averagePKE.txt</file>
-    <file name="2">/share/scratch2/cgeroux/March_12/1D_CTeos/T6100/output/averagePKE.txt</file>
+<figures>
+  <figure title="$T_{\rm eff} = 6100$ [K]" outputfile="./PKE_1D3D_T6100.png"
+    axisSpacing="0.05" figBottom="0.05" figTop="0.95" figWidth="10" figHeight="8" dpi="300">
+    <dataSet>
+      <file name="1">/share/scratch2/cgeroux/test_grid_5x5/no_EV_5x5/3D_T6100/output/averagePKE.txt</file>
+      <file name="2">/share/scratch2/cgeroux/March_12/1D_CTeos/T6100/output/averagePKE.txt</file>
 
-    <axis xlabel="t [s]" xminortics="True">
-      <plot ylabel="Log(PKE) [erg]" legendloc="4" numlegendpoints="1" ymin="36" ymax="41"  weightHeight="0.5"><!-- weightHeight="0.5" will say that this plot will be half the height of a plot with weightHeight="1.0"-->
-        <curve file="1" xcolumn="2" ycolumn="log10($5)" errcolumn="3" line="-" color="r"
-          markersize="5" marker="x" label="3D 5x5" linewidth="2.0" ecolor="red" elinewidth="2.0" capsize="3"></curve>
-        <curve file="2" xcolumn="2" ycolumn="log10($5)" line="-" color="b" markersize="5" markeredgecolor="b" markerfacecolor="w" label="1D" linewidth="2.0"></curve>
-      </plot>
-    </axis>
-  </dataSet>
-</figure>
+      <axis xlabel="t [s]" xminortics="True">
+        <plot ylabel="Log(PKE) [erg]" legendloc="4" numlegendpoints="1" ymin="36" ymax="41"  weightHeight="0.5"><!-- weightHeight="0.5" will say that this plot will be half the height of a plot with weightHeight="1.0"-->
+          <curve file="1" xcolumn="2" ycolumn="log10($5)" errcolumn="3" line="-" color="r"
+            markersize="5" marker="x" label="3D 5x5" linewidth="2.0" ecolor="red" elinewidth="2.0" capsize="3"></curve>
+          <curve file="2" xcolumn="2" ycolumn="log10($5)" line="-" color="b" markersize="5" markeredgecolor="b" markerfacecolor="w" label="1D" linewidth="2.0"></curve>
+        </plot>
+      </axis>
+    </dataSet>
+  </figure>
+</figures>

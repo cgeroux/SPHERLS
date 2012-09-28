@@ -12,7 +12,7 @@ import parser
 from math import *
 import xml.etree.ElementTree as xml
 import parse_formula
-
+figureNumber=0
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
@@ -399,7 +399,7 @@ def plot(dataSets,options,title):
   #print "all backends=",matplotlib.rcsetup.all_backends
   
   import matplotlib
-  if not options.show:
+  if not options.show and figureNumber==0:
     matplotlib.use("Agg")
   import matplotlib.pyplot as plt
   
@@ -604,65 +604,73 @@ def main():
   tree=xml.parse(args[0])
   root=tree.getroot()
   
-  #set plot title
-  title=""
-  if root.get("title")!=None and root.get("title")!="":
-    title=root.get("title")
-  
-  #set spacing between axies
-  options.axisSpacing=0.05
-  if root.get("axisSpacing")!=None and root.get("axisSpacing")!="":
-    options.axisSpacing=float(root.get("axisSpacing"))
-  
-  #set location of top of the plot area
-  options.figTop=0.95
-  if root.get("figTop")!=None and root.get("figTop")!="":
-    options.figTop=float(root.get("figTop"))
-  
-  #set location of bottom of the plot area
-  options.figBottom=0.05
-  if root.get("figBottom")!=None and root.get("figBottom")!="":
-    options.figBottom=float(root.get("figBottom"))
-  
-  #set figure height
-  if root.get("figHeight")!=None and root.get("figHeight")!="":
-    options.figHeight=float(root.get("figHeight"))
-  
-  #set figure width
-  if root.get("figWidth")!=None and root.get("figWidth")!="":
-    options.figWidth=float(root.get("figWidth"))
+  #get all figures
+  figureElements=root.findall("figure")
+  if len(figureElements)==0:
+    raise Exception("No \"figure\" nodes found under \"figures\" node! Nothing to be done.")
+  global figureNumber
+  figureNumber=0
+  for figureElement in figureElements:
     
-  #set figure dpi
-  if root.get("dpi")!=None and root.get("dpi")!="":
-    options.dpi=int(root.get("dpi"))
-  
-  #set plot output
-  if root.get("outputfile")!=None and root.get("outputfile")!="":
-    options.outputFile=root.get("outputfile")
-    [path,ext]=os.path.splitext(options.outputFile)
-    supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
-    if ext[1:] not in supportedFileTypes:
-      print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
-      quit()
-  
-  #get list of files elements
-  dataSetElements=root.findall("dataSet")
-  
-  #initialize dataSets
-  dataSets=[]
-  for dataSetElement in dataSetElements:
-    dataSets.append(DataSet(dataSetElement,options))
-  
-  #load datasets
-  i=0
-  for dataSet in dataSets:
-    print "reading in data set ",i
-    dataSet.load(options)
-    i=i+1
-  
-  #plot datasets
-  plot(dataSets,options,title)
-  
+    #set plot title
+    title=""
+    if figureElement.get("title")!=None and figureElement.get("title")!="":
+      title=figureElement.get("title")
+    
+    #set spacing between axies
+    options.axisSpacing=0.05
+    if figureElement.get("axisSpacing")!=None and figureElement.get("axisSpacing")!="":
+      options.axisSpacing=float(figureElement.get("axisSpacing"))
+    
+    #set location of top of the plot area
+    options.figTop=0.95
+    if figureElement.get("figTop")!=None and figureElement.get("figTop")!="":
+      options.figTop=float(figureElement.get("figTop"))
+    
+    #set location of bottom of the plot area
+    options.figBottom=0.05
+    if figureElement.get("figBottom")!=None and figureElement.get("figBottom")!="":
+      options.figBottom=float(figureElement.get("figBottom"))
+    
+    #set figure height
+    if figureElement.get("figHeight")!=None and figureElement.get("figHeight")!="":
+      options.figHeight=float(figureElement.get("figHeight"))
+    
+    #set figure width
+    if figureElement.get("figWidth")!=None and figureElement.get("figWidth")!="":
+      options.figWidth=float(figureElement.get("figWidth"))
+      
+    #set figure dpi
+    if figureElement.get("dpi")!=None and figureElement.get("dpi")!="":
+      options.dpi=int(figureElement.get("dpi"))
+    
+    #set plot output
+    if figureElement.get("outputfile")!=None and figureElement.get("outputfile")!="":
+      options.outputFile=figureElement.get("outputfile")
+      [path,ext]=os.path.splitext(options.outputFile)
+      supportedFileTypes=["png", "pdf", "ps", "eps", "svg"]
+      if ext[1:] not in supportedFileTypes:
+        print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
+        quit()
+    
+    #get list of files elements
+    dataSetElements=figureElement.findall("dataSet")
+    
+    #initialize dataSets
+    dataSets=[]
+    for dataSetElement in dataSetElements:
+      dataSets.append(DataSet(dataSetElement,options))
+    
+    #load datasets
+    i=0
+    for dataSet in dataSets:
+      print "reading in data set ",i
+      dataSet.load(options)
+      i=i+1
+    
+    #plot datasets
+    plot(dataSets,options,title)
+    figureNumber+=1
   return
 if __name__ == "__main__":
   main()

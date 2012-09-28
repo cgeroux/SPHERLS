@@ -3,7 +3,9 @@ import xml.etree.ElementTree as xml
 import mywarnings
 import warnings
 import optparse as op
-
+minMag=0
+maxMag=30
+includeUnphased=False
 def parseOptions():
   
   #setup command line parser
@@ -17,12 +19,27 @@ def parseXML(xmlConfig):
   tree=xml.parse(xmlConfig)
   root=tree.getroot()
   
+  #get wheather to include unphased data
+  global includeUnphased
+  if root.get("includeUnphased").lower() in ["true","yes","t","y"]:
+    includeUnphased=True
+  else:
+    includeUnphased=False
+  
   #get inputFile
   inputFileElements=root.findall("inputFile")
   if len(inputFileElements)>1:
     warn.warning("more than one \"inputFile\" node ignoring all but first node")
   
   inputFile=inputFileElements[0].text
+  
+  #get minimum magnitude to include
+  global minMag
+  minMag=float(inputFileElements[0].get("minMag"))
+  
+  #get maximum magnitude to include
+  global maxMag
+  maxMag=float(inputFileElements[0].get("maxMag"))
   
   #get stars node
   starsElements=root.findall("stars")
@@ -91,22 +108,38 @@ def main():
       #clean slate for next star
       time=[]
       m=[]
-      
-      time.append(timeTmp)
-      m.append(mTmp)
+      if mTmp>=minMag and mTmp<=maxMag:
+        time.append(timeTmp)
+        m.append(mTmp)
     else:
       
       #add current time/magintude
-      time.append(timeTmp)
-      m.append(mTmp)
+      if mTmp>=minMag and mTmp<=maxMag:
+        time.append(timeTmp)
+        m.append(mTmp)
       
     #save for later
     nameTmpOld=nameTmp
     filterTmpOld=filterTmp
   f.close()
   
+  #save data collected for last star
+  if not(nameTmpOld in stars.keys()):#don't have a dictionary yet
+    stars[nameTmpOld]={}#add dictionary for that star
+  stars[nameTmpOld][filterTmpOld]=[time,m]
+  
   #phase data
+  global includeUnphased
   for starName in starList:
+    
+    if includeUnphased:
+      #write out data unphased
+      f=open(starName+".txt",'w')
+      for i in range(len(stars[starName][starList[starName]['filter']][0])):
+        t=stars[starName][starList[starName]['filter']][0][i]
+        mag=stars[starName][starList[starName]['filter']][1][i]
+        f.write(str(t)+" "+str(mag)+"\n")
+      f.close()
     
     #phase data
     t0=stars[starName][starList[starName]['filter']][0][0]
@@ -122,7 +155,6 @@ def main():
     minDataTmp=min(phasedData,key=lambda x: x[1])
     minData.append(minDataTmp[0])
     minData.append(minDataTmp[1])
-    
     for i in range(len(phasedData)):
       phasedData[i][0]=phasedData[i][0]-minData[0]
       if phasedData[i][0]<0:
@@ -130,14 +162,17 @@ def main():
     
     phasedData.sort(key=lambda x: x[0])
     f=open(starName+"_phased.txt",'w')
-    f.write("phase mag\n")
+    f2=open(starName+"_phased_double.txt",'w')
+    f2.write("phase mag\n")
     print "saving phased light curve to \""+starName+"_phased.txt\""
     for data in phasedData:
       f.write(str(data[0])+" "+str(data[1])+"\n")
-      
+      f2.write(str(data[0])+" "+str(data[1])+"\n")
+    f.close()
+    
     #print out twice
     for data in phasedData:
-      f.write(str(data[0]+1.0)+" "+str(data[1])+"\n")
-    f.close()
+      f2.write(str(data[0]+1.0)+" "+str(data[1])+"\n")
+    f2.close()
 if __name__ == "__main__":
   main()

@@ -2623,19 +2623,13 @@ class interpTableManager:
     self.tables=[]
     for tableElement in tables:
       self.tables.append(interpTable(tableElement))
-def main():
-  
-  #parse command line options
-  (options,args)=parseOptions()
-  
-  #assume reading a configuration file to make a new table
-  if len(args)==1:
+def createTable(args):
+  if len(args)==1:#could add a test to make sure it is an xml file
     interp=interpTableManager(args[0])
     #interp.createTables(withoutNans=True)
     interp.createTables()
-    
-  #assume comparing two pre-existing tables
-  elif len(args)==2:
+def compareTables(args):
+  if len(args)==2:
     table1=interpTable()
     table1.read(args[0])
     
@@ -2648,9 +2642,30 @@ def main():
     table1.plotLogP([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
     table1.plotLogE([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
     table1.plotLogK([table2],[rhoIndex1,rhoIndex2],[numRho,numRho],outputfile=options.output)
+def printTablePart(args):
+  #could add a test to see if it isn't an xml file, then assume it is an equation of state
+  table=interpTable()
+  table.read(args[0])
+  for i in range(table.logD.shape[0]):#loop over density
+    print table.logD[i][0]
+    if table.logD[i][0]<=-7 and table.logD[i][0]>=-9:
+      f=open(table.sFileName+"_opacity_LogD"+str(table.logD[i][0])+".txt",'w')
+      for j in range(table.logD.shape[1]):#loopover temperature
+        line=str(table.logT[i][j])+" "+str(table.logK[i][j])+"\n"
+        f.write(line)
+      f.close()
+def main():
+  
+  #parse command line options
+  (options,args)=parseOptions()
+  
+  #assume reading a configuration file to make a new table
+  #createTable(args)
     
-    #table1.plotLogP([table2])
-    #table1.plotLogE([table2])
-    #table1.plotLogK([table2])
+  #assume comparing two pre-existing tables
+  #compareTables(args,options)
+  
+  #print out part of a table
+  printTablePart(args)
 if __name__ == "__main__":
   main()
