@@ -377,7 +377,7 @@ class Axis:
       
       #set phase
       if self.period!=None:
-        self.phase.append((float(fileHeader[1])-self.x[0])/self.period)
+        self.phase.append((float(fileHeader[1][0:indexBracket])-self.x[0])/self.period)
         
     else:#assuming if it isn't time data, it is column data
       if self.nColumn!=None:
@@ -467,14 +467,14 @@ class DataSet:
       self.fileIndices.append(temp[:temp.find("_pro")])
       
       #read in profile
-      print "reading in profile ",file," ..."
+      print "reading in profile ",file,str(nFileCount+1)+"/"+str(self.nNumFiles)+" ..."
       fileData=datafile.DataFile()
       fileData.readFile(file)
       
       #load x-axis data and y-data
       for axis in self.axes:
         axis.load(fileData,options)
-            
+      nFileCount=nFileCount+1
   def getCurve(self,ID):
     '''Returns a curve object that has ID, ID'''
     nCount=0
@@ -537,6 +537,7 @@ def plot(dataSets,options,title):
     gs=[]
     top=options.figTop
     plotDataForFile=[]
+    fileHeader=""
     #add title
     if title!="":
       tempTitle=title
@@ -604,6 +605,12 @@ def plot(dataSets,options,title):
                   temp=ax[nTotalPlotCount-1].plot(axisMine.phase,curve.y,str(curve.color)+str(curve.style)
                     ,markersize=curve.markersize,linewidth=curve.linewidth)
                   if options.file:
+                    ylabel=""
+                    if plot.ylabel!=None:
+                      ylabel+=plot.ylabel.replace(" ","_")
+                    if curve.label!=None:
+                      ylabel+="_"+curve.label.replace(" ","_")
+                    fileHeader+=axisMine.xlabel.replace(" ","_")+" "+ylabel+" "
                     plotDataForFile.append([axisMine.phase,curve.y])
                   if curve.label!=None and curve.label!="":
                     lines.append(temp[0])
@@ -618,11 +625,23 @@ def plot(dataSets,options,title):
                       yTemp[1]=plot.limits[1]
                     ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
                     if options.file:
+                      ylabel=""
+                      if plot.ylabel!=None:
+                        ylabel+=plot.ylabel.replace(" ","_")
+                      if curve.label!=None:
+                        ylabel+="_"+curve.label.replace(" ","_")
+                      fileHeader+=axisMine.xlabel.replace(" ","_")+" "+ylabel+" "
                       plotDataForFile.append([xTemp,yTemp])
                 else:
                   temp=ax[nTotalPlotCount-1].plot(axisMine.x,curve.y,str(curve.color)+str(curve.style)
                     ,markersize=curve.markersize,linewidth=curve.linewidth)
                   if options.file:
+                    ylabel=""
+                    if plot.ylabel!=None:
+                      ylabel+=plot.ylabel.replace(" ","_")
+                    if curve.label!=None:
+                      ylabel+="_"+curve.label.replace(" ","_")
+                    fileHeader+=axisMine.xlabel.replace(" ","_")+" "+ylabel+" "
                     plotDataForFile.append([axisMine.x,curve.y])
                   if curve.label!=None and curve.label!="":
                     lines.append(temp[0])
@@ -637,6 +656,12 @@ def plot(dataSets,options,title):
                       yTemp[1]=plot.limits[1]
                     ax[nTotalPlotCount-1].plot(xTemp,yTemp,'r-',linewidth=curve.linewidth)
                     if options.file:
+                      ylabel=""
+                      if plot.ylabel!=None:
+                        ylabel+=plot.ylabel.replace(" ","_")
+                      if curve.label!=None:
+                        ylabel+="_"+curve.label.replace(" ","_")
+                      fileHeader+=axisMine.xlabel.replace(" ","_")+" "+ylabel+" "
                       plotDataForFile.append([xTemp,yTemp])
                 curveCount=curveCount+1
             else:
@@ -647,6 +672,12 @@ def plot(dataSets,options,title):
                 temp=ax[nTotalPlotCount-1].plot(axisMine.x[i],curve.y[i],str(curve.color)+str(curve.style)
                   ,markersize=curve.markersize,linewidth=curve.linewidth)
                 if options.file:
+                  ylabel=""
+                  if plot.ylabel!=None:
+                    ylabel+=plot.ylabel.replace(" ","_")
+                  if curve.label!=None:
+                    ylabel+="_"+curve.label.replace(" ","_")
+                  fileHeader+=axisMine.xlabel.replace(" ","_")+" "+ylabel+" "
                   plotDataForFile.append([axisMine.x[i],curve.y[i]])
                 if curve.label!=None and curve.label!="":
                   lines.append(temp[0])
@@ -685,7 +716,12 @@ def plot(dataSets,options,title):
     else:
       [path,ext]=os.path.splitext(options.outputFile)
       if options.file:
+        print __name__+":"+main.__name__+": saving figure "+str(i+1)+"/"+str(nMaxNumFiles)+" to file \""+path+"_"+str(fileCount\
+          +options.startIndex)+".txt\" ..."
         f=open(path+"_"+str(fileCount)+".txt",'w')
+        
+        #write header to file
+        f.write(fileHeader+"\n")
         
         #write info to file
         nIndex=0
@@ -714,7 +750,7 @@ def plot(dataSets,options,title):
           print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes\
             ," please choose one of those"
           quit()
-        print __name__+":"+main.__name__+": saving figure to file \""+path+"_"+str(fileCount\
+        print __name__+":"+main.__name__+": saving figure "+str(i+1)+"/"+str(nMaxNumFiles)+" to file \""+path+"_"+str(fileCount\
           +options.startIndex)+ext+"\" ..."
         fig.savefig(path+"_"+str(fileCount+options.startIndex)+ext,format=ext[1:]
           ,transparent=False,dpi=options.dpi)#save to file

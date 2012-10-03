@@ -32,8 +32,7 @@ def parseOptions():
   #setup command line parser
   '''This is out of date, needs to be updated to reflect new additions'''
   parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE"
-    ,version="%prog 1.0",description=r"Reads in the XMLFILE which specifies how the plot is to be "
-    +"made and produce an output file to be plotted with plot_file.py.")
+    ,version="%prog 1.0",description=r"Reads in the XMLFILE which specifies how the light curve is to be made. see light_curve_reference.xml for a template xml file to be used with this script. Found in the SPHERLS directory docs/templateXML")
     
   #these options apply globaly
   parser.add_option("-k","--keep",action="store_true",dest="keep"
