@@ -35,6 +35,8 @@ def parseOptions():
   parser.add_option("-l",action="store_true",dest="bLconInsteadofKE",default=False
     ,help="Will use L_con column and compute the max, instead of the sum, saving it to a file"
     +"called \"maxLcon.txt\" instead of \"averagePKE.txt\"")
+  parser.add_option("-p",action="store",dest="period"
+    ,help="Set the initial period to use for finding peaks.",default=None)
   #parse command line options
   return parser.parse_args()
 def main():
@@ -179,48 +181,56 @@ def averagePKE(start,end,baseFileName,options):
   bContinue=True
   bContinue1=True
   i=0
-  iOfLastPrint=-1
-  while bContinue1 and bContinue:
-    if KE[i+1]<KE[i] and bIncreasing:#stopped increasing
-      bIncreasing=False
-      if totalNumPeaks==0:#assume first peak is a peak to include in average
-        
-        #keep important info for peak finding
-        timeOfLastPeak=times[i]
-        totalNumPeaks=totalNumPeaks+1
-        
-        #add peak to summing
-        peakKESum=peakKESum+KE[i]
-        numInKESum=numInKESum+1
-        
-        #write first peak
+  if options.period==None:
+    iOfLastPrint=-1
+    while bContinue1 and bContinue:
+      if KE[i+1]<KE[i] and bIncreasing:#stopped increasing
+        bIncreasing=False
+        if totalNumPeaks==0:#assume first peak is a peak to include in average
+          
+          #keep important info for peak finding
+          timeOfLastPeak=times[i]
+          totalNumPeaks=totalNumPeaks+1
+          
+          #add peak to summing
+          peakKESum=peakKESum+KE[i]
+          numInKESum=numInKESum+1
+          
+          #write first peak
+          iOfLastPrint=i
+          f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" "+str(KE[i])+" -\n")
+        elif totalNumPeaks==1:#assume second peak is a peak to include in average
+          
+          #keep important info for peak finding
+          halfPeriodAve=(times[i]-timeOfLastPeak)
+          totalNumPeaks=totalNumPeaks+1
+          timeOfLastPeak=times[i]
+          
+          #add peak to summing
+          peakKESum=peakKESum+KE[i]
+          numInKESum=numInKESum+1
+          
+          #write second peak
+          iOfLastPrint=i
+          f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" "+str(KE[i])+" -\n")
+          bContinue1=False
+      elif KE[i+1]>=KE[i]:
+        bIncreasing=True
+      if iOfLastPrint!=i:#if didn't print out a peak
+        #write KE[i]
         iOfLastPrint=i
-        f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" "+str(KE[i])+" -\n")
-      elif totalNumPeaks==1:#assume second peak is a peak to include in average
-        
-        #keep important info for peak finding
-        halfPeriodAve=(times[i]-timeOfLastPeak)
-        totalNumPeaks=totalNumPeaks+1
-        timeOfLastPeak=times[i]
-        
-        #add peak to summing
-        peakKESum=peakKESum+KE[i]
-        numInKESum=numInKESum+1
-        
-        #write second peak
-        iOfLastPrint=i
-        f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" "+str(KE[i])+" -\n")
-        bContinue1=False
-    elif KE[i+1]>=KE[i]:
-      bIncreasing=True
-    if iOfLastPrint!=i:#if didn't print out a peak
-      #write KE[i]
-      iOfLastPrint=i
-      f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" - -\n")
-    
-    i=i+1
-    if i>=len(times)-1:#check for EOF
-      bContinue=False
+        f.write(str(indexes[i])+" "+str(times[i])+" "+str(KE[i])+" - -\n")
+      
+      i=i+1
+      if i>=len(times)-1:#check for EOF
+        bContinue=False
+  else:
+    iOfLastPrint=0
+    if options.bLconInsteadofKE:
+      halfPeriodAve=float(options.period)
+    else:
+      halfPeriodAve=float(options.period)*0.5
+  
   
   #repeat search for peak until EOF reached
   while bContinue:
