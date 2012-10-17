@@ -26,12 +26,15 @@ def parseOptions():
   parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
     ,help="Will remake binaries if they already exist. [not default].",default=False)
   parser.add_option("--re-sum",action="store_true",dest="resum"
-    ,help="Will re-sum all model profiles, usefull when files have problems being made from "
-    +"corruption and have to be re-made. Other wise should not be used as it takes more time"
-    +" [not default].",default=False)
+    ,help="Will re-sum all model profiles kinetic energies, usefull when files have problems "
+    +"being made from corruption and have to be re-made. Other wise should not be used as it "
+    +"takes more time. In the case when -l option is set it will recalculate the maximum of L_con"
+    +". [not default].",default=False)
   parser.add_option("-e",action="store",dest="eosFile"
     ,help="Overrides the equation of state file set in the model.",default=None)
-  
+  parser.add_option("-l",action="store_true",dest="bLconInsteadofKE",default=False
+    ,help="Will use L_con column and compute the max, instead of the sum, saving it to a file"
+    +"called \"maxLcon.txt\" instead of \"averagePKE.txt\"")
   #parse command line options
   return parser.parse_args()
 def main():
@@ -73,8 +76,10 @@ def averagePKE(start,end,baseFileName,options):
     print __name__+":"+averagePKE.__name__+": need at least 2 files!"
     return False
   
-  
-  print __name__+":"+averagePKE.__name__+":summing up kinetic energies in profiles ..."
+  if options.bLconInsteadofKE:
+    print __name__+":"+averagePKE.__name__+":finding max L_con in profiles ..."
+  else:
+    print __name__+":"+averagePKE.__name__+":summing up kinetic energies in profiles ..."
   times=[]
   indexes=[]
   KE=[]
@@ -82,12 +87,24 @@ def averagePKE(start,end,baseFileName,options):
   lastIndex=-1
   directory=os.path.dirname(baseFileName)
   if directory=="":
-    averagePKEFile="averagePKE.txt"
+    if options.bLconInsteadofKE:
+      averagePKEFile="maxLcon.txt"
+    else:
+      averagePKEFile="averagePKE.txt"
   else:
-    averagePKEFile=directory+"/averagePKE.txt"
+    if options.bLconInsteadofKE:
+      averagePKEFile=directory+"/maxLcon.txt"
+    else:
+      averagePKEFile=directory+"/averagePKE.txt"
+    
   if os.path.exists(averagePKEFile):
     if not options.resum:
-      print "  \"",averagePKEFile,"\" already exists, not re-summing KE for entries already in file"
+      if options.bLconInsteadofKE:
+        print "  \"",averagePKEFile,"\" already exists, not recalculating L_con_max for entries"\
+          +" already in file"
+      else:
+        print "  \"",averagePKEFile,"\" already exists, not re-summing KE for entries already in"\
+          +" file"
       f=open(averagePKEFile,'r')
       f.readline() #skip header
       for line in f:
@@ -98,13 +115,24 @@ def averagePKE(start,end,baseFileName,options):
       lastIndex=int(lineParts[0])
       f.close()
     else:
-      print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but re-sum set so resumming KE entries in profiles"
-  
-  nColumKE=61
+      if options.bLconInsteadofKE:
+        print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but "\
+          +"re-sum set so reclaculating L_con_max entries in profiles"
+      else:
+        print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but "\
+          +"re-sum set so resumming KE entries in profiles"
+      
+  if options.bLconInsteadofKE:
+    nColumn=60#use L_con column
+  else:
+    nColumn=61#use kinetic energy column
   for file in files:
     fileIndex=int(file[len(file)-16:len(file)-8])
     if fileIndex>lastIndex:#make sure that file hasn't already been done
-      print __name__+":"+averagePKE.__name__+": summing KE of file \""+file+"\" ..."
+      if options.bLconInsteadofKE:
+        print __name__+":"+averagePKE.__name__+": finding max of L_con of file \""+file+"\" ..."
+      else:
+        print __name__+":"+averagePKE.__name__+": summing KE of file \""+file+"\" ..."
       fileData=datafile.DataFile()
       fileData.readFile(file)
       fileHeader=fileData.sHeader.split()
@@ -115,9 +143,17 @@ def averagePKE(start,end,baseFileName,options):
       
       #sum up all kinetic energies
       dKESum=0.0
-      for i in range(len(fileData.fColumnValues)-1):
-        dKESum=dKESum+fileData.fColumnValues[i][nColumKE]
-      KE.append(dKESum)
+      if options.bLconInsteadofKE:
+        CLM=0.0
+        for i in range(len(fileData.fColumnValues)-1):
+          if fileData.fColumnValues[i][nColumn]!=None:
+            if fileData.fColumnValues[i][nColumn]>CLM:
+              CLM=fileData.fColumnValues[i][nColumn]
+        KE.append(CLM)
+      else:
+        for i in range(len(fileData.fColumnValues)-1):
+          dKESum=dKESum+fileData.fColumnValues[i][nColumn]
+        KE.append(dKESum)
   
   bIncreasing=True
   peakKESum=0.0
@@ -132,8 +168,12 @@ def averagePKE(start,end,baseFileName,options):
   f=open(averagePKEFile,'w')
   
   #write header to file
-  f.write("index(1) t[s](2) KE(3) PKE(4) 3_Period_Ave_PKE(5)\n")
-  print __name__+":"+averagePKE.__name__+":computing average Peak KE ..."
+  if options.bLconInsteadofKE:
+    f.write("index(1) t[s](2) CLM(3) PCLM(4) 3_Period_Ave_PCLM(5)\n")
+    print __name__+":"+averagePKE.__name__+":computing average Peak CLM ..."
+  else:
+    f.write("index(1) t[s](2) KE(3) PKE(4) 3_Period_Ave_PKE(5)\n")
+    print __name__+":"+averagePKE.__name__+":computing average Peak KE ..."
   
   #find first two peaks
   bContinue=True
@@ -253,8 +293,8 @@ def averagePKE(start,end,baseFileName,options):
         peakKESum=peakKESum+KEMaxPeak
         
         #write out average
-        f.write(str(indexes[iOfMaxKEPeak])+" "+str(times[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])
-          +" "+str(peakKESum/numInKESum)+"\n")
+        f.write(str(indexes[iOfMaxKEPeak])+" "+str(times[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])
+          +" "+str(KE[iOfMaxKEPeak])+" "+str(peakKESum/numInKESum)+"\n")
         iOfLastPrint=iOfLastPrint+1
         numInKESum=0
         peakKESum=0.0
@@ -262,8 +302,8 @@ def averagePKE(start,end,baseFileName,options):
         numInKESum=numInKESum+1
         peakKESum=peakKESum+KEMaxPeak
         #write out peak
-        f.write(str(indexes[iOfMaxKEPeak])+" "+str(times[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])
-          +" -\n")
+        f.write(str(indexes[iOfMaxKEPeak])+" "+str(times[iOfMaxKEPeak])+" "+str(KE[iOfMaxKEPeak])
+          +" "+str(KE[iOfMaxKEPeak])+" -\n")
         iOfLastPrint=iOfLastPrint+1
       i=i+1
       if i>=len(times)-2:#check for EOF
@@ -278,7 +318,9 @@ def averagePKE(start,end,baseFileName,options):
         iOfLastPrint=j
         f.write(str(indexes[j])+" "+str(times[j])+" "+str(KE[j])+" - -\n")
   f.close()
-  
-  print __name__+":"+averagePKE.__name__+":Peak Kinetic energy data saved in \"",averagePKEFile,"\""
+  if options.bLconInsteadofKE:
+    print __name__+":"+averagePKE.__name__+":Peak Convective Luminosity data saved in \""+averagePKEFile+"\""
+  else:
+    print __name__+":"+averagePKE.__name__+":Peak Kinetic energy data saved in \""+averagePKEFile+"\""
 if __name__ == "__main__":
   main()
