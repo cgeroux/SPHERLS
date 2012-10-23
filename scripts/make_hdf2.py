@@ -137,7 +137,7 @@ class fileSet:
     self.supportedNodeAttributes={}
     
     #for a fileSet Node
-    self.supportedNodeAttributes["fileSet"]=["fileRange","timeFile","outputpath","frequency"]
+    self.supportedNodeAttributes["fileSet"]=["fileRange","timeFile","outputPath","frequency"]
     
     #for a dataPerFile Node
     self.supportedNodeAttributes["radialCutZone"]=[]
@@ -169,9 +169,10 @@ class fileSet:
       warnings.warn("no files found in \""+fileName+"\"")
     
     times=[]
+    numFiles=len(files)-1
     for i in range(0,len(files),self.frequency):
       file=files[i]
-      print "reading file \""+file+"\" ..."
+      print "reading file \""+file+"\" "+str(i)+"/"+str(numFiles)+" ..."
       tmp=dump.dump(file)
       times.append(tmp.time)
       self.convertDumpToHDF(tmp)
