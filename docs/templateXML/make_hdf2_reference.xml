@@ -1,0 +1,18 @@
+<config>
+  <!--
+  fileSet node attributes:
+    frequency: sets the frequency of the input files, 1=every file, 2=every other file etc.
+    fileRange: gives the location of the SPHERLS model dumps and the range to include in making the hdf files
+    timeFile: where to store the time informaion
+    outputPath: where to put the hdf files
+  
+  radialCutZone node: sets how many radial zones from the inner part of the model that are removed from the hdf file
+  includeBoundaries: should the theta and phi boundaries be included
+  numRInterp: how many radial zones should be used when interpolating to a regularly space grid in the radial direction
+  -->
+  <fileSet frequency="1" fileRange="../output/T6300_20x1_t[0-10000]" timeFile="time" outputPath="hdf_dumps">
+    <radialCutZone>100</radialCutZone>
+    <includeBoundaries>false</includeBoundaries>
+    <numRInterp>200</numRInterp>
+  </fileSet>
+</config>

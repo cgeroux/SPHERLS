@@ -29,7 +29,7 @@ class fileSet:
     #get file range
     self.fileRange=element.get("fileRange")
     if self.fileRange==None or self.fileRange=="":
-      raise Exception("Need a fileRange attribute in fileSet Node")
+      raise Exception("Need a \"fileRange\" attribute in \"fileSet\" Node")
     [self.start,self.end,self.baseFileName]=disect_filename.disectFileName(self.fileRange)
     
     #get timeFile Name
@@ -42,15 +42,18 @@ class fileSet:
     self.frequency=int(element.get("frequency"))
     
     #get output path
-    self.outputPath=element.get("outputpath")
+    self.outputPath=element.get("outputPath")
+    if self.outputPath==None or self.outputPath=="":
+      raise Exception("Need a \"outputPath\" attribute in \"fileSet\" Node")
     
     #get radialCutZone element text
     elementRadialCutZone=element.findall("radialCutZone")
     if len(elementRadialCutZone)>1:
       warnings.warn("more than one \"radialCutZone\" node ignoring all but first node")
-    self.__checkSuppotedNodeAttributes(elementRadialCutZone[0])
-    if elementRadialCutZone[0].text!=None or elementRadialCutZone[0].text!="":
-      self.radialCutZone=int(elementRadialCutZone[0].text)
+    elif len(elementRadialCutZone)==1:
+      self.__checkSuppotedNodeAttributes(elementRadialCutZone[0])
+      if elementRadialCutZone[0].text!=None or elementRadialCutZone[0].text!="":
+        self.radialCutZone=int(elementRadialCutZone[0].text)
     else:
       raise Exception("must have a \"radialCutZone\" node in a \"fileSet\" node with an integer value")
     
@@ -58,24 +61,26 @@ class fileSet:
     elementIncludeBoundaries=element.findall("includeBoundaries")
     if len(elementIncludeBoundaries)>1:
       warnings.warn("more than one \"includeBoundaries\" node ignoring all but first node")
-    self.__checkSuppotedNodeAttributes(elementIncludeBoundaries[0])
-    if elementIncludeBoundaries[0]!=None:
-      if elementIncludeBoundaries[0].text in ["true","yes","y","t","1"]:
-        self.includeBoundaries=True
-      elif elementIncludeBoundaries[0].text in ["false","no","n","n","0"]:
-        self.includeBoundaries=False
-      else:
-        raise Exception("\"includeBoundaries\" node expects \"true\" or \"false\"")
+    elif len(elementIncludeBoundaries)==1:
+      self.__checkSuppotedNodeAttributes(elementIncludeBoundaries[0])
+      if elementIncludeBoundaries[0]!=None:
+        if elementIncludeBoundaries[0].text in ["true","yes","y","t","1"]:
+          self.includeBoundaries=True
+        elif elementIncludeBoundaries[0].text in ["false","no","n","n","0"]:
+          self.includeBoundaries=False
+        else:
+          raise Exception("\"includeBoundaries\" node expects \"true\" or \"false\"")
     else:
       raise Exception("must have a \"includeBoundaries\" node in a \"fileSet\" node")
     
     #get numRInterp element text
-    elementRadialCutZone=element.findall("numRInterp")
-    if len(elementRadialCutZone)>1:
+    elementnumRInterp=element.findall("numRInterp")
+    if len(elementnumRInterp)>1:
       warnings.warn("more than one \"numRInterp\" node ignoring all but first node")
-    self.__checkSuppotedNodeAttributes(elementRadialCutZone[0])
-    if elementRadialCutZone[0].text!=None or elementRadialCutZone[0]!="":
-      self.numRInterp=int(elementRadialCutZone[0].text)
+    elif len(elementnumRInterp)==1:
+      self.__checkSuppotedNodeAttributes(elementnumRInterp[0])
+      if elementnumRInterp[0].text!=None or elementnumRInterp[0]!="":
+        self.numRInterp=int(elementnumRInterp[0].text)
     else:
       raise Exception("must have a \"numRInterp\" node in a \"fileSet\" node with an integer value")
       
