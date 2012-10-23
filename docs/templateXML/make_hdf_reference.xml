@@ -1,0 +1,32 @@
+<!--
+Variable ID's
+M_r
+theta (only availble in 2D and 3D dumps)
+phi (only availble in 3D dumps)
+Delta_M_r
+r
+rho
+u
+u_0
+v (only availble in 2D and 3D dumps)
+w (only availble in 3D dumps)
+e (only availble in adiabatic dumps)
+T (only availble in non-adiabatic dumps)
+-->
+<config>
+  <fileSet frequency="5" fileRange="../output/T6100_5x5_t[0-*]" timeFile="time">
+    <dataPerFile><!-- only one per fileSet Node-->
+      <variable indep0="r/R">r/R</variable>
+      <variable indep1="theta">theta</variable>
+      <variable indep2="phi">phi</variable>
+      <variable indep0="x">x</variable>
+      <variable indep1="y">y</variable>
+      <variable indep2="z">z</variable>
+      <variable indep0="x" indep1="y" indep2="z">T</variable><!-- as many as you want per dataPerFile Node-->
+    </dataPerFile>
+    <interpVar numPoints="200" name="r/R">r/1e11</interpVar><!-- pointRation= multiplier on the current number of points-->
+    <interpVar numPoints="200" name="x">r*sin(theta)*cos(phi)</interpVar><!-- pointRation= multiplier on the current number of points-->
+    <interpVar numPoints="200" name="y">r*sin(theta)*sin(phi)</interpVar><!-- pointRation= multiplier on the current number of points-->
+    <interpVar numPoints="200" name="z">r*cos(theta)</interpVar><!-- pointRation= multiplier on the current number of points-->
+  </fileSet>
+</config>
