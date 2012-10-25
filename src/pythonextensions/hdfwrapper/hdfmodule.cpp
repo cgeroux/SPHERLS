@@ -35,9 +35,10 @@ bool walkListAndWriteData(PyObject* list, int* nPosition,int nDepth){
   if(nDepth==nRank-1){//we are at the bottom of the list, write out data
     
     //loop over list and write data
+    double *dTemp= new double[nDims[nDepth]];
+    nPosition[nDepth]=0;
     for(int i=0;i<nDims[nDepth];i++){
       
-      nPosition[nDepth]=i;
       PyObject* temp=PyList_GetItem(list,i);
       
       //check to make sure we really are at the bottom
@@ -49,33 +50,63 @@ bool walkListAndWriteData(PyObject* list, int* nPosition,int nDepth){
         return false;
       }
       
-      double dTemp=PyFloat_AsDouble(temp);
+
+      dTemp[i]=PyFloat_AsDouble(temp);
       
       //check to see if we might have an error some where
-      if(dTemp==-1){
+      if(dTemp[i]==-1){
         if(PyErr_Occurred()!=NULL){
           return false;
         }
       }
-      
-      //write data to file
-      int* nDimsTemp=new int[nRank];
-      for(int j=0;j<nRank;j++){
-        nDimsTemp[j]=1;
+    }
+    
+    //write data to file
+    int* nDimsTemp=new int[nRank];
+    for(int j=0;j<nRank;j++){
+      nDimsTemp[j]=1;
+      if (j==nDepth){
+        nDimsTemp[j]=nDims[nDepth];
       }
-      int32 nStat=SDwritedata(nDataID,nPosition,NULL,nDimsTemp,(VOIDP)&dTemp);
-      delete [] nDimsTemp;
-      if(nStat==FAIL){
-        std::stringstream ssTemp;
-        ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-          <<": failed writting data to file at data location (";
-        for(int j=0;j<nRank-1;j++){
-          ssTemp<<nPosition[j]<<",";
-        }
-        ssTemp<<nPosition[nRank-1]<<")";
-        PyErr_SetString(HDFError,ssTemp.str().c_str());
-        return false;
+    }
+    
+    //DEBUG write out position
+    /*std::cout<<"nPosition=(";
+    for(int j=0;j<nRank-1;j++){
+      std::cout<<nPosition[j]<<",";
+    }
+    std::cout<<nPosition[nRank-1]<<") ";
+    
+    //DEBUG write out position
+    std::cout<<"nDimsTemp=(";
+    for(int j=0;j<nRank-1;j++){
+      std::cout<<nDimsTemp[j]<<",";
+    }
+    std::cout<<nDimsTemp[nRank-1]<<") ";
+    
+    //DEBUG write out position
+    std::cout<<"dTemp=(";
+    for(int j=0;j<nDims[nDepth];j++){
+      std::cout<<dTemp[j]<<",";
+    }
+    std::cout<<dTemp[nDims[nDepth]-1]<<") \n\n";*/
+    
+    /**Warning this function call (SDWritedata) seems to leak memory, not sure why, I have tried a number of different methods to ensure that the buffer, dTemp is freed. I have also made sure that the data opened with SDcreate is closed with SDendaccess. Perhaps saving the data and doing one write would help, I am not sure. In any case doing only one write would very likely speed this up.
+    
+    I have moved this write out side the very bottom loop, and while it may not have removed the memory leak totaly, it seems to have drastically reduced it's severity.*/
+    int32 nStat=SDwritedata(nDataID,nPosition,NULL,nDimsTemp,(VOIDP)dTemp);
+    delete [] nDimsTemp;
+    delete [] dTemp;
+    if(nStat==FAIL){
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": failed writting data to file at data location (";
+      for(int j=0;j<nRank-1;j++){
+        ssTemp<<nPosition[j]<<",";
       }
+      ssTemp<<nPosition[nRank-1]<<")";
+      PyErr_SetString(HDFError,ssTemp.str().c_str());
+      return false;
     }
   }
   else{//not at the bottom of the list, keep going
@@ -196,6 +227,7 @@ static PyObject* openData(PyObject* self, PyObject* args){
       ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
         <<": expecting a list of integers for argument 3";
       PyErr_SetString(HDFError,ssTemp.str().c_str());
+      return NULL;
     }
     int32 nDimTemp=PyInt_AsLong(temp);
     nDims[i]=nDimTemp;
@@ -208,6 +240,7 @@ static PyObject* openData(PyObject* self, PyObject* args){
     ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
       <<": creating a new HDF data set for variable \""<<cVarName<<"\" failed\n";
     PyErr_SetString(HDFError,ssTemp.str().c_str());
+    return NULL;
   }
   nDataID=nDataIDLoc;
   return Py_BuildValue("i",nDataIDLoc);
@@ -225,10 +258,12 @@ static PyObject* writeData(PyObject* self, PyObject* args){
   }
   
   if(!walkListAndWriteData(list,nPosition,0)){
+    delete [] nPosition;
     return NULL;
   }
   
   //nStat=SDwritedata(nDataID,nStart,NULL,nDims,(VOIDP)dTemp);
+  delete [] nPosition;
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -248,7 +283,7 @@ static PyObject* closeData(PyObject* self, PyObject* args){
   
   //check to make sure we have a good data ID to use
   if(nDataIDLoc==FAIL){//if a data ID wasn't given
-    if(nDataID==FAIL){//check to see if a file has been opened previously and use that file it has
+    if(nDataID==FAIL){//check to see if a data has been opened previously and use that data it has
       //nothing to do
       Py_INCREF(Py_None);
       return Py_None;
@@ -257,7 +292,6 @@ static PyObject* closeData(PyObject* self, PyObject* args){
       nDataIDLoc=nDataID;
     }
   }
-  
   int32 nStat=SDendaccess(nDataID);
   if(nStat==FAIL){
     std::stringstream ssTemp;
