@@ -61,7 +61,7 @@ def parseOptions():
   return parser.parse_args()
 class Curve:
   '''This class holds all the information for a curve on a plot.'''
-  def __init__(self,element,type):
+  def __init__(self,element,type,curveIndex):
     
     '''This method initilizes a curve object, the type parameter allows checking curve syntax 
     against axis syntax to see if they match.'''
@@ -80,6 +80,8 @@ class Curve:
     self.linewidth=1.0
     self.testZoneAdjust=False#triggered first time zoning is adjusted so doesn't adjust it every load
     self.label=None
+    self.ID=None
+    self.indexOfLastFileLoad=-1
     
     #set curve style
     if element.get("style")!=None:
@@ -96,6 +98,10 @@ class Curve:
     #set curve label
     if element.get("label")!=None:
       self.label=element.get("label")
+      
+    #set curve id
+    if element.get("id")!=None:
+      self.ID=element.get("id")
     
     #get marker size
     if element.get("markersize")!=None:
@@ -124,6 +130,9 @@ class Curve:
           self.zone="max"
         elif element.get("radialZone")=="min":
           self.zone="min"
+        elif len(element.get("radialZone"))>12:
+          if element.get("radialZone")[0:12]=="sameascurve:":
+            self.zone=element.get("radialZone")[12:]
         elif element.get("radialZone").isdigit():
           self.zone=element.get("radialZone")
         else:
@@ -134,78 +143,96 @@ class Curve:
         print "Attribute \"radialZone\" must be set for a curve in an axis of type=\"time\""
         quit()
     
-    #create forula and code from the formula, as well as which columns are referenced and weather 
+    #create formula and code from the formula, as well as which columns are referenced and weather 
     #they are shifted in i
     [self.formulaOrig,self.formula,self.nColumn,self.nRowShift,self.code]\
       =parse_formula.getFormula(element.text)
-  def load(self,fileData,options):
+  def load(self,fileData,options,dataSet,nFileCount):
     '''This method adds a y value and index to the curve for the current fileData.'''
-    try:
-      if self.zone=="max":
-        #find largest value in column and use that
-        nIndex=0
-        while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
-          nIndex=nIndex+1
-          if nIndex>len(fileData.fColumnValues)-1:
-            warnings.warn("could find non-empty value in column \""+str(self.nColumn)
-              +"\" of file \""+fileData.sFileName+"\"")
-            break
+    if self.indexOfLastFileLoad!=nFileCount:#prevents loading the same file twice
+      try:
+        if self.zone=="max":
           
-        yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-        yIndexTemp=0
-        for i in range(nIndex,len(fileData.fColumnValues)-1):
-          yTest=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i)
-          if yTest>yTemp:
-            yTemp=yTest
-            yIndexTemp=i
-        self.y.append(yTemp)
-        self.index.append(yIndexTemp)
-      elif self.zone=="min":
-        #find smallest value in column and use that
-        nIndex=0
-        while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
-          nIndex=nIndex+1
-          if nIndex>len(fileData.fColumnValues)-1:
-            warnings.warn("could find non-empty value in column \""+str(self.nColumn)
-              +"\" of file \""+fileData.sFileName+"\"")
-            break
-        yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-        yIndexTemp=0
-        for i in range(nIndex,len(fileData.fColumnValues)-1):
-          testY=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
-          if testY<yTemp:
-            yTemp=testY
-            yIndexTemp=i
-        self.y.append(yTemp)
-        self.index.append(yIndexTemp)
-      elif self.zone==None and self.bTime==False:#this will be a series of y's as a function of time,
-        #creating a 2D list instead of a 1D list
-        yTemp=[]
-        for i in range(len(fileData.fColumnValues)):
-          yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
-        self.y.append(yTemp)
-      elif self.zone==None:
-        raise Exception("If zone="+str(self.zone)+" is \"None\" then it shouldn't be a time curve"\
-          +" and thus the if above should have been flagged first, something strange is going on"\
-          +" here")
-      elif self.zone.isdigit():
-        if not self.testZoneAdjust:
-          if not options.zoneIndexFromCenter:
-            zone=len(fileData.fColumnValues)-1-int(self.zone)
+          #find largest value in column and use that
+          nIndex=0
+          
+          #find first non-empty value
+          while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
+            nIndex=nIndex+1
+            if nIndex>len(fileData.fColumnValues)-1:
+              warnings.warn("could find non-empty value in column \""+str(self.nColumn)
+                +"\" of file \""+fileData.sFileName+"\"")
+              break
             
-            #if right at the surface, and the zone is a non-interface, should move in
-            while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,zone)==None:
-              zone=zone-1
-            self.zone=str(zone)
-          self.testZoneAdjust=True
-        self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(self.zone)))
-        self.index.append(int(self.zone))
-      else:#I don't know what to do ??
-        print "unknown zone spedificiation \"",zone,"\""
-    except ValueError as anException:
-      print "ValueError:", anException
-      print "In curve formula:",self.formulaOrig
-      quit()
+          yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+          yIndexTemp=0
+          for i in range(nIndex,len(fileData.fColumnValues)-1):
+            yTest=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i)
+            if yTest>yTemp:
+              yTemp=yTest
+              yIndexTemp=i
+          self.y.append(yTemp)
+          self.index.append(yIndexTemp)
+        elif self.zone=="min":
+          #find smallest value in column and use that
+          nIndex=0
+          while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)==None:
+            nIndex=nIndex+1
+            if nIndex>len(fileData.fColumnValues)-1:
+              warnings.warn("could find non-empty value in column \""+str(self.nColumn)
+                +"\" of file \""+fileData.sFileName+"\"")
+              break
+          yTemp=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+          yIndexTemp=0
+          for i in range(nIndex,len(fileData.fColumnValues)-1):
+            testY=parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,nIndex)
+            if testY<yTemp:
+              yTemp=testY
+              yIndexTemp=i
+          self.y.append(yTemp)
+          self.index.append(yIndexTemp)
+        elif self.zone==None and self.bTime==False:#this will be a series of y's as a function of time,
+          #creating a 2D list instead of a 1D list
+          yTemp=[]
+          for i in range(len(fileData.fColumnValues)):
+            yTemp.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,i))
+          self.y.append(yTemp)
+        elif self.zone==None:
+          raise Exception("If zone="+str(self.zone)+" is \"None\" then it shouldn't be a time curve"\
+            +" and thus the if above should have been flagged first, something strange is going on"\
+            +" here")
+        elif self.zone.isdigit():
+          if not self.testZoneAdjust:
+            if not options.zoneIndexFromCenter:
+              zone=len(fileData.fColumnValues)-1-int(self.zone)
+              
+              #if right at the surface, and the zone is a non-interface, should move in
+              while parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,zone)==None:
+                zone=zone-1
+              self.zone=str(zone)
+            self.testZoneAdjust=True
+          self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(self.zone)))
+          self.index.append(int(self.zone))
+        else:#check to see if it is a curve ID
+          curveTemp=dataSet.getCurve(self.zone)
+          if curveTemp!=None:
+            
+            #check that curve has been loaded already
+            if curveTemp.indexOfLastFileLoad!=nFileCount:
+              curveTemp.load(fileData,options,dataSet,nFileCount)
+            
+            #get y
+            zone=curveTemp.index[len(curveTemp.index)-1]
+            self.y.append(parse_formula.getY(self.nRowShift,self.nColumn,fileData,self.code,int(zone)))
+            self.index.append(int(zone))
+            
+          else:
+            print "zone spedificiation \""+str(self.zone)+"\" is not \"max\", \"min\", a radial index, or curve id"
+        self.indexOfLastFileLoad=nFileCount
+      except ValueError as anException:
+        print "ValueError:", anException
+        print "In curve formula:",self.formulaOrig
+        quit()
 class Plot:
   '''This class holds all the information for a single plot, namely the list of curves for that plot.'''
   
@@ -252,9 +279,11 @@ class Plot:
     
     #add curves to plot
     curveElements=element.findall("curve")
+    curveIndex=0
     for curveElement in curveElements:
-      self.curves.append(Curve(curveElement,type))
-  def load(self,fileData,options):
+      self.curves.append(Curve(curveElement,type,curveIndex))
+      curveIndex+=1
+  def load(self,fileData,options,dataSet,nFileCount):
     '''loads the data for a plot, y-data is stored in the curves, and sets the ylabel from the first
     file read in'''
     
@@ -263,7 +292,7 @@ class Plot:
       for curve in self.curves:
         
         #load curve data
-        curve.load(fileData,options)
+        curve.load(fileData,options,dataSet)
         
         #add zone number to suffix
         suffix=''
@@ -287,7 +316,7 @@ class Plot:
             self.ylabel=self.ylabel+", "+curve.formulaOrig+suffix
     else:#for all subsequent files
       for curve in self.curves:
-        curve.load(fileData,options)
+        curve.load(fileData,options,dataSet,nFileCount)
 class Axis:
   '''This class holds all the information needed for a particular x-axis. An axis can either be 
   either of time, or of some column in the data files.'''
@@ -364,8 +393,7 @@ class Axis:
       if self.bTime:
         type="time"
       self.plots.append(Plot(plotElement,type))
-      
-  def load(self,fileData,options):
+  def load(self,fileData,options,dataSet,nFileCount):
     '''This function loads the values needed for the x-axis data from the fileData argument'''
     
     if self.bTime:#add time
@@ -393,7 +421,7 @@ class Axis:
           
     #load plots
     for plot in self.plots:
-      plot.load(fileData,options)
+      plot.load(fileData,options,dataSet,nFileCount)
 class DataSet:
   '''This class holds all the information for a single dataSet, which includes the baseFileName of 
   the dataset, the range of the dataSet (start-end), the times and phases of the files within the 
@@ -430,7 +458,6 @@ class DataSet:
       self.axes.append(axis)
       if not axis.bTime:
         self.hasNonTimeAxis=True
-  
   def load(self,options):
     '''Loads the dataSet, this means that it sets, time, phases, and plots data'''
     
@@ -473,17 +500,17 @@ class DataSet:
       
       #load x-axis data and y-data
       for axis in self.axes:
-        axis.load(fileData,options)
+        axis.load(fileData,options,self,nFileCount)
       nFileCount=nFileCount+1
   def getCurve(self,ID):
     '''Returns a curve object that has ID, ID'''
-    nCount=0
+    
     for axis in self.axes:
       for plot in axis.plots:
         for curve in plot.curves:
-          if nCount==ID:
+          if curve.ID==ID:
             return curve
-          nCount=nCount+1
+    return None
 def plot(dataSets,options,title):
   
   #set import options based on weather it will saved to a file, or sent to x11

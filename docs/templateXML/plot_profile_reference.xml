@@ -56,7 +56,7 @@ OPTIONAL if created with SPHERLSanal with the -v option
     <eosFile></eosFile>
     <axis type="profile" xlabel="r/H_p" xmin="100" xmax="112" column="$5/4e9" xminortics="True">
       <plot ylabel="(u_max-u_0)(T_max-T_min)" ymin="0" ymax="1.65e5" grid="both" legendloc="2">
-        <curve style="-o" color="b" >($15-$21)*($47-$50)/1e5</curve>
+        <curve style="-o" color="b">($15-$21)*($47-$50)/1e5</curve>
       </plot>
       <plot ylabel="V_max [km/s]" ymin="0" ymax="1.5e1" grid="both">
         <curve style="-o" color="b" >$23/1e5</curve>
@@ -73,7 +73,12 @@ OPTIONAL if created with SPHERLSanal with the -v option
         
         <!-- radial zone can be either a reference to a particular radial zone (0=surface increasing
         inward) or "max" or "min" for the maximum or minimum of all radial zones.-->
-        <curve radialZone="1" style="-o">$21/1e5</curve>
+        <curve radialZone="1" style="-o" id="test">$21/1e5</curve>
+      </plot>
+    </axis>
+    <axis type="time" xlabel="t [s]" xminortics="True">
+      <plot>
+        <curve radialZone="sameascurve:test" style="-o">$21/1e5</curve>
       </plot>
     </axis>
   </dataSet>
