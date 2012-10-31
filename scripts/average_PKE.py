@@ -35,6 +35,12 @@ def parseOptions():
   parser.add_option("-l",action="store_true",dest="bLconInsteadofKE",default=False
     ,help="Will use L_con column and compute the max, instead of the sum, saving it to a file"
     +"called \"maxLcon.txt\" instead of \"averagePKE.txt\"")
+  parser.add_option("-u",action="store_true",dest="bumu0InsteadofKE",default=False
+    ,help="Will use u-u_0 columns and compute the max, instead of the sum, saving it to a file"
+    +"called \"maxumu0.txt\" instead of \"averagePKE.txt\"")
+  parser.add_option("-t",action="store_true",dest="bTmTaveInsteadofKE",default=False
+    ,help="Will use (T-<T>)_maxjk and compute the max over i, instead of the sum, saving it to a file"
+    +"called \"maxTmTave.txt\" instead of \"averagePKE.txt\"")
   parser.add_option("-p",action="store",dest="period"
     ,help="Set the initial period to use for finding peaks.",default=None)
   #parse command line options
@@ -58,7 +64,13 @@ def main():
   for file in failedFiles:
     print file
 def averagePKE(start,end,baseFileName,options):
-
+  nColumnUMax=14
+  nColumnUMin=17
+  nColumnU0=20
+  nColumnTAve=49
+  nColumnTMax=50
+  nColumnTMin=53
+  
   #get and sort files
   extension="_pro"+".txt"
   filesExistProfiles=glob.glob(baseFileName+"*"+extension)
@@ -80,6 +92,10 @@ def averagePKE(start,end,baseFileName,options):
   
   if options.bLconInsteadofKE:
     print __name__+":"+averagePKE.__name__+":finding max L_con in profiles ..."
+  elif options.bumu0InsteadofKE:
+    print __name__+":"+averagePKE.__name__+":finding max u-u_0 in profiles ..."
+  elif options.bTmTaveInsteadofKE:
+    print __name__+":"+averagePKE.__name__+":finding max T-<T> in profiles ..."
   else:
     print __name__+":"+averagePKE.__name__+":summing up kinetic energies in profiles ..."
   times=[]
@@ -91,11 +107,19 @@ def averagePKE(start,end,baseFileName,options):
   if directory=="":
     if options.bLconInsteadofKE:
       averagePKEFile="maxLcon.txt"
+    elif options.bumu0InsteadofKE:
+      averagePKEFile="maxumu0.txt"
+    elif options.bTmTaveInsteadofKE:
+      averagePKEFile="maxTmTave.txt"
     else:
       averagePKEFile="averagePKE.txt"
   else:
     if options.bLconInsteadofKE:
       averagePKEFile=directory+"/maxLcon.txt"
+    elif options.bumu0InsteadofKE:
+      averagePKEFile=directory+"/maxumu0.txt"
+    elif options.bTmTaveInsteadofKE:
+      averagePKEFile=directory+"/maxTmTave.txt"
     else:
       averagePKEFile=directory+"/averagePKE.txt"
     
@@ -103,6 +127,12 @@ def averagePKE(start,end,baseFileName,options):
     if not options.resum:
       if options.bLconInsteadofKE:
         print "  \"",averagePKEFile,"\" already exists, not recalculating L_con_max for entries"\
+          +" already in file"
+      elif options.bumu0InsteadofKE:
+        print "  \"",averagePKEFile,"\" already exists, not recalculating (u-u_0)_max for entries"\
+          +" already in file"
+      elif options.bTmTaveInsteadofKE:
+        print "  \"",averagePKEFile,"\" already exists, not recalculating (T-<T>)_max for entries"\
           +" already in file"
       else:
         print "  \"",averagePKEFile,"\" already exists, not re-summing KE for entries already in"\
@@ -146,6 +176,13 @@ def averagePKE(start,end,baseFileName,options):
       #sum up all kinetic energies
       dKESum=0.0
       if options.bLconInsteadofKE:
+        CLM=0.0
+        for i in range(len(fileData.fColumnValues)-1):
+          if fileData.fColumnValues[i][nColumn]!=None:
+            if fileData.fColumnValues[i][nColumn]>CLM:
+              CLM=fileData.fColumnValues[i][nColumn]
+        KE.append(CLM)
+      elif options.bumu0InsteadofKE:
         CLM=0.0
         for i in range(len(fileData.fColumnValues)-1):
           if fileData.fColumnValues[i][nColumn]!=None:

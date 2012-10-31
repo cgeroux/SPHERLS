@@ -173,6 +173,8 @@ class Curve:
               yIndexTemp=i
           self.y.append(yTemp)
           self.index.append(yIndexTemp)
+          if self.ID=="DelT" or self.ID=="L_con" or self.ID=="u-u0_max" or self.ID=="u-u0_atdt":
+            print yIndexTemp,fileData.sHeader,self.ID
         elif self.zone=="min":
           #find smallest value in column and use that
           nIndex=0

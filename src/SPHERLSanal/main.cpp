@@ -4350,6 +4350,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
   double dA_jp1half;
   double dA_jm1half;
   double dA_j;
+  double dCp;
   if(nPlane==0){//r-theta
     
     //write out cooridnate variables
@@ -4441,7 +4442,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
       <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](21)"<<std::setw(nWidthOutputField)
       <<"Kap_rel_dif_hor_ave(22)"
       <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
-      <<"Gam_rel_dif_hor_ave(24)"
+      <<"Gam_rel_dif_hor_ave(24)"<<std::setw(nWidthOutputField)<<"C_P[na](25)"
       <<std::endl;
     
     //copy 1D region to 2D grid
@@ -4470,7 +4471,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, and L
           
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][0][0],dGrid[nD][i][0][0],dP,dE,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][0][0],dGrid[nD][i][0][0],dP,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][0][0]);
@@ -4492,7 +4493,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<0.0//10,11
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)<<0.0//14,15
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0;//16,17
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<dCp<<std::setw(nWidthOutputField);//16,17
           
         }
         else{//set P and Q
@@ -4586,8 +4588,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dA_j=sin(dTheta_j);
           
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][j][nPlaneIndex],dGrid[nD][i][j][nPlaneIndex],dP,dE
-            ,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][j][nPlaneIndex],dGrid[nD][i][j][nPlaneIndex],dP
+            ,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
@@ -4796,8 +4798,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<(dGrid[nD][i][j][nPlaneIndex]-dDAve)/dDAve;//5
         if(nGammaLaw!=0){
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][j][nPlaneIndex],dGrid[nD][i][j][nPlaneIndex],dP,dE
-            ,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][j][nPlaneIndex],dGrid[nD][i][j][nPlaneIndex],dP
+            ,dE,dKappa,dGamma,dCp);
           
           //calculate Q, uses dGamma
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][nPlaneIndex]);
@@ -4878,7 +4880,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::endl;//8
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//8
         }
         else{
           
@@ -4961,7 +4963,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           }
           ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0
+            <<std::setw(nWidthOutputField)<<dCp
+            <<std::endl;//8
         }
       }
       ofFile
@@ -4982,7 +4986,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
     for(int j=0;j<nSizeY2;j++){
@@ -5004,7 +5008,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<"-"<<std::setw(nWidthOutputField)
         <<std::endl;
     }
   }
@@ -5091,6 +5095,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
       <<"Kap_rel_dif_hor_ave(22)"
       <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
       <<"Gam_rel_dif_hor_ave(24)"
+      <<std::setw(nWidthOutputField)<<"C_P[na](24)"
       <<std::endl;
     
     //3D region
@@ -5106,6 +5111,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
     double dKappaAve=0.0;
     double dGammaAve=0.0;
     int nCount=0;
+    double dCp;
     dR_i=(dGrid[nR][i+1][0][0]+dGrid[nR][i][0][0])*0.5;
     dRSq_ip1half=dGrid[nR][i+1][0][0]*dGrid[nR][i+1][0][0];
     dRSq_i=dR_i*dR_i;
@@ -5133,8 +5139,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         for(int k=0;k<nSizeZ;k++){
           
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][j][k],dGrid[nD][i][j][k],dP,dE
-            ,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][j][k],dGrid[nD][i][j][k],dP,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][k]);
@@ -5345,9 +5350,10 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<dGrid[nD][i][j][k]//4
           <<std::setw(nWidthOutputField)<<(dGrid[nD][i][j][k]-dDAve)/dDAve;//5
         if(nGammaLaw!=0){
-          //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][j][k],dGrid[nD][i][j][k],dP,dE
-            ,dKappa,dGamma);
+          
+          //get P,E,Kappa,Gamma, calculate luminosity from cell and add to sum
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][j][k],dGrid[nD][i][j][k],dP,dE,dKappa
+            ,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][j][k]);
@@ -5422,7 +5428,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::endl;//8
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)
+            <<dCp
+            <<std::endl;//8
         }
         else{
           
@@ -5505,7 +5513,9 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           }
           ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0
+            <<std::setw(nWidthOutputField)<<dCp
+            <<std::endl;//8
         }
       }
       ofFile
@@ -5534,7 +5544,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
     for(int k=0;k<nSizeZ;k++){
@@ -5556,7 +5566,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
   }
@@ -5644,7 +5654,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
       <<std::setw(nWidthOutputField)<<"Kap_ij[cm^2/g](21)"<<std::setw(nWidthOutputField)
       <<"Kap_rel_dif_hor_ave(22)"
       <<std::setw(nWidthOutputField)<<"Gam_ijk[na](23)"<<std::setw(nWidthOutputField)
-      <<"Gam_rel_dif_hor_ave(24)"
+      <<"Gam_rel_dif_hor_ave(24)"<<std::setw(nWidthOutputField)<<"C_P[na](24)"
       <<std::endl;
     
     //1D region
@@ -5669,7 +5679,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, and L
           
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][0][0],dGrid[nD][i][0][0],dP,dE,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][0][0],dGrid[nD][i][0][0],dP
+            ,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][0][0]);
@@ -5691,7 +5702,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<0.0//10,11
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)<<0.0//14,15
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0;//16,17
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<dCp;//16,17
           
         }
         else{//set P and Q
@@ -5723,7 +5735,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<0.0//10,11
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0;//16,17
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<dCp;//16,17
         }
         ofFile<<std::endl;
       }
@@ -5753,7 +5766,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
     
@@ -5798,8 +5811,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         for(int k=0;k<nSizeZ;k++){
           
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][nPlaneIndex][k],dGrid[nD][i][nPlaneIndex][k],dP,dE
-            ,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][nPlaneIndex][k],dGrid[nD][i][nPlaneIndex][k],dP
+            ,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
@@ -6013,8 +6026,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<(dGrid[nD][i][nPlaneIndex][k]-dDAve)/dDAve;//4
         if(nGammaLaw!=0){
           //get P, E, kappa, and gamma
-          eosTable.getPEKappaGamma(dGrid[nT][i][nPlaneIndex][k],dGrid[nD][i][nPlaneIndex][k],dP,dE
-            ,dKappa,dGamma);
+          eosTable.getPEKappaGammaCp(dGrid[nT][i][nPlaneIndex][k],dGrid[nD][i][nPlaneIndex][k],dP
+            ,dE,dKappa,dGamma,dCp);
           
           //calculate Q
           dC=sqrt(dGamma*dP/dGrid[nD][i][nPlaneIndex][k]);
@@ -6095,7 +6108,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
             <<(dKappa-dKappaAve)/dKappaAve
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::endl;//8
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//8
         }
         else{
           
@@ -6178,7 +6191,8 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           }
           ofFile
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
+            <<std::setw(nWidthOutputField)<<"-"<<std::endl;//8
         }
       }
       ofFile
@@ -6207,7 +6221,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
     for(int k=0;k<nSizeZ;k++){
@@ -6229,7 +6243,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
+        <<"-"<<std::setw(nWidthOutputField)<<"-"
         <<std::endl;
     }
   }
