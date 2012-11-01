@@ -2613,7 +2613,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
   }
   else{//using a tabulated equaiton of state
     if(nNumDims==1){
-      nNumIntVars=9;
+      nNumIntVars=10;
       nM=0;
       nDM=1;
       nR=2;
@@ -2628,15 +2628,16 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGamma=nNumVars+4;
       nL_rad=nNumVars+5;
       nL_con=nNumVars+6;
-      nKE=nNumVars+7;
-      nC=nNumVars+8;
+      nF_con=nNumVars+7;
+      nKE=nNumVars+8;
+      nC=nNumVars+9;
       nV=-1;
       nW=-1;
       nTheta=-1;
       nPhi=-1;
     }
     else if(nNumDims==2){
-      nNumIntVars=9;
+      nNumIntVars=10;
       nM=0;
       nTheta=1;
       nDM=2;
@@ -2653,13 +2654,14 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGamma=nNumVars+4;
       nL_rad=nNumVars+5;
       nL_con=nNumVars+6;
-      nKE=nNumVars+7;
-      nC=nNumVars+8;
+      nF_con=nNumVars+7;
+      nKE=nNumVars+8;
+      nC=nNumVars+9;
       nPhi=-1;
       nW=-1;
     }
     else if(nNumDims==3){
-      nNumIntVars=9;
+      nNumIntVars=10;
       nM=0;
       nTheta=1;
       nPhi=2;
@@ -2678,8 +2680,9 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGamma=nNumVars+4;
       nL_rad=nNumVars+5;
       nL_con=nNumVars+6;
-      nKE=nNumVars+7;
-      nC=nNumVars+8;
+      nF_con=nNumVars+7;
+      nKE=nNumVars+8;
+      nC=nNumVars+9;
     }
   }
   
@@ -2867,6 +2870,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGhostCellsZ=0;
     }
     
+    double dF_con;
     double dP_i;
     double dE_i;
     double dKappa_i;
@@ -2894,6 +2898,9 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     double dMaxP;
     double dMinP;
     double dSumP;
+    double dMaxF_con;
+    double dMinF_con;
+    double dSumF_con;
     double dMaxKappa;
     double dMinKappa;
     double dSumKappa;
@@ -2985,6 +2992,9 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       dMax[nP][i]=dP_i;
       dMin[nP][i]=dP_i;
       dAve[nP][i]=dP_i;
+      dMax[nF_con][i]=0.0;
+      dMin[nF_con][i]=0.0;
+      dAve[nF_con][i]=0.0;
       dMax[nKappa][i]=dKappa_i;
       dMin[nKappa][i]=dKappa_i;
       dAve[nKappa][i]=dKappa_i;
@@ -3046,6 +3056,9 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       dMaxP=-1.0*std::numeric_limits<double>::max();
       dMinP=std::numeric_limits<double>::max();
       dSumP=0.0;
+      dMaxF_con=-1.0*std::numeric_limits<double>::max();
+      dMinF_con=std::numeric_limits<double>::max();
+      dSumF_con=0.0;
       dMaxKappa=-1.0*std::numeric_limits<double>::max();
       dMinKappa=std::numeric_limits<double>::max();
       dSumKappa=0.0;
@@ -3068,6 +3081,39 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       dLSum_con=0.0;
       dAreaSum=0.0;
       dArea1=dRSq_ip1half*4.0*dPi;
+      
+      //start debug LCon
+      /*
+      double bDebugLCon=false;
+      std::ofstream ofDebugLCon;
+      int nWidthOutputField=25;
+      int nWidthIntOutputField=12;
+      if(i==125 || i==128){
+        bDebugLCon=true;
+        std::stringstream ssDebugFile;
+        ssDebugFile<<"debugLCon_i"<<i<<".txt";
+        std::cout<<ssDebugFile.str().c_str()<<std::endl;
+        ofDebugLCon.open(ssDebugFile.str().c_str());
+        
+        //set double output precision
+        ofDebugLCon.precision(16);
+        ofDebugLCon.unsetf(std::ios::fixed);
+        ofDebugLCon.setf(std::ios::scientific);
+        
+        ofDebugLCon
+          <<std::setw(nWidthIntOutputField)<<"j(0)"
+          <<std::setw(nWidthIntOutputField)<<"k(1)"
+          <<std::setw(nWidthOutputField)<<"dCp_ip1half(2)"
+          <<std::setw(nWidthOutputField)<<"dRho_ip1half(3)"
+          <<std::setw(nWidthOutputField)<<"dT_ip1halfjk(4)"
+          <<std::setw(nWidthOutputField)<<"dTAve_ip1half(5)"
+          <<std::setw(nWidthOutputField)<<"dU_ip1halfjk(6)"
+          <<std::setw(nWidthOutputField)<<"dU0_ip1half(7)"
+          <<std::setw(nWidthOutputField)<<"dA_ip1halfjk(8)"
+          <<std::setw(nWidthOutputField)<<"dLCon_ip1halfjk(9)"<<std::endl;
+      }*/
+      //end debug LCon
+      
       for(j=nStartY;j<nEndY;j++){
         
         if(nNumDims>1){
@@ -3114,8 +3160,30 @@ void makeRadialProFromColBin(std::string sFileName){//updated
             dTAve_ip1half=(dAve[nT][i]+dAve[nT][i+1])*0.5;
             dT_ip1halfjk=(dGrid[nT][i][j][k]+dGrid[nT][i+1][j][k])*0.5;
             dCp_ip1half=(dCp_i+dCp_ip1)*0.5;
+            
+            //start debug LCon
+            /*
+            if (bDebugLCon){
+              double dLCon=dCp_ip1half*dRho_ip1half*(dT_ip1halfjk-dTAve_ip1half)
+                *(dGrid[nU][i+1][j][k]-dGrid[nU0][i+1][0][0])*dArea;
+              ofDebugLCon
+                <<std::setw(nWidthIntOutputField)<<j
+                <<std::setw(nWidthIntOutputField)<<k
+                <<std::setw(nWidthOutputField)<<dCp_ip1half
+                <<std::setw(nWidthOutputField)<<dRho_ip1half
+                <<std::setw(nWidthOutputField)<<dT_ip1halfjk
+                <<std::setw(nWidthOutputField)<<dTAve_ip1half
+                <<std::setw(nWidthOutputField)<<dGrid[nU][i+1][j][k]
+                <<std::setw(nWidthOutputField)<<dGrid[nU0][i+1][0][0]
+                <<std::setw(nWidthOutputField)<<dArea
+                <<std::setw(nWidthOutputField)<<dLCon<<std::endl;
+            }*/
+            //end debug LCon
+            
             dLSum_con=dLSum_con+dCp_ip1half*dRho_ip1half*(dT_ip1halfjk-dTAve_ip1half)
               *(dGrid[nU][i+1][j][k]-dGrid[nU0][i+1][0][0])*dArea;
+            dF_con=dCp_ip1half*dRho_ip1half*(dT_ip1halfjk-dTAve_ip1half)
+              *(dGrid[nU][i+1][j][k]-dGrid[nU0][i+1][0][0]);
           }
           else{
             //use surface boundary condition
@@ -3123,6 +3191,18 @@ void makeRadialProFromColBin(std::string sFileName){//updated
             dLSum_con=0.0;
           }
           dAreaSum+=dArea;
+          
+          if(dF_con>dMaxF_con){
+            dMaxF_con=dF_con;
+            nMaxJIndex[nF_con][i]=j;
+            nMaxKIndex[nF_con][i]=k;
+          }
+          if(dF_con<dMinF_con){
+            dMinF_con=dF_con;
+            nMinJIndex[nF_con][i]=j;
+            nMinKIndex[nF_con][i]=k;
+          }
+          dSumF_con+=dF_con;
           
           //calculate Q
           dC=sqrt(dGamma_i*dP_i/dGrid[nD][i][j][k]);
@@ -3265,6 +3345,21 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       else{
         dAve[nD][i]=dGrid[nD][i][0][0];
       }
+      
+      //start debug LCon
+      /*
+      if (bDebugLCon){
+        ofDebugLCon
+          <<std::setw(nWidthOutputField)<<dLSum_con
+          <<std::setw(nWidthOutputField)<<dAreaSum
+          <<std::setw(nWidthOutputField)<<dPi
+          <<std::setw(nWidthOutputField)<<dRSq_ip1half
+          <<std::endl;
+        ofDebugLCon.close();
+        bDebugLCon=false;
+      }*/
+      //end debug LCon
+      
       dAve[nL_rad][i]=dLSum_rad/dAreaSum*4.0*dPi*dRSq_ip1half;
       dAve[nL_con][i]=dLSum_con/dAreaSum*4.0*dPi*dRSq_ip1half;
       dU_i=(dGrid[nU0][i+1][0][0]+dGrid[nU0][i][0][0])*0.5;
@@ -3272,6 +3367,9 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       dMax[nP][i]=dMaxP;
       dMin[nP][i]=dMinP;
       dAve[nP][i]=dSumP/double(nCount);
+      dMax[nF_con][i]=dMaxF_con;
+      dMin[nF_con][i]=dMinF_con;
+      dAve[nF_con][i]=dSumF_con/double(nCount);
       dMax[nE][i]=dMaxE;
       dMin[nE][i]=dMinE;
       dAve[nE][i]=dSumE/double(nCount);
@@ -3623,26 +3721,29 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthOutputField)<<"Kap_ave[cm^2/g](57)"
     <<std::setw(nWidthOutputField)<<"Kap_min[cm^2/g](58)"
     <<std::setw(nWidthOutputField)<<"Kap_max[cm^2/g](59)"
-    <<std::setw(nWidthOutputField)<<"L_rad_im1half[L_sun](60)"
-    <<std::setw(nWidthOutputField)<<"L_con_im1half[L_sun](61)"
-    <<std::setw(nWidthOutputField)<<"KE[ergs](62)"
-    <<std::setw(nWidthOutputField)<<"P_ave[dynes/cm^2](63)"
-    <<std::setw(nWidthOutputField)<<"P_min[dynes/cm^2](64)"
-    <<std::setw(nWidthOutputField)<<"P_max[dynes/cm^2](65)"
-    <<std::setw(nWidthOutputField)<<"Gam_ave[na](66)"
-    <<std::setw(nWidthOutputField)<<"Gam_min[na](67)"
-    <<std::setw(nWidthOutputField)<<"Gam_max[na](68)"
-    <<std::setw(nWidthOutputField)<<"C_ave[cm/s](69)"
-    <<std::setw(nWidthOutputField)<<"C_max[cm/s](70)"
-    <<std::setw(nWidthIntOutputField)<<"C_max_j(71)"
-    <<std::setw(nWidthIntOutputField)<<"C_max_k(72)"
-    <<std::setw(nWidthOutputField)<<"C_min[cm/s](73)"
-    <<std::setw(nWidthIntOutputField)<<"C_min_j(74)"
-    <<std::setw(nWidthIntOutputField)<<"C_min_k(75)";
+    <<std::setw(nWidthOutputField)<<"L_rd_im1half[L_sun](60)"
+    <<std::setw(nWidthOutputField)<<"L_cv_im1half[L_sun](61)"
+    <<std::setw(nWidthOutputField)<<"F_cv_ave[L_sun/cm^2](62)"
+    <<std::setw(nWidthOutputField)<<"F_cv_max[L_sun/cm^2](63)"
+    <<std::setw(nWidthOutputField)<<"F_cv_min[L_sun/cm^2](64)"
+    <<std::setw(nWidthOutputField)<<"KE[ergs](65)"
+    <<std::setw(nWidthOutputField)<<"P_ave[dynes/cm^2](66)"
+    <<std::setw(nWidthOutputField)<<"P_min[dynes/cm^2](67)"
+    <<std::setw(nWidthOutputField)<<"P_max[dynes/cm^2](68)"
+    <<std::setw(nWidthOutputField)<<"Gam_ave[na](69)"
+    <<std::setw(nWidthOutputField)<<"Gam_min[na](70)"
+    <<std::setw(nWidthOutputField)<<"Gam_max[na](71)"
+    <<std::setw(nWidthOutputField)<<"C_ave[cm/s](72)"
+    <<std::setw(nWidthOutputField)<<"C_max[cm/s](73)"
+    <<std::setw(nWidthIntOutputField)<<"C_max_j(74)"
+    <<std::setw(nWidthIntOutputField)<<"C_max_k(75)"
+    <<std::setw(nWidthOutputField)<<"C_min[cm/s](76)"
+    <<std::setw(nWidthIntOutputField)<<"C_min_j(77)"
+    <<std::setw(nWidthIntOutputField)<<"C_min_k(78)";
   if(bExtraInfoInProfile){
-    ofFile<<std::setw(nWidthOutputField)<<"DlnPDlnT(76)"
-      <<std::setw(nWidthOutputField)<<"DlnPDlnRho(77)"
-      <<std::setw(nWidthOutputField)<<"DEDT(78)";
+    ofFile<<std::setw(nWidthOutputField)<<"DlnPDlnT(79)"
+      <<std::setw(nWidthOutputField)<<"DlnPDlnRho(80)"
+      <<std::setw(nWidthOutputField)<<"DEDT(81)";
   }
   ofFile<<std::endl;
   
@@ -3770,33 +3871,39 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       if(i!=0){
         ofFile
           <<std::setw(nWidthOutputField)<<dAve[nL_rad][i-1]/dLSun//60
-          <<std::setw(nWidthOutputField)<<dAve[nL_con][i-1]/dLSun;//61
+          <<std::setw(nWidthOutputField)<<dAve[nL_con][i-1]/dLSun//61
+          <<std::setw(nWidthOutputField)<<dAve[nF_con][i-1]/dLSun//62
+          <<std::setw(nWidthOutputField)<<dMax[nF_con][i-1]/dLSun//63
+          <<std::setw(nWidthOutputField)<<dMin[nF_con][i-1]/dLSun;//64
       }
       else{//luminosity not defined at inner interface
         ofFile
           <<std::setw(nWidthOutputField)<<"-"//60
-          <<std::setw(nWidthOutputField)<<"-";//61
+          <<std::setw(nWidthOutputField)<<"-"//61
+          <<std::setw(nWidthOutputField)<<"-"//62
+          <<std::setw(nWidthOutputField)<<"-"//63
+          <<std::setw(nWidthOutputField)<<"-";//64
       }
     }
     ofFile
-      <<std::setw(nWidthOutputField)<<dAve[nKE][i]//62
-      <<std::setw(nWidthOutputField)<<dAve[nP][i]//63
-      <<std::setw(nWidthOutputField)<<dMax[nP][i]//64
-      <<std::setw(nWidthOutputField)<<dMin[nP][i]//65
-      <<std::setw(nWidthOutputField)<<dAve[nGamma][i]//66
-      <<std::setw(nWidthOutputField)<<dMax[nGamma][i]//67
-      <<std::setw(nWidthOutputField)<<dMin[nGamma][i]//68
-      <<std::setw(nWidthOutputField)<<dAve[nC][i]//69
-      <<std::setw(nWidthOutputField)<<dMax[nC][i]//70
-      <<std::setw(nWidthIntOutputField)<<nMaxJIndex[nC][i]//71
-      <<std::setw(nWidthIntOutputField)<<nMaxKIndex[nC][i]//72
-      <<std::setw(nWidthOutputField)<<dMin[nC][i]//73
-      <<std::setw(nWidthIntOutputField)<<nMinJIndex[nC][i]//74
-      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i];//75
+      <<std::setw(nWidthOutputField)<<dAve[nKE][i]//65
+      <<std::setw(nWidthOutputField)<<dAve[nP][i]//66
+      <<std::setw(nWidthOutputField)<<dMax[nP][i]//67
+      <<std::setw(nWidthOutputField)<<dMin[nP][i]//68
+      <<std::setw(nWidthOutputField)<<dAve[nGamma][i]//69
+      <<std::setw(nWidthOutputField)<<dMax[nGamma][i]//70
+      <<std::setw(nWidthOutputField)<<dMin[nGamma][i]//71
+      <<std::setw(nWidthOutputField)<<dAve[nC][i]//72
+      <<std::setw(nWidthOutputField)<<dMax[nC][i]//73
+      <<std::setw(nWidthIntOutputField)<<nMaxJIndex[nC][i]//74
+      <<std::setw(nWidthIntOutputField)<<nMaxKIndex[nC][i]//75
+      <<std::setw(nWidthOutputField)<<dMin[nC][i]//76
+      <<std::setw(nWidthIntOutputField)<<nMinJIndex[nC][i]//77
+      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i];//78
     if(bExtraInfoInProfile){
-      ofFile<<std::setw(nWidthOutputField)<<dDlnPDlnT
-        <<std::setw(nWidthOutputField)<<dDlnPDlnRho
-        <<std::setw(nWidthOutputField)<<dDEDT;
+      ofFile<<std::setw(nWidthOutputField)<<dDlnPDlnT//79
+        <<std::setw(nWidthOutputField)<<dDlnPDlnRho//80
+        <<std::setw(nWidthOutputField)<<dDEDT;//81
     }
     ofFile<<std::endl;
   }
@@ -3862,24 +3969,27 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthOutputField)<<"-"//59
     <<std::setw(nWidthOutputField)<<dAve[nL_rad][nSizeGlobe[0]+2*nNumGhostCells-1]/dLSun//60
     <<std::setw(nWidthOutputField)<<dAve[nL_con][nSizeGlobe[0]+2*nNumGhostCells-1]/dLSun//61
-    <<std::setw(nWidthOutputField)<<"-"//62
-    <<std::setw(nWidthOutputField)<<"-"//63
-    <<std::setw(nWidthOutputField)<<"-"//64
+    <<std::setw(nWidthOutputField)<<dAve[nF_con][nSizeGlobe[0]+2*nNumGhostCells-1]/dLSun//62
+    <<std::setw(nWidthOutputField)<<dMax[nF_con][nSizeGlobe[0]+2*nNumGhostCells-1]/dLSun//63
+    <<std::setw(nWidthOutputField)<<dMin[nF_con][nSizeGlobe[0]+2*nNumGhostCells-1]/dLSun//64
     <<std::setw(nWidthOutputField)<<"-"//65
     <<std::setw(nWidthOutputField)<<"-"//66
     <<std::setw(nWidthOutputField)<<"-"//67
     <<std::setw(nWidthOutputField)<<"-"//68
     <<std::setw(nWidthOutputField)<<"-"//69
     <<std::setw(nWidthOutputField)<<"-"//70
-    <<std::setw(nWidthIntOutputField)<<"-"//71
-    <<std::setw(nWidthIntOutputField)<<"-"//72
+    <<std::setw(nWidthOutputField)<<"-"//71
+    <<std::setw(nWidthOutputField)<<"-"//72
     <<std::setw(nWidthOutputField)<<"-"//73
     <<std::setw(nWidthIntOutputField)<<"-"//74
-    <<std::setw(nWidthIntOutputField)<<"-";//75
+    <<std::setw(nWidthIntOutputField)<<"-"//75
+    <<std::setw(nWidthOutputField)<<"-"//76
+    <<std::setw(nWidthIntOutputField)<<"-"//77
+    <<std::setw(nWidthIntOutputField)<<"-";//78
   if(bExtraInfoInProfile){
-    ofFile<<std::setw(nWidthOutputField)<<"-"
-      <<std::setw(nWidthOutputField)<<"-"
-      <<std::setw(nWidthOutputField)<<"-";
+    ofFile<<std::setw(nWidthOutputField)<<"-"//79
+      <<std::setw(nWidthOutputField)<<"-"//80
+      <<std::setw(nWidthOutputField)<<"-";//81
   }
   ofFile<<std::endl;
   

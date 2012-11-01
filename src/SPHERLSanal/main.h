@@ -101,6 +101,10 @@ int nKE;/**<
 int nC;/**<
   Index of the sound speed.
   */
+  
+int nF_con;/**<
+  Index of the convective luminosity.
+  */
 
 //variables
 int  nPrecisionAscii=16;/**<
