@@ -28,12 +28,12 @@ def parseOptions():
   parser.add_option("--re-sum",action="store_true",dest="resum"
     ,help="Will re-sum all model profiles kinetic energies, usefull when files have problems "
     +"being made from corruption and have to be re-made. Other wise should not be used as it "
-    +"takes more time. In the case when -l option is set it will recalculate the maximum of L_con"
+    +"takes more time. In the case when -l option is set it will recalculate the maximum of F_con"
     +". [not default].",default=False)
   parser.add_option("-e",action="store",dest="eosFile"
     ,help="Overrides the equation of state file set in the model.",default=None)
   parser.add_option("-l",action="store_true",dest="bLconInsteadofKE",default=False
-    ,help="Will use L_con column and compute the max, instead of the sum, saving it to a file"
+    ,help="Will use F_con column and compute the max, instead of the sum, saving it to a file"
     +"called \"maxLcon.txt\" instead of \"averagePKE.txt\"")
   parser.add_option("-u",action="store_true",dest="bumu0InsteadofKE",default=False
     ,help="Will use u-u_0 columns and compute the max, instead of the sum, saving it to a file"
@@ -91,7 +91,7 @@ def averagePKE(start,end,baseFileName,options):
     return False
   
   if options.bLconInsteadofKE:
-    print __name__+":"+averagePKE.__name__+":finding max L_con in profiles ..."
+    print __name__+":"+averagePKE.__name__+":finding max F_con in profiles ..."
   elif options.bumu0InsteadofKE:
     print __name__+":"+averagePKE.__name__+":finding max u-u_0 in profiles ..."
   elif options.bTmTaveInsteadofKE:
@@ -106,7 +106,7 @@ def averagePKE(start,end,baseFileName,options):
   directory=os.path.dirname(baseFileName)
   if directory=="":
     if options.bLconInsteadofKE:
-      averagePKEFile="maxLcon.txt"
+      averagePKEFile="maxFcon.txt"
     elif options.bumu0InsteadofKE:
       averagePKEFile="maxumu0.txt"
     elif options.bTmTaveInsteadofKE:
@@ -115,7 +115,7 @@ def averagePKE(start,end,baseFileName,options):
       averagePKEFile="averagePKE.txt"
   else:
     if options.bLconInsteadofKE:
-      averagePKEFile=directory+"/maxLcon.txt"
+      averagePKEFile=directory+"/maxFcon.txt"
     elif options.bumu0InsteadofKE:
       averagePKEFile=directory+"/maxumu0.txt"
     elif options.bTmTaveInsteadofKE:
@@ -126,7 +126,7 @@ def averagePKE(start,end,baseFileName,options):
   if os.path.exists(averagePKEFile):
     if not options.resum:
       if options.bLconInsteadofKE:
-        print "  \"",averagePKEFile,"\" already exists, not recalculating L_con_max for entries"\
+        print "  \"",averagePKEFile,"\" already exists, not recalculating F_con_max for entries"\
           +" already in file"
       elif options.bumu0InsteadofKE:
         print "  \"",averagePKEFile,"\" already exists, not recalculating (u-u_0)_max for entries"\
@@ -149,20 +149,20 @@ def averagePKE(start,end,baseFileName,options):
     else:
       if options.bLconInsteadofKE:
         print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but "\
-          +"re-sum set so reclaculating L_con_max entries in profiles"
+          +"re-sum set so reclaculating F_con_max entries in profiles"
       else:
         print __name__+":"+averagePKE.__name__+":  \"",averagePKEFile,"\" already exists, but "\
           +"re-sum set so resumming KE entries in profiles"
       
   if options.bLconInsteadofKE:
-    nColumn=60#use L_con column
+    nColumn=62#use F_con column
   else:
-    nColumn=61#use kinetic energy column
+    nColumn=64#use kinetic energy column
   for file in files:
     fileIndex=int(file[len(file)-16:len(file)-8])
     if fileIndex>lastIndex:#make sure that file hasn't already been done
       if options.bLconInsteadofKE:
-        print __name__+":"+averagePKE.__name__+": finding max of L_con of file \""+file+"\" ..."
+        print __name__+":"+averagePKE.__name__+": finding max of F_con of file \""+file+"\" ..."
       else:
         print __name__+":"+averagePKE.__name__+": summing KE of file \""+file+"\" ..."
       fileData=datafile.DataFile()

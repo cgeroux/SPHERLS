@@ -115,23 +115,25 @@ def make_2DSlices(keep,fileName,nPlane,nPlaneIndex,remake):
     extension=extension+"i="+str(nPlaneIndex)+".txt"
   if nPlane==2:
     extension=extension+"j="+str(nPlaneIndex)+".txt"
+  count=1
   for file in files:
-  
-      #if this particular 2D slice doesn't already exsist for this binary file create it
-      if not (os.path.exists(file+extension)) or remake:
+    #if this particular 2D slice doesn't already exsist for this binary file create it
+    if not (os.path.exists(file+extension)) or remake:
+      
+      #make 2D slice
+      print __name__+":"+make_2DSlices.__name__+": creating 2D slice from \""+file+"\" "\
+        +str(count)+"/"+str(len(files))+" ..."
+      success=os.system(paths.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
+      if success==0:
+        pass
+      else :
         
-        #make 2D slice
-        print __name__+":"+make_2DSlices.__name__+": creating 2D slice from \""+file+"\""
-        success=os.system(paths.SPHERLSanalPath+' -s cb '+str(nPlane)+' '+str(nPlaneIndex)+' '+file)
-        if success==0:
-          pass
-        else :
-          
-          #say there was an error and return
-          print __name__+":"+make_2DSlices.__name__+": error making 2D slice "+file+extension
-          return False
-      else:
-        print __name__+":"+make_2DSlices.__name__+": 2D slice \""+file+extension+"\" already exists"
+        #say there was an error and return
+        print __name__+":"+make_2DSlices.__name__+": error making 2D slice "+file+extension
+        return False
+    else:
+      print __name__+":"+make_2DSlices.__name__+": 2D slice \""+file+extension+"\" already exists"
+    count+=1
   return True
 if __name__ == "__main__":
   main()

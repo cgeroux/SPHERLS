@@ -5118,8 +5118,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
         <<"-"
         <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<"-"<<std::setw(nWidthOutputField)
-        <<std::endl;
+        <<"-"<<std::setw(nWidthOutputField)<<"-"<<std::endl;
     }
   }
   if(nPlane==1){//theta-phi
