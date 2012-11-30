@@ -44,13 +44,13 @@
   
   @section installation Installing SPHERLS
   
-    \todo This should be updated to reflect the use of the GNU build system.
+    %\todo This should be updated to reflect the use of the GNU build system.
   
-    Once the correct libraries are installed, and their paths added to your \c LD_LIBRARY_PATH environment varible, it should just require typing make in the correct directories. SPHERLS is broken up into 3 main codes. SPHERLS it self, which is the main hydrodynamics code which integrates the initial static model, SPHERLSgen which creates the static model, and SPHERLSanal which is used for processing the output of SPHERLS and SPHERLSgen.
+    %Once the correct libraries are installed, and their paths added to your \c LD_LIBRARY_PATH environment varible, it should just require typing make in the correct directories. SPHERLS is broken up into 3 main codes. SPHERLS it self, which is the main hydrodynamics code which integrates the initial static model, SPHERLSgen which creates the static model, and SPHERLSanal which is used for processing the output of SPHERLS and SPHERLSgen.
     
-    To Add
-    - example .bashrc entries, showing LD_LIBRARY_PATH additions, and other SPHERLS related configuration options
-    - also the make files will need to know where the paths for the libraries are, either describe how the user can do this, or automate it some how.
+    %To Add
+    %- example .bashrc entries, showing LD_LIBRARY_PATH additions, and other SPHERLS related configuration options
+    %- also the make files will need to know where the paths for the libraries are, either describe how the user can do this, or automate it some how.
     
     A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib, \c /include, \c /usr/lib /usr/include, \c /usr/local/lib, \c /usr/local/include, \c /home/$USER/lib, and \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manualy tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options to tell the script where to find these include files and libraries.
     

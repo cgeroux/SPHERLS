@@ -1,10 +1,10 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-AC_PROG_CXX([mpic++])
-AS_IF(
-[test "$CXX" != "mpic++"],
-[AC_MSG_RESULT(["mpic++ not found! Aborting"])
-exit;])
+AC_PROG_CXX([mpic++ mpicxx])
+#AS_IF(
+#[test "$CXX" == "mpic++"],[],
+#[test "$CXX" == "mpicxx"],[],
+#,[AC_MSG_RESULT([mpic++ not found! Aborting])exit;])
 AC_LANG([C++])
 GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
 GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
@@ -48,8 +48,9 @@ AC_ARG_ENABLE([fftw-lib-path],
   [])
 #
 #check to make sure we have a library and include path, if we are using fftw
-AS_IF([test "$FFTW_ENABLE" = "yes"],[
-  #
+AS_IF(
+  [test "$FFTW_ENABLE" = "yes"],
+  [#
   #search include paths for fftw3.h
   FFTW_INCLUDE_PATH=""
   for TEST_PATH in $FFTW_INCLUDE_PATHS; do
@@ -65,17 +66,13 @@ AS_IF([test "$FFTW_ENABLE" = "yes"],[
   #
   #check that a lib path was found
   AS_IF([test "$FFTW_LIB_PATH" = ""],[
-    AC_MSG_RESULT(["No fftw3 library found in search paths \"$FFTW_LIB_PATHS\". Either specify the\
-    path to libfftw3.a/.so with --enable-fftw-lib-path or disable fftw features with --disable-fftw\
-    ."])
+    AC_MSG_RESULT([No fftw3 library found in search paths \"$FFTW_LIB_PATHS\". Either specify the path to libfftw3.a/.so with --enable-fftw-lib-path or disable fftw features with --disable-fftw .])
     exit
     ])
   #
   #check that an include path was found
   AS_IF([test "$FFTW_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT(["No fftw3 include file found in search paths \"$FFTW_INCLUDE_PATHS\". Either \
-    specify the path to fftw3.h with --enable-fftw-include-path or disable fftw features with \
-    --disable-fftw ."])
+    AC_MSG_RESULT([No fftw3 include file found in search paths \"$FFTW_INCLUDE_PATHS\". Either specify the path to fftw3.h with --enable-fftw-include-path or disable fftw features with --disable-fftw .])
     exit
     ])
   #
@@ -133,15 +130,11 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
   done
 
   AS_IF([test "$HDF_LIB_PATH" = ""],[
-    AC_MSG_RESULT(["No hdf library found in search paths \"$HDF_LIB_PATHS\". Either specify the\
-    path to libmfhdf.a/.so with --enable-hdf-lib-path or disable hdf features with --disable-hdf\
-    ."])
+    AC_MSG_RESULT([No hdf library found in search paths \"$HDF_LIB_PATHS\". Either specify the path to libmfhdf.a/.so with --enable-hdf-lib-path or disable hdf features with --disable-hdf .])
     exit
     ])
   AS_IF([test "$HDF_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT(["No hdf include file found in search paths \"$HDF_INCLUDE_PATHS\". Either \
-    specify the path to hdf.h with --enable-hdf-include-path or disable hdf features with \
-    --disable-hdf."])
+    AC_MSG_RESULT([No hdf include file found in search paths \"$HDF_INCLUDE_PATHS\". Either specify the path to hdf.h with --enable-hdf-include-path or disable hdf features with --disable-hdf .])
     exit
     ])
   AC_DEFINE([HDF_ENABLE],[],[Defined if hdf is enabled])
@@ -195,17 +188,13 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
   #
   #check that a lib path was found
   AS_IF([test "$PETSC_LIB_PATH" = ""],[
-    AC_MSG_RESULT(["No petsc library found in search paths \"$PETSC_LIB_PATHS\". Either specify the\
-    path to libpetsc.a/.so with --enable-petsc-lib-path or disable petsc features with \
-    --disable-petsc."])
+    AC_MSG_RESULT([No petsc library found in search paths \"$PETSC_LIB_PATHS\". Either specify the path to libpetsc.a/.so with --enable-petsc-lib-path or disable petsc features with --disable-petsc .])
     exit
     ])
   #
   #check that an include path was found
   AS_IF([test "$PETSC_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT(["No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Either \
-    specify the path to petscksp.h with --enable-petsc-include-path or disable petsc features with \
-    --disable-petsc ."])
+    AC_MSG_RESULT([No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Either specify the path to petscksp.h with --enable-petsc-include-path or disable petsc features with --disable-petsc .])
     exit
     ])
   #
