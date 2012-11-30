@@ -1,3 +1,7 @@
+SPHERLS simulates the interaction of radial pulsation and convection in stars.
+
+Below are the basic instructions for building. To find out more on how to use the SPHERLS packages see user manuals in the docs/manuals directory, especially SPHERLS_manual.pdf in which the installation of prerequisit libraries is described.
+
 ==========================================
 IF RAW SOURCE:
 
