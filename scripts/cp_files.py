@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-##@file cp_files.py
-#
-#
+"""@file cp_files.py
+"""
+
 import os
 import getopt
 import sys
@@ -9,11 +9,12 @@ import glob
 import optparse as op
 import disect_filename
 
-
-## Documentation for a function
-#
-# more details
 def main():
+  """ Documentation for a function
+
+      more details
+  """
+
   #make command line parser
   parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END] NEWBASEFILENAME"
     ,version="%prog 1.0"
@@ -37,11 +38,13 @@ def main():
     
   #create profile files, and save list of files
   cp_files(args[0],args[1],options)
-
-## Documentation for a function
-#
-# more details
 def cp_files(fileName,newBaseFileName,options):
+  """
+  Copies SPHERLS output files using the BASEFILENAME[startIndex-endIndex] syntax.
+  
+  This is the same syntax that the other scripts use when working with SPHERLS
+  output files.
+  """
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
@@ -81,7 +84,6 @@ def cp_files(fileName,newBaseFileName,options):
     os.system(cmd)
     
   return True
-
 if __name__ == "__main__":
   main()
   
