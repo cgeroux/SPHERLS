@@ -147,14 +147,32 @@ SPHERLSgen_SOURCES	=	\
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 .PHONY:docs
-docs:	docs/manuals/SPHERLS_manual.pdf
+docs:	docs/manuals/SPHERLS_manual.pdf	docs/manuals/SPHERLSgen_manual.pdf	\
+	docs/manuals/SPHERLSanal_manual.pdf 	docs/manuals/SPHERLS_user_guide.pdf
 
 if HDF_ENABLE
 hdf.so:
 	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
 endif
 
-docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	${SPHERLSanal_SOURCES}	${SPHERLSgen_SOURCES}	Doxyfile	${DOC_FILES}
-	(doxygen)
-	(cd	docs/latex;	make	pdf;)
-	(cd	docs/latex;mv	refman.pdf	../manuals/SPHERLS_manual.pdf)
+docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+	(cd	src/SPHERLS;echo	${PWD};	doxygen)
+	(cd	src/SPHERLS/docs/latex;	make	pdf;)
+	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_manual.pdf)
+
+docs/manuals/SPHERLSgen_manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
+	(cd	src/SPHERLSgen;	doxygen)
+	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
+	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_manual.pdf)
+
+docs/manuals/SPHERLSanal_manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
+	(cd	src/SPHERLSanal;	doxygen)
+	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
+	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_manual.pdf)
+
+docs/manuals/SPHERLS_user_guide.pdf:	${DOC_FILES}	src/Doxyfile
+	(cd	src;	doxygen)
+	(cd	src/docs/latex;	make	pdf;)
+	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_user_guide.pdf)
+
+
