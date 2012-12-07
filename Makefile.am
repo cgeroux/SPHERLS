@@ -1,4 +1,8 @@
-CXX=mpic++
+#CXX=mpic++, this should really be the case after running configure
+
+###############################################################################
+# EXTRA_DIST ##################################################################
+###############################################################################
 
 #energy profiles
 EXTRA_DIST=data/energy_pro/Epro.dat
@@ -43,6 +47,9 @@ EXTRA_DIST+=docs/templateXML/*.xml
 #python c++ extensions
 EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
 
+###############################################################################
+# INSTALL DATA ################################################################
+###############################################################################
 
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(datadir)/$(PACKAGE)/data
@@ -52,6 +59,16 @@ install-data-local:
 uninstall-local:
 	rm $(DESTDIR)$(datadir)/$(PACKAGE)/data/[ab]
 	-rmdir $(DESTDIR)$(datadir)/$(PACKAGE)/data
+
+###############################################################################
+# DOCS ########################################################################
+###############################################################################
+
+DOC_FILES=./src/userguide.txt
+  
+###############################################################################
+# BINS + SOURCE ###############################################################
+###############################################################################
 
 bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen
 #dist_pkgdata_DATA=./data/energy_pro/*	./data/eos/*	./data/ref_cals/*	./data/velocity_pro/*
@@ -71,7 +88,6 @@ SPHERLS_SOURCES	=	\
 	src/SPHERLS/time.cpp	\
 	src/SPHERLS/procTop.h	\
 	src/SPHERLS/procTop.cpp	\
-	src/SPHERLS/userguide.h	\
 	src/SPHERLS/watchzone.h	\
 	src/SPHERLS/profileData.cpp	\
 	src/SPHERLS/profileData.h	\
@@ -131,27 +147,14 @@ SPHERLSgen_SOURCES	=	\
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 .PHONY:docs
-docs:	docs/manuals/SPHERLS_manual.pdf	docs/manuals/SPHERLSgen_manual.pdf	\
-	docs/manuals/SPHERLSanal_manual.pdf
+docs:	docs/manuals/SPHERLS_manual.pdf
 
 if HDF_ENABLE
 hdf.so:
 	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
 endif
 
-docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
-	(cd	src/SPHERLS;echo	${PWD};	doxygen)
-	(cd	src/SPHERLS/docs/latex;	make	pdf;)
-	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_manual.pdf)
-
-docs/manuals/SPHERLSgen_manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
-	(cd	src/SPHERLSgen;	doxygen)
-	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_manual.pdf)
-
-docs/manuals/SPHERLSanal_manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
-	(cd	src/SPHERLSanal;	doxygen)
-	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_manual.pdf)
-
-
+docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	${SPHERLSanal_SOURCES}	${SPHERLSgen_SOURCES}	Doxyfile	${DOC_FILES}
+	(doxygen)
+	(cd	docs/latex;	make	pdf;)
+#	(cd	docs/latex;mv	refman.pdf	../manuals/SPHERLS_manual.pdf)
