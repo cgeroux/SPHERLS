@@ -1,9 +1,9 @@
 /** @file
-  Contains the text for the "Using and Modifying SPHERlS" section of this manual.
+  Contains the text for the "Installing, Using, and Modifying SPHERlS" section of this manual.
 **/
 
 /**
-  @mainpage Using and Modifying SPHERLS
+  @mainpage Installing, Using, and Modifying SPHERLS
   
   This manual is divided into two main parts the current chapter, and the rest of the chapters. All chapters other than the current, contain specific reference material for the SPHERLS code while the current chapter contains a more descriptive how-to approach explaining the usage and modification of SPHERLS. The chapters following chapter 1 will serve as a useful reference when specific details need to be found, for example a description of a particular variable in the code. The current chapter on the other hand is the best place to go to get a quick understanding of SPHERLS that will enable you to use it.
   
@@ -43,24 +43,21 @@
     
   
   @section installation Installing SPHERLS
-  
-    %\todo This should be updated to reflect the use of the GNU build system.
-  
-    %Once the correct libraries are installed, and their paths added to your \c LD_LIBRARY_PATH environment variable, it should just require typing make in the correct directories. SPHERLS is broken up into 3 main codes. SPHERLS it self, which is the main hydrodynamics code which integrates the initial static model, SPHERLSgen which creates the static model, and SPHERLSanal which is used for processing the output of SPHERLS and SPHERLSgen.
     
-    %To Add
-    %- example .bashrc entries, showing LD_LIBRARY_PATH additions, and other SPHERLS related configuration options
-    %- also the make files will need to know where the paths for the libraries are, either describe how the user can do this, or automate it some how.
+    \textbf{Need to update the below, to include the fact that I am now including the required libraries with the package. This will ensure that compatible versions of the libraries are avaible for use, and garantee that the end user gets libraries that have been tested to work with the code. I should periodically try updating these libraries.}
+    
+    \textbf{I should also follow the step-by-step instructions on a fresh machine without using sudo. This could be done using virtual box}
+    
+    \textbf{Check to make sure I mention what needs to be added to .bashrc, this is likely different for per-user installs that it is for global installs}
     
     A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib, \c /include, \c /usr/lib /usr/include, \c /usr/local/lib, \c /usr/local/include, \c /home/$USER/lib, and \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manually tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options to tell the script where to find these include files and libraries.
     
-    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \verbatim --prefix=/home/$USER/ \endverbatim , mentioned below, to point to where you want to install it. 
+    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \verbatim --prefix=/home/$USER/ \endverbatim , mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also --prefix should always be specified as some of these libraries don't install to standard debian locations on their own, prefering install to install into the directory where they are built.
     
     If you have root access and want to install for all users of the current machine you will likely want to install the libraries into \c /usr/local  which can be achieved by setting \verbatim --prefix=/usr/local \endverbatim instead of \verbatim --prefix=/home/$USER/ \endverbatim used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
     @subsection requirements Requirements
-      - gcc/g++
-      - openMPI
+      - gcc/g++/openMPI
       - PETSc library, used as the core matrix solver
     @subsection optional_requirements Optional Requirements
       - python for analysis scripts
@@ -69,11 +66,15 @@
       -- scipy for interpolating in equation of state files
       - fftw3 library for frequency analysis
       - hdf4 library for converting to hdf4 file format
+      -- hdf library needs jpeg library and zlib library
       - Doxygen used to create documentation from source code via "make docs"
     
     @subsection installOpenMPI Installing OpenMPI
     - Download OpenMPI from <a href="http://www.open-mpi.org/software/ompi/v1.6/">website</a>.
     - add library path to LD_LIBRARY_PATH
+    - ./configure --prefix=<path-to-final-location-of-install>
+    - make
+    - install
     @subsection installPETSC Installing PETSC Library
       Version \c petsc-lite-3.1-p8, has been tested to work with SPHERLS. \c petsc-lite-3.2-p7 is known to be incompatible, which as of this writting is the current version of the petsc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
       - Download PETSc library, from the PETSc <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>.
@@ -81,6 +82,7 @@
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
         -# \verbatim ./configure PETSC_DIR=$PWD --prefix=/home/$USER/ --with-c++-support --with-c-support
+        note that the PETSC_DIR=$PWD needs to come first
  --with-shared --download-f-blas-lapack=1 --with-x11=no \endverbatim \c $USER is the environment variable corresponding to your username.
         -# \verbatim make all \endverbatim \
         Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above if given.
@@ -102,6 +104,13 @@
         -# \verbatim make install \endverbatim
     
     @subsection installHDF4 Installing HDF4 Library
+      - First run configure in the hdf directory
+      - If configure doesn't find the jpeg library install that before proceding see jpeg library install
+      \verbatim ./configure --prefix=<path-to-final-location-of-library> \endverbatim
+      note that for hdf --prefix should be set if doing a global install or doing a per user install as the default install directory is inside the build directory, which is not what is usually wanted, so if doing a global install it will probably want to be set to "/usr/local"
+      \verbatim make\endverbatim
+      \verbatim make install\endverbatim
+      
       - Building these libraries requires gfortran make sure it is available.
       - Download the HDF Library from the hdfgroup <a href="http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/">website</a>. Version hdf-4.2.7 has been tested to work with SPHERLS.
       - Then untar and unzip the downloaded file with something like <tt>tar -xzf hdf.4.2.7-patch1.tar.gz</tt>
@@ -116,8 +125,6 @@
     @subsection installPython Installing Python
     
     @subsection installingSPHERLS Installing SPHERLS
-    
-    
     
   @section usage Using SPHERLS
     - Generating a starting model (\todo should merge SPHERLSgen and SPHERLSanal documentation)
@@ -174,5 +181,4 @@
   
   @section messpass Message Passing
     - Explain message passing in SPHERLS
-   
 */

@@ -157,4 +157,4 @@ endif
 docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	${SPHERLSanal_SOURCES}	${SPHERLSgen_SOURCES}	Doxyfile	${DOC_FILES}
 	(doxygen)
 	(cd	docs/latex;	make	pdf;)
-#	(cd	docs/latex;mv	refman.pdf	../manuals/SPHERLS_manual.pdf)
+	(cd	docs/latex;mv	refman.pdf	../manuals/SPHERLS_manual.pdf)

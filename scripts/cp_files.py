@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""@file cp_files.py
-"""
+##@file cp_files.py
+#
 
 import os
 import getopt
@@ -11,7 +11,7 @@ import disect_filename
 
 def main():
   """ Documentation for a function
-
+      
       more details
   """
 
