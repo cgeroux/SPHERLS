@@ -416,6 +416,7 @@ def plot(dataSets,options,title):
   axisSpacing=options.axisSpacing
   figBottom=options.figBottom
   figTop=options.figTop
+  figLeft=options.figLeft
   
   #count number of axes in all figures, this number will be the same for all figures.
   nNumAxes=0
@@ -442,12 +443,12 @@ def plot(dataSets,options,title):
   nDataSetCount=0
   for dataSet in dataSets:
     for axisMine in dataSet.axes:
-      gs.append(GridSpec(len(axisMine.plots),1,height_ratios=axisMine.plotHeightWeights))
+      gs.append(      GridSpec(len(axisMine.plots),1,height_ratios=axisMine.plotHeightWeights))
       bottom=top-heightPlot*(len(axisMine.plots))
       if options.spaceAxisEvenly:
         top=figTop-axisCount*(heightAxis+axisSpacing)
         bottom=figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+axisSpacing)
-      gs[axisCount].update(top=top,bottom=bottom,hspace=0.0)
+      gs[axisCount].update(left=figLeft,top=top,bottom=bottom,hspace=0.0)
       
       #for each plot
       nPlotCount=0
@@ -631,6 +632,11 @@ def main():
     options.figBottom=0.05
     if figureElement.get("figBottom")!=None and figureElement.get("figBottom")!="":
       options.figBottom=float(figureElement.get("figBottom"))
+      
+    #set location of left of the plot area
+    options.figLeft=0.05
+    if figureElement.get("figLeft")!=None and figureElement.get("figLeft")!="":
+      options.figLeft=float(figureElement.get("figLeft"))
     
     #set figure height
     if figureElement.get("figHeight")!=None and figureElement.get("figHeight")!="":

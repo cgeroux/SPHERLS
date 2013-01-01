@@ -47,6 +47,13 @@ EXTRA_DIST+=docs/templateXML/*.xml
 #python c++ extensions
 EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
 
+#supporting libraries
+EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
+EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
+EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz
+EXTRA_DIST+=libs/openmpi-1.6.3.tar.gz
+EXTRA_DIST+=libs/petsc-3.1-p8.tar.gz
+
 ###############################################################################
 # INSTALL DATA ################################################################
 ###############################################################################
@@ -148,14 +155,14 @@ SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 .PHONY:docs
 docs:	docs/manuals/SPHERLS_manual.pdf	docs/manuals/SPHERLSgen_manual.pdf	\
-	docs/manuals/SPHERLSanal_manual.pdf 	docs/manuals/SPHERLS_user_guide.pdf
+	docs/manuals/SPHERLSanal_manual.pdf	docs/manuals/scripts_manual.pdf
 
 if HDF_ENABLE
 hdf.so:
 	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
 endif
 
-docs/manuals/SPHERLS_manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+docs/manuals/SPHERLS_manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
 	(cd	src/SPHERLS;echo	${PWD};	doxygen)
 	(cd	src/SPHERLS/docs/latex;	make	pdf;)
 	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_manual.pdf)
@@ -170,9 +177,7 @@ docs/manuals/SPHERLSanal_manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxy
 	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
 	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_manual.pdf)
 
-docs/manuals/SPHERLS_user_guide.pdf:	${DOC_FILES}	src/Doxyfile
-	(cd	src;	doxygen)
-	(cd	src/docs/latex;	make	pdf;)
-	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_user_guide.pdf)
-
-
+docs/manuals/scripts_manual.pdf:	scripts/Doxyfile	scripts/*.py
+	(cd	scripts;	doxygen)
+	(cd	scripts/docs/latex;	make	pdf;)
+	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/scripts_manual.pdf)

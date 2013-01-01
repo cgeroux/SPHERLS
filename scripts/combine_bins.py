@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+##@file combine_bins.py
+
 import os
 import getopt
 import sys
@@ -34,6 +36,7 @@ def main():
   #create profile files, and save list of files
   combine_bin_files(options.keep,args[0],options.remakeBins)
 def combine_bin_files(keep,fileName,remakeBins):
+  """Combines distributed binary dump files created by SPHERLS into a single binary file."""
   
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
   

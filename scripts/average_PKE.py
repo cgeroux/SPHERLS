@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+##@file average_PKE.py
 
 import datafile
 import optparse as op
@@ -64,6 +65,8 @@ def main():
   for file in failedFiles:
     print file
 def averagePKE(start,end,baseFileName,options):
+  """Computes the average PKE from radial profiles."""
+  
   nColumnUMax=14
   nColumnUMin=17
   nColumnU0=20

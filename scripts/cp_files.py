@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 ##@file cp_files.py
-#
 
 import os
 import getopt

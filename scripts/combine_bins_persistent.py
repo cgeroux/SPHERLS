@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+##@file combine_bins_persistent.py
 import combine_bins
 import optparse as op
 import time
