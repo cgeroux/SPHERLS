@@ -114,7 +114,6 @@ SPHERLS_CPPFLAGS	=	-I$(PETSC_INCLUDE_PATH)	-Isrc/
 SPHERLSanal_SOURCES	=	\
 	src/SPHERLSanal/main.cpp	\
 	src/SPHERLSanal/main.h	\
-	src/SPHERLSanal/userguide.h	\
 	src/eos.h	\
 	src/eos.cpp	\
 	src/exception2.cpp	\
@@ -142,7 +141,6 @@ SPHERLSanal_CPPFLAGS=$(FFTW_CPPFLAGS) $(HDF_CPPFLAGS) -Isrc/
 SPHERLSgen_SOURCES	=	\
 	src/SPHERLSgen/main.cpp	\
 	src/SPHERLSgen/main.h	\
-	src/SPHERLSgen/userguide.h	\
 	src/exception2.cpp	\
 	src/exception2.h	\
 	src/xmlFunctions.cpp	\
@@ -154,30 +152,35 @@ SPHERLSgen_SOURCES	=	\
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 .PHONY:docs
-docs:	docs/manuals/SPHERLS_manual.pdf	docs/manuals/SPHERLSgen_manual.pdf	\
-	docs/manuals/SPHERLSanal_manual.pdf	docs/manuals/scripts_manual.pdf
+docs:	docs/manuals/SPHERLS_Ref_Manual.pdf	docs/manuals/SPHERLSgen_Ref_Manual.pdf	\
+	docs/manuals/SPHERLSanal_Ref_Manual.pdf	docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
 
 if HDF_ENABLE
 hdf.so:
 	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
 endif
 
-docs/manuals/SPHERLS_manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+docs/manuals/SPHERLS_Ref_Manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
 	(cd	src/SPHERLS;echo	${PWD};	doxygen)
 	(cd	src/SPHERLS/docs/latex;	make	pdf;)
-	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_manual.pdf)
+	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
 
-docs/manuals/SPHERLSgen_manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
+docs/manuals/SPHERLSgen_Ref_Manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
 	(cd	src/SPHERLSgen;	doxygen)
 	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_manual.pdf)
+	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_Ref_Manual.pdf)
 
-docs/manuals/SPHERLSanal_manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
+docs/manuals/SPHERLSanal_Ref_Manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
 	(cd	src/SPHERLSanal;	doxygen)
 	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_manual.pdf)
+	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_Ref_Manual.pdf)
 
-docs/manuals/scripts_manual.pdf:	scripts/Doxyfile	scripts/*.py
+docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
 	(cd	scripts;	doxygen)
 	(cd	scripts/docs/latex;	make	pdf;)
-	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/scripts_manual.pdf)
+	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
+  
+docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile ${DOC_FILES}
+	(cd	src;	doxygen)
+	(cd	src/docs/latex;	make	pdf;)
+	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_User_Guide.pdf)
