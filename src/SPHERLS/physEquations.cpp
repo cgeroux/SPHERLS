@@ -282,7 +282,8 @@ void setMainFunctions(Functions &functions,ProcTop &procTop,Parameters &paramete
       }
     }
   }
-  if(!time.bVariableTimeStep){//if not a variable time step use a constant one
+  if(!time.bVariableTimeStep){/*if not a variable time step use a function which
+    calculates a constant timestep*/
     functions.fpCalculateDeltat=&calDelt_CONST;
   }
 }

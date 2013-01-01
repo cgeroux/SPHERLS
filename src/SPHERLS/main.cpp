@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
     }
     while(global.time.dt<=global.time.dEndTime&&global.time.nTimeStepIndex<=global.time.nEndTimeStep){
       
-      //write out grid
+      //if bDump is true write out grid
       if(global.output.bDump){
         
         global.output.nNumTimeStepsSinceLastDump++;
