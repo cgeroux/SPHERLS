@@ -637,18 +637,22 @@ def main():
       options.figLeft=float(figureElement.get("figLeft"))
     
     #set figure height
+    options.figHeight=11.0
     if figureElement.get("figHeight")!=None and figureElement.get("figHeight")!="":
       options.figHeight=float(figureElement.get("figHeight"))
     
     #set figure width
+    options.figWidth=8.5
     if figureElement.get("figWidth")!=None and figureElement.get("figWidth")!="":
       options.figWidth=float(figureElement.get("figWidth"))
       
     #set font size
+    options.fontSize=12.0
     if figureElement.get("fontSize")!=None and figureElement.get("fontSize")!="":
       options.fontSize=float(figureElement.get("fontSize"))
       
     #set figure dpi
+    options.dpi=300
     if figureElement.get("dpi")!=None and figureElement.get("dpi")!="":
       options.dpi=int(figureElement.get("dpi"))
     
