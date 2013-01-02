@@ -554,7 +554,7 @@ def plot(dataSets,options,title):
     if ext[1:] not in supportedFileTypes:
       print "File type \""+ext[1:]+"\" not suported. Supported types are ",supportedFileTypes," please choose one of those"
       quit()
-    print __name__+":"+main.__name__+": saving figure to file \""+options.outputFile
+    print __name__+":"+main.__name__+": saving figure to file \""+options.outputFile+"\" ..."
     fig.savefig(options.outputFile,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
 def isFloat(str):
   try:
