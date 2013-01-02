@@ -7,14 +7,15 @@ directory, especially SPHERLS_manual.pdf in which the installation of
 prerequisite libraries is described.
 
 ==========================================
-IF RAW SOURCE:
+IF RAW SOURCE (will have gotten it from the git repository):
 
   autoreconf --install
   ./configure
   make
+  make install (optional)
 
 ===========================================
-IF PACKAGE:
+IF PACKAGE (will be a tar.gz file):
 
 To build and install:
 
