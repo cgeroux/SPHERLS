@@ -1,7 +1,7 @@
-2012-08-15 10:31:34.717356
-directory "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA" found
+2013-01-01 18:29:05.175670
+directory "/home/cgeroux/Documents/WORK/SPHERLS_git/data/ref_calcs/1DNA" found
 checking for needed files ...
-found "/home/cgeroux/WORK/SPHERLS/data/ref_calcs/1DNA/SPHERLS.xml"
+found "/home/cgeroux/Documents/WORK/SPHERLS_git/data/ref_calcs/1DNA/SPHERLS.xml"
 found start model "1DNARef_t00000000"
 
 RUNNING SPHERLS
@@ -105,9 +105,9 @@ src/SPHERLS/main.cpp:main:144:0:
   : Over last 1 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.35144e-15
-src/SPHERLS/dataManipulation.cpp:fin:670:0:
+src/SPHERLS/dataManipulation.cpp:fin:696:0:
   Dumping model to file: 1DNARef_t00000010
-src/SPHERLS/dataManipulation.cpp:fin:672:0:
+src/SPHERLS/dataManipulation.cpp:fin:698:0:
   For current time step 10 at time t=6.70048405349971e+01 [s] with time step dt=6.70048e+00 [s]
     * max( (Del Rho)_t/Rho )   =3.43538e-05
     * max( (Del T)_t/T )       =2.26130e-05
@@ -115,7 +115,7 @@ src/SPHERLS/dataManipulation.cpp:fin:672:0:
   : Over last 0 time steps :
     * Largest number of iterations for temperature calculation was 3
     * Largest relative error in calculation of temperature was     6.07563e-15
-Run time for proc 0 is 1.1199998856e-01 [s]
+Run time for proc 0 is 2.9334712029e-01 [s]
 
 combining binary dumps "./3DNARef_t[0-*]" and removing distributed binary files ...
 __main__:combine_bin_files: combining "./1DNARef_t00000000" and removing distributed binaries ...

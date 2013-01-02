@@ -276,7 +276,7 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
   #combine binary files
   print "combining binary dump \"./RestartTest2_t[0-*]\" for restart ...",
   log=open("log.txt",'a')
-  result=subprocess.call([paths.scriptPaths+"combine_bins.py","./RestartTest1_t[0-*]"],stdout=log,stderr=log)
+  result=subprocess.call([paths.scriptPath+"/combine_bins.py","./RestartTest1_t[0-*]"],stdout=log,stderr=log)
   log.close()
   if result!=0:
     print "FAILED"
@@ -302,7 +302,7 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
 
   #combine final binary files and convert to ascii
   print "combining binary files for dump \"./RestartTest2_t[0-*]\" ...",
-  result=subprocess.call([paths.scriptPaths+"combine_bins.py","./RestartTest2_t[0-*]"],stdout=log,stderr=log)
+  result=subprocess.call([paths.scriptPath+"/combine_bins.py","./RestartTest2_t[0-*]"],stdout=log,stderr=log)
   if result!=0:
     print "FAILED"
     os.chdir("../")

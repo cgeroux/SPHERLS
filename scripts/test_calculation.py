@@ -84,7 +84,7 @@ def main():
   #if not recreating reference calculations
   if not options.m:
     for haveRef in haveRefCals:
-      print "checking calculation against \""+paths.ref_calcs+haveRef+"\" calculation ...",
+      print "checking calculation against \""+paths.ref_calcsPath+"/"+haveRef+"\" calculation ...",
       if haveRefCals[haveRef]:
         if checkCalAgainstRef(haveRef,options):
           
@@ -214,10 +214,10 @@ def createTestCalcNA(subDir,numProcs,options):
   
   #run 10 steps with SPHERLS
   log.write("\nEVOLVING FOR 10 TIME STEPS ...\n")
-  log.write( "running \""+paths.scriptPaths+"SPHERLS_run.py"+"\" for 10 time steps ...\n",)
+  log.write( "running \""+paths.scriptPath+"/SPHERLS_run.py"+"\" for 10 time steps ...\n",)
   log.close()
   log=open("log.txt",'a')
-  result=subprocess.call(paths.scriptPaths+"SPHERLS_run.py",stdout=log,stderr=log)
+  result=subprocess.call(paths.scriptPath+"/SPHERLS_run.py",stdout=log,stderr=log)
   if result!=0:
     os.chdir("../")
     return False
@@ -226,7 +226,7 @@ def createTestCalcNA(subDir,numProcs,options):
   log.write("\ncombining binary dumps \"./"+subDir+"Test_t[0-*]\" ...\n")
   log.close()
   log=open("log.txt",'a')
-  result=subprocess.call([paths.scriptPaths+"combine_bins.py","./"+subDir+"Test_t[0-*]"],stdout=log,stderr=log)
+  result=subprocess.call([paths.scriptPath+"/combine_bins.py","./"+subDir+"Test_t[0-*]"],stdout=log,stderr=log)
   if result!=0:
     os.chdir("../")
     return False
@@ -244,6 +244,7 @@ def checkForRefCalcsAndRemake(options):
       print "checking for reference calculations for \""+key+"\" calculation ... ",
       for j in range(len(ref_calcs.refCalcs[key])):
         if not os.access(ref_calcs.refCalcs[key][j],os.F_OK):
+          print ref_calcs.refCalcs[key][j]
           haveRefCalc=False
     else:
       haveRefCalc=False
@@ -364,7 +365,7 @@ def createRefCalcNA(subDir,numProcs,options):
     c) remove any models not needed for comparison
   '''
   
-  tmpDir=paths.ref_calcs+subDir
+  tmpDir=paths.ref_calcsPath+"/"+subDir
   cwd=os.getcwd()#keep cwd to return to it afterwards
   
   #establish that all required files to run SPHERLS are present, if not remake as needed keep as 
@@ -434,7 +435,7 @@ def createRefCalcNA(subDir,numProcs,options):
   log.write("\nRUNNING SPHERLS\n")
   log.close()
   log=open("log.txt",'a')
-  result=subprocess.call(paths.scriptPaths+"SPHERLS_run.py",stdout=log,stderr=log)
+  result=subprocess.call(paths.scriptPath+"/SPHERLS_run.py",stdout=log,stderr=log)
   if result!=0:
     os.chdir(cwd)
     return False
@@ -446,7 +447,7 @@ def createRefCalcNA(subDir,numProcs,options):
   modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
   fileName=os.path.basename(modelPath)
   fileNameParts=fileName.split('_t')
-  cmd=[paths.scriptPaths+"combine_bins.py","-r","-m","./"+fileNameParts[0]+"_t["\
+  cmd=[paths.scriptPath+"/combine_bins.py","-r","-m","./"+fileNameParts[0]+"_t["\
     +str(int(fileNameParts[1]))+"-*]"]
   result=subprocess.call(cmd,stdout=log,stderr=log)
   if result!=0:

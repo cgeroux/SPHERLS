@@ -1,48 +1,80 @@
 #CXX=mpic++, this should really be the case after running configure
 
+
 ###############################################################################
-# EXTRA_DIST ##################################################################
+# INSTALL DATA & EXTRA_DIST ###################################################
 ###############################################################################
+datadir=${prefix}/data
+docsdir=${prefix}/docs
 
 #energy profiles
-EXTRA_DIST=data/energy_pro/Epro.dat
-EXTRA_DIST+=data/energy_pro/Epro_mod.dat
-EXTRA_DIST+=data/energy_pro/Epro_points.dat
+energyprodir=${datadir}/energy_pro
+energypro_DATA=data/energy_pro/Epro.dat\
+               data/energy_pro/Epro_mod.dat\
+               data/energy_pro/Epro_points.dat
+EXTRA_DIST=${energypro_DATA}
 
 #OPAL/Alexander Furguson EOS and opacity files
-EXTRA_DIST+=data/OPAL_EOS_2005/EOS5_0*
-EXTRA_DIST+=data/OPAL_OPACITY_GN93/GN93hz
-EXTRA_DIST+=data/AF_OPACITY_GN93_1994/g*.*.tron
+opaleos2005dir=${datadir}/OPAL_EOS_2005
+opaleos2005_DATA=data/OPAL_EOS_2005/EOS5_0*
+EXTRA_DIST+=${opaleos2005_DATA}
+
+GN93hzdir=${datadir}/OPAL_OPACITY_GN93
+GN93hz_DATA=data/OPAL_OPACITY_GN93/GN93hz
+EXTRA_DIST+=${GN93hz_DATA}
+
+AFOPACITYGN93dir=${datadir}/AF_OPACITY_GN93_1994
+AFOPACITYGN93_DATA=data/AF_OPACITY_GN93_1994/g*.*.tron
+EXTRA_DIST+=${AFOPACITYGN93_DATA}
 
 #eos files
-EXTRA_DIST+=data/eos/convert.cpp
-EXTRA_DIST+=data/eos/Makefile
-EXTRA_DIST+=data/eos/eosCTOPAC
-EXTRA_DIST+=data/eos/eosY240Z002
-EXTRA_DIST+=data/eos/eosY300Z002
-EXTRA_DIST+=data/eos/eosNewY240Z002_wider_finer
-EXTRA_DIST+=data/eos/eosNewY300Z002_wider_finer
+eosdir=${datadir}/eos
+eos_DATA=data/eos/convert.cpp\
+         data/eos/Makefile\
+         data/eos/eosCTOPAC\
+         data/eos/eosY240Z002\
+         data/eos/eosY300Z002\
+         data/eos/eosNewY240Z002_wider_finer\
+         data/eos/eosNewY240Z002.xml\
+         data/eos/eosNewY300Z002_wider_finer
+         
+EXTRA_DIST+=${eos_DATA}
 
-#ref calcs, will include .svn files :(
-EXTRA_DIST+=data/ref_calcs/1DNA/1*
-EXTRA_DIST+=data/ref_calcs/1DNA/*.xml
-EXTRA_DIST+=data/ref_calcs/1DNA/*.txt
-EXTRA_DIST+=data/ref_calcs/2DNA/2*
-EXTRA_DIST+=data/ref_calcs/2DNA/*.xml
-EXTRA_DIST+=data/ref_calcs/2DNA/*.txt
-EXTRA_DIST+=data/ref_calcs/3DNA/3*
-EXTRA_DIST+=data/ref_calcs/3DNA/*.xml
-EXTRA_DIST+=data/ref_calcs/3DNA/*.txt
+#ref calcs, will include .svn files :(, not a problem under git
+refcalcsdir=${datadir}/ref_calcs
+refcalcs1DNAdir=${refcalcsdir}/1DNA
+refcalcs1DNA_DATA=data/ref_calcs/1DNA/1*\
+              data/ref_calcs/1DNA/*.xml\
+              data/ref_calcs/1DNA/*.txt
+EXTRA_DIST+=${refcalcs1DNA_DATA}
+refcalcs2DNAdir=${refcalcsdir}/2DNA
+refcalcs2DNA_DATA=data/ref_calcs/2DNA/2*\
+              data/ref_calcs/2DNA/*.xml\
+              data/ref_calcs/2DNA/*.txt
+EXTRA_DIST+=${refcalcs2DNA_DATA}
+refcalcs3DNAdir=${refcalcsdir}/3DNA
+refcalcs3DNA_DATA=data/ref_calcs/3DNA/3*\
+              data/ref_calcs/3DNA/*.xml\
+              data/ref_calcs/3DNA/*.txt
+EXTRA_DIST+=${refcalcs3DNA_DATA}
 
 #velocity profiles
-EXTRA_DIST+=data/velocity_pro/*.dat
+velocityprodir=${datadir}/velocity_pro
+velocitypro_DATA=data/velocity_pro/*.dat
+EXTRA_DIST+=${velocitypro_DATA}
+
+#Manuals
+manualsdir=${docsdir}/manuals
+manuals_DATA=docs/manuals/*.pdf
+EXTRA_DIST+=${manuals_DATA}
+
+#template xml files
+templatexmldir=${docsdir}/templateXML
+templatexml_DATA=docs/templateXML/*.xml
+EXTRA_DIST+=${templatexml_DATA}
 
 #scripts
 EXTRA_DIST+=scripts/*.py
-
-#docs
-EXTRA_DIST+=docs/manuals/*.pdf
-EXTRA_DIST+=docs/templateXML/*.xml
 
 #python c++ extensions
 EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
@@ -55,27 +87,20 @@ EXTRA_DIST+=libs/openmpi-1.6.3.tar.gz
 EXTRA_DIST+=libs/petsc-3.1-p8.tar.gz
 
 ###############################################################################
-# INSTALL DATA ################################################################
-###############################################################################
-
-install-data-local:
-	$(MKDIR_P) $(DESTDIR)$(datadir)/$(PACKAGE)/data
-	for f in a b; do \
-	  $(INSTALL_DATA) $(srcdir)/data/$$f \
-	  $(DESTDIR)$(datadir)/$(PACKAGE)/data; done
-uninstall-local:
-	rm $(DESTDIR)$(datadir)/$(PACKAGE)/data/[ab]
-	-rmdir $(DESTDIR)$(datadir)/$(PACKAGE)/data
-
-###############################################################################
 # DOCS ########################################################################
 ###############################################################################
 
-DOC_FILES=./src/userguide.txt
+EXTRA_DIST+=src/userguide.txt
+EXTRA_DIST+=src/Doxyfile
+EXTRA_DIST+=scripts/Doxyfile
+EXTRA_DIST+=src/SPHERLSanal/Doxyfile
+EXTRA_DIST+=src/SPHERLSgen/Doxyfile
+EXTRA_DIST+=src/SPHERLS/Doxyfile
   
 ###############################################################################
 # BINS + SOURCE ###############################################################
 ###############################################################################
+bin_SCRIPTS=./scripts/*.py
 
 bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen
 #dist_pkgdata_DATA=./data/energy_pro/*	./data/eos/*	./data/ref_cals/*	./data/velocity_pro/*
