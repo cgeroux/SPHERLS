@@ -248,8 +248,8 @@ class Plot:
         self.ticks.append(float(tickString))
     
     #get ylabel
-    if element.get("ylabel")!=None and element.get("ylabel")!="":
-      self.ylabel=element.get("ylabel")
+    #if element.get("ylabel")!=None and element.get("ylabel")!="":
+    self.ylabel=element.get("ylabel")
     
     #get range
     yMin=None
@@ -393,12 +393,10 @@ class DataSet:
           nCount=nCount+1
 def plot(dataSets,options,title):
   
-  #set import options based on weather it will saved to a file, or sent to x11
-  #print "interactive backends=",matplotlib.rcsetup.interactive_bk
-  #print "non-interactive backends=",matplotlib.rcsetup.non_interactive_bk
-  #print "all backends=",matplotlib.rcsetup.all_backends
-  
   import matplotlib
+  matplotlib.rc('text', usetex=True)  #use latex for fonts
+  matplotlib.rc('font',size=options.fontSize) #set font size
+  
   if not options.show and figureNumber==0:
     matplotlib.use("Agg")
   import matplotlib.pyplot as plt
@@ -645,6 +643,10 @@ def main():
     #set figure width
     if figureElement.get("figWidth")!=None and figureElement.get("figWidth")!="":
       options.figWidth=float(figureElement.get("figWidth"))
+      
+    #set font size
+    if figureElement.get("fontSize")!=None and figureElement.get("fontSize")!="":
+      options.fontSize=float(figureElement.get("fontSize"))
       
     #set figure dpi
     if figureElement.get("dpi")!=None and figureElement.get("dpi")!="":
