@@ -191,7 +191,6 @@ class Curve:
             if testY<yTemp:
               yTemp=testY
               yIndexTemp=i
-          print yTemp
           self.y.append(yTemp)
           self.index.append(yIndexTemp)
         elif self.zone==None and self.bTime==False:#this will be a series of y's as a function of time,
