@@ -69,11 +69,11 @@ OPTIONAL if created with SPHERLSanal with the -v option
       </plot>
     </axis>
     <axis type="time" xlabel="t [s]" xminortics="True">
-      <plot ylabel="u_0 [km/s]" grid="major">
+      <plot ylabel="$\Delta u_0$ [km/s]" grid="major">
         
         <!-- radial zone can be either a reference to a particular radial zone (0=surface increasing
         inward) or "max" or "min" for the maximum or minimum of all radial zones.-->
-        <curve radialZone="1" style="-o" id="test">$21/1e5</curve>
+        <curve radialZone="1" style="-o" id="test">($21_ip1-$21_im1)/1e5</curve>
       </plot>
     </axis>
     <axis type="time" xlabel="t [s]" xminortics="True">
