@@ -546,7 +546,7 @@ def plot(dataSets,options,title):
     nDataSetCount+=1
   #done making plot
   if options.show:
-    print "ploting file ",i," to screen, close for next plot"
+    print "ploting file to screen, close for next plot"
     plt.show()
   else:
     [path,ext]=os.path.splitext(options.outputFile)
