@@ -6,7 +6,24 @@
       <file name="2">/share/scratch2/cgeroux/March_12/1D_CTeos/T6100/output/averagePKE.txt</file>
 
       <axis xlabel="t [s]" xminortics="True">
-        <plot ylabel="Log(PKE) [erg]" legendloc="4" numlegendpoints="1" ymin="36" ymax="41"  weightHeight="0.5"><!-- weightHeight="0.5" will say that this plot will be half the height of a plot with weightHeight="1.0"-->
+        <!--
+        weightHeight="0.5" will say that this plot will be half the height
+        of a plot with weightHeight="1.0" when having multiple plots on the same
+        figure.
+        
+        numlegendpoints="1", sets the number of points to include on the
+        ledgend. One might want to set to 1 if there is not line, while 2 might 
+        be more suitable to have line segment with points on either end of it
+        rather than centered.
+        
+        legendloc: position of the legend, 1= top right, 2=top left,
+        3=bottom right, 4=bottom left
+        
+        ticks: manaully set tick marks on y-axis, e.g. ticks="-1.0 0.0 1.0" will
+        place tick marks and labels at -1.0, 0.0, and 1.0 on the y-axis.
+        -->
+        <plot ylabel="Log(PKE) [erg]" legendloc="4" numlegendpoints="1" 
+          ymin="36" ymax="41"  weightHeight="0.5" ticks="-1.0 0.0 1.0">
           <curve file="1" xcolumn="2" ycolumn="log10($5)" errcolumn="3" line="-" color="r"
             markersize="5" marker="x" label="3D 5x5" linewidth="2.0" ecolor="red" elinewidth="2.0" capsize="3"></curve>
           <curve file="2" xcolumn="2" ycolumn="log10($5)" line="-" color="b" markersize="5" markeredgecolor="b" markerfacecolor="w" label="1D" linewidth="2.0"></curve>
