@@ -10,9 +10,10 @@ GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
 FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
 FFTW_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/fftw/lib /usr/local/FFTW3/lib /share/apps/fftw/lib"
 #
-#common places for fftw libraries and includes
+#common places for jpeg libraries and includes
 HDF_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/hdf4/include"
 HDF_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/hdf4/lib"
+JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
 #
 #common places for PETSc libraries and includes
 PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
@@ -83,6 +84,8 @@ AS_IF(
 AM_CONDITIONAL([FFTW_ENABLE],[test "$FFTW_ENABLE" = "yes"])
 #################################################################
 
+
+
 #################################################################
 ## Check for HDF4 include and library and dependent libraries
 #################################################################
@@ -108,9 +111,29 @@ AC_ARG_ENABLE([hdf-lib-path],
   [set location of the hdf library])],
   [HDF_LIB_PATHS="$enableval"],
   [])
+  
+#check to see if user set an overide for the jpeg library path
+AC_ARG_ENABLE([jpeg-lib-path],
+  [AS_HELP_STRING([--enable-jpeg-lib-path],
+  [set location of the jpeg library])],
+  [JPEG_LIB_PATHS="$enableval"],
+  [])
 
 #check to make sure we have a library and include path, if we are using hdf
 AS_IF([test "$HDF_ENABLE" = "yes"],[
+  
+  #seach lib paths for libjpeg.so and libjpeg.a
+  JPEG_LIB_PATH=""
+  for TEST_PATH in $JPEG_LIB_PATHS; do
+    AC_CHECK_FILES([${TEST_PATH}/libjpeg.so ${TEST_PATH}/libmfhdf.a ]
+      ,[JPEG_LIB_PATH=${TEST_PATH};break],[])
+  done
+
+  AS_IF([test "$JPEG_LIB_PATH" = ""],[
+    AC_MSG_RESULT([No jpeg library found in search paths \"$JPEG_LIB_PATHS\" required by the hdf library. Either specify the path to libjpeg.a/.so with --enable-jpeg-lib-path or disable hdf features with --disable-hdf .])
+    exit
+    ])
+
   # Get HDF library and include locations
   
   # #search include paths for hdf.h
@@ -137,6 +160,8 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
   AC_DEFINE([HDF_ENABLE],[],[Defined if hdf is enabled])
   AC_SUBST([HDF_INCLUDE_PATH])
   AC_SUBST([HDF_LIB_PATH])
+  AC_SUBST([JPEG_LIB_PATH])
+  
   ])
 AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 #################################################################
