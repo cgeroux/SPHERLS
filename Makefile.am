@@ -176,9 +176,14 @@ SPHERLSgen_SOURCES	=	\
 	src/xmlParser.cpp
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
+EXTRA_PROGRAMS=docs
 .PHONY:docs
-docs:	docs/manuals/SPHERLS_Ref_Manual.pdf	docs/manuals/SPHERLSgen_Ref_Manual.pdf	\
-	docs/manuals/SPHERLSanal_Ref_Manual.pdf	docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
+docs_SOURCES=docs/manuals/SPHERLS_Ref_Manual.pdf\
+ docs/manuals/SPHERLSgen_Ref_Manual.pdf\
+ docs/manuals/SPHERLSanal_Ref_Manual.pdf\
+ docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
+#docs:	docs/manuals/SPHERLS_Ref_Manual.pdf	docs/manuals/SPHERLSgen_Ref_Manual.pdf	\
+#	docs/manuals/SPHERLSanal_Ref_Manual.pdf	docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
 
 if HDF_ENABLE
 hdf.so:

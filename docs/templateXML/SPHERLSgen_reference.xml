@@ -61,9 +61,9 @@
   <model type="stellar">
     
     <output>
-      <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time step -->
-      <fileName>3DGL_u-1e5.txt</fileName><!-- name of the output file -->
-      <binary>false</binary><!-- if true outputs a binary file else outputs ascii -->
+      <timeStepFactor>0.25</timeStepFactor><!-- multiplies the Courant time step, to produce the time step -->
+      <fileName>T6000_20x1_t00000000</fileName><!-- name of the output file -->
+      <binary>true</binary><!-- if true outputs a binary file else outputs ascii -->
       <writeToScreen>false</writeToScreen><!-- if true outputs to screen -->
       <precision>16</precision><!-- number of decimals to write on numbers-->
     </output>
@@ -78,9 +78,9 @@
     <EOS type="table">
       <T-eff>6.8e3</T-eff><!-- Effective temperature [K] -->
       <L>30.0</L><!-- Luminosity [L_sun] -->
-      <eosTable>/home/cgeroux/SPHERLS/trunk/eos/eos</eosTable><!-- Equation of state table -->
+      <eosTable>/home/cgeroux/Documents/WORK/SPHERLS/data/eos/eosNewY240Z0005_wider_finer</eosTable><!-- Equation of state table -->
       <tolerance>5e-15</tolerance><!-- Error allowed when calculating -->
-      <maxIterations>100</maxIterations><!-- how many iterations to before stop trying to converage
+      <maxIterations>1000</maxIterations><!-- how many iterations to before stop trying to converage
         temperature to within tolerance -->
     </EOS>
     
@@ -102,7 +102,7 @@
           values with "T" stop values. The "R" stop values are mostly intended for the adiabatic 
           models which lack temperatures. Using stopType="T" requires increasing stopVaules from 
           top to bottom, while using stopType="R" requires decreasing values from top to bottom.-->
-        <M-delta-picking>
+        <M-delta-picking type="manual">
           <M-delta-delta stopType="T" stopValue="5e6">1e-01</M-delta-delta><!-- % to increase delta M by each step-->
           <M-delta-delta stopType="R" stopValue="5e6">1e-01</M-delta-delta><!-- % to increase delta M by each step-->
           <R-stop>7.6e-01</R-stop><!-- depth to stop at [solar radii] (7.6e-01)-->
