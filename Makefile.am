@@ -186,7 +186,7 @@ docs_SOURCES=docs/manuals/SPHERLS_Ref_Manual.pdf\
 #	docs/manuals/SPHERLSanal_Ref_Manual.pdf	docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
 
 if HDF_ENABLE
-hdf.so:
+src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
 	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
 endif
 
