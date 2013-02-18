@@ -82,11 +82,10 @@
       - To install the library change into the directory made when you extracted the archive
         and type the following commands:
         -# \verbatim ./configure PETSC_DIR=$PWD --prefix=/home/$USER/ --with-c++-support --with-c-support
-        note that the PETSC_DIR=$PWD needs to come first
- --with-shared --download-f-blas-lapack=1 --with-x11=no \endverbatim \c $USER is the environment variable corresponding to your username.
-        -# \verbatim make all \endverbatim \
+        --with-shared --download-c-blas-lapack=1 --with-x11=no \endverbatim \c $USER is the environment variable corresponding to your username.  Note that the PETSC_DIR=$PWD needs to come first. Also \c --download-f-blas-lapack=1 only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using \c --download-c-blas-lapack=1 seems to work in this case
+        -# \verbatim make all \endverbatim \ 
         Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above if given.
-        -# \verbatim make install \endverbatim \
+        -# \verbatim make install \endverbatim \ 
         as with the \c make \c all the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
         -# \verbatim make PETSC_DIR=/home/$USER/lib test \endverbatim will test the code
       - You will then need to add the following line to you \c .bashrc file to assure that you will pick up the library

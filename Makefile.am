@@ -187,7 +187,7 @@ docs_SOURCES=docs/manuals/SPHERLS_Ref_Manual.pdf\
 
 if HDF_ENABLE
 hdf.so:
-	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../)
+	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
 endif
 
 docs/manuals/SPHERLS_Ref_Manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
