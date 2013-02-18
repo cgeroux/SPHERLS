@@ -152,7 +152,7 @@ FFTW_LDADDS=
 FFTW_CPPFLAGS= 
 endif
 if HDF_ENABLE
-HDF_LDADDS=-L$(HDF_LIB_PATH) -lm -lmfhdf -ldf -ljpeg -lz
+HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
 BUILT_SOURCES=hdf.so
 else
