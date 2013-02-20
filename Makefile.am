@@ -64,9 +64,12 @@ velocitypro_DATA=data/velocity_pro/*.dat
 EXTRA_DIST+=${velocitypro_DATA}
 
 #Manuals
-manualsdir=${docsdir}/manuals
-manuals_DATA=docs/manuals/*.pdf
-EXTRA_DIST+=${manuals_DATA}
+EXTRA_DIST+=\
+ docs/manuals/SPHERLS_Ref_Manual.pdf\
+ docs/manuals/SPHERLSgen_Ref_Manual.pdf\
+ docs/manuals/SPHERLSanal_Ref_Manual.pdf\
+ docs/manuals/Scripts_Ref_Manual.pdf\
+ docs/manuals/SPHERLS_User_Guide.pdf
 
 #template xml files
 templatexmldir=${docsdir}/templateXML
@@ -154,7 +157,7 @@ endif
 if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
-BUILT_SOURCES=hdf.so
+BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so
 else
 HDF_LDADDS= 
 HDF_CPPFLAGS= 
@@ -176,14 +179,14 @@ SPHERLSgen_SOURCES	=	\
 	src/xmlParser.cpp
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
-EXTRA_PROGRAMS=docs
-.PHONY:docs
-docs_SOURCES=docs/manuals/SPHERLS_Ref_Manual.pdf\
+docs:\
+ docs/manuals/SPHERLS_Ref_Manual.pdf\
  docs/manuals/SPHERLSgen_Ref_Manual.pdf\
  docs/manuals/SPHERLSanal_Ref_Manual.pdf\
- docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
-#docs:	docs/manuals/SPHERLS_Ref_Manual.pdf	docs/manuals/SPHERLSgen_Ref_Manual.pdf	\
-#	docs/manuals/SPHERLSanal_Ref_Manual.pdf	docs/manuals/Scripts_Ref_Manual.pdf docs/manuals/SPHERLS_User_Guide.pdf
+ docs/manuals/Scripts_Ref_Manual.pdf\
+ docs/manuals/SPHERLS_User_Guide.pdf
+
+.PHONY:docs
 
 if HDF_ENABLE
 src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
@@ -209,7 +212,7 @@ docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
 	(cd	scripts;	doxygen)
 	(cd	scripts/docs/latex;	make	pdf;)
 	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
-  
+
 docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile ${DOC_FILES}
 	(cd	src;	doxygen)
 	(cd	src/docs/latex;	make	pdf;)
