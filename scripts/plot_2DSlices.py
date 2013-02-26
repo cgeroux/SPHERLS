@@ -33,6 +33,7 @@ class File2DSlice:
     dataNames, names of the data columns
     data, the data columns
     '''
+    
     self.fileName=fileName
     if not os.access(fileName,os.F_OK|os.R_OK):
       print "error opening ",fileName," for reading"
@@ -78,7 +79,7 @@ class File2DSlice:
     #read in data
     self.data=[]
     line=f.readline()
-    nCount=0
+    nCount=0#indicates the variable
     for word in line.split():
       self.data.append([])
       if word!="-":

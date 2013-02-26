@@ -4572,11 +4572,13 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<dGrid[nU0][i][0][0]//1
           <<std::setw(nWidthOutputField)<<0.0;//2
         if(nW==-1){
-          ofFile<<std::setw(nWidthOutputField)<<"-";//2
+          ofFile<<std::setw(nWidthOutputField)<<"-";//3
         }
-        ofFile
-          <<std::setw(nWidthOutputField)<<0.0//3
-          <<std::setw(nWidthOutputField)<<dGrid[nD][i][0][0]<<std::setw(nWidthOutputField)<<0.0;//4,5
+        else{
+          ofFile<<std::setw(nWidthOutputField)<<0.0;//3
+        }
+        ofFile<<std::setw(nWidthOutputField)<<dGrid[nD][i][0][0]
+          <<std::setw(nWidthOutputField)<<0.0;//4,5
         
         if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, and L
           
@@ -4604,7 +4606,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)<<0.0//14,15
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
-            <<std::setw(nWidthOutputField)<<dCp<<std::setw(nWidthOutputField);//16,17
+            <<std::setw(nWidthOutputField)<<dCp<<std::setw(nWidthOutputField);//18
           
         }
         else{//set P and Q
@@ -4636,29 +4638,31 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<0.0//10,11
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0;//16,17
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<"-";//18
         }
         ofFile<<std::endl;
       }
     ofFile
-      <<std::setw(nWidthOutputField)<<"-"
-      <<std::setw(nWidthOutputField)<<"-"
-      <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][0]
-      <<std::setw(nWidthOutputField)<<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
-      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-      <<"-"
+      <<std::setw(nWidthOutputField)<<"-"//0
+      <<std::setw(nWidthOutputField)<<"-"//1
+      <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][0]//2
+      <<std::setw(nWidthOutputField)<<"-"//3
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+      <<"-"//5
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+      <<"-"//7
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+      <<"-"//9
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+      <<"-"//11
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+      <<"-"//13
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+      <<"-"//15
+      <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+      <<"-"//17
+      <<std::setw(nWidthOutputField)<<"-"//18
       <<std::endl;
     }
     
@@ -4973,24 +4977,24 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][nPlaneIndex]
-            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][nPlaneIndex]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][nPlaneIndex]//8
+            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][nPlaneIndex]-dTAve)/dTAve//9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
-            <<(dKappa-dKappaAve)/dKappaAve
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)//14
+            <<(dKappa-dKappaAve)/dKappaAve//15
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)//16
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//17,18
         }
         else{
           
@@ -5059,66 +5063,66 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//8,9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0
-            <<std::setw(nWidthOutputField)<<dCp
-            <<std::endl;//8
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<dCp//18
+            <<std::endl;
         }
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][nPlaneIndex]
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<"-"//0
+        <<std::setw(nWidthOutputField)<<"-"//1
+        <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][nPlaneIndex]//2
+        <<std::setw(nWidthOutputField)<<"-"//3
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
     for(int j=0;j<nSizeY2;j++){
       ofFile
-        <<std::setw(nWidthOutputField)<<dGrid[nU][nSizeX2][j][nPlaneIndex]
-        <<std::setw(nWidthOutputField)<<dGrid[nU0][nSizeX2][0][0]
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"<<std::endl;
+        <<std::setw(nWidthOutputField)<<dGrid[nU][nSizeX2][j][nPlaneIndex]//0
+        <<std::setw(nWidthOutputField)<<dGrid[nU0][nSizeX2][0][0]//1
+        <<std::setw(nWidthOutputField)<<"-"//2
+        <<std::setw(nWidthOutputField)<<"-"//3
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"<<std::endl;//17,18
     }
   }
   if(nPlane==1){//theta-phi
@@ -5520,26 +5524,26 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][k]
-            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][k]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<dGrid[nT][i][j][k]//8
+            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][j][k]-dTAve)/dTAve//9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
-            <<(dKappa-dKappaAve)/dKappaAve
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)
-            <<dCp
-            <<std::endl;//8
+            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)//14
+            <<(dKappa-dKappaAve)/dKappaAve//15
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)//16
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)//17
+            <<dCp//18
+            <<std::endl;
         }
         else{
           
@@ -5608,74 +5612,74 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//8,9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0
-            <<std::setw(nWidthOutputField)<<dCp
-            <<std::endl;//8
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
+            <<std::setw(nWidthOutputField)<<"-"//18
+            <<std::endl;
         }
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-";
+        <<std::setw(nWidthOutputField)<<"-"//0
+        <<std::setw(nWidthOutputField)<<"-"//1
+        <<std::setw(nWidthOutputField)<<"-";//2
       if(nW!=-1){
         ofFile
-          <<std::setw(nWidthOutputField)<<dGrid[nW][i][j][0];
+          <<std::setw(nWidthOutputField)<<dGrid[nW][i][j][0];//3
       }
       else{
         ofFile
-          <<std::setw(nWidthOutputField)<<"-";
+          <<std::setw(nWidthOutputField)<<"-";//3
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
     for(int k=0;k<nSizeZ;k++){
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][k]
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<"-"//0
+        <<std::setw(nWidthOutputField)<<"-"//1
+        <<std::setw(nWidthOutputField)<<dGrid[nV][i][0][k]//2
+        <<std::setw(nWidthOutputField)<<"-"//3
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
   }
@@ -5785,7 +5789,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<0.0//3
           <<std::setw(nWidthOutputField)<<dGrid[nD][i][0][0]<<std::setw(nWidthOutputField)<<0.0;//4,5
         
-        if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, and L
+        if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, and L,Cp
           
           //get P, E, kappa, and gamma
           eosTable.getPEKappaGammaCp(dGrid[nT][i][0][0],dGrid[nD][i][0][0],dP
@@ -5812,7 +5816,7 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)<<0.0//14,15
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
-            <<std::setw(nWidthOutputField)<<dCp;//16,17
+            <<std::setw(nWidthOutputField)<<dCp;//18
           
         }
         else{//set P and Q
@@ -5845,37 +5849,37 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
             <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0//12,13
             <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
             <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)<<0.0//16,17
-            <<std::setw(nWidthOutputField)<<dCp;//16,17
+            <<std::setw(nWidthOutputField)<<"-";//18
         }
         ofFile<<std::endl;
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-";
+        <<std::setw(nWidthOutputField)<<"-"//0
+        <<std::setw(nWidthOutputField)<<"-"//1
+        <<std::setw(nWidthOutputField)<<"-";//2
       if(nW!=-1){
         ofFile
-          <<std::setw(nWidthOutputField)<<0.0;
+          <<std::setw(nWidthOutputField)<<0.0;//3
       }
       else{
         ofFile
-          <<std::setw(nWidthOutputField)<<"-";
+          <<std::setw(nWidthOutputField)<<"-";//3
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
     
@@ -6124,17 +6128,17 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           <<std::setw(nWidthOutputField)<<dGrid[nV][i][nPlaneIndex][k];//2
         if(nW!=-1){
           ofFile
-            <<std::setw(nWidthOutputField)<<dGrid[nW][i][nPlaneIndex][k];//2
+            <<std::setw(nWidthOutputField)<<dGrid[nW][i][nPlaneIndex][k];//3
         }
         else{
           ofFile
-            <<std::setw(nWidthOutputField)<<"-";//2
+            <<std::setw(nWidthOutputField)<<"-";//3
         }
         ofFile
-          <<std::setw(nWidthOutputField)<<dGrid[nD][i][nPlaneIndex][k]//3
-          <<std::setw(nWidthOutputField)<<(dGrid[nD][i][nPlaneIndex][k]-dDAve)/dDAve;//4
+          <<std::setw(nWidthOutputField)<<dGrid[nD][i][nPlaneIndex][k]//4
+          <<std::setw(nWidthOutputField)<<(dGrid[nD][i][nPlaneIndex][k]-dDAve)/dDAve;//5
         if(nGammaLaw!=0){
-          //get P, E, kappa, and gamma
+          //get P, E, kappa, and gamma,Cp
           eosTable.getPEKappaGammaCp(dGrid[nT][i][nPlaneIndex][k],dGrid[nD][i][nPlaneIndex][k],dP
             ,dE,dKappa,dGamma,dCp);
           
@@ -6200,24 +6204,24 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<dGrid[nT][i][nPlaneIndex][k]
-            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][nPlaneIndex][k]-dTAve)/dTAve
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<dGrid[nT][i][nPlaneIndex][k]//8
+            <<std::setw(nWidthOutputField)<<(dGrid[nT][i][nPlaneIndex][k]-dTAve)/dTAve//9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)
-            <<(dKappa-dKappaAve)/dKappaAve
-            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)
-            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<dKappa<<std::setw(nWidthOutputField)//14
+            <<(dKappa-dKappaAve)/dKappaAve//15
+            <<std::setw(nWidthOutputField)<<dGamma<<std::setw(nWidthOutputField)//16
+            <<(dGamma-dGammaAve)/dGammaAve<<std::setw(nWidthOutputField)<<dCp<<std::endl;//17,18
         }
         else{
           
@@ -6286,73 +6290,73 @@ void make2DSlice(std::string sFileName,int nPlane,int nPlaneIndex){//updated
           dQ=dQ0+dQ1+dQ2;
           
           ofFile
-            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;
+            <<std::setw(nWidthOutputField)<<dE<<std::setw(nWidthOutputField)<<(dE-dEAve)/dEAve//6,7
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//8,9
+            <<std::setw(nWidthOutputField)<<dP<<std::setw(nWidthOutputField)<<(dP-dPAve)/dPAve;//10,11
           if(dQAve==0.0){/*if QAve is zero, this can only be the case if all Q's are zero in the 
             horizontal zone also*/
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<0.0;//12,13
           }
           else{
             ofFile
-              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;
+              <<std::setw(nWidthOutputField)<<dQ<<std::setw(nWidthOutputField)<<(dQ-dQAve)/dQAve;//12,13
           }
           ofFile
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"
-            <<std::setw(nWidthOutputField)<<"-"<<std::endl;//8
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//14,15
+            <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)<<"-"//16,17
+            <<std::setw(nWidthOutputField)<<"-"<<std::endl;//18
         }
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-";
+        <<std::setw(nWidthOutputField)<<"-"//0
+        <<std::setw(nWidthOutputField)<<"-"//1
+        <<std::setw(nWidthOutputField)<<"-";//2
       if(nW!=-1){
         ofFile
-          <<std::setw(nWidthOutputField)<<dGrid[nW][i][nPlaneIndex][0];
+          <<std::setw(nWidthOutputField)<<dGrid[nW][i][nPlaneIndex][0];//3
       }
       else{
         ofFile
-          <<std::setw(nWidthOutputField)<<"-";
+          <<std::setw(nWidthOutputField)<<"-";//3
       }
       ofFile
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
     for(int k=0;k<nSizeZ;k++){
       ofFile
-        <<std::setw(nWidthOutputField)<<dGrid[nU][nSizeX2][nPlaneIndex][k]
-        <<std::setw(nWidthOutputField)<<dGrid[nU0][nSizeX2][0][0]
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"
-        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)
-        <<"-"<<std::setw(nWidthOutputField)<<"-"
+        <<std::setw(nWidthOutputField)<<dGrid[nU][nSizeX2][nPlaneIndex][k]//0
+        <<std::setw(nWidthOutputField)<<dGrid[nU0][nSizeX2][0][0]//1
+        <<std::setw(nWidthOutputField)<<"-"//2
+        <<std::setw(nWidthOutputField)<<"-"//3
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//4
+        <<"-"//5
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//6
+        <<"-"//7
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//8
+        <<"-"//9
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//10
+        <<"-"//11
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//12
+        <<"-"//13
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//14
+        <<"-"//15
+        <<std::setw(nWidthOutputField)<<"-"<<std::setw(nWidthOutputField)//16
+        <<"-"<<std::setw(nWidthOutputField)<<"-"//17,18
         <<std::endl;
     }
   }
