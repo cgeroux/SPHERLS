@@ -354,7 +354,7 @@ class Plot:
         for j in range(len(curve.y)):
           
           #if in xrange
-          if xLimitsTemp[0]<x[j] and x[j]<xLimitsTemp[1]:
+          if xLimitsTemp[0]<=x[j] and x[j]<=xLimitsTemp[1]:
             
             #keep smallest y
             if minyInCurves> curve.y[j] and curve.y[j]!=None:
@@ -378,7 +378,7 @@ class Plot:
           for j in range(len(curve.y[i])):
             
             #if in xrange
-            if xLimitsTemp[0]<x[i][j] and x[i][j]<xLimitsTemp[1]:
+            if xLimitsTemp[0]<=x[i][j] and x[i][j]<=xLimitsTemp[1]:
               
               #keep smallest y
               if minyInCurves> curve.y[i][j] and curve.y[i][j]!=None:
