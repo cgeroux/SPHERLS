@@ -319,6 +319,82 @@ class Plot:
     else:#for all subsequent files
       for curve in self.curves:
         curve.load(fileData,options,dataSet,nFileCount)
+  def setLimits(self,x,xlimits,bTimeAxis):
+    """Sets the y limits from the maximum, and minimum y values in the curves on
+    the plot in the xrange specified, over all files.
+    """
+    
+    #if both y limits were already set in configuraiton file, don't set anything
+    if self.autoLimits[0]==False and self.autoLimits[1]==False:
+      return
+    
+    #Only upper bound set
+    if xlimits[1]==None:
+      xLimitsTemp=[xlimits[0],sys.float_info.max]
+      
+    #Only lower bound set
+    elif xlimits[0]==None:
+      xLimitsTemp=[-1.0*sys.float_info.max,xlimits[1]]
+    #Both Bounds set
+    else:
+      xLimitsTemp=xlimits
+    
+    minyInCurves=sys.float_info.max
+    maxyInCurves=-1.0*sys.float_info.max
+    
+    if bTimeAxis:#axis is a time axis
+      
+      for curve in self.curves:
+        
+        #check that num x, and num y match for each curve, for each file
+        if len(x)!=len(curve.y):
+          raise Exception("number of x points for axis, and number of y points"\
+            +" for curve don't match")
+        
+        for j in range(len(curve.y)):
+          
+          #if in xrange
+          if xLimitsTemp[0]<x[j] and x[j]<xLimitsTemp[1]:
+            
+            #keep smallest y
+            if minyInCurves> curve.y[j] and curve.y[j]!=None:
+              minyInCurves=curve.y[j]
+            
+            #keep largest y
+            if maxyInCurves< curve.y[j] and curve.y[j]!=None:
+              maxyInCurves=curve.y[j]
+    else:#axis is a profile axis
+      
+      for curve in self.curves:
+        
+        #loop over every file
+        for i in range(len(curve.y)):
+          
+          #check that num x, and num y match for each curve, for each file
+          if len(x[i])!=len(curve.y[i]):
+            raise Exception("number of x points for axis, and number of y points"\
+              +" for curve don't match")
+          
+          for j in range(len(curve.y[i])):
+            
+            #if in xrange
+            if xLimitsTemp[0]<x[i][j] and x[i][j]<xLimitsTemp[1]:
+              
+              #keep smallest y
+              if minyInCurves> curve.y[i][j] and curve.y[i][j]!=None:
+                minyInCurves=curve.y[i][j]
+              
+              #keep largest y
+              if maxyInCurves< curve.y[i][j] and curve.y[i][j]!=None:
+                maxyInCurves=curve.y[i][j]
+      
+    #set only limits which are not set in configuration file
+    if self.autoLimits[0]==True and self.autoLimits[1]==True:
+      self.limits=[minyInCurves,maxyInCurves]
+    elif self.autoLimits[0]==True:
+      self.limits[0]=minyInCurves
+    elif self.autoLimits[1]==True:
+      self.limits[1]=maxyInCurves
 class Axis:
   '''This class holds all the information needed for a particular x-axis. An axis can either be 
   either of time, or of some column in the data files.'''
@@ -424,6 +500,10 @@ class Axis:
     #load plots
     for plot in self.plots:
       plot.load(fileData,options,dataSet,nFileCount)
+    
+    #set plot limits
+    for plot in self.plots:
+      plot.setLimits(self.x,self.limits,self.bTime)
 class DataSet:
   '''This class holds all the information for a single dataSet, which includes the baseFileName of 
   the dataset, the range of the dataSet (start-end), the times and phases of the files within the 
@@ -712,6 +792,9 @@ def plot(dataSets,options,title):
                   lines.append(temp[0])
                   labels.append(curve.label)
                 curveCount=curveCount+1
+            
+            print "plot "+str(nTotalPlotCount)+" xlimits="+str(axisMine.limits)
+            print "plot "+str(nTotalPlotCount)+" ylimits="+str(plot.limits)
             ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
             ax[nTotalPlotCount-1].set_ylim(plot.limits)
             
