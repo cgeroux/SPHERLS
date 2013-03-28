@@ -148,12 +148,22 @@ def parseOptions():
   #setup command line parser
   '''This is out of date, needs to be updated to reflect new additions'''
   parser=op.OptionParser(usage="Usage: %prog [options] INPUTFILE"
-    ,version="%prog 1.0",description=r"Cacluates the risidual between fitting"
-    +" observed light cuves to model light curves")
+    ,version="%prog 1.0",description=r"Cacluates the risidual between cuves "
+    +"defined by a set of points.")
     
   #parse command line options
   return parser.parse_args()
 def main():
+  
+  #phase_wrapped_3D  mag+DM_3D phase_wrapped_2D  mag+DM_2D phase mag
+  
+  #x,y columns of first data set, oringally model data
+  data1XColumn=0
+  data1YColumn=1
+  
+  #x,y columns of second data set, oringally observational data
+  data2XColumn=4
+  data2YColumn=5
   
   #parse command line options
   (options,args)=parseOptions()
@@ -166,12 +176,24 @@ def main():
   inputFile=datafile.DataFile()
   inputFile.readFile(args[0])
   
+  #get first set of data, in our original case it was the model data
+  x=inputFile.fColumnValues[:,data1XColumn]
+  y=inputFile.fColumnValues[:,data1YColumn]
+  data1=np.append(x.reshape(x.shape[0],1),y.reshape(y.shape[0],1),axis=1)
+  
+  #get second set of data, in our original case this was the observations
+  #x=inputFile[:,data2XColumn]
+  #y=inputFile[:,data2YColumn]
+  #data2=np.append(x.reshape(x.shape[0],1),y.reshape(y.shape[0],1),axis=1)
+  
+  
   #bin data and get centers, means and standard deviations, of bins
+  #this is the model data
   binData=BinnedData()
   binData.addEvenBins(0.0,0.04,5)
   binData.addEvenBins(0.04,0.89,40)
   binData.addEvenBins(0.89,1.0,10)
-  binData.binData(inputFile.fColumnValues[:,0:2])
+  binData.binData(data1)
   centers=binData.getBinCenters()
   mean=binData.getMean()
   sigma=binData.getSTDD()
@@ -193,15 +215,17 @@ def main():
   diffY=[]
   i=0
   j=0
-  for x in inputFile.fColumnValues[:,2]:
+  
+  for x in inputFile.fColumnValues[:,data2XColumn]:
     
     if x<=funcModel.maxRange and x>funcModel.minRange:
       modelX.append(x)
       modelY.append(funcModel.getPointByLinearInt(x))
-      diffY.append(inputFile.fColumnValues[i,3]-modelY[j])
+      diffY.append(inputFile.fColumnValues[i,data2YColumn]-modelY[j])
       j+=1
     i+=1
   
+  #bin differences
   binDataRes=BinnedData()
   binDataRes.addEvenBins(0.0,1.0,20)
   data=np.transpose(np.array([modelX,diffY]))
@@ -244,7 +268,7 @@ def main():
   ax=axs[1]
   ax.plot(modelX,modelY,"o")
   #ax.plot(inputFile.fColumnValues[:,0],inputFile.fColumnValues[:,1],"o")
-  ax.plot(inputFile.fColumnValues[:,2],inputFile.fColumnValues[:,3],"ro")
+  ax.plot(inputFile.fColumnValues[:,data2XColumn],inputFile.fColumnValues[:,data2YColumn],"ro")
   #ax.errorbar(centers,mean,yerr=sigma)
   plt.ylim((16.5,14.5))
   plt.xlim((0,1.0))
