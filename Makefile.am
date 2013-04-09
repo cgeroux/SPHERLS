@@ -63,7 +63,7 @@ velocitypro_DATA=data/velocity_pro/*.dat
 EXTRA_DIST+=${velocitypro_DATA}
 
 #Manuals
-manualsdir=${docsdir}/docs
+manualsdir=${docsdir}/manuals
 manuals_DATA=\
   docs/manuals/SPHERLS_Ref_Manual.pdf\
   docs/manuals/SPHERLSgen_Ref_Manual.pdf\
