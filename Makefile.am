@@ -36,6 +36,7 @@ eos_DATA=data/eos/convert.cpp\
          data/eos/eosNewY240Z002_wider_finer\
          data/eos/eosNewY240Z002.xml\
          data/eos/eosNewY300Z002_wider_finer
+         data/eos/eosNewY240Z0005_wider_finer
          
 EXTRA_DIST+=${eos_DATA}
 
