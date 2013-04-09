@@ -18,6 +18,14 @@ JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
 #common places for PETSc libraries and includes
 PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
 PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
+
+INCLUDE_LIBS_IN_DIST=yes
+AC_ARG_ENABLE([include-libs],
+  [AS_HELP_STRING([--disable-include-libs],
+  [Thrid party libraries are not included in distribution package])],
+  [INCLUDE_LIBS_IN_DIST="$enableval"],
+  [])
+AM_CONDITIONAL([INCLUDE_LIBS_IN_DIST],[test "$INCLUDE_LIBS_IN_DIST" = "yes"])
 #
 #################################################################
 ## Check for FFTW3 include and library

@@ -1,6 +1,5 @@
 #CXX=mpic++, this should really be the case after running configure
 
-
 ###############################################################################
 # INSTALL DATA & EXTRA_DIST ###################################################
 ###############################################################################
@@ -64,12 +63,15 @@ velocitypro_DATA=data/velocity_pro/*.dat
 EXTRA_DIST+=${velocitypro_DATA}
 
 #Manuals
-EXTRA_DIST+=\
- docs/manuals/SPHERLS_Ref_Manual.pdf\
- docs/manuals/SPHERLSgen_Ref_Manual.pdf\
- docs/manuals/SPHERLSanal_Ref_Manual.pdf\
- docs/manuals/Scripts_Ref_Manual.pdf\
- docs/manuals/SPHERLS_User_Guide.pdf
+manualsdir=${docsdir}/docs
+manuals_DATA=\
+  docs/manuals/SPHERLS_Ref_Manual.pdf\
+  docs/manuals/SPHERLSgen_Ref_Manual.pdf\
+  docs/manuals/SPHERLSanal_Ref_Manual.pdf\
+  docs/manuals/Scripts_Ref_Manual.pdf\
+  docs/manuals/SPHERLS_User_Guide.pdf
+EXTRA_DIST+=${manuals_DATA}
+
 
 #template xml files
 templatexmldir=${docsdir}/templateXML
@@ -82,12 +84,15 @@ EXTRA_DIST+=scripts/*.py
 #python c++ extensions
 EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
 
-#supporting libraries
+#supporting libraries, include if --disable-include-libs not set in
+#configuration
+if INCLUDE_LIBS_IN_DIST
 EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
 EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
 EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz
 EXTRA_DIST+=libs/openmpi-1.6.3.tar.gz
 EXTRA_DIST+=libs/petsc-3.1-p8.tar.gz
+endif
 
 ###############################################################################
 # DOCS ########################################################################
