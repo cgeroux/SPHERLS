@@ -2,7 +2,7 @@
 import dump
 import optparse as op
 import numpy
-import subprocess
+import sys
 
 def diffDumps(fileName0,fileName1,allowedRelativeDifference,thresholdValue,out):
   '''Checks to see if the two dump files differ'''
@@ -217,6 +217,6 @@ def main():
     return False
   
   #test out some simple uses for this class
-  diffDumps(args[0],args[1],5e-14,1e-17,subprocess.STDOUT)
+  diffDumps(args[0],args[1],5e-14,1e-17,sys.stdout)
 if __name__ == "__main__":
   main()
