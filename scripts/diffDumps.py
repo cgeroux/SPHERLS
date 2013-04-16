@@ -40,7 +40,7 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,out):
     out.write("file \""+dumpFile0.fileName+"\" has version \""+str(dumpFile0.version)+"\" while file \""\
       +dumpFile1.fileName+"\" has version \""+str(dumpFile1.version)+"\"\n")
     headersMatch=False
-  relativeDifference=abs(dumpFile0.time-dumpFile1.time)/dumpFile0.time
+  relativeDifference=abs(dumpFile0.time-dumpFile1.time)/(dumpFile0.time+allowedRelativeDifference)
   if relativeDifference>allowedRelativeDifference:
     out.write("file \""+dumpFile0.fileName+"\" has time \""+str(dumpFile0.time)+"\" while file \""\
       +dumpFile1.fileName+"\" has time \""+str(dumpFile1.time)+"\"\n")
