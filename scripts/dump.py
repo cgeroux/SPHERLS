@@ -6,14 +6,8 @@ import numpy as np
 class Dump:
   """Allows manipulation of SPHERLS binary and ascii dump files.
   
-  Public Methods:
-  read: reads a dump file
-  readHeader: reads a dump file header
-  printHeader: prints a dump file header
-  printVar: prints a variable
-  printDumpToSTDOut: prints a dump to standard output
-  
-  Public Attributes:
+  \todo should probalby add methods to write out binary/ascii dump files in the
+  version that SPHERLS knows how to read.
   """
   
   def __init__(self,fileName):
@@ -521,7 +515,7 @@ class Dump:
     
     self.printHeader(sys.stdout)
     for i in range(self.numVars):
-      self.printVar(i,sys.stdout)
+      self._printVarByID(i,sys.stdout)
   def getVarNames(self):
     """Returns a list of variable names that are availble."""
     
