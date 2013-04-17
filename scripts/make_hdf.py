@@ -633,12 +633,15 @@ class fileSet:
       warnings.warn("no files found in \""+fileName+"\"")
     
     for file in files:
-      tmp=dump.dump(file)
+      tmp=dump.Dump(file)
       hdfTmp=self.convertDumpToHDF(tmp)
       hdfTmp.write()
   def convertDumpToHDF(self,dump):
-    """Converts a dump ifle to an hdf file formated in the way sepcified in the xml configuration
-    file"""
+    """Converts a dump file to an hdf file
+    
+    formated in the way sepcified in the xml configuration file
+    
+    """
     
     #make interpolated variables
     tmpHDF=hdfFile(self.variables,self.interpVars,dump)
@@ -683,7 +686,7 @@ def main():
 if __name__ == "__main__":
   main()
   
-#dumpFile=dump.dump("./T5700_5x5_t00000000")
+#dumpFile=dump.Dump("./T5700_5x5_t00000000")
 #dumpFile.printHeader()
 #dumpFile.printVar(5)
 
