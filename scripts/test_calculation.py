@@ -194,10 +194,7 @@ def createTestCalcNA(subDir,numProcs,options):
   #make SPHERLS.xml file
   log.write("making \"SPHERLS.xml\" ...")
   
-  
   configFile=os.path.dirname(ref_calcs.refCalcs[subDir][0])+"/SPHERLS.xml"
-  #cmd=["cp",configFile,"./SPHERLS.xml"]
-  #result=subprocess.call(cmd,stdout=log,stderr=log)
   spherlsConfig=xml.parse(configFile)
   root=spherlsConfig.getroot()
   

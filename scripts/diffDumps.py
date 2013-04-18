@@ -88,8 +88,8 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
   #check delta_t_nm1half
   denomitator=abs(dumpFile0.delta_t_nm1half+dumpFile1.delta_t_nm1half)*0.5
   if denomitator>threshold:
-    relativeDifference=abs(dumpFile0.delta_t_nm1half-dumpFile1.delta_t_nm1half)
-      /denomitator
+    relativeDifference=(abs(dumpFile0.delta_t_nm1half-dumpFile1.delta_t_nm1half)
+      /denomitator)
     if relativeDifference>allowedRelativeDifference:
       out.write("file \""+dumpFile0.fileName+"\" has delta_t_nm1half \""
         +str(dumpFile0.delta_t_nm1half)+"\" while file \""+dumpFile1.fileName
@@ -99,8 +99,8 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
   #check delta_t_np1half
   denomitator=abs(dumpFile0.delta_t_np1half+dumpFile1.delta_t_np1half)*0.5
   if denomitator>threshold:
-    relativeDifference=abs(dumpFile0.delta_t_np1half-dumpFile1.delta_t_np1half)
-      /denomitator
+    relativeDifference=(abs(dumpFile0.delta_t_np1half-dumpFile1.delta_t_np1half)
+      /denomitator)
     if relativeDifference>allowedRelativeDifference:
       out.write("file \""+dumpFile0.fileName+"\" has delta_t_np1half \""
         +str(dumpFile0.delta_t_np1half)+"\" while file \""+dumpFile1.fileName
@@ -110,8 +110,8 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
   #check alpha
   denomitator=abs(dumpFile0.alpha+dumpFile1.alpha)*0.5
   if denomitator>threshold:
-    relativeDifference=abs(dumpFile0.alpha-dumpFile1.alpha)
-      /denomitator
+    relativeDifference=(abs(dumpFile0.alpha-dumpFile1.alpha)
+      /denomitator)
     if relativeDifference>allowedRelativeDifference:
       out.write("file \""+dumpFile0.fileName+"\" has alpha \""
         +str(dumpFile0.alpha)+"\" while file \""+dumpFile1.fileName
@@ -144,8 +144,8 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
   #check av (artificial viscosity)
   denomitator=abs(dumpFile0.av+dumpFile1.av)*0.5
   if denomitator>threshold:
-    relativeDifference=abs(dumpFile0.av-dumpFile1.av)
-      /denomitator
+    relativeDifference=(abs(dumpFile0.av-dumpFile1.av)
+      /denomitator)
     if relativeDifference>allowedRelativeDifference:
       out.write("file \""+dumpFile0.fileName+"\" has av \""+str(dumpFile0.av)\
         +"\" while file \""+dumpFile1.fileName+"\" has av \""\
@@ -155,8 +155,8 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
   #check avthreshold
   denomitator=abs(dumpFile0.avthreshold+dumpFile1.avthreshold)*0.5
   if denomitator>threshold:
-    relativeDifference=abs(dumpFile0.avthreshold-dumpFile1.avthreshold)
-      /denomitator
+    relativeDifference=(abs(dumpFile0.avthreshold-dumpFile1.avthreshold)
+      /denomitator)
     if relativeDifference>allowedRelativeDifference:
       out.write("file \""+dumpFile0.fileName+"\" has avthreshold \""
         +str(dumpFile0.avthreshold)+"\" while file \""+dumpFile1.fileName
