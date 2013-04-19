@@ -19,13 +19,32 @@ JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
 PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
 PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
 
-INCLUDE_LIBS_IN_DIST=yes
-AC_ARG_ENABLE([include-libs],
-  [AS_HELP_STRING([--disable-include-libs],
-  [Thrid party libraries are not included in distribution package])],
-  [INCLUDE_LIBS_IN_DIST="$enableval"],
+#Should optional 3rd party libararies be included in the distribution
+INCLUDE_OPTIONAL_LIBS_IN_DIST=no
+AC_ARG_ENABLE([include-optional-libs],
+  [AS_HELP_STRING([--enable-include-optional-libs],
+  [Optional thrid party libraries will be included in distribution package created from "make dist"])],
+  [INCLUDE_OPTIONAL_LIBS_IN_DIST="$enableval"],
   [])
-AM_CONDITIONAL([INCLUDE_LIBS_IN_DIST],[test "$INCLUDE_LIBS_IN_DIST" = "yes"])
+AM_CONDITIONAL([INCLUDE_OPTIONAL_LIBS_IN_DIST],[test "$INCLUDE_OPTIONAL_LIBS_IN_DIST" = "yes"])
+
+#Should crucial 3rd party libraries be included in the distribution
+INCLUDE_CRUCIAL_LIBS_IN_DIST=yes
+AC_ARG_ENABLE([include-crucial-libs],
+  [AS_HELP_STRING([--disable-include-crucial-libs],
+  [Crucial thrid party libraries will not be included in distribution package created from "make dist"])],
+  [INCLUDE_CRUCIAL_LIBS_IN_DIST="$enableval"],
+  [])
+AM_CONDITIONAL([INCLUDE_CRUCIAL_LIBS_IN_DIST],[test "$INCLUDE_CRUCIAL_LIBS_IN_DIST" = "yes"])
+
+#Should documents be made with "make" or "make all"
+MAKE_DOCS=no
+AC_ARG_ENABLE([make-docs],
+  [AS_HELP_STRING([--enable-make-docs],
+  [If enabled it will remake the documenation from the source files when running "make" or "make all". This requires the installation of doxygen, latex and ps2pdf and is not recomended unless you are actively making changes to the source files.])],
+  [MAKE_DOCS="$enableval"],
+  [])
+AM_CONDITIONAL([MAKE_DOCS],[test "$MAKE_DOCS" = "yes"])
 #
 #################################################################
 ## Check for FFTW3 include and library
@@ -123,7 +142,7 @@ AC_ARG_ENABLE([hdf-lib-path],
 #check to see if user set an overide for the jpeg library path
 AC_ARG_ENABLE([jpeg-lib-path],
   [AS_HELP_STRING([--enable-jpeg-lib-path],
-  [set location of the jpeg library])],
+  [set location of the jpeg library, required by hdf features])],
   [JPEG_LIB_PATHS="$enableval"],
   [])
 
@@ -182,7 +201,7 @@ AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 PETSC_ENABLE=yes
 AC_ARG_ENABLE([petsc],
   [AS_HELP_STRING([--disable-petsc],
-  [Disable petsc features])],
+  [Disable petsc features, these are required to run implicit calculations])],
   [PETSC_ENABLE="$enableval"],
   [])
 #

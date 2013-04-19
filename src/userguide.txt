@@ -5,7 +5,7 @@
 /**
   @mainpage Installing, Using, and Modifying SPHERLS
   
-  This manual is divided into two main parts the current chapter, and the rest of the chapters. All chapters other than the current, contain specific reference material for the SPHERLS code while the current chapter contains a more descriptive how-to approach explaining the usage and modification of SPHERLS. The chapters following chapter 1 will serve as a useful reference when specific details need to be found, for example a description of a particular variable in the code. The current chapter on the other hand is the best place to go to get a quick understanding of SPHERLS that will enable you to use it.
+  This manual is primarily designed to be used to get a user up and running quickly. It also includes some information on how to go about modifying and developing SPHERLS. The reference manuals are useful for determining specific information about variables, functions and classes.
   
   @section overview Overview
   
@@ -25,7 +25,7 @@
   \f]
   
   \f[
-\frac{\partial E}{\partial t}+(\vec{v}\cdot\nabla)E+P\frac{d\mathbb{V}}{dt}=\epsilon+\frac{1}{\rho}\left[-\nabla\cdot F+\nabla\cdot\left(\boldsymbol{\tau}\cdot\vec{v}\right)-\left(\nabla\cdot\boldsymbol{\tau}\right)\cdot\vec{v}\right]
+\frac{\partial E}{\partial t}+(\vec{v}\cdot\nabla)E+P\frac{d\mathbb{V}}{dt}=\epsilon-\frac{1}{\rho}\nabla\cdot\ F+\frac{D_t\mathcal{K}^{3/2}}{L}+\frac{1}{\rho}\nabla\cdot\left(\frac{\mu_t}{\rho P_{rt}}\nabla E\right)
   \f]
   where \f$\boldsymbol{\tau}\f$ is the stress tensor for zero bulk viscosity, \f$E\f$ is the specific internal energy, \f$\mathbb{V}\f$ is the specific volume, and \f$F\f$ is the radiative flux. In addition to these conservation equations an equation of state is needed, in this case the OPAL equation of state and opacities, and the Alaxander opacities at low temperatures are used. The equation of state tables are functions of density and temperature, and produce the energy, pressure, opacity, and adiabatic index of the gas for a given temperature and density. In adiabatic calculations, it is also possible to use a \f$\gamma\f$-law gas equation of state but in that case an energy profile must also be included.
 

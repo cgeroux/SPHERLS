@@ -85,14 +85,22 @@ EXTRA_DIST+=scripts/*.py
 #python c++ extensions
 EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
 
-#supporting libraries, include if --disable-include-libs not set in
+#supporting libraries, included if --disable-include-crucial-libs not set in
 #configuration
-if INCLUDE_LIBS_IN_DIST
-EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
-EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
-EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz
+if INCLUDE_CRUCIAL_LIBS_IN_DIST
 EXTRA_DIST+=libs/openmpi-1.6.3.tar.gz
 EXTRA_DIST+=libs/petsc-3.1-p8.tar.gz
+endif
+
+#supporting libraries, included if --enable-optional-crucial-libs set in
+#configuration
+if INCLUDE_OPTIONAL_LIBS_IN_DIST
+EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
+EXTRA_DIST+=libs/doxygen-1.8.3.1.src.tar.gz
+EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
+EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz#needed by hdf
+EXTRA_DIST+=libs/ffmpeg-1.2.tar.gz
+EXTRA_DIST+=libs/yasm-1.2.0.tar.gz #needed by ffmpeg
 endif
 
 ###############################################################################
@@ -185,6 +193,13 @@ SPHERLSgen_SOURCES	=	\
 	src/xmlParser.cpp
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
+if HDF_ENABLE
+src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
+	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
+endif
+
+if MAKE_DOCS
+
 docs:\
  docs/manuals/SPHERLS_Ref_Manual.pdf\
  docs/manuals/SPHERLSgen_Ref_Manual.pdf\
@@ -194,12 +209,7 @@ docs:\
 
 .PHONY:docs
 
-if HDF_ENABLE
-src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
-	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
-endif
-
-docs/manuals/SPHERLS_Ref_Manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
 	(cd	src/SPHERLS;echo	${PWD};	doxygen)
 	(cd	src/SPHERLS/docs/latex;	make	pdf;)
 	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
@@ -219,7 +229,8 @@ docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
 	(cd	scripts/docs/latex;	make	pdf;)
 	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
 
-docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile ${DOC_FILES}
+docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile src/userguide.txt
 	(cd	src;	doxygen)
 	(cd	src/docs/latex;	make	pdf;)
 	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_User_Guide.pdf)
+endif
