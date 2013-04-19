@@ -541,7 +541,7 @@ class Dump:
     """Prints varible to standard output"""
     
     self.printVarToOut(var,sys.stdout)
-  def getRectangularVar(self,var):
+  def getRecVar(self,var):
     """Returns a rectangular numpy array version of a varible.
     
     Variables are stored as a 1D part plus a 2D or 3D part. This function
@@ -573,8 +573,6 @@ class Dump:
     
     #calculate rectangular size
     shapeRec=[sizeX02,sizeX12,sizeX22]
-    print sizeX01,sizeX02,sizeX12,sizeX22
-    print shapeRec
     
     #allocate numpy array
     rectVar=np.empty(shapeRec)
@@ -610,7 +608,7 @@ class Dump:
     """
     
     #get a rectangular version
-    variableToSlice=self.getRectangularVar(self.getVarID(var))
+    variableToSlice=self.getRecVar(self.getVarID(var))
     
     #set default shape options, if max's are Nones use full extent
     shape=variableToSlice.shape
@@ -623,7 +621,109 @@ class Dump:
     
     return variableToSlice[rIndexMin:rIndexMax,tIndexMin:tIndexMax
       ,pIndexMin:pIndexMax]
-  def printVarSliceToOutInRadialColumns(self,var,out,rIndexMin=0,rIndexMax=None
+  def getHorAveVarSlice(self,var,rIndexMin=0,rIndexMax=None
+                                    ,tIndexMin=0 ,tIndexMax=None,pIndexMin=0
+                                    ,pIndexMax=None):
+    """Returns a 1D numpy array for the horizontal average of the variable slice.
+    
+    Returns a 1D numpy array for the named variable within the given range
+    averaged in the horizontal direction so that the 1D array is a function of
+    radius only.
+    
+    Arguments:
+    var: variable name to get
+    
+    Keyword Arguements:
+    rIndexMin: minimum radial index to include
+    rIndexMax: maximum radial index-1 to include
+    tIndexMin: minimum theta index to include
+    tIndexMax: maximum theta index-1 to include
+    pIndexMin: minimum theta index to include
+    pIndexMax: maximum theta index-1 to include
+    """
+    
+    #get a variable slice
+    varSliced=self.getVarSlice(var,rIndexMin=rIndexMin,rIndexMax=rIndexMax
+                  ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
+                  ,pIndexMax=pIndexMax)
+    
+    #Perform a horizontal average
+    varHorAved=varSliced.sum(axis=1)/varSliced.shape[1]
+    
+    #make 3D numpy array to be more universally usable
+    temp=varHorAved[:,:,np.newaxis]
+    
+    return temp
+  def printVarToRadCol(self,temp,var,out,tIndexMin=0,pIndexMin=0):
+    """Writes the numpy array temp to out
+    
+    It formats the write to out in a column wise manner with the first index
+    written as the first column, and the second two as a column header seperated
+    by a comma.
+    
+    Arguments:
+    temp: 3D numpy array to print out
+    var: string varaible name
+    out: object supporting the write function
+    
+    Keyword Arguments:
+    tIndexMin: integer, mimimum theta index of slice
+    pIndexMin: integer, mimimum phi index of slice
+    """
+    
+    #write temp to out
+    out.write("varible=\""+var+"\"\n")
+    columnWidthFloat=28
+    columnWidthInt=8
+    precision=15
+    
+    #write out header
+    line=""
+    columnFormatStringFloatWidth="{0: >"+str(columnWidthFloat)+"}"
+    columnFormatStringIntWidth="{0: >"+str(columnWidthInt)+"}"
+    columnFormatFloat="{0: >"+str(columnWidthFloat)+"."+str(precision)+"e}"
+    columnFormatInt="{0: >"+str(columnWidthInt)+"d}"
+    line+=columnFormatStringIntWidth.format("zone#")
+    for j in range(temp.shape[1]):
+      for k in range(temp.shape[2]):
+        line+=columnFormatStringFloatWidth.format( (str(j+tIndexMin)+","
+          +str(k+pIndexMin)) )
+    out.write(line+"\n")
+    
+    #write out variable slice
+    for i in range(temp.shape[0]):
+      line=""
+      line+=columnFormatInt.format(i)
+      for j in range(temp.shape[1]):
+        for k in range(temp.shape[2]):
+          line+=columnFormatFloat.format(temp[i][j][k])
+      out.write(line+"\n")
+  def printHorAveVarSliceToOutInRadCol(self,var,out,rIndexMin=0,rIndexMax=None
+                                        ,tIndexMin=0,tIndexMax=None,pIndexMin=0
+                                        ,pIndexMax=None):
+    """
+    Prints a horizontally averaged variable slice to out in a radial column
+    format.
+    
+    Arguments:
+    var: variable name to write in column format
+    out: object with a write method, such as a file object or sys.stdout
+    
+    Keyword Arguements:
+    rIndexMin: minimum radial index to include
+    rIndexMax: maximum radial index-1 to include
+    tIndexMin: minimum theta index to include
+    tIndexMax: maximum theta index-1 to include
+    pIndexMin: minimum theta index to include
+    pIndexMax: maximum theta index-1 to include
+    """
+    
+    temp=self.getHorAveVarSlice(var,rIndexMin=rIndexMin,rIndexMax=rIndexMax
+                  ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
+                  ,pIndexMax=pIndexMax)
+    
+    self.printVarToRadCol(temp,var,out)
+  def printVarSliceToOutInRadCol(self,var,out,rIndexMin=0,rIndexMax=None
                                         ,tIndexMin=0,tIndexMax=None,pIndexMin=0
                                         ,pIndexMax=None):
     """
@@ -649,27 +749,7 @@ class Dump:
                   ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
                   ,pIndexMax=pIndexMax)
     
-    #write temp to out
-    out.write("varible=\""+var+"\"\n")
-    columnWidth=28
-    precision=15
-    
-    #write out header
-    line=""
-    columnFormatString="{0: >"+str(columnWidth)+"}"
-    columnFormatFloat="{0: >"+str(columnWidth)+"."+str(precision)+"e}"
-    for j in range(temp.shape[1]):
-      for k in range(temp.shape[2]):
-        line+=columnFormatString.format( (str(j+tIndexMin)+","+str(k+pIndexMin)) )
-    out.write(line+"\n")
-    
-    #write out variable slice
-    for i in range(temp.shape[0]):
-      line=""
-      for j in range(temp.shape[1]):
-        for k in range(temp.shape[2]):
-          line+=columnFormatFloat.format(temp[i][j][k])
-      out.write(line+"\n")
+    self.printVarToRadCol(temp,var,out,tIndexMin=tIndexMin,pIndexMin=pIndexMin)
 def main():
   """Performs some basic tests of the class Dump.
   
@@ -692,8 +772,8 @@ def main():
   print "reading a dump file ..."
   dumpFile1=Dump(args[0])
   
-  print "printing the header ..."
-  dumpFile1.printHeader(sys.stdout)
+  #print "printing the header ..."
+  #dumpFile1.printHeader(sys.stdout)
   
   #print "printing variable 1 ..."
   #dumpFile1.printVar(1,sys.stdout)
@@ -702,10 +782,15 @@ def main():
   #dumpFile1.printVar(2,sys.stdout)
   
   print dumpFile1.getVarNames()
-  dumpFile1.printVarToSTDOut("v")
+  #dumpFile1.printVarToSTDOut("v")
   
-  a=dumpFile1.getVarSlice("v",rIndexMin=100)
-  dumpFile1.printVarSliceToOutInRadialColumns("v",sys.stdout)
-  #dumpFile1.printVarSliceToOutInRadialColumns("v",sys.stdout,tIndexMin=2,tIndexMax=4)
+  #a=dumpFile1.getVarSlice("v",rIndexMin=100)
+  TFile=open("T_0.txt",'w')
+  dumpFile1.printVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  TFile.close()
+  TFile=open("T_ave_0.txt",'w')
+  dumpFile1.printHorAveVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  TFile.close()
+  #dumpFile1.printVarSliceToOutInRadCol("v",sys.stdout,tIndexMin=2,tIndexMax=4)
 if __name__ == "__main__":
   main()
