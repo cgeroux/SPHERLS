@@ -13,6 +13,18 @@ from math import *
 import xml.etree.ElementTree as xml
 import parse_formula
 figureNumber=0
+def checkForRecogAttrib(element,recogAttrib):
+  """Checks for attributes in element that arn't in recogAttrib
+  
+  Elements not in recogAttrib are added to a list of attributes not recognized
+  and are returned
+  """
+  
+  notRecogAttrib=[]
+  for key in element.attrib.keys():
+    if key not in recogAttrib:
+      notRecogAttrib.append(key)
+  return notRecogAttrib
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
   #argparse, which does allow for raw formating (repects indents, newlines etc.)
@@ -47,12 +59,29 @@ def parseOptions():
   #parse command line options
   return parser.parse_args()
 class Text:
-  '''This class holds informatin for a text object on a plot.'''
+  """This class holds informatin for a text object on a plot.
+  
+  """
+  
   def __init__(self,element):
-    '''This method initializest a text object from an xml element'''
+    """This method initializest a text object from an xml element
+    
+    """
+    
     self.x=0
     self.y=0
     self.text=None
+    
+    #check for unrecognized attributes
+    recogAttribs=[
+      "x",
+      "y",
+      ]
+    notRecogAttribs=checkForRecogAttrib(element,recogAttribs)
+    if len(notRecogAttribs)>0:
+      raise Exception("attributes in text "+str(notRecogAttribs)
+      +" are not in list of recognized text attributes "+str(recogAttribs))
+    
     
     #get x position
     if element.get("x")!=None:
@@ -71,11 +100,14 @@ class Text:
     #set text
     self.text=element.text
 class Curve:
-  '''This class holds all the information for a curve on a plot.'''
+  """Holds all the information for a curve on a plot.
+  
+  """
+  
   def __init__(self,element):
+    """Initilizes a curve object
     
-    '''This method initilizes a curve object, the type parameter allows checking curve syntax 
-    against axis syntax to see if they match.'''
+    """
     
     self.nColumnX=None
     self.nColumnY=None
@@ -108,6 +140,29 @@ class Curve:
     self.ecolor="red"
     self.elinewidth=1.0
     self.capsize=1.0
+    
+    #check for unrecognized attributes
+    recogAttribs=[
+      "line",
+      "marker",
+      "color",
+      "markerfacecolor",
+      "markeredgecolor",
+      "label",
+      "markersize",
+      "capsize",
+      "elinewidth",
+      "ecolor",
+      "linewidth",
+      "file",
+      "errcolumn",
+      "xcolumn",
+      "ycolumn",
+      ]
+    notRecogAttribs=checkForRecogAttrib(element,recogAttribs)
+    if len(notRecogAttribs)>0:
+      raise Exception("attributes in cuve "+str(notRecogAttribs)
+      +" are not in list of recognized curve attributes "+str(recogAttribs))
     
     #set curve style
     if element.get("line")!=None:
@@ -191,9 +246,8 @@ class Curve:
     if element.get("errcolumn")!=None:
       [self.formulaOrigErr,self.formulaErr,self.nColumnErr,self.nRowShiftErr,self.codeErr]=\
         parse_formula.getFormula(element.get("errcolumn"))
-    
   def load(self,files,options):
-    '''This method adds a y value and index to the curve for the current fileData.'''
+    """Adds a y-value and index to the curve for the current fileData."""
     
     #get y's from file
     for i in range(len(files[self.fileReference].fColumnValues)):
@@ -208,10 +262,16 @@ class Curve:
         self.y.append(y)
         self.x.append(x)
 class Plot:
-  '''This class holds all the information for a single plot, namely the list of curves for that plot.'''
+  """Holds all the information for a single plot
+  
+  namely the list of curves for that plot.
+  
+  """
   
   def __init__(self,element):
-    '''This method initlizes the plot object'''
+    """Initlizes the plot object
+    
+    """
     
     self.ylabel=None
     self.curves=[]
@@ -222,6 +282,23 @@ class Plot:
     self.legendloc=1
     self.numpoints=None
     self.weightHeight=1.0
+    self.autoLimits=[True,True]
+    
+    recogAttribs=[
+      "grid",
+      "yminortics",
+      "ticks",
+      "ylabel",
+      "ymin",
+      "ymax",
+      "weightHeight",
+      "legendloc",
+      "numlegendpoints"
+      ]
+    notRecogAttribs=checkForRecogAttrib(element,recogAttribs)
+    if len(notRecogAttribs)>0:
+      raise Exception("attributes in plot "+str(notRecogAttribs)
+      +" are not in list of recognized plot attributes "+str(recogAttribs))
     
     #check for grid setting
     if element.get("grid")!=None:
@@ -255,9 +332,11 @@ class Plot:
     yMin=None
     if element.get("ymin")!=None and element.get("ymin")!="":
       yMin=float(element.get("ymin"))
+      self.autoLimits[0]=False
     yMax=None
     if element.get("ymax")!=None and element.get("ymax")!="":
       yMax=float(element.get("ymax"))
+      self.autoLimits[1]=False
     self.limits=[yMin,yMax]
     
     #get weight to use when deciding plot height
@@ -282,22 +361,99 @@ class Plot:
     for textElement in textElements:
       self.texts.append(Text(textElement))
   def load(self,files,options):
-    '''loads the data for a plot, y-data is stored in the curves, and sets the ylabel from the first
-    file read in'''
+    """Loads the data for a plot
     
+    y-data is stored in the curves, and sets the ylabel from the first
+    file read in
+    
+    """
+    
+    #load the plots
     for curve in self.curves:
       curve.load(files,options)
+  def setLimits(self,xlimits):
+    """Sets the y limits
+    
+    from the maximum, and minimum y values in the curves on
+    the plot in the xrange specified, over all files.
+    
+    """
+    
+    #if both y limits were already set in configuraiton file, don't set anything
+    if self.autoLimits[0]==False and self.autoLimits[1]==False:
+      return
+    
+    #Only upper bound set
+    if xlimits[1]==None:
+      xLimitsTemp=[xlimits[0],sys.float_info.max]
+      
+    #Only lower bound set
+    elif xlimits[0]==None:
+      xLimitsTemp=[-1.0*sys.float_info.max,xlimits[1]]
+    
+    #Both Bounds set
+    else:
+      xLimitsTemp=xlimits
+    
+    minyInCurves=sys.float_info.max
+    maxyInCurves=-1.0*sys.float_info.max
+    
+    for curve in self.curves:
+      
+      #check that num x, and num y match for each curve, for each file
+      if len(curve.x)!=len(curve.y):
+        raise Exception("number of x points for axis, and number of y points"\
+          +" for curve don't match")
+      
+      for i in range(len(curve.y)):
+        
+        #if in xrange
+        if xLimitsTemp[0]<=curve.x[i] and curve.x[i]<=xLimitsTemp[1]:
+          
+          #keep smallest y
+          if minyInCurves> curve.y[i] and curve.y[i]!=None:
+            minyInCurves=curve.y[i]
+          
+          #keep largest y
+          if maxyInCurves< curve.y[i] and curve.y[i]!=None:
+            maxyInCurves=curve.y[i]
+      
+    #set only limits which are not set in configuration file
+    if self.autoLimits[0]==True and self.autoLimits[1]==True:
+      self.limits=[minyInCurves,maxyInCurves]
+    elif self.autoLimits[0]==True:
+      self.limits[0]=minyInCurves
+    elif self.autoLimits[1]==True:
+      self.limits[1]=maxyInCurves
 class Axis:
-  '''This class holds all the information needed for a particular x-axis.'''
+  """Holds all the information needed for a particular x-axis.
+  
+  """
   
   def __init__(self,element,options):
-    '''This function initizalizes the axis object.'''
+    """Initizalizes the axis object.
+    
+    """
     
     self.plots=[]
     self.xlabel=None
     self.limits=None
     self.bMinorTics=False
     self.ticks=None
+    
+    #check for unrecognized attributes
+    recogAttribs=[
+      "ticks",
+      "grid",
+      "xminortics",
+      "xlabel",
+      "xmin",
+      "xmax",
+      ]
+    notRecogAttribs=checkForRecogAttrib(element,recogAttribs)
+    if len(notRecogAttribs)>0:
+      raise Exception("attributes in axis "+str(notRecogAttribs)
+      +" are not in list of recognized axis attributes "+str(recogAttribs))
     
     #check for manual ticks
     if element.get("ticks")!=None:
@@ -348,23 +504,44 @@ class Axis:
     for plot in self.plots:
       self.plotHeightWeights.append(plot.weightHeight)
   def load(self,files,options):
-    '''This function loads the values needed for the x-axis data from the fileData argument'''
+    """Loads the values needed for the x-axis points from the fileData argument
+    
+    """
     
     #load plots
     for plot in self.plots:
       plot.load(files,options)
+    
+    #set plot limits
+    for plot in self.plots:
+      plot.setLimits(self.limits)
 class DataSet:
-  '''This class holds all the information for a single dataSet, which includes the baseFileName of 
-  the dataset, the range of the dataSet (start-end), the times and phases of the files within the 
-  range of the dataSet, and the plots made from the dataSet.'''
+  """Holds all the information for a single dataSet
+  
+  which includes the baseFileName of the dataset, the range of the dataSet
+  (start-end), the times and phases of the files within the range of the 
+  dataSet, and the plots made from the dataSet.
+  
+  """
   
   def __init__(self,element,options):
-    '''Initilizes the dataSet by setting baseFileName, start, end, and intilizing plots from an xml 
-    element'''
+    """Initilizes the dataSet
+
+    by setting baseFileName, start, end, and intilizing plots from an xml 
+    element
+    
+    """
     
     #set some initial values
     self.axes=[]
     self.files={}
+    
+    #check for unrecognized attributes
+    recogAttribs=[]
+    notRecogAttribs=checkForRecogAttrib(element,recogAttribs)
+    if len(notRecogAttribs)>0:
+      raise Exception("attributes in dataset "+str(notRecogAttribs)
+      +" are not in list of recognized dataset attributes "+str(recogAttribs))
     
     #load files
     fileElements=element.findall("file")
@@ -379,11 +556,19 @@ class DataSet:
       axis=Axis(axisElement,options)
       self.axes.append(axis)
   def load(self,options):
-    '''Loads the dataSet, this means that it sets, time, phases, and plots data'''
+    """Loads the dataSet
+    
+    this means that it sets, time, phases, and plots data
+    
+    """
+    
     for axis in self.axes:
       axis.load(self.files,options)
   def getCurve(self,ID):
-    '''Returns a curve object that has ID, ID'''
+    """Returns a curve object with the given ID
+    
+    """
+    
     nCount=0
     for axis in self.axes:
       for plot in axis.plots:
@@ -392,6 +577,9 @@ class DataSet:
             return curve
           nCount=nCount+1
 def plot(dataSets,options,title):
+  """Creates the plot
+  
+  """
   
   import matplotlib
   matplotlib.rc('text', usetex=True)  #use latex for fonts
@@ -557,13 +745,19 @@ def plot(dataSets,options,title):
     print __name__+":"+main.__name__+": saving figure to file \""+options.outputFile+"\" ..."
     fig.savefig(options.outputFile,format=ext[1:],transparent=False,dpi=options.dpi)#save to file
 def isFloat(str):
+  """Returns true if str can be converted to a float
+  
+  """
+  
   try:
     float(str)
     return True
   except:
     return False
 def isHexColor(str):
-  """Checks to see if str is a hex color, returns True if it is, else it returns False"""
+  """Returns True if str is a hex color else returns False
+  
+  """
   
   #split up string
   numberSign=str[0]
