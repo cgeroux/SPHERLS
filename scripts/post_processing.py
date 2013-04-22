@@ -51,8 +51,7 @@ def main():
   #parse command line options
   (options,args)=parser.parse_args()
   if options.t and options.E!=None:
-    print "Adding extra commands in threaded mode not yet supported"
-    quit()
+    raise Exception("Adding extra commands in threaded mode not yet supported")
   
   #get output file names and paths for running average_PKE.py in
   outputFilePaths=[]
@@ -119,7 +118,7 @@ def main():
     #create submit scripts, and run job
     settings={}
     settings['shell']="/bin/bash"
-    settings['exe']=os.path.join(paths.scriptPath,"/average_PKE.py")
+    settings['exe']=os.path.join(paths.scriptPath,"average_PKE.py")
     for i in range(len(outputFilePaths)):
       
       jobName=os.path.relpath(outputFilePaths[i])
