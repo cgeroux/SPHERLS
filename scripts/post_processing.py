@@ -119,7 +119,7 @@ def main():
     #create submit scripts, and run job
     settings={}
     settings['shell']="/bin/bash"
-    settings['exe']=os.path.join(paths.scriptPaths,"average_PKE.py")
+    settings['exe']=os.path.join(paths.scriptPath,"/average_PKE.py")
     for i in range(len(outputFilePaths)):
       
       jobName=os.path.relpath(outputFilePaths[i])
@@ -160,7 +160,7 @@ def main():
           +") before all jobs submitted, use -n to increast limit")
         break
 def runAverage(outputFileName,logFile,options):
-  cmd=os.path.join(paths.scriptPaths,"average_PKE.py")
+  cmd=os.path.join(paths.scriptPath,"average_PKE.py")
   if options.m:#use --remake option to remake profiles even if they exist already
     cmd+=" --remake"
   if options.r:#use --re-sum option so that all model profiles KE will be re-summed
@@ -223,7 +223,7 @@ def makeSubScript(settings,extras):
     for extra in extras:
       extra=extra.replace("\\cwd",cwd)
       extra=extra.replace("//","/")
-      extra=extra.replace("\\sp",paths.scriptPaths)
+      extra=extra.replace("\\sp",paths.scriptPath)
       extra=extra.replace("//","/")
       script+=extra+"\n"
   f.write(script)
