@@ -7,7 +7,6 @@ import glob
 import numpy as np
 import sys
 import os
-import disect_filename
 import parser
 from math import *
 import xml.etree.ElementTree as xml
@@ -446,6 +445,7 @@ class Axis:
       "ticks",
       "grid",
       "xminortics",
+      "ticks",
       "xlabel",
       "xmin",
       "xmax",
@@ -604,7 +604,8 @@ def plot(dataSets,options,title):
   figTop=options.figTop
   figLeft=options.figLeft
   
-  #count number of axes in all figures, this number will be the same for all figures.
+  #count number of axes in all figures, this number will be the same for all
+  #figures.
   nNumAxes=0
   for dataSet in dataSets:
     nNumAxes=nNumAxes+len(dataSet.axes)
@@ -629,7 +630,8 @@ def plot(dataSets,options,title):
   nDataSetCount=0
   for dataSet in dataSets:
     for axisMine in dataSet.axes:
-      gs.append(      GridSpec(len(axisMine.plots),1,height_ratios=axisMine.plotHeightWeights))
+      gs.append(GridSpec(len(axisMine.plots),1
+        ,height_ratios=axisMine.plotHeightWeights))
       bottom=top-heightPlot*(len(axisMine.plots))
       if options.spaceAxisEvenly:
         top=figTop-axisCount*(heightAxis+axisSpacing)
