@@ -4,7 +4,9 @@
   used to initialize the classes defined in \ref global.h, and does little more than initilize the
   default values of various parameters.
 */
+#include <sstream>
 #include "global.h"
+#include "exception2.h"
 
 MessPass::MessPass(){
   typeSendNewGrid=NULL; 
@@ -91,6 +93,26 @@ Output::Output(){
   ofWatchZoneFiles=NULL;
   nNumTimeStepsSinceLastDump=-1;
   nNumTimeStepsSinceLastPrint=-1;
+}
+void Output::setExeDir(ProcTop &procTop){
+    char buff[1024];
+    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    if (len != -1) {
+      buff[len] = '\0';
+      sExeDir=std::string(buff);
+      
+      //find the first "/" from the end
+      unsigned pos=sExeDir.find_last_of("/");
+      
+      //keep from the begning to the locaiton of the last "/" to remove the name
+      //of the executable
+      sExeDir=sExeDir.substr(0,pos);
+    } else {
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
+        <<": error determining executable path"<<std::endl;
+      throw exception2(ssTemp.str(),OUTPUT);
+    }
 }
 Performance::Performance(){
   dStartTimer=0.0;

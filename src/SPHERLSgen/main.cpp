@@ -39,6 +39,9 @@ int main(){
 }
 void readConfig(std::string sConfigFileName,std::string sStartNode){
   
+  //set directory of executable
+  setExeDir();
+  
   //open file
   XMLNode xData=openXMLFile(sConfigFileName,sStartNode);
   
@@ -314,7 +317,7 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       //GET EQUATION OF STATE
       XMLNode xEOS=getXMLNode(xModel,"EOS",0);
       getXMLAttribute(xEOS,"type",sEOSType);
-      if(sEOSType.compare("gammaLaw")==0){//eosTable overides gamma
+      if(sEOSType.compare("gammaLaw")==0){//use gamma law equation of state
         
         //get gamma
         getXMLValue(xEOS,"gamma",0,dGamma);
@@ -323,19 +326,42 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
         std::string sEProFileName;
         getXMLValue(xEOS,"E-pro",0,sEProFileName);
         
+        //test to see if it is relative to the execuatable directory
+        std::string sTemp;
+        if (sEProFileName.substr(0,1)!="/" 
+          && sEProFileName.substr(0,2)!="./"){
+          
+          //if relative to executable directory 
+          sTemp=sExeDir+"/"+sEProFileName;
+        }
+        else{
+          sTemp=sEProFileName;
+        }
+        
         //read in energy profile
-        readEnergyProfile_GL(sEProFileName);
+        readEnergyProfile_GL(sTemp);
         
         //get dRSurf
         getXMLValue(xEOS,"R-surf",0,dRSurf);
       }
-      else if(sEOSType.compare("table")==0){//if no gamma and no eosTable specified 
+      else if(sEOSType.compare("table")==0){//use tabulated equation of state
         
         //get file name for eos table
         getXMLValue(xEOS,"eosTable",0,sEOSFile);
         
+        //test to see if it is relative to the execuatable directory
+        std::string sTemp;
+        if (sEOSFile.substr(0,1)!="/" && sEOSFile.substr(0,2)!="./"){
+          
+          //if relative to executable directory 
+          sTemp=sExeDir+"/"+sEOSFile;
+        }
+        else{
+          sTemp=sEOSFile;
+        }
+        
         //read in equation of state
-        eosTable.readBin(sEOSFile);
+        eosTable.readBin(sTemp);
         
         //get dTeff
         getXMLValue(xEOS,"T-eff",0,dTeff);
@@ -582,8 +608,20 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
         std::string sProfileFileName;
         getXMLValue(xVelDist,"fileName",0,sProfileFileName);
         
+        //test to see if it is relative to the execuatable directory
+        std::string sTemp;
+        if (sProfileFileName.substr(0,1)!="/" 
+          && sProfileFileName.substr(0,2)!="./"){
+          
+          //if relative to executable directory 
+          sTemp=sExeDir+"/"+sProfileFileName;
+        }
+        else{
+          sTemp=sProfileFileName;
+        }
+        
         //read u profile
-        readUProfile(sProfileFileName);
+        readUProfile(sTemp);
         
         //get surface velocity value
         getXMLValue(xVelDist,"uSurf",0,dUSurf);
@@ -4898,4 +4936,24 @@ double interpolateE_GL(double dIntVar){
   }
   //do linear interpolation
   return (dEPro[i]-dEPro[i-1])/(dEProM[i]-dEProM[i-1])*(dIntVar-dEProM[i-1])+dEPro[i-1];
+}
+void setExeDir(){
+    char buff[1024];
+    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    if (len != -1) {
+      buff[len] = '\0';
+      sExeDir=std::string(buff);
+      
+      //find the first "/" from the end
+      unsigned pos=sExeDir.find_last_of("/");
+      
+      //keep from the begning to the locaiton of the last "/" to remove the name
+      //of the executable
+      sExeDir=sExeDir.substr(0,pos);
+    } else {
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": error determining executable path"<<std::endl;
+      throw exception2(ssTemp.str(),OUTPUT);
+    }
 }

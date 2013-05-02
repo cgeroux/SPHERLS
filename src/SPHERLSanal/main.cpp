@@ -2477,7 +2477,22 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     if(sEOSFile!=""){//overwrite sEOSTable if sEOSFile is set
       sEOSTable=sEOSFile;
     }
-    eosTable.readBin(sEOSTable);
+    
+    //set the exe directory
+    setExeDir();
+    
+    //test to see if it is relative to the execuatable directory
+    std::string sTemp;
+    if (sEOSTable.substr(0,1)!="/" && sEOSTable.substr(0,2)!="./"){
+      
+      //if relative to executable directory 
+      sTemp=sExeDir+"/"+sEOSTable;
+    }
+    else{
+      sTemp=sEOSTable;
+    }
+    
+    eosTable.readBin(sTemp);
   }
   
   //read in artificial viscosity
@@ -7946,3 +7961,23 @@ void convertBinToHDF4(std::string sFileName){
   ifFile.close();
 }
 #endif
+void setExeDir(){
+    char buff[1024];
+    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    if (len != -1) {
+      buff[len] = '\0';
+      sExeDir=std::string(buff);
+      
+      //find the first "/" from the end
+      unsigned pos=sExeDir.find_last_of("/");
+      
+      //keep from the begning to the locaiton of the last "/" to remove the name
+      //of the executable
+      sExeDir=sExeDir.substr(0,pos);
+    } else {
+      std::stringstream ssTemp;
+      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+        <<": error determining executable path"<<std::endl;
+      throw exception2(ssTemp.str(),OUTPUT);
+    }
+}

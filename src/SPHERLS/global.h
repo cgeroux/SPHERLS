@@ -758,6 +758,12 @@ class Output{
       How often the status is printed to the screen in simulation time.*/
     double dTimeLastPrint;/**<
       Simulation time when last status was printed.*/
+    std::string sExeDir;/**<
+      Directory where the executable is located.
+      */
+    void setExeDir(ProcTop &procTop);/**<
+      Sets sExeDir to the directory where the current executable is located
+      */
     Output(); /**<
       Constructor for this class.
       */

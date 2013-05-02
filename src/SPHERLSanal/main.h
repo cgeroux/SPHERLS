@@ -132,6 +132,9 @@ bool bExtraInfoInProfile=false;/**<
 std::string sEOSFile="";/**<
   path to an equation of state file, used for overriding the path/eos file in the model files.
   */
+std::string sExeDir;/**<
+  The directory where this executable lives
+  */
 //functions
 void convertDistBinToAscii(std::string sFileNameBase);
 void combineBinFiles(std::string sFileNameBase);
@@ -185,4 +188,4 @@ void convertBinToHDF4(std::string sFileName);/**<
   converts a collected binary file to an hdf file
 */
 #endif
-
+void setExeDir();
