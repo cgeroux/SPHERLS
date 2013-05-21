@@ -200,14 +200,19 @@ endif
 
 if MAKE_DOCS
 
-docs:\
- docs/manuals/SPHERLS_Ref_Manual.pdf\
- docs/manuals/SPHERLSgen_Ref_Manual.pdf\
- docs/manuals/SPHERLSanal_Ref_Manual.pdf\
- docs/manuals/Scripts_Ref_Manual.pdf\
- docs/manuals/SPHERLS_User_Guide.pdf
+
+#docs/manuals/SPHERLS_Ref_Manual.pdf
+#docs/manuals/SPHERLSgen_Ref_Manual.pdf
+#docs/manuals/SPHERLSanal_Ref_Manual.pdf
+#docs/manuals/Scripts_Ref_Manual.pdf
+#fuck doxygen, should just use latex
+docs: docs/manuals/SPHERLS_User_Guide.pdf
 
 .PHONY:docs
+
+docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
+	(cd	src/docs;	pdflatex userguide.tex)
+	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
 
 docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
 	(cd	src/SPHERLS;echo	${PWD};	doxygen)
@@ -229,8 +234,4 @@ docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
 	(cd	scripts/docs/latex;	make	pdf;)
 	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
 
-docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile src/userguide.txt
-	(cd	src;	doxygen)
-	(cd	src/docs/latex;	make	pdf;)
-	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_User_Guide.pdf)
 endif
