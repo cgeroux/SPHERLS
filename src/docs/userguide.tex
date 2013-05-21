@@ -1,183 +1,204 @@
-/** @file
-  Contains the text for the "Installing, Using, and Modifying SPHERlS" section of this manual.
-**/
+\documentclass[11pt]{article}
+\usepackage{amsfonts}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = blue, %Colour for external hyperlinks
+  linkcolor    = blue, %Colour of internal links
+  citecolor   = red %Colour of citations
+}
+\begin{document}
+\section{Introduction}
 
-/**
-  @mainpage Installing, Using, and Modifying SPHERLS
+This manual is primarily designed to be used to get a user up and running quickly. It also includes some information on how to go about modifying and developing SPHERLS. The reference manuals are useful for determining specific information about variables, functions and classes.
+
+\section{Overview}
+SPHERLS stands for Stellar Pulsation with a Horizontal Eulerian Radial Lagrangian Scheme. There are three components to SPHERLS: SPHERLS itself which does the hydrodynamics calculations, SPHERLSgen which creates starting models, and SPHERLSanal which is able to manipulate the output files. Both SPHERLSgen and SPHERLSanal have there own manuals which can be consulted for their specific uses and installations.
   
-  This manual is primarily designed to be used to get a user up and running quickly. It also includes some information on how to go about modifying and developing SPHERLS. The reference manuals are useful for determining specific information about variables, functions and classes.
+\subsection{The Basics}
+SPHERLS calculates the radial pulsation motions together with the horizontal convective flow. The radial pulsation can be described by a radial grid velocity Grid::nU0, moving the grid inward and outward with the pulsation. The movement of the grid is defined by the motion required to maintaining the mass in a spherical shell through out the calculation. This motion is determined so that it will change the volume of the shell so the newly calculated density when multiplied with the new volume will produce the same shell mass. The total motion of the stellar material is simply the combination of the three velocity components, radial Grid::nU, theta Grid::nV, and phi velocities Grid::nW.  The convective motion is the radial velocity minus the grid velocity, combined with the theta and phi velocities. This is because the grid velocity describes the bulk motion of the pulsation so subtracting it out leaves only the convective motions.
+
+SPHERLS solves the normal hydrodynamic equations of, mass, momentum, and energy conservation. The form of the mass equation, momentum conservation, and energy conservation are:
+\begin{equation}
+\frac{d M}{d t} + \oint_{\mathbb{S}} \left(\rho\vec v\right)\cdot\hat{n}d\sigma=0
+\end{equation}
+\begin{equation}
+\frac{\partial \vec{v}}{\partial t}+(\vec{v}\cdot\nabla)\vec{v}=-\frac{1}{\rho}\nabla P + \nabla\cdot\mathbf{\tau}-\nabla \phi
+\end{equation}
   
-  @section overview Overview
-  
-  SPHERLS stands for Stellar Pulsation with a Horizontal Eulerian Radial Lagrangian Scheme. There are three components to SPHERLS: SPHERLS itself which does the hydrodynamics calculations, SPHERLSgen which creates starting models, and SPHERLSanal which is able to manipulate the output files. Both SPHERLSgen and SPHERLSanal have there own manuals which can be consulted for their specific uses and installations.
-  
-  @subsection basics The Basics
-  SPHERLS calculates the radial pulsation motions together with the horizontal convective flow. The radial pulsation can be described by a radial grid velocity \ref Grid::nU0, moving the grid inward and outward with the pulsation. The movement of the grid is defined by the motion required to maintaining the mass in a spherical shell through out the calculation. This motion is determined so that it will change the volume of the shell so the newly calculated density when multiplied with the new volume will produce the same shell mass. The total motion of the stellar material is simply the combination of the three velocity components, radial \ref Grid::nU, theta \ref Grid::nV, and phi velocities \ref Grid::nW.  The convective motion is the radial velocity minus the grid velocity, combined with the theta and phi velocities. This is because the grid velocity describes the bulk motion of the pulsation so subtracting it out leaves only the convective motions.
-  
-  SPHERLS solves the normal hydrodynamic equations of, mass, momentum, and energy conservation. The form of the mass equation, momentum conservation, and energy conservation are:
-   
-  \f[
-  \frac{d M}{d t} + \oint_{\mathbb{S}} \left(\rho\vec v\right)\cdot\hat{n}d\sigma=0
-  \f]
-  
-  \f[
-  \frac{\partial \vec{v}}{\partial t}+(\vec{v}\cdot\nabla)\vec{v}=-\frac{1}{\rho}\nabla P + \nabla\cdot\boldsymbol{\tau}-\nabla \phi
-  \f]
-  
-  \f[
+\begin{equation}
 \frac{\partial E}{\partial t}+(\vec{v}\cdot\nabla)E+P\frac{d\mathbb{V}}{dt}=\epsilon-\frac{1}{\rho}\nabla\cdot\ F+\frac{D_t\mathcal{K}^{3/2}}{L}+\frac{1}{\rho}\nabla\cdot\left(\frac{\mu_t}{\rho P_{rt}}\nabla E\right)
-  \f]
-  where \f$\boldsymbol{\tau}\f$ is the stress tensor for zero bulk viscosity, \f$E\f$ is the specific internal energy, \f$\mathbb{V}\f$ is the specific volume, and \f$F\f$ is the radiative flux. In addition to these conservation equations an equation of state is needed, in this case the OPAL equation of state and opacities, and the Alaxander opacities at low temperatures are used. The equation of state tables are functions of density and temperature, and produce the energy, pressure, opacity, and adiabatic index of the gas for a given temperature and density. In adiabatic calculations, it is also possible to use a \f$\gamma\f$-law gas equation of state but in that case an energy profile must also be included.
+\end{equation}
+where $\mathbf{\tau}$ is the stress tensor for zero bulk viscosity, $E$ is the specific internal energy, $\mathbb{V}$ is the specific volume, and $F$ is the radiative flux. In addition to these conservation equations an equation of state is needed, in this case the OPAL equation of state and opacities, and the Alaxander opacities at low temperatures are used. The equation of state tables are functions of density and temperature, and produce the energy, pressure, opacity, and adiabatic index of the gas for a given temperature and density. In adiabatic calculations, it is also possible to use a $\gamma$-law gas equation of state but in that case an energy profile must also be included.
 
-  The simulation grid is broken up into two main sections, the 1D region towards the center of the star, the multi-dimensional region towards the surface. The inner part of the multi-dimensional region solves all the conservation equations explicitly, in that the new values for the conserved quantities are directly calculated from the information in the previous time step. In the outer parts of the multi-dimensional region the energy conservation equation is calculated semi-implicitly, which means that the new values are dependent on the new values averaged with the old values to correctly time center the equation. This semi-implicit energy conservation equation can be perturbed and linearized producing a set of linear equations the size of the region being solved implicitly. The solution of these linear equations provide corrections for the temperature which can be applied and then resolved in an iterative approach until the value of the new temperature converges. The equation of state is a function of temperature and not energy which is why the temperature is perturbed and not the energy. This set of equations for the temperature corrections are solved using the PETSC library.
+The simulation grid is broken up into two main sections, the 1D region towards the center of the star, the multi-dimensional region towards the surface. The inner part of the multi-dimensional region solves all the conservation equations explicitly, in that the new values for the conserved quantities are directly calculated from the information in the previous time step. In the outer parts of the multi-dimensional region the energy conservation equation is calculated semi-implicitly, which means that the new values are dependent on the new values averaged with the old values to correctly time center the equation. This semi-implicit energy conservation equation can be perturbed and linearised producing a set of linear equations the size of the region being solved implicitly. The solution of these linear equations provide corrections for the temperature which can be applied and then resolved in an iterative approach until the value of the new temperature converges. The equation of state is a function of temperature and not energy which is why the temperature is perturbed and not the energy. This set of equations for the temperature corrections are solved using the PETSC library.
   
-  - Different ways in which SPHERLS can be used, 1D,2D,3D, Adiabatic,Non-adiabatic, implicit, debugging options/test
-  @section equations The Equations
-  
-  I will want to give a detailed description of the equations used (probably copied from my notes wiki) so that the reader can easily see a 1-1 correspondence between the equation and the terms in SPHERLS.
-  
-  @section flow Program Flow
-    - Describe the grids
-    - The order of calculation
-    - When parts of the grid are updated
+- Different ways in which SPHERLS can be used, 1D,2D,3D, Adiabatic,Non-adiabatic, implicit, debugging options/test
+
+\section{The Equations}
+I will want to give a detailed description of the equations used (probably copied from my notes wiki) so that the reader can easily see a 1-1 correspondence between the equation and the terms in SPHERLS.
+\section{Program Flow}
+\begin{itemize}
+\item Describe the grids
+\item The order of calculation
+\item When parts of the grid are updated
+\end{itemize}
+\section{Installing SPHERLS}
+\textbf{TODO}
+\begin{itemize}
+\item Need to update the below, to include the fact that I am now including the required libraries with the package. This will ensure that compatible versions of the libraries are available for use, and guarantee that the end user gets libraries that have been tested to work with the code. I should periodically try updating these libraries.
+\item I should also follow the step-by-step instructions on a fresh machine without using {\tt sudo}. This could be done using virtual box
+\item Check to make sure I mention what needs to be added to {\tt .bashrc}, this is likely different for per-user installs that it is for global installs
+\end{itemize}
+
+A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/lib} {\tt /usr/include}, {\tt /usr/local/lib}, {\tt /usr/local/include}, {\tt /home/\$USER/lib}, and {\tt /home/\$USER/include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
+
+I am going to assume that the user is installing on a Linux system, more over I will be assuming that the Linux distribution follows a Debian like directory structure (many distributions are based on Debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in {\tt ~/bin}, {\tt ~/lib}, {\tt ~/include}, and {\tt ~/share} directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix=/home/\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also --prefix should always be specified as some of these libraries don't install to standard Debian locations on their own, preferring install to install into the directory where they are built.
+
+If you have root access and want to install for all users of the current machine you will likely want to install the libraries into {\tt /usr/local}  which can be achieved by setting {\tt --prefix=/usr/local} instead of {\tt --prefix=/home/\$USER/} used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
-  
-  @section installation Installing SPHERLS
+\subsection{Requirements}
+\begin{itemize}
+\item gcc/g++/openMPI
+\item PETSc library, used as the core matrix solver
+\end{itemize}
+
+\subsection{Optional Requirements}
+\begin{itemize}
+\item python for analysis scripts
+\begin{itemize}
+\item numpy used by matplotlib
+\item matplotlib for creating plots
+\item scipy for interpolating in equation of state files
+\end{itemize}
+\item fftw3 library for frequency analysis
+\item hdf4 library for converting to hdf4 file format
+\begin{itemize}
+\item hdf library needs jpeg library and zlib library
+\end{itemize}
+\item Doxygen used to create documentation from source code via "make docs"
+\end{itemize}
+
+\subsection{Installing OpenMPI}
+\begin{itemize}
+\item Download OpenMPI from \href{http://www.open-mpi.org/software/ompi/v1.6/}{the open mpi site}
+\item add library path to {\tt LD\_LIBRARY\_PATH}
+\item ./configure --prefix=<path-to-final-location-of-install>
+\item make
+\item install
+\end{itemize}
+
+\subsection{Installing PETSC Library}
+Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt petsc-lite-3.2-p7} is known to be incompatible, which as of this writing is the current version of the PETSc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
+
+\begin{itemize}
+\item Download PETSc library, from the PETSc \href{http://www.mcs.anl.gov/petsc/download/index.html}{website}
+\item Then untar and unzip it with {\tt tar -xzf petsc-lite-3.1-p8.tar}
+\item To install the library change into the directory made when you extracted the archive and type the following commands:
+\begin{enumerate}
+\item {\tt ./configure PETSC\_DIR=\$PWD --prefix=/home/\$USER/ --with-c++-support --with-c-support --with-shared --download-c-blas-lapack=1 --with-x11=no} where {\tt \$USER} is the environment variable corresponding to your username.  Note that the {\tt PETSC\_DIR=\$PWD} needs to come first. Also {\tt --download-f-blas-lapack=1} only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using {\tt --download-c-blas-lapack=1} seems to work in this case
+\item {\tt make all} Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above if given.
+\item {\tt make install} as with the {\tt make all} the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
+\item {\tt make PETSC\_DIR=/home/\$USER/lib test} will test the code
+\end{enumerate}
+\item You will then need to add the following line to you {\tt .bashrc} file to assure that you will pick up the library {\tt export PETSC\_DIR=/home/\$USER/lib}
+\end{itemize}
+
+\subsection{Installing FFTW Library}
+\begin{itemize}
+\item Download the FFTW Library from the FFTS \href{http://www.fftw.org/download.html}{website}. Version fftw-3.2.2 has been tested to work with SPHERLS.
+\item Then untar and unzip the downloaded with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
+\item To install the library change into the directory made when you extracted the archive and type the following commands:
+\begin{enumerate}
+\item {\tt ./configure --prefix=<path-to-final-location-of-library>}
+\item {\tt make}
+\item {\tt make install}
+\end{enumerate}
+\end{itemize}
+
+\subsection{Installing HDF4 Library}
+\begin{itemize}
+\item First run configure in the hdf directory
+\item If configure doesn't find the jpeg library install that before proceeding see jpeg library install
+\item {\tt ./configure --prefix=<path-to-final-location-of-library> } note that for hdf {\tt --prefix} should be set if doing a global install or doing a per user install as the default install directory is inside the build directory, which is not what is usually wanted, so if doing a global install it will probably want to be set to {\tt /usr/local}
+\item {\tt  make}
+\item {\tt  make install}
+\item Building these libraries requires gfortran make sure it is available.
+\item Download the HDF Library from the hdfgroup \href{http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/}{website}. Version hdf-4.2.7 has been tested to work with SPHERLS.
+\item Then untar and unzip the downloaded file with something like {\tt tar -xzf hdf.4.2.7-patch1.tar.gz}
+\item To install the library change into the directory made when you extracted the archive and type the following commands:
+\begin{enumerate}
+\item {\tt ./configure --prefix=<path-to-final-location-of-library> CFLAGS="-fPIC" CXXFLAGS="-fPIC"}
+\item {\tt make}
+\item {\tt make install}
+\end{enumerate}
+\end{itemize}
+
+\subsection{Installing Doxygen}
+The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
+
+\subsection{Installing Python}
     
-    \textbf{Need to update the below, to include the fact that I am now including the required libraries with the package. This will ensure that compatible versions of the libraries are avaible for use, and garantee that the end user gets libraries that have been tested to work with the code. I should periodically try updating these libraries.}
+\subsection{Installing SPHERLS}
     
-    \textbf{I should also follow the step-by-step instructions on a fresh machine without using sudo. This could be done using virtual box}
-    
-    \textbf{Check to make sure I mention what needs to be added to .bashrc, this is likely different for per-user installs that it is for global installs}
-    
-    A few words on installation before we get into the details of the specific packages. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following "standard" locations: \c /lib, \c /include, \c /usr/lib /usr/include, \c /usr/local/lib, \c /usr/local/include, \c /home/$USER/lib, and \c /home/$USER/include . If you install the required libraries in places other than these "standard" locations you will have to manually tell the SPHERLS configuration script where to find them. Running \c configure \c -h will list the avaible options to tell the script where to find these include files and libraries.
-    
-    I am going to assume that the user is installing on a linux system, more over I will be assuming that the linux distribution follows a debian like directory structure (many distributions are based on debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation  (at least far as SPHERLS is concerned) is in \c ~/bin, \c ~/lib, \c ~/include, and \c ~/share directories respectively. Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing \verbatim --prefix=/home/$USER/ \endverbatim , mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also --prefix should always be specified as some of these libraries don't install to standard debian locations on their own, prefering install to install into the directory where they are built.
-    
-    If you have root access and want to install for all users of the current machine you will likely want to install the libraries into \c /usr/local  which can be achieved by setting \verbatim --prefix=/usr/local \endverbatim instead of \verbatim --prefix=/home/$USER/ \endverbatim used in the below installations and SPHERLS will automatically check this location for the install libraries.
-    
-    @subsection requirements Requirements
-      - gcc/g++/openMPI
-      - PETSc library, used as the core matrix solver
-    @subsection optional_requirements Optional Requirements
-      - python for analysis scripts
-      -- numpy used by matplotlib
-      -- matplotlib for creating plots
-      -- scipy for interpolating in equation of state files
-      - fftw3 library for frequency analysis
-      - hdf4 library for converting to hdf4 file format
-      -- hdf library needs jpeg library and zlib library
-      - Doxygen used to create documentation from source code via "make docs"
-    
-    @subsection installOpenMPI Installing OpenMPI
-    - Download OpenMPI from <a href="http://www.open-mpi.org/software/ompi/v1.6/">website</a>.
-    - add library path to LD_LIBRARY_PATH
-    - ./configure --prefix=<path-to-final-location-of-install>
-    - make
-    - install
-    @subsection installPETSC Installing PETSC Library
-      Version \c petsc-lite-3.1-p8, has been tested to work with SPHERLS. \c petsc-lite-3.2-p7 is known to be incompatible, which as of this writting is the current version of the petsc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
-      - Download PETSc library, from the PETSc <a href="http://www.mcs.anl.gov/petsc/download/index.html">website</a>.
-      - Then untar and unzip it with <tt>tar -xzf petsc-lite-3.1-p8.tar</tt>
-      - To install the library change into the directory made when you extracted the archive
-        and type the following commands:
-        -# \verbatim ./configure PETSC_DIR=$PWD --prefix=/home/$USER/ --with-c++-support --with-c-support
-        --with-shared --download-c-blas-lapack=1 --with-x11=no \endverbatim \c $USER is the environment variable corresponding to your username.  Note that the PETSC_DIR=$PWD needs to come first. Also \c --download-f-blas-lapack=1 only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using \c --download-c-blas-lapack=1 seems to work in this case
-        -# \verbatim make all \endverbatim \ 
-        Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above if given.
-        -# \verbatim make install \endverbatim \ 
-        as with the \c make \c all the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
-        -# \verbatim make PETSC_DIR=/home/$USER/lib test \endverbatim will test the code
-      - You will then need to add the following line to you \c .bashrc file to assure that you will pick up the library
-      \verbatim
-      export PETSC_DIR=/home/$USER/lib
-      \endverbatim
-    
-    @subsection installFFTW Installing FFTW Library
-      - Download the FFTW Library from the FFTS <a href="http://www.fftw.org/download.html">website</a>. Version fftw-3.2.2 has been tested to work with SPHERLS.
-      - Then untar and unzip the downloaded with something like <tt>tar -xzf fftw-3.2.2.tar.gz</tt>
-      - To install the library change into the directory made when you extracted the archive
-        and type the following commands:
-        -# \verbatim ./configure --prefix=<path-to-final-location-of-library> \endverbatim
-        -# \verbatim make \endverbatim
-        -# \verbatim make install \endverbatim
-    
-    @subsection installHDF4 Installing HDF4 Library
-      - First run configure in the hdf directory
-      - If configure doesn't find the jpeg library install that before proceding see jpeg library install
-      \verbatim ./configure --prefix=<path-to-final-location-of-library> \endverbatim
-      note that for hdf --prefix should be set if doing a global install or doing a per user install as the default install directory is inside the build directory, which is not what is usually wanted, so if doing a global install it will probably want to be set to "/usr/local"
-      \verbatim make\endverbatim
-      \verbatim make install\endverbatim
-      
-      - Building these libraries requires gfortran make sure it is available.
-      - Download the HDF Library from the hdfgroup <a href="http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/">website</a>. Version hdf-4.2.7 has been tested to work with SPHERLS.
-      - Then untar and unzip the downloaded file with something like <tt>tar -xzf hdf.4.2.7-patch1.tar.gz</tt>
-      - To install the library change into the directory made when you extracted the archive
-        and type the following commands:
-        -# \verbatim ./configure --prefix=<path-to-final-location-of-library> CFLAGS="-fPIC" CXXFLAGS="-fPIC" \endverbatim
-        -# \verbatim make \endverbatim
-        -# \verbatim make install \endverbatim
-        
-    @subsection installDoxygen Installing Doxygen
-    The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
-    @subsection installPython Installing Python
-    
-    @subsection installingSPHERLS Installing SPHERLS
-    
-  @section usage Using SPHERLS
-    - Generating a starting model (\todo should merge SPHERLSgen and SPHERLSanal documentation)
-    - The XML configuration file
-    - Starting a calculation
-    - getting data
-      - watchzones
-      - model dumps
-      - debug information
-    - post calculation analysis
-     - python scripts and plotting
-    - Adiabatic Calculations
-      - 1D, 2D, and 3D
-      - $gamma$-law gas
-      - Sedov Blast wave test
-    - Non-Adiabatic Calculations
-      - 1D, 2D, and 3D
-      - Tabulate EOS
-      - Different versions of the energy equation
-      - LES models
-    -creating a new EOS file using eos_interp.py
-    
-  @section modding Modifing or Developing SPHERLS
-    - Basic layout/design of the code
-      - model output
-      - data monitoring
-        - watch zones
-        - peak KE tracking
-      - internal/versus external variables
-      - message passing
-      - grid layout
-      - ranges of grids
-      - boundary regions
-      - grid updating
-    - How to document SPHERLS
-    - Premade test for SPHERLS after modification
-      - reference calculations
-      - restart test
-      - calculation test (if not modifying calcluation part of SPHERLS)
-    - How to modify SPHERLS
-      - Common changes
-        - How to add a new internal variable
-          -# <b>Add to the internal variable count:</b> Decide in what cases the variable will be needed, 1D calculations, 2D calculations, when there is a gamma law gas or a tabulated equation of state, adiabatic or non-adiabatic etc. Then once decided it can be added to the total number of internal variables \ref Grid::nNumIntVars by increasing the value by one in the function \ref modelRead in the section below the comment "set number of internal variables ..." under the appropriate if block. If the specific if block for the situation you need isn't there, you can create your own, and add it there.
-          -# <b>Create a new variable ID:</b> In the \ref grid.h file under the \ref Grid class are variable ID's. These ID's simply indicate the location of the variable in the array. One must add a new ID for the new variable as an integer. The value of the ID is set in the function \ref modelRead in the same section as the number of internal variables. The value used should be the last integer after the last pre-existing variable ID. This should also be \ref Grid::nNumVars + \ref Grid::nNumIntVars -1. The ID should also be initialized to -1, so that the code knows when it isn't being used. This is done in the grid class constructor, \ref Grid::Grid. Simply add a line in the constructor setting your new ID = -1.
-          -# <b>Set variable infos:</b> Decide what the dimensions of the new variable will be. It can be cell centered or interface centered. It can also be only 1D, 2D, or 3D. Of course it will be only 1D if the entire calculation is 1D, or 2D if the calculation is 2D, but if the calculation is 3D it could also only be 2D, or 1D, and if 2D it could be only 1D. Also decide if the variable will change with time, dependent variables are only initialized and not updated during the calculations. This information is given to SPHERLS in the \ref setInternalVarInf function in the \ref physEquations.cpp file. The variable that is set is \ref Grid::nVariables. It is a 2D array, the first index corresponds to the particular variable in question, the ID you made in the previous step can be used as the first index of this array. The second index refers to one of the three directions (0-2) or the time dimension (3). If the variable is centered in the grid in direction 0 (r-direction) then this array element should have a value of 0. If the variable is interface centered in the grid in direction 0, then this array element should have a value of 1. If it isn't defined in direction 0 (for example the theta independent variable isn't defined in the 0 direction) then it should be -1. This is the same for the other 2 directions. The last element (3) should be either 0 not updated every time step, or 1 if updated every timestep. There are 
-          various sections here which allows one to set variable information based on which conditions are the variable is defined in. Put these variable infos into the most general case in which the variable is defined. At the end of this function variables are automatically adjusted depending on what the number of dimensions the model uses, so this does not need to be considered unless the variable is not used at all for a specific case of dimensions. For example a variable which is defined at cell center for all three cases for the number of dimensions (1D, 2D, 3D) will be automatically adjusted to be not defined in the 3rd direction when only doing 2D calculations, and similarly for 1D only defined in 1st direction and not defined in the 2nd or 3rd directions.
-          -# <b>Add functions:</b> Finally to do anything usefull with your new internal variable functions must be added to initialize the values of the variables, and to update them with time if needed. Initialization functions are called within the \ref initInternalVars function in the \ref physEquations.cpp file. The details of these functions will depend on what the individual variables are intended for. Functions to be called every timestep must be called from the main program loop in the file \ref main.cpp in the appropriate order.
-        - How to add a new external variable
-        - How to add a new physics functions
-          - Function naming conventions
-          - Grid variables
-          - indecies and their ranges
-    - SPHERLS debugging tips
-  
-  @section messpass Message Passing
-    - Explain message passing in SPHERLS
-*/
+\section{Using SPHERLS}
+Bits to include in this seciton are
+\begin{itemize}
+\item Generating a starting model
+\item The XML configuration file
+\item Starting a calculation
+\item getting data
+\item watchzones
+\item model dumps
+\item debug information
+\item post calculation analysis
+\item python scripts and plotting
+\item Adiabatic Calculations
+\item 1D, 2D, and 3D
+\item $\gamma$-law gas
+\item Sedov Blast wave test
+\item Non-Adiabatic Calculations
+\item 1D, 2D, and 3D
+\item Tabulate EOS
+\item Different versions of the energy equation
+\item LES models
+\item creating a new EOS file using {\tt eos\_interp.py}
+\end{itemize}
+\section{Modifing or Developing SPHERLS}
+This section should include
+\begin{itemize}
+\item Basic layout/design of the code
+\item model output
+\item data monitoring
+\item watch zones
+\item peak KE tracking
+\item internal/versus external variables
+\item message passing
+\item grid layout
+\item ranges of grids
+\item boundary regions
+\item grid updating
+\item How to document SPHERLS
+\item Premade test for SPHERLS after modification
+\item reference calculations
+\item restart test
+\item calculation test (if not modifying calcluation part of SPHERLS)
+\item How to modify SPHERLS
+\item Common changes
+\item How to add a new internal variable
+\begin{enumerate}
+\item \textbf{Add to the internal variable count:} Decide in what cases the variable will be needed, 1D calculations, 2D calculations, when there is a gamma law gas or a tabulated equation of state, adiabatic or non-adiabatic etc. Then once decided it can be added to the total number of internal variables Grid::nNumIntVars by increasing the value by one in the function modelRead in the section below the comment "set number of internal variables ..." under the appropriate if block. If the specific if block for the situation you need isn't there, you can create your own, and add it there.
+\item \textbf{Create a new variable ID:} In the grid.h file under the Grid class are variable ID's. These ID's simply indicate the location of the variable in the array. One must add a new ID for the new variable as an integer. The value of the ID is set in the function modelRead in the same section as the number of internal variables. The value used should be the last integer after the last pre-existing variable ID. This should also be Grid::nNumVars + Grid::nNumIntVars -1. The ID should also be initialized to -1, so that the code knows when it isn't being used. This is done in the grid class constructor, Grid::Grid. Simply add a line in the constructor setting your new ID = -1.
+\item \textbf{Set variable infos:} Decide what the dimensions of the new variable will be. It can be cell centered or interface centered. It can also be only 1D, 2D, or 3D. Of course it will be only 1D if the entire calculation is 1D, or 2D if the calculation is 2D, but if the calculation is 3D it could also only be 2D, or 1D, and if 2D it could be only 1D. Also decide if the variable will change with time, dependent variables are only initialized and not updated during the calculations. This information is given to SPHERLS in the setInternalVarInf function in the physEquations.cpp file. The variable that is set is Grid::nVariables. It is a 2D array, the first index corresponds to the particular variable in question, the ID you made in the previous step can be used as the first index of this array. The second index refers to one of the three directions (0-2) or the time dimension (3). If the variable is centered in the grid in direction 0 (r-direction) then this array element should have a value of 0. If the variable is interface centered in the grid in direction 0, then this array element should have a value of 1. If it isn't defined in direction 0 (for example the theta independent variable isn't defined in the 0 direction) then it should be -1. This is the same for the other 2 directions. The last element (3) should be either 0 not updated every time step, or 1 if updated every timestep. There are various sections here which allows one to set variable information based on which conditions are the variable is defined in. Put these variable infos into the most general case in which the variable is defined. At the end of this function variables are automatically adjusted depending on what the number of dimensions the model uses, so this does not need to be considered unless the variable is not used at all for a specific case of dimensions. For example a variable which is defined at cell center for all three cases for the number of dimensions (1D, 2D, 3D) will be automatically adjusted to be not defined in the 3rd direction when only doing 2D calculations, and similarly for 1D only defined in 1st direction and not defined in the 2nd or 3rd directions.
+\item \textbf{Add functions:} Finally to do anything usefull with your new internal variable functions must be added to initialize the values of the variables, and to update them with time if needed. Initialization functions are called within the initInternalVars function in the physEquations.cpp file. The details of these functions will depend on what the individual variables are intended for. Functions to be called every timestep must be called from the main program loop in the file main.cpp in the appropriate order.
+\end{enumerate}
+\item How to add a new external variable
+\item How to add a new physics functions
+\item Function naming conventions
+\item Grid variables
+\item indecies and their ranges
+\item SPHERLS debugging tips
+\end{itemize}
+\section{Message Passing}
+Explain message passing in SPHERLS
+\end{document}
