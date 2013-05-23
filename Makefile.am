@@ -95,6 +95,8 @@ endif
 #supporting libraries, included if --enable-optional-crucial-libs set in
 #configuration
 if INCLUDE_OPTIONAL_LIBS_IN_DIST
+EXTRA_DIST+=libs/evtk.tar.gz
+EXTRA_DIST+=libs/Cython-0.19.1.tar.gz
 EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
 EXTRA_DIST+=libs/doxygen-1.8.3.1.src.tar.gz
 EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
@@ -209,6 +211,12 @@ if MAKE_DOCS
 docs: docs/manuals/SPHERLS_User_Guide.pdf
 
 .PHONY:docs
+
+CLEANFILES=\
+src/docs/userguide.pdf\
+src/docs/userguide.out\
+src/docs/userguide.log\
+src/docs/userguide.aux
 
 docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
 	(cd	src/docs;	pdflatex userguide.tex)

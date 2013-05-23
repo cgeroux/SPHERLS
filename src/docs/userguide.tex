@@ -131,8 +131,8 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \begin{itemize}
 \item {\tt tar -xzf Cython-0.19.1.tar.gz}
 \item {\tt cd Cython-0.19.1}
-\item {\tt  python setup.py install --prefix=/home/\$USER}
-\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/site-packages/:$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python.
+\item {\tt  python setup.py install --prefix=/home/\-\$USER}
+\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python.
 \end{itemize}
 
 \subsection{Installing evtk}
@@ -140,8 +140,14 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item {\tt tar -xzf evtk.tar.gz}
 \item {\tt cd evtk}
 \item {\tt  python setup.py install --prefix=/home/\$USER}
-\item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/site-packages/:$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
+\item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
 \end{itemize}
+
+\subsection{Installing ffmpeg}
+useful for making movies from stills
+
+\subsection{Installing yasm}
+I think this is needed by ffmpeg
 
 \subsection{Installing HDF4 Library}
 Building these libraries requires gfortran and the jpeg library. If using the SPHERLS distribution package including third party optional libraries, version 4.2.8 of the HDF4 library is available in the {\tt libs} subdirectory. Otherwise this library can be downloaded from the hdfgroup \href{http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/}{website}. The most recent version tested to work with SPHERLS is version 4.2.8, version 4.2.7 has also been tested to work. To build the version included with the SPHERLS distribution package use the following set of commands:
@@ -162,10 +168,19 @@ The latest version seems to hang while creating documents. doxygen-1.5.6 is know
 This could be pain if not simply doing apt-get install
 
 \subsection{Installing SPHERLS}
-After all the third party libraries are available this should be easy
-
+After all the third party libraries are available this should be as easy as:
+\begin{itemize}
+\item {\tt ./configure}
+\item {\tt make}
+\end{itemize}
+If you have the raw git repository do the following
+\begin{itemize}
+\item {\tt autoreconf --install} provided you have the gnu build tool auto conf installed, this makes the configuration script
+\item {\tt ./configure}
+\item {\tt make}
+\end{itemize}
 \subsection{.bashrc}
-What you need to add to .bashrc after all the libraries are installed
+What you need to add to .bashrc after all the libraries are installed, this might be best to add on a per library basis, but perhaps a summary would be good?
 
 \section{Using SPHERLS}
 Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
