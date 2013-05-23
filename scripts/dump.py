@@ -526,7 +526,10 @@ class Dump:
         varNames.append(key)
     return varNames
   def getVarID(self,var):
-    """Returns the array index (ID) of a variable given by name"""
+    """Returns the array index (ID) of a variable given by name var
+    
+    var: a string name for variable
+    """
     
     return self._varIDs[var]
   def printVarToOut(self,var,out):
@@ -546,7 +549,14 @@ class Dump:
     
     Variables are stored as a 1D part plus a 2D or 3D part. This function
     returns a variable that has the 1D part copied to match the 2D or 3D part.
+    
+    var: an index or name of a variable
     """
+    
+    strType=type("")
+    if type(var)==strType:#if it is a string assume it is a variable name and
+                          #get the ID
+      var=self.getVarID(var)
     
     #set ghost cells based on which directions the variable is defined in
     ghostCellsInX0=1
@@ -750,6 +760,36 @@ class Dump:
                   ,pIndexMax=pIndexMax)
     
     self.printVarToRadCol(temp,var,out,tIndexMin=tIndexMin,pIndexMin=pIndexMin)
+  def writeVTKFile(self,fileName,withGhost=True):
+    """Writes out a vtk file from the model dump
+    
+    """
+    
+    varNames=self.getVarNames()
+    for var in varNames:
+      recVar=self.getRecVar(var)
+      print var
+      print recVar.shape
+    
+    #
+  def setAdditionalVars(self):
+    """Set additional variables
+    
+    At some point I would like to have the equation of state and opacity info
+    here too
+    """
+    
+    raise NotImplementedError
+def testVTK(args,options):
+  """Test out making VTK files
+  
+  This isn't a proper test as it doesnt' autmatically verify that a vtk file
+  was successfully written. It is simply a means for me to verify that the
+  new vtk functions are working correctly, as a build them.
+  """
+  
+  dumpFile1=Dump(args[0])
+  dumpFile1.writeVTKFile("test.vts")
 def main():
   """Performs some basic tests of the class Dump.
   
@@ -768,9 +808,11 @@ def main():
   #parse command line options
   (options,args)=parser.parse_args()
   
+  testVTK(args,options)
+  
   #test out some simple uses for this class
-  print "reading a dump file ..."
-  dumpFile1=Dump(args[0])
+  #print "reading a dump file ..."
+  #dumpFile1=Dump(args[0])
   
   #print "printing the header ..."
   #dumpFile1.printHeader(sys.stdout)
@@ -781,16 +823,16 @@ def main():
   #print "printing variable 2 ..."
   #dumpFile1.printVar(2,sys.stdout)
   
-  print dumpFile1.getVarNames()
+  #print dumpFile1.getVarNames()
   #dumpFile1.printVarToSTDOut("v")
   
   #a=dumpFile1.getVarSlice("v",rIndexMin=100)
-  TFile=open("T_0.txt",'w')
-  dumpFile1.printVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
-  TFile.close()
-  TFile=open("T_ave_0.txt",'w')
-  dumpFile1.printHorAveVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
-  TFile.close()
+  #TFile=open("T_0.txt",'w')
+  #dumpFile1.printVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  #TFile.close()
+  #TFile=open("T_ave_0.txt",'w')
+  #dumpFile1.printHorAveVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  #TFile.close()
   #dumpFile1.printVarSliceToOutInRadCol("v",sys.stdout,tIndexMin=2,tIndexMax=4)
 if __name__ == "__main__":
   main()
