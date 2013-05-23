@@ -77,6 +77,10 @@ The below libraries can be optionally installed but will greatly enhance the use
   \item[matplotlib] for creating plots
   \item[scipy] for interpolating in equation of state and opacity tables when making new files
 \end{description}
+\item[evtk] a python library to make writing vtk files easier
+\begin{description}
+\item[Cython] needed to build evtk
+\end{description}
 \item[fftw3] used for frequency analysis
 \item[hdf4] for converting model dumps to hdf4 file format for visualizing
 \begin{description}
@@ -121,6 +125,22 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item {\tt make}
 \item {\tt make install}
 \end{enumerate}
+\end{itemize}
+
+\subsection{Installing Cython}
+\begin{itemize}
+\item {\tt tar -xzf Cython-0.19.1.tar.gz}
+\item {\tt cd Cython-0.19.1}
+\item {\tt  python setup.py install --prefix=/home/\$USER}
+\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/site-packages/:$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python.
+\end{itemize}
+
+\subsection{Installing evtk}
+\begin{itemize}
+\item {\tt tar -xzf evtk.tar.gz}
+\item {\tt cd evtk}
+\item {\tt  python setup.py install --prefix=/home/\$USER}
+\item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/site-packages/:$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
 \end{itemize}
 
 \subsection{Installing HDF4 Library}
