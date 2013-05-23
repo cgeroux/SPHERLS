@@ -214,24 +214,24 @@ docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
 	(cd	src/docs;	pdflatex userguide.tex)
 	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
 
-docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
-	(cd	src/SPHERLS;echo	${PWD};	doxygen)
-	(cd	src/SPHERLS/docs/latex;	make	pdf;)
-	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
+#docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+#	(cd	src/SPHERLS;echo	${PWD};	doxygen)
+#	(cd	src/SPHERLS/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
 
-docs/manuals/SPHERLSgen_Ref_Manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
-	(cd	src/SPHERLSgen;	doxygen)
-	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_Ref_Manual.pdf)
+#docs/manuals/SPHERLSgen_Ref_Manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
+#	(cd	src/SPHERLSgen;	doxygen)
+#	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_Ref_Manual.pdf)
 
-docs/manuals/SPHERLSanal_Ref_Manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
-	(cd	src/SPHERLSanal;	doxygen)
-	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_Ref_Manual.pdf)
+#docs/manuals/SPHERLSanal_Ref_Manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
+#	(cd	src/SPHERLSanal;	doxygen)
+#	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_Ref_Manual.pdf)
 
-docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
-	(cd	scripts;	doxygen)
-	(cd	scripts/docs/latex;	make	pdf;)
-	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
+#docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
+#	(cd	scripts;	doxygen)
+#	(cd	scripts/docs/latex;	make	pdf;)
+#	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
 
 endif
