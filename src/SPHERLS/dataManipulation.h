@@ -118,8 +118,8 @@ void initUpdateLocalBoundaries(ProcTop &procTop, Grid &grid, MessPass &messPass
   It also allocates memeory for:
     - \ref MessPass::requestSend
     - \ref MessPass::requestRecv
-    - \ref MessPass:statusSend
-    - \ref MessPass:statusRecv
+    - \ref MessPass::statusSend
+    - \ref MessPass::statusRecv
   
   @param[in,out] procTop
   @param[in,out] grid
