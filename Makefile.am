@@ -244,9 +244,28 @@ EXTRA_DIST+=${cevtk_SOURCE}
 
 src/pythonextensions/lib/python/cevtk.so: ${cevtk_SOURCE}
 	(cd	src/pythonextensions/evtk;	python setup.py build;python setup.py install --home=../ --prefix='')
-  
-if MAKE_DOCS
 
+  
+CLEANFILES=\
+src/docs/userguide.pdf\
+src/docs/userguide.out\
+src/docs/userguide.log\
+src/docs/userguide.aux\
+src/pythonextensions/eos/exception2.h\
+src/pythonextensions/eos/exception2.cpp\
+src/pythonextensions/eos/eos_tmp.cpp\
+src/pythonextensions/eos/eos.h\
+src/pythonextensions/eos/eos.cpp\
+src/pythonextensions/evtk/src/cevtk.c\
+src/pythonextensions/hdf/setup.py
+
+clean-local:
+	-rm -rf src/pythonextensions/eos/build
+	-rm -rf src/pythonextensions/hdf/build
+	-rm -rf src/pythonextensions/lib
+	-rm -rf src/pythonextensions/evtk/build
+
+if MAKE_DOCS
 
 #docs/manuals/SPHERLS_Ref_Manual.pdf
 #docs/manuals/SPHERLSgen_Ref_Manual.pdf
@@ -257,24 +276,6 @@ docs: docs/manuals/SPHERLS_User_Guide.pdf
 
 .PHONY:docs
 
-CLEANFILES=\
-src/docs/userguide.pdf\
-src/docs/userguide.out\
-src/docs/userguide.log\
-src/docs/userguide.aux\
-src/pythonextension/eos/exception2.h\
-src/pythonextension/eos/exception2.cpp\
-src/pythonextension/eos/eos_tmp.cpp\
-src/pythonextension/eos/eos.h\
-src/pythonextension/eos/eos.cpp\
-src/pythonextension/evtk/cevtk.c
-
-clean-local:
-	-rm -rf src/pythonextension/eos/build
-	-rm -rf src/pythonextension/hdf/build
-	-rm -rf src/pythonextension/lib
-	-rm -rf src/pythonextension/evtk/build
-  
 docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
 	(cd	src/docs;	pdflatex userguide.tex)
 	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
