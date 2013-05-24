@@ -61,6 +61,9 @@ class eos{
       
       @param[in] nNumT number of temperatures in the equaiton of state table
       @param[in] nNumRho number of densities in the equaiton of state table
+      
+      Note: I don't think this version of the constructor is implemented,
+      I should probably get rid of this definition
       */
     eos(const eos &ref);/**<
       Copy constructor, simply constructs a new eos object from another eos object
@@ -71,18 +74,18 @@ class eos{
     eos& operator=(const eos & eosRightSide);/**<
       Assignment operator, assigns one eos object to another.
       */
-    void readAscii(std::string sFileName);/**<
+    void readAscii(std::string sFileName)throw(exception2);/**<
       This fuction reads in an ascii file and stores it in the current object.
       
       @param[in] sFileName name of the equation of state file to read from.
       */
-    void readBobsAscii(std::string sFileName);/**<
+    void readBobsAscii(std::string sFileName)throw(exception2);/**<
       This fuction reads in an ascii file and stores it in the current object. The ascii file is in 
       Bob's format.
       
       @param[in] sFileName name of the equation of state file to read from.
       */
-    void writeAscii(std::string sFileName);/**<
+    void writeAscii(std::string sFileName)throw(exception2);/**<
       This fuction writes the equation of state stored in the current object to an ascii file.
       @param[in] sFileName name of the file to write the equation of state to.
       */
@@ -90,11 +93,11 @@ class eos{
       This fuction reads in a binary file and stores it in the current object.
       @param[in] sFileName name of the equation of state file to read from.
       */
-    void writeBin(std::string sFileName);/**<
+    void writeBin(std::string sFileName)throw(exception2);/**<
       This fuction writes the equation of state stored in the current object to a binary file.
       @param[in] sFileName name of the file to write the equaiton of state to.
       */
-    double dGetPressure(double dT, double dRho);/**<
+    double dGetPressure(double dT, double dRho)throw(exception2);/**<
       This function linearly interpolates the pressure to a given temperature and density. 
       Note that both \c dT and \c dRho are not in log space.
       
@@ -102,7 +105,7 @@ class eos{
       @param[in] dRho density to interpolate to.
       @return the interpolated pressure.
       */
-    double dGetEnergy(double dT, double dRho);/**<
+    double dGetEnergy(double dT, double dRho)throw(exception2);/**<
       This function linearly interpolates the energy to a given temperature and and density. 
       Note that both \c dT and \c dRho are not in log space.
       
@@ -110,7 +113,7 @@ class eos{
       @param[in] dRho density to interpolate to.
       @return the interpolated energy.
       */
-    double dGetOpacity(double dT, double dRho);/**<
+    double dGetOpacity(double dT, double dRho)throw(exception2);/**<
       This function linearly interpolates the opacity to a given temperature and and density. 
       Note that both \c dT and \c dRho are not in log space.
       
@@ -118,19 +121,19 @@ class eos{
       @param [in] dRho density to interpolate to.
       @return the interpolated opacity.
       */
-    double dDRhoDP(double dT,double dRho);/**<
+    double dDRhoDP(double dT,double dRho)throw(exception2);/**<
       This function calculates the partial derivative of density w.r.t. pressure
       @param [in] dT temperature at which the derivative is to be computed
       @param [in] dRho density at which the derivative is to be computed
       @return the partial derivative of density w.r.t. pressure.
       */
-    double dSoundSpeed(double dT,double dRho);/**<
+    double dSoundSpeed(double dT,double dRho)throw(exception2);/**<
       This function calculates the adiabatic sound speed
       @param [in] dT temperature at which the derivative is to be computed
       @param [in] dRho density at which the derivative is to be computed
       @return the sound speed.
       */
-    void getEKappa(double dT, double dRho, double &dE, double &dKappa);/**<
+    void getEKappa(double dT, double dRho, double &dE, double &dKappa)throw(exception2);/**<
       This function linearly interpolates the three dependent quantities (Pressure, Energy
       , Opacity) to a given temperature and density. Note that both \c dT and \c dRho are 
       not in log space.
@@ -140,7 +143,7 @@ class eos{
       @param[out] dE energy at dT and dRho.
       @param[out] dKappa opacity at dT and dRho.
       */
-    void getPEKappa(double dT, double dRho, double &dP,double &dE, double &dKappa);/**<
+    void getPEKappa(double dT, double dRho, double &dP,double &dE, double &dKappa)throw(exception2);/**<
       This function linearly interpolates the three dependent quantities (Pressure, Energy
       , Opacity) to a given temperature and density. Note that both \c dT and \c dRho are 
       not in log space.
@@ -152,7 +155,7 @@ class eos{
       @param[out] dKappa opacity at dT and dRho.
       */
     void getPEKappaGamma(double dT,double dRho,double &dP,double &dE,double &dKappa
-      ,double &dGamma);/**<
+      ,double &dGamma)throw(exception2);/**<
       This function linearly interpolates the energy and opacity to a given temperature and 
       density. Note that both \c dT and \c dRho are not in log space.
       
@@ -164,7 +167,7 @@ class eos{
       @param[out] dGamma adiabatic index at dT and dRho.
       */
     void getPEKappaGammaCp(double dT,double dRho,double &dP,double &dE,double &dKappa
-      ,double &dGamma,double &dCp);/**<
+      ,double &dGamma,double &dCp)throw(exception2);/**<
       This function linearly interpolates the energy and opacity to a given temperature and 
       density. Note that both \c dT and \c dRho are not in log space.
       
@@ -176,7 +179,7 @@ class eos{
       @param[out] dGamma adiabatic index at dT and dRho.
       @param[out] dCp specific heat at constant pressure at dT and dRho.
       */
-    void getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma);/**<
+    void getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma)throw(exception2);/**<
       This function linearly interpolates the energy and opacity to a given temperature and 
       density. Note that both \c dT and \c dRho are not in log space.
       
@@ -186,7 +189,7 @@ class eos{
       @param[out] dKappa opacity at dT and dRho.
       @param[out] dGamma adiabatic index at dT and dRho.
       */
-    void gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd, double &dC_v);/**<
+    void gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd, double &dC_v)throw(exception2);/**<
       This function calculates gamma1 and the adiabatic gradient
       
       @param [in] dT temperature at which the derivative is to be computed
@@ -195,7 +198,7 @@ class eos{
       @param [out] dDelAd adiabatic gradient
       @param [out] dC_v specific heat at constant volume
       */
-    void getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP);/**<
+    void getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP)throw(exception2);/**<
       This function calculates the partial derivative of density w.r.t. pressure
       and the pressure
       @param [in] dT temperature at which the derivative is to be computed
@@ -203,7 +206,7 @@ class eos{
       @param [out] dP pressure at dT and dRho
       @param [out] dDRhoDP derivative of density w.r.t. pressure at conatant temperature
       */
-    void getEAndDTDE(double dT,double dRho,double &dE, double & dDTDE);/**<
+    void getEAndDTDE(double dT,double dRho,double &dE, double & dDTDE)throw(exception2);/**<
       This function calculates the partial derivative of temperature w.r.t. energy
       and the energy
       @param [in] dT temperature at which the derivative is to be computed
@@ -212,7 +215,7 @@ class eos{
       @param [out] dDTDE derivative of temperature w.r.t. energy at constant density
       */
     void getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT, double &dDlnPDlnRho,
-      double &dDEDT);/**<
+      double &dDEDT)throw(exception2);/**<
         This function calculates various partial derivatives
         @param [in] dT temperature at which the derivative is to be computed
         @param [in] dRho density at which the derivative is to be computed
@@ -223,4 +226,5 @@ class eos{
 };/**@class eos
   This class holds an equation of state as well as many functions useful for manipulating it
   */
+
 #endif

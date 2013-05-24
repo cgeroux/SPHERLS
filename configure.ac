@@ -257,5 +257,5 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
 #################################################################
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile src/pythonextensions/hdfwrapper/setup.py])
+AC_CONFIG_FILES([Makefile src/pythonextensions/hdf/setup.py])
 AC_OUTPUT

@@ -1,4 +1,8 @@
 #include "exception2.h"
+
+const char* exception2::what()const throw(){
+  return sMsg.c_str();
+}
 std::string exception2::getMsg(){
   return sMsg;
 }

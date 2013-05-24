@@ -6,12 +6,20 @@
 datadir=${prefix}/data
 docsdir=${prefix}/docs
 
+#atmosphere models
+atmospheresdir=${datadir}/atmospheres
+atmospheres_DATA=data/atmospheres/table3.dat\
+               data/atmospheres/table2p3combined.dat\
+               data/atmospheres/table2.dat\
+               data/atmospheres/ReadMe.txt
+EXTRA_DIST=${atmospheres_DATA}
+
 #energy profiles
 energyprodir=${datadir}/energy_pro
 energypro_DATA=data/energy_pro/Epro.dat\
                data/energy_pro/Epro_mod.dat\
                data/energy_pro/Epro_points.dat
-EXTRA_DIST=${energypro_DATA}
+EXTRA_DIST+=${energypro_DATA}
 
 #OPAL/Alexander Furguson EOS and opacity files
 opaleos2005dir=${datadir}/OPAL_EOS_2005
@@ -83,7 +91,10 @@ EXTRA_DIST+=${templatexml_DATA}
 EXTRA_DIST+=scripts/*.py
 
 #python c++ extensions
-EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
+EXTRA_DIST+=src/pythonextensions/hdf/hdfmodule.cpp
+EXTRA_DIST+=src/pythonextensions/hdf/setup.py.in
+EXTRA_DIST+=src/pythonextensions/eos/eos.pyx
+EXTRA_DIST+=src/pythonextensions/eos/setup.py
 
 #supporting libraries, included if --disable-include-crucial-libs not set in
 #configuration
@@ -109,8 +120,7 @@ endif
 # DOCS ########################################################################
 ###############################################################################
 
-EXTRA_DIST+=src/userguide.txt
-EXTRA_DIST+=src/Doxyfile
+EXTRA_DIST+=src/docs/userguide.tex
 EXTRA_DIST+=scripts/Doxyfile
 EXTRA_DIST+=src/SPHERLSanal/Doxyfile
 EXTRA_DIST+=src/SPHERLSgen/Doxyfile
@@ -119,9 +129,16 @@ EXTRA_DIST+=src/SPHERLS/Doxyfile
 ###############################################################################
 # BINS + SOURCE ###############################################################
 ###############################################################################
-bin_SCRIPTS=./scripts/*.py
+bin_SCRIPTS=\
+./scripts/*.py\
+./src/pythonextensions/lib/python/hdf.so\
+./src/pythonextensions/lib/python/eos.so\
+./src/pythonextensions/lib/python/evtk/cevtk.so\
+./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/vtk.py\
+./src/pythonextensions/evtk/src/hl.py
 
-bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen
+bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen 
 #dist_pkgdata_DATA=./data/energy_pro/*	./data/eos/*	./data/ref_cals/*	./data/velocity_pro/*
 SPHERLS_SOURCES	=	\
 	src/SPHERLS/dataManipulation.cpp	\
@@ -173,8 +190,9 @@ endif
 if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
-BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so
+BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
 else
+BUILT_SOURCES=src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
 HDF_LDADDS= 
 HDF_CPPFLAGS= 
 endif
@@ -196,10 +214,37 @@ SPHERLSgen_SOURCES	=	\
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 if HDF_ENABLE
-src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
-	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
+src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp src/pythonextensions/hdf/setup.py.in
+	(cd	src/pythonextensions/hdf;	python setup.py build;python setup.py install --home=../ --prefix='')
 endif
 
+#make eos class available in python
+src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py
+	(cd	src/pythonextensions/eos;	cp ../../eos.cpp ./eos_tmp.cpp;	cp ../../eos.h .;	cp ../../exception2.h .;	cp ../../exception2.cpp .;)
+	(cd	src/pythonextensions/eos;	python setup.py build;python setup.py install --home=../ --prefix='')
+
+#make vtk file python module
+cevtk_SOURCE=\
+./src/pythonextensions/evtk/setup.py\
+./src/pythonextensions/evtk/README.txt\
+./src/pythonextensions/evtk/src/hl.py\
+./src/pythonextensions/evtk/src/__init__.py\
+./src/pythonextensions/evtk/src/cevtk.pyx\
+./src/pythonextensions/evtk/src/vtk.py\
+./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/examples/group.py\
+./src/pythonextensions/evtk/src/examples/image.py\
+./src/pythonextensions/evtk/src/examples/__init__.py\
+./src/pythonextensions/evtk/src/examples/lowlevel.py\
+./src/pythonextensions/evtk/src/examples/points.py\
+./src/pythonextensions/evtk/src/examples/rectilinear.py\
+./src/pythonextensions/evtk/src/examples/structured.py
+
+EXTRA_DIST+=${cevtk_SOURCE}
+
+src/pythonextensions/lib/python/cevtk.so: ${cevtk_SOURCE}
+	(cd	src/pythonextensions/evtk;	python setup.py build;python setup.py install --home=../ --prefix='')
+  
 if MAKE_DOCS
 
 
@@ -216,8 +261,20 @@ CLEANFILES=\
 src/docs/userguide.pdf\
 src/docs/userguide.out\
 src/docs/userguide.log\
-src/docs/userguide.aux
+src/docs/userguide.aux\
+src/pythonextension/eos/exception2.h\
+src/pythonextension/eos/exception2.cpp\
+src/pythonextension/eos/eos_tmp.cpp\
+src/pythonextension/eos/eos.h\
+src/pythonextension/eos/eos.cpp\
+src/pythonextension/evtk/cevtk.c
 
+clean-local:
+	-rm -rf src/pythonextension/eos/build
+	-rm -rf src/pythonextension/hdf/build
+	-rm -rf src/pythonextension/lib
+	-rm -rf src/pythonextension/evtk/build
+  
 docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
 	(cd	src/docs;	pdflatex userguide.tex)
 	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
