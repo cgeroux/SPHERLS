@@ -219,7 +219,7 @@ src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp s
 endif
 
 #make eos class available in python
-src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py
+src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py src/eos.cpp src/eos.h src/exception2.h src/exception2.cpp
 	(cd	src/pythonextensions/eos;	cp ../../eos.cpp ./eos_tmp.cpp;	cp ../../eos.h .;	cp ../../exception2.h .;	cp ../../exception2.cpp .;)
 	(cd	src/pythonextensions/eos;	python setup.py build;python setup.py install --home=../ --prefix='')
 
@@ -256,7 +256,9 @@ src/pythonextensions/eos/exception2.cpp\
 src/pythonextensions/eos/eos_tmp.cpp\
 src/pythonextensions/eos/eos.h\
 src/pythonextensions/eos/eos.cpp\
-src/pythonextensions/evtk/src/cevtk.c\
+src/pythonextensions/evtk/src/cevtk.c
+
+DISTCLEANFILES=\
 src/pythonextensions/hdf/setup.py
 
 clean-local:

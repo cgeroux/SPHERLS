@@ -7,30 +7,40 @@ import optparse as op
 import combine_bins
 import paths
 import disect_filename
-
+class FileCreateFailed(Exception):
+  """Exception raised when makeFileFunction fails
+  """
+  pass
+def addParserOptions(parser):
+  """Adds command line options for this script to parser
+  
+  """
+  
+  parser.add_option("--remake-profiles",action="store_true"
+    ,dest="remakeProfiles"
+    ,help="Will remake profiles even if they already exist. [not default]."
+    ,default=False)
+  parser.add_option("-e",action="store", dest="eosFile",type="string"
+    ,help="Can be used to over ride the equation of state file found in the "
+    +"model dumps. [not default].",default=None)
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo"
+    ,help="Will include (dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in "
+    +"radial profile. These are useful for calculating adiabatic gradient."
+    ,default=False)
+  
+  #add parser options form combine_bins
+  combine_bins.addParserOptions(parser)
 def main():
   #make command line parser
-  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]",version="%prog 1.0"
-    ,description="Creates radial profiles from a range of combined binary files starting with "
-    +"BASEFILENAME with time step indices including START upto but not including END. Ex. there "
-    +"are a number of files in the current directory from run1_t00000000, to run1_t00012300, one "
-    +"could combine all these files with the command %prog run1_t[0-12300] or %prog run1_t[0-*]. "
-    +"The \"*\" wild character is used to include all files upto the maximum integer starting from "
-    +"START.")
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files [not default]")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles even if they already exist. [not default].",default=False)
-  parser.add_option("-e",action="store", dest="eosFile",type="string"
-    ,help="Can be used to over ride the equation of state file found in the model dumps"
-    +". [not default].",default=None)
-  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
-    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
-    +" calculating adiabatic gradient.",default=False)
-  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
-    ,help="Will remake binaries even if they already exist. [not default].",default=False)
+  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
+    ,version="%prog 1.0",description="Creates radial profiles from a range of "
+    +"combined binary files starting with BASEFILENAME with time step indices "
+    +"including START up to but not including END. Ex. there are a number of "
+    +"files in the current directory from run1_t00000000, to run1_t00012300, "
+    +"one could combine all these files with the command %prog run1_t[0-12300] "
+    +"or %prog run1_t[0-*]. The \"*\" wild character is used to include all "
+    +"files up to the maximum integer starting from START.")
+  addParserOptions(parser)
   
   #parse command line options
   (options,args)=parser.parse_args()
@@ -40,18 +50,70 @@ def main():
     parser.error(" need one and one argument only.")
     
   #create profile files, and save list of files
-  make_profiles(options.keep,args[0],options.remake,options.remakeBins,options.eosFile
-    ,options.extraProfileInfo)
-def make_profiles(keep,fileName,remake,remakeBins,eosFile,extraProfileInfo):
+  failedFiles=make_fileSet(args[0],options)
+  
+  if __name__=="__main__":#keeps from redundantly reporting errors
+    #report profiles failed files
+    for file in failedFiles:
+      print file
+def make_profile(fileName,options):
+  """Makes a radial profile form combined binary file fileName using SPHERLSanal
+  
+  uses:
+  options.eosFile: if not None this equation of state file is used over the one
+    indicated in the model dump.
+  options.extraProfileInfo: add extra equation of state information to the 
+    radial profile such as various gradients.
+  options.remakeProfiles: if true it will remake the radial profile even if it
+    already exists.
+  """
+  
+  #if profile not already made for this combined binary file
+  if not (os.path.exists(fileName+"_pro.txt")) or options.remakeProfiles:
+    
+    #make profile
+    print (__name__+":"+make_profile.__name__+": creating profile from \""
+      +fileName+"\" ...")
+    cmd=paths.SPHERLSanalPath
+    if options.extraProfileInfo:
+      cmd+=" -v "
+    if options.eosFile!=None:
+      cmd+=" -e "+options.eosFile
+    cmd+=' -a cb '+fileName
+    success=os.system(cmd)
+    if success!=0:#creating profile failed
+      raise FileCreateFailed("error making profile "+fileName+"_pro.txt")
+  else:
+    print __name__+":"+make_profile.__name__+": profile \""+fileName\
+      +"_pro.txt\" already exists, not remaking"
+  
+  return None#conversion successful
+def make_fileSet(fileName,options,makeFileFunction=make_profile):
+  """Makes a set of files from SPHERLS output using fileMakingFunction
+  
+  fileName: is expected to be the name of the inputfile
+  options: command line options
+  makeFileFunction: function to be used to create the a new file in the set.
+  
+  returns a list of files that failed being made
+  """
+  
+  #check that we have a file name
+  if len(fileName)<1:
+    raise Exception("Requires an input file")
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
   
-  #make sure that all the distributed binary files in this range have been converted to combined binary files
-  failedFiles=combine_bins.combine_bin_files(keep,fileName,remakeBins)
   
-  #check for combined binary files in interation range starting with baseFileName
-  filesExistCombBin=glob.glob(baseFileName+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]")
+  #make sure that all the distributed binary files in this range have been 
+  #converted to combined binary files
+  failedFiles=combine_bins.combine_bin_files(options.keep,fileName
+    ,options.remakeBins)
+  
+  #check for combined binary files in iteration range starting with baseFileName
+  filesExistCombBin=glob.glob(baseFileName
+    +"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]")
   files=[]
   for file in filesExistCombBin:
     intOfFile=int(file[len(baseFileName):len(file)])
@@ -63,32 +125,10 @@ def make_profiles(keep,fileName,remake,remakeBins,eosFile,extraProfileInfo):
     print "no files found in range"
     quit()
   for file in files:
-      
-      #if profile not already made for this combined binary file
-      if not (os.path.exists(file+"_pro.txt")) or remake:
-        
-        #make profile
-        print __name__+":"+make_profiles.__name__+": creating profile from \""+file+"\" ..."
-        cmd=paths.SPHERLSanalPath
-        if extraProfileInfo:
-          cmd+=" -v "
-        if eosFile!=None:
-          cmd+=" -e "+eosFile
-        cmd+=' -a cb '+file
-        success=os.system(cmd)
-        if success==0:
-          pass
-        else :
-          #say there was an error and quit
-          failedFiles.append(__name__+":"+make_profiles.__name__+": error making profile "+file+"_pro.txt")
-      else:
-        print __name__+":"+make_profiles.__name__+": profile \""+file\
-          +"_pro.txt\" already exists, not remaking"
-  
-  if __name__=="__main__":#keeps from redundently reporting errors
-    #report profiles failed files
-    for file in failedFiles:
-      print file
+    try:
+      makeFileFunction(file,options)
+    except FileCreateFailed as e:
+      failedFiles.append(e.message)
   
   return failedFiles
 if __name__ == "__main__":

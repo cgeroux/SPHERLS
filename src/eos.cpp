@@ -18,6 +18,7 @@ eos::eos(){//empty constructor
   dLogP=NULL;
   dLogE=NULL;
   dLogKappa=NULL;
+  setExePath();
 }
 eos& eos::operator=(const eos & rhs){//assignment operator
   if (this !=&rhs){
@@ -227,6 +228,19 @@ void eos::writeAscii(std::string sFileName)throw(exception2){
   ofOut.close();
 }
 void eos::readBin(std::string sFileName)throw(exception2){
+  
+  //test to see if it is relative to the executable directory
+  std::string sTemp;
+  if (sFileName.substr(0,1)!="/" 
+    && sFileName.substr(0,2)!="./"){
+    
+    //if relative to executable directory add executable directory
+    sTemp=sExePath+"/"+sFileName;
+  }
+  else{
+    sTemp=sFileName;
+  }
+  sFileName=sTemp;
   
   //open file
   std::ifstream ifIn;
@@ -1741,4 +1755,27 @@ void eos::getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT,
   
   //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
   dDEDT=(pow(10.0,dE_jp1)-pow(10.0,dE_j))/(pow(10.0,dLogTUpper)-pow(10.0,dLogTLower));
+}
+void eos::setExePath(){
+  /*This method might not be 100% portable, may need to look into other 
+  solutions if problems arise with this not being reliable*/
+  
+  char buff[1024];
+  ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+  if (len != -1) {
+    buff[len] = '\0';
+    sExePath=std::string(buff);
+    
+    //find the first "/" from the end
+    unsigned pos=sExePath.find_last_of("/");
+    
+    //keep from the beginning to the location of the last "/" to remove the name
+    //of the executable
+    sExePath=sExePath.substr(0,pos);
+  } else {
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": error determining executable path"<<std::endl;
+    throw exception2(ssTemp.str(),OUTPUT);
+  }
 }

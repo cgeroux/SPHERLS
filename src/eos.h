@@ -48,8 +48,13 @@ class eos{
       */
     double **dLogKappa;/**<
       2D array of log10 opacities. dLogKappa[i][j] gives 
-      the log10 opacity at log10 density of \ref eos::dLogRhoDelta*i+\ref eos::dLogRhoMin, 
-      and at log10 temperature of \ref eos::dLogTDelta*j+\ref eos::dLogTMin.
+      the log10 opacity at log10 density of \ref eos::dLogRhoDelta*i+
+      \ref eos::dLogRhoMin, and at log10 temperature of \ref eos::dLogTDelta*j
+      +\ref eos::dLogTMin.
+      */
+    std::string sExePath;/**<
+      contains the path to the current executable, used for making equation of 
+      state file paths relative to it.
       */
     
     //member functions
@@ -73,6 +78,9 @@ class eos{
       */
     eos& operator=(const eos & eosRightSide);/**<
       Assignment operator, assigns one eos object to another.
+      */
+    void setExePath();/**<
+      Sets the path of the current executable, used for relative eos file paths
       */
     void readAscii(std::string sFileName)throw(exception2);/**<
       This fuction reads in an ascii file and stores it in the current object.
