@@ -5,6 +5,7 @@ import numpy as np
 import math
 import paths
 import os
+from timeitDec import timeitDec
 
 #The blow two lines should not needed when a proper install is done
 sys.path.append(paths.srcPath+"/pythonextensions/lib/python/")
@@ -487,6 +488,61 @@ class Dump:
         for k in range(sizeX2):
           out.write("var["+str(i)+"]["+str(j)+"]["+str(k)+"]="
             +str(self.vars[var][i][j][k])+"\n")
+  def _adjustForPeriodBC(self):
+    """Adjust for periodic boundary conditions in theta and phi directions
+    
+    In the theta and phi directions the theta and phi velocity componenets are
+    copies of those at the other boundary; thus even though they are interface
+    centered quantities they have the same number of elements as a zone centered
+    quantity in that direction. Thus function copies the boundaries values of
+    the velocities and cooridnates so this doesn't need to be worried about
+    """
+    
+    for n in range(len(self.varInfo)):
+      if self.varInfo[n][1]==1:
+        
+        if self.varNames[n]!="theta":
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
+          shape=self.rectVars[n].shape
+          for i in range(shape[0]):
+            for k in range(shape[2]):
+              self.rectVars[n][i][shape[1]-1][k]=self.rectVars[n][i][0][k]
+        else:
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
+          shape=self.rectVars[n].shape
+          dTheta=(self.rectVars[n][0][1][0]-self.rectVars[n][0][0][0])
+          for i in range(shape[0]):
+            for k in range(shape[2]):
+              self.rectVars[n][i][shape[1]-1][k]=(
+                self.rectVars[n][i][shape[1]-2][k]+dTheta)
+      if self.varInfo[n][2]==1:
+
+        if self.varNames[n]!="phi":
+          
+          #copy k=0 to k=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1],shape[2]+1))
+          shape=self.rectVars[n].shape
+          for i in range(shape[0]):
+            for j in range(shape[1]):
+              self.rectVars[n][i][j][shape[2]-1]=self.rectVars[n][i][j][0]
+        else:
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1],shape[2]+1))
+          shape=self.rectVars[n].shape
+          dPhi=(self.rectVars[n][0][0][1]-self.rectVars[n][0][0][0])
+          for i in range(shape[0]):
+            for j in range(shape[1]):
+              self.rectVars[n][i][j][shape[2]-1]=(
+                self.rectVars[n][i][j][shape[2]-2]+dPhi)
   def readHeader(self,eosFile=None):
     """Reads header information from binary dump file.
     
@@ -539,7 +595,7 @@ class Dump:
         self._readAsciiVar(i)
     self._setVarIDs()#set variable names/id
     self.setRectVars()#create rectangular variables
-    self.adjustForPeriodBC()#adjust interface variables effected by periodic BC
+    self._adjustForPeriodBC()#adjust interface variables effected by periodic BC
   def printHeader(self,out):
     """Writes the header of a binary dump file to out.
     
@@ -853,70 +909,24 @@ class Dump:
                   ,pIndexMax=pIndexMax)
     
     self.printVarToRadCol(temp,var,out,tIndexMin=tIndexMin,pIndexMin=pIndexMin)
-  def adjustForPeriodBC(self):
-    """Adjust for periodic boundary conditions in theta and phi directions
-    
-    In the theta and phi directions the theta and phi velocity componenets are
-    copies of those at the other boundary; thus even though they are interface
-    centered quantities they have the same number of elements as a zone centered
-    quantity in that direction. Thus function copies the boundaries values of
-    the velocities and cooridnates so this doesn't need to be worried about
-    """
-    
-    for n in range(len(self.varInfo)):
-      if self.varInfo[n][1]==1:
-        
-        if self.varNames[n]!="theta":
-          
-          #copy j=0 to j=N
-          shape=self.rectVars[n].shape
-          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
-          shape=self.rectVars[n].shape
-          for i in range(shape[0]):
-            for k in range(shape[2]):
-              self.rectVars[n][i][shape[1]-1][k]=self.rectVars[n][i][0][k]
-        else:
-          
-          #copy j=0 to j=N
-          shape=self.rectVars[n].shape
-          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
-          shape=self.rectVars[n].shape
-          dTheta=(self.rectVars[n][0][0][0]-self.rectVars[n][0][1][0])
-          for i in range(shape[0]):
-            for k in range(shape[2]):
-              self.rectVars[n][i][shape[1]-1][k]=(
-                self.rectVars[n][i][shape[1]-2][k]+dTheta)
-      if self.varInfo[n][2]==1:
-
-        if self.varNames[n]!="phi":
-          
-          #copy k=0 to k=N
-          shape=self.rectVars[n].shape
-          self.rectVars[n].resize((shape[0],shape[1],shape[2]+1))
-          shape=self.rectVars[n].shape
-          for i in range(shape[0]):
-            for j in range(shape[1]):
-              self.rectVars[n][i][j][shape[2]-1]=self.rectVars[n][i][j][0]
-        else:
-          
-          #copy j=0 to j=N
-          shape=self.rectVars[n].shape
-          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
-          shape=self.rectVars[n].shape
-          dPhi=(self.rectVars[n][0][0][0]-self.rectVars[n][0][0][1])
-          for i in range(shape[0]):
-            for j in range(shape[1]):
-              self.rectVars[n][i][shape[1]-1][k]=(
-                self.rectVars[n][i][j][shape[2]-2]+dPhi)
   def writeVTKFile(self,fileName,withGhost=True,eosFile=None,curvature=True
-    ,excludedVars=[]
+    ,excludedScalars=[]
+    ,includeScalars=None
     ,vectors=None
     ,coords=None
     ):
     """Writes out a vtk file from the model dump
     
+    parameters:
+      fileName: model dump to create vtk file from
     keywords:
-      excludedVars: a list of scalars to exclude from vtk file
+      withGhost: if true will output ghost cells, if false it won't. Currently
+        not implemented
+      excludedScalars: a list of scalars to exclude from vtk file
+      includeScalars: a list of scalar varaibles to include, if not set will
+        output all available scalars. Possible scalars are: "dlnPdlnT"
+        ,"dlnPdlnD","dEdT","p","e","kappa","gamma","cp","c","gamma1","DelAd"
+        ,"cv"
       vectors: A dictonary with a vector name as a key, and a 3 component list
         of strings indicating the names of the components to be used for the
         vector. Default value depends on curvature and is either 
@@ -956,12 +966,31 @@ class Dump:
     
     #create cell centered velocity
     self.calZoneCenteredVelocity(curvature=curvature)
-    
+    if curvature==True and ("vr_cen" in includeScalars
+      or "vt_cen" in includeScalars
+      or "vp_cen" in includeScalars):
+      self.calZoneCenteredVelocity(curvature=False)
+    if curvature==False and ("vx_cen" in includeScalars
+      or "vy_cen" in includeScalars
+      or "vz_cen" in includeScalars):
+      self.calZoneCenteredVelocity(curvature=True)
+      
     #create cell centered convective velocity
     self.calZoneCenteredConvVelocity(curvature=curvature)
     
+    #if variables of opposite curvature are requested
+    if curvature==True and ("vr_con_cen" in includeScalars
+      or "vt_con_cen" in includeScalars
+      or "vp_con_cen" in includeScalars):
+      self.calZoneCenteredConvVelocity(curvature=False)
+    if curvature==False and ("vx_con_cen" in includeScalars
+      or "vy_con_cen" in includeScalars
+      or "vz_con_cen" in includeScalars):
+      self.calZoneCenteredConvVelocity(curvature=True)
+      
+    
     #set thermodynamic variables from equation of state/opacity table
-    self.setAdditionalVars()
+    self.setAdditionalVars(varsToSet=includeScalars)
     
     #set coordinates
     x=self.rectVars[self.getVarID(coords["x"])]
@@ -970,6 +999,8 @@ class Dump:
     
     #get cell centered vars
     cellCenteredVars=self.getCellCenteredRect()
+    if includeScalars==None:
+      includeScalars=cellCenteredVars
     
     #add cell centered data
     cellData={}
@@ -978,10 +1009,11 @@ class Dump:
     for var in cellCenteredVars:
       includeScalar=True
       for vector in vectors:
-        if var in vectors[vector] or var in excludedVars:
+        if var in vectors[vector]:
           includeScalar=False
           break
-      
+      if var in excludedScalars or var not in includeScalars:
+        includeScalar=False
       if includeScalar:#add it
         cellData[var]=self.rectVars[self.getVarID(var)]
     
@@ -1097,8 +1129,8 @@ class Dump:
               r=self.rectVars[self.getVarID("r")][i][0][0]
               theta=self.rectVars[self.getVarID("theta")][0][j][0]
               phi=self.rectVars[self.getVarID("phi")][0][0][k]
-              varTmpX[i][j][k]=r*math.sin(theta)*cos(phi)
-              varTmpY[i][j][k]=r*math.cos(theta)*sin(phi)
+              varTmpX[i][j][k]=r*math.sin(theta)*math.cos(phi)
+              varTmpY[i][j][k]=r*math.sin(theta)*math.sin(phi)
               varTmpZ[i][j][k]=r*math.cos(theta)
         self.rectVars.append(varTmpX)
         self.rectVars.append(varTmpY)
@@ -1189,7 +1221,6 @@ class Dump:
         
         #add vz_cen
         self.rectVars.append(np.zeros(self.cellCenteredShape))
-        
       elif self.numDims==2:
         
         #add x_cen and y_cen
@@ -1218,6 +1249,16 @@ class Dump:
         varTmpX=np.empty(self.cellCenteredShape)
         varTmpY=np.empty(self.cellCenteredShape)
         varTmpZ=np.empty(self.cellCenteredShape)
+        sinTheta=np.empty((self.cellCenteredShape[1]))
+        cosTheta=np.empty((self.cellCenteredShape[1]))
+        sinPhi=np.empty((self.cellCenteredShape[2]))
+        cosPhi=np.empty((self.cellCenteredShape[2]))
+        for j in range((self.cellCenteredShape[1])):
+          sinTheta[j]=math.sin(self.rectVars[self.getVarID("theta_cen")][0][j][0])
+          cosTheta[j]=math.cos(self.rectVars[self.getVarID("theta_cen")][0][j][0])
+        for k in range((self.cellCenteredShape[2])):
+          sinPhi[k]=math.sin(self.rectVars[self.getVarID("phi_cen")][0][0][k])
+          cosPhi[k]=math.cos(self.rectVars[self.getVarID("phi_cen")][0][0][k])
         for i in range(self.cellCenteredShape[0]):
           for j in range(self.cellCenteredShape[1]):
             for k in range(self.cellCenteredShape[2]):
@@ -1229,19 +1270,17 @@ class Dump:
                 +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
               vp=(self.rectVars[self.getVarID("w")][i][j][k]
                 +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
-              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
-              phi=self.rectVars[self.getVarID("phi_cen")][0][0][k]
               varTmpX[i][j][k]=(
-                vr*math.sin(theta)*cos(phi)
-                +vt*math.cos(theta)*cos(phi)
-                +vp*math.sin(phi))
+                vr*sinTheta[j]*cosPhi[k]
+                +vt*cosTheta[j]*cosPhi[k]
+                +vp*sinPhi[k])
               varTmpY[i][j][k]=(
-                vr*math.sin(theta)*sin(phi)
-                +vt*math.cos(theta)*sin(phi)
-                +vp*math.cos(theta))
+                vr*sinTheta[j]*sinPhi[k]
+                +vt*cosTheta[j]*sinPhi[k]
+                +vp*cosTheta[j])
               varTmpZ[i][j][k]=(
-                vr*math.cos(theta)
-                -vt*maht.sin(theta))
+                vr*cosTheta[j]
+                -vt*sinTheta[j])
         self.rectVars.append(varTmpX)
         self.rectVars.append(varTmpY)
         self.rectVars.append(varTmpZ)
@@ -1336,7 +1375,6 @@ class Dump:
         
         #add vz_cen
         self.rectVars.append(np.zeros(self.cellCenteredShape))
-        
       elif self.numDims==2:
         
         #add x_cen and y_cen
@@ -1363,6 +1401,16 @@ class Dump:
         varTmpX=np.empty(self.cellCenteredShape)
         varTmpY=np.empty(self.cellCenteredShape)
         varTmpZ=np.empty(self.cellCenteredShape)
+        sinTheta=np.empty((self.cellCenteredShape[1]))
+        cosTheta=np.empty((self.cellCenteredShape[1]))
+        sinPhi=np.empty((self.cellCenteredShape[2]))
+        cosPhi=np.empty((self.cellCenteredShape[2]))
+        for j in range((self.cellCenteredShape[1])):
+          sinTheta[j]=math.sin(self.rectVars[self.getVarID("theta_cen")][0][j][0])
+          cosTheta[j]=math.cos(self.rectVars[self.getVarID("theta_cen")][0][j][0])
+        for k in range((self.cellCenteredShape[2])):
+          sinPhi[k]=math.sin(self.rectVars[self.getVarID("phi_cen")][0][0][k])
+          cosPhi[k]=math.cos(self.rectVars[self.getVarID("phi_cen")][0][0][k])
         for i in range(self.cellCenteredShape[0]):
           for j in range(self.cellCenteredShape[1]):
             for k in range(self.cellCenteredShape[2]):
@@ -1372,19 +1420,17 @@ class Dump:
                 +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
               vp=(self.rectVars[self.getVarID("w")][i][j][k]
                 +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
-              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
-              phi=self.rectVars[self.getVarID("phi_cen")][0][0][k]
               varTmpX[i][j][k]=(
-                vr*math.sin(theta)*cos(phi)
-                +vt*math.cos(theta)*cos(phi)
-                +vp*math.sin(phi))
+                vr*sinTheta[j]*cosPhi[k]
+                +vt*cosTheta[j]*cosPhi[k]
+                +vp*sinPhi[k])
               varTmpY[i][j][k]=(
-                vr*math.sin(theta)*sin(phi)
-                +vt*math.cos(theta)*sin(phi)
-                +vp*math.cos(theta))
+                vr*sinTheta[j]*sinPhi[k]
+                +vt*cosTheta[j]*sinPhi[k]
+                +vp*cosTheta[j])
               varTmpZ[i][j][k]=(
-                vr*math.cos(theta)
-                -vt*maht.sin(theta))
+                vr*cosTheta[j]
+                -vt*sinTheta[j])
         self.rectVars.append(varTmpX)
         self.rectVars.append(varTmpY)
         self.rectVars.append(varTmpZ)
@@ -1468,12 +1514,14 @@ class Dump:
     
     #see if specific variables are selected
     if varsToSet!=None:
-      
+      pass
+      #lets allow variables we can't set to be silently ignored, perhaps this 
+      #should be a warning
       #check that we can set all the varsToSet
-      for var in varsToSet:
-        if var not in settableVars:
-          raise Exception("variable \""+var+"\" in keyword argument varsToSet "
-            +"not in list of settable variables:"+str(settableVars))
+      #for var in varsToSet:
+      #  if var not in settableVars:
+      #    raise Exception("variable \""+var+"\" in keyword argument varsToSet "
+      #      +"not in list of settable variables:"+str(settableVars))
     else:#otherwise set all variables
       varsToSet=settableVars
     
@@ -1611,16 +1659,6 @@ class Dump:
     if "cv" in varsToSet:
       self._addVarID("cv","rect")
       self.rectVars.append(cv)
-def testVTK(args,options):
-  """Test out making VTK files
-  
-  This isn't a proper test as it doesnt' autmatically verify that a vtk file
-  was successfully written. It is simply a means for me to verify that the
-  new vtk functions are working correctly, as a build them.
-  """
-  
-  dumpFile1=Dump(args[0])
-  dumpFile1.writeVTKFile("test.vts")
 def main():
   """Performs some basic tests of the class Dump.
   
@@ -1639,7 +1677,6 @@ def main():
   #parse command line options
   (options,args)=parser.parse_args()
   
-  testVTK(args,options)
   
   #test out some simple uses for this class
   #print "reading a dump file ..."

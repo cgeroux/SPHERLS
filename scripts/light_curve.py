@@ -26,26 +26,16 @@ M_bol_sun=4.75
 withAccelInGrav=False
 
 def parseOptions():
-  #note: newlines are not respected in the optparse description string :(, maybe someday will use
-  #argparse, which does allow for raw formating (repects indents, newlines etc.)
   
   #setup command line parser
   '''This is out of date, needs to be updated to reflect new additions'''
   parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE"
-    ,version="%prog 1.0",description=r"Reads in the XMLFILE which specifies how the light curve is to be made. see light_curve_reference.xml for a template xml file to be used with this script. Found in the SPHERLS directory docs/templateXML")
-    
-  #these options apply globaly
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
-  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
-    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
-    +" calculating adiabatic gradient.",default=False)
-  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
-    ,help="Will remake binaries even if they already exist. [not default].",default=False)
+    ,version="%prog 1.0",description=r"Reads in the XMLFILE which specifies "
+    +"how the light curve is to be made. see light_curve_reference.xml for a "
+    +"template xml file to be used with this script. Found in the SPHERLS "
+    +"directory docs/templateXML.")
+  
+  make_profiles.addParserOptions(parser)
   
   #parse command line options
   return parser.parse_args()
@@ -146,8 +136,8 @@ class LightCurve:
     
     #make sure needed radial profiles are made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
-    failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins
-      ,self.eosFile,options.extraProfileInfo)
+    failedFiles=make_profiles.make_fileSet(fileName,options)#default is to make 
+                                                            #a profile set
     
     #let user know if there were any failed files
     if len(failedFiles)>0:

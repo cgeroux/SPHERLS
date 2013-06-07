@@ -29,7 +29,7 @@ def main():
     +"which \"SPHERLS.xml\" configuration file was found. Also the macro \"\sp\" can be used for "
     +"the absolute path to the SPHERLS scripts. Note: if any scripts you are running use "
     +"configuration files they should use absolute paths.")
-  parser.add_option('-e',action="store",dest="e",type="string",help="Allows one to overried the "
+  parser.add_option('-e',action="store",dest="e",type="string",help="Allows one to override the "
     +"equation of state file in the model with the the one specified after this option."
     ,default=None)
   parser.add_option('-d',action="store_true",dest="d",default=False,help="Perform a dry run. "
@@ -135,7 +135,7 @@ def main():
       eosFile=""
       extraProfileInfo=""
       if options.m:#use --remake option to remake profiles even if they exist already
-        remake=" --remake "
+        remake=" --remake-profiles"
       if options.r:#use --re-sum option so that all model profiles KE will be re-summed
         resum=" --re-sum "
       if options.M:#remake binaries
@@ -161,7 +161,7 @@ def main():
 def runAverage(outputFileName,logFile,options):
   cmd=os.path.join(paths.scriptPath,"average_PKE.py")
   if options.m:#use --remake option to remake profiles even if they exist already
-    cmd+=" --remake"
+    cmd+=" --remake-profiles"
   if options.r:#use --re-sum option so that all model profiles KE will be re-summed
     cmd+=" --re-sum"
   cmd+=" "+outputFileName+"_t[0-*] >"+logFile+".out"

@@ -158,12 +158,12 @@ def main():
   #phase_wrapped_3D  mag+DM_3D phase_wrapped_2D  mag+DM_2D phase mag
   
   #x,y columns of first data set, oringally model data
-  data1XColumn=0
-  data1YColumn=1
+  data1XColumn=4
+  data1YColumn=5
   
   #x,y columns of second data set, oringally observational data
-  data2XColumn=4
-  data2YColumn=5
+  data2XColumn=10
+  data2YColumn=11
   
   #parse command line options
   (options,args)=parseOptions()
@@ -275,6 +275,5 @@ def main():
   #ax.plot(modelX,modelY,"o")
 
   plt.show()
-  
 if __name__ == "__main__":
   main()

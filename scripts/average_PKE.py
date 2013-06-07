@@ -15,24 +15,11 @@ def parseOptions():
   #setup command line parser
   parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
     ,version="%prog 1.0",description="Creates a file containing KE, Peak KE, and Average Peak KE.")
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
-  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
-    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
-    +" calculating adiabatic gradient.",default=False)
-  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
-    ,help="Will remake binaries if they already exist. [not default].",default=False)
   parser.add_option("--re-sum",action="store_true",dest="resum"
     ,help="Will re-sum all model profiles kinetic energies, usefull when files have problems "
     +"being made from corruption and have to be re-made. Other wise should not be used as it "
     +"takes more time. In the case when -l option is set it will recalculate the maximum of F_con"
     +". [not default].",default=False)
-  parser.add_option("-e",action="store",dest="eosFile"
-    ,help="Overrides the equation of state file set in the model.",default=None)
   parser.add_option("-l",action="store_true",dest="bLconInsteadofKE",default=False
     ,help="Will use F_con column and compute the max, instead of the sum, saving it to a file"
     +"called \"maxLcon.txt\" instead of \"averagePKE.txt\"")
@@ -45,6 +32,8 @@ def parseOptions():
   parser.add_option("-p",action="store",dest="period"
     ,help="Set the initial period to use for finding peaks.",default=None)
   #parse command line options
+  make_profiles.addParserOptions(parser)
+  
   return parser.parse_args()
 def main():
   
@@ -55,8 +44,7 @@ def main():
   [start,end,baseFileName]=disect_filename.disectFileName(args[0])
   
   #make sure that all the combined binary files have profiles made
-  failedFiles=make_profiles.make_profiles(options.keep,args[0],options.remake,options.remakeBins
-    ,options.eosFile,options.extraProfileInfo)
+  failedFiles=make_profiles.make_fileSet(args[0],options)
   
   #compute the average PKE
   averagePKE(start,end,baseFileName,options)

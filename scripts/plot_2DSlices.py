@@ -13,11 +13,6 @@ import disect_filename
 import xml.etree.ElementTree as xml
 import parser
 import re
-import matplotlib
-matplotlib.use('Agg')#prevents a window from poping up
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-#from mpl_toolkits.mplot3d import axes3d
 
 nNumCoords=7
 colors=['r','g','b','c','m','y']
@@ -176,7 +171,37 @@ def parseXMLFile(fileName):
       quit()
   else:
     settings['figHeight']=10.0
-    
+  
+  #set location of left of the plot area
+  settings['figLeft']=0.05
+  if root.get("figLeft")!=None and root.get("figLeft")!="":
+    settings['figLeft']=float(root.get("figLeft"))
+  
+  #set location of top of the plot area
+  settings['figTop']=0.95
+  if root.get("figTop")!=None and root.get("figTop")!="":
+    settings['figTop']=float(root.get("figTop"))
+  
+  #set location of bottom of the plot area
+  settings['figBottom']=0.05
+  if root.get("figBottom")!=None and root.get("figBottom")!="":
+    settings['figBottom']=float(root.get("figBottom"))
+  
+  #set font size
+  settings['fontSize']=12.0
+  if root.get("fontSize")!=None and root.get("fontSize")!="":
+    settings['fontSize']=float(root.get("fontSize"))
+  
+  #set location of right side of the figure
+  settings['figRight']=0.95
+  if root.get("figRight")!=None and root.get("figRight")!="":
+    settings['figRight']=float(root.get("figRight"))
+  
+  #figure horizontal spacing
+  settings['figSpace']=0.0
+  if root.get("figSpace")!=None and root.get("figSpace")!="":
+    settings['figSpace']=float(root.get("figSpace"))
+  
   #get figure dpi
   if root.get("dpi")!=None and root.get("dpi")!="":
     if isInt(root.get("dpi")):
@@ -186,7 +211,7 @@ def parseXMLFile(fileName):
       quit()
   else:
     settings['figDpi']=90
-    
+  
   #get starting index for output file names
   if root.get("startIndex")!=None and root.get("startIndex")!="":
     if isInt(root.get("startIndex")):
@@ -999,6 +1024,15 @@ def setCodes(settings,parsed):
       vector['vCode']=parser.expr(string).compile()
       j+=1
 def createPlots(settings,parsed):
+  global matplotlib
+  global plt
+  import matplotlib
+  matplotlib.rc('text', usetex=True)  #use latex for fonts
+  matplotlib.rc('font',size=settings['fontSize']) #set font size
+  matplotlib.use('Agg')#prevents a window from poping up
+  import matplotlib.pyplot as plt
+  from matplotlib.gridspec import GridSpec
+  #from mpl_toolkits.mplot3d import axes3d
   
   #get base file name
   [start,end,baseFileName]=disect_filename.disectFileName(settings['inputFileName'])
@@ -1057,9 +1091,16 @@ def createPlots(settings,parsed):
     nPlaneCount=0
     ax=[]
     fileNames=[]
+    gs=(GridSpec(len(settings['planes']),1))
+    #not sure top, and bottom will work if more than one plot
+    gs.update(left=settings['figLeft'],right=settings['figRight']
+      ,top=settings['figTop'],bottom=settings['figBottom']
+      ,hspace=settings['figSpace'])
     for plane in settings['planes']:
-      ax.append(plt.subplot(len(settings['planes']),1,nPlaneCount))
-      #ax.append(fig.add_subplot(len(settings['planes']),1,nPlaneCount,projection='3d'))
+      
+      #ax.append(plt.subplot(len(settings['planes']),1,nPlaneCount))
+      ax.append(plt.subplot(gs[nPlaneCount,0]))
+      
       [time,index]=plot_plane(plane['files'][i],nCount,fig,ax[nPlaneCount],plane,settings['planes'])
       fileNames.append(plane['files'][i])
       nPlaneCount+=1

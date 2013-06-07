@@ -8,11 +8,7 @@ import math
 import numpy as np
 import sys
 import disect_filename
-
-def parseOptions():
-  #setup command line parser
-  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
-    ,version="%prog 1.0",description="Creates a plot of the surface luminosity as a function of time.")
+def addParserOptions(parser):
   parser.add_option("-o","--outputFile",dest="outputFile",default="out"
     ,help="Specifies the OUTPUTFILE. [default: %default]"
     ,metavar="OUTPUTFILE", type="string")
@@ -43,6 +39,12 @@ def parseOptions():
     +" plotting in addition to lines [default: %default]",default=False)
   parser.add_option("--no-lines",action="store_true",dest="noLines",help="If set, will not use "
     +"lines when plotting, and only points [default: %default]",default=False)
+def parseOptions():
+  #setup command line parser
+  parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
+    ,version="%prog 1.0",description="Creates a plot of the surface luminosity as a function of time.")
+  addParserOptions(parser)
+  
   #parse command line options
   return parser.parse_args()
   

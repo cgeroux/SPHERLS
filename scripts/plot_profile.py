@@ -30,17 +30,6 @@ def parseOptions():
     ,help="Display plot to x11 display rather than saving to a file.")
   parser.add_option("-f","--file",dest="file",action="store_true",default=False
     ,help="Instead of plotting the data will be written to an ascii file.")
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
-  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
-    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
-    +" calculating adiabatic gradient.",default=False)
-  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
-    ,help="Will remake binaries even if they already exist. [not default].",default=False)
   parser.add_option("--dpi",dest="dpi",type="float",default=100
     ,help="Sets the dots per inch of the figure [default: %default]")
   parser.add_option("--space-axis-evenly",action="store_true",dest="spaceAxisEvenly"
@@ -56,6 +45,8 @@ def parseOptions():
     ,help="Set the width of the figure [default: %default]")
   parser.add_option("--fig-height",dest="figHeight",type="float",default=9
     ,help="Set the height of the figure [default: %default]")
+  
+  make_profiles.addParserOptions(parser)
   
   #parse command line options
   return parser.parse_args()
@@ -561,8 +552,7 @@ class DataSet:
     
     #make sure that all the combined binary files within range of dataset have profiles made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
-    failedFiles=make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins
-      ,self.eosFile,options.extraProfileInfo)
+    failedFiles=make_profiles.make_fileSet(fileName,options)
     
     if len(failedFiles)>0:
       for failedFile in failedFiles:
@@ -809,8 +799,6 @@ def plot(dataSets,options,title):
                   labels.append(curve.label)
                 curveCount=curveCount+1
             
-            print "plot "+str(nTotalPlotCount)+" xlimits="+str(axisMine.limits)
-            print "plot "+str(nTotalPlotCount)+" ylimits="+str(plot.limits)
             ax[nTotalPlotCount-1].set_xlim(axisMine.limits)
             ax[nTotalPlotCount-1].set_ylim(plot.limits)
             

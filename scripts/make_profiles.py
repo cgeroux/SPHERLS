@@ -56,7 +56,7 @@ def main():
     #report profiles failed files
     for file in failedFiles:
       print file
-def make_profile(fileName,options):
+def make_profile(fileName,options,nCount,nNumFiles):
   """Makes a radial profile form combined binary file fileName using SPHERLSanal
   
   uses:
@@ -73,7 +73,7 @@ def make_profile(fileName,options):
     
     #make profile
     print (__name__+":"+make_profile.__name__+": creating profile from \""
-      +fileName+"\" ...")
+      +fileName+"\" "+str(nCount)+"/"+str(nNumFiles)+" ...")
     cmd=paths.SPHERLSanalPath
     if options.extraProfileInfo:
       cmd+=" -v "
@@ -115,6 +115,7 @@ def make_fileSet(fileName,options,makeFileFunction=make_profile):
   filesExistCombBin=glob.glob(baseFileName
     +"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]")
   files=[]
+  
   for file in filesExistCombBin:
     intOfFile=int(file[len(baseFileName):len(file)])
     if intOfFile>=start and intOfFile<end:
@@ -124,12 +125,15 @@ def make_fileSet(fileName,options,makeFileFunction=make_profile):
   if len(files)==0:
     print "no files found in range"
     quit()
+  
+  nNumFiles=len(files)
+  nCount=1
   for file in files:
     try:
-      makeFileFunction(file,options)
+      makeFileFunction(file,options,nCount,nNumFiles)
     except FileCreateFailed as e:
       failedFiles.append(e.message)
-  
+    nCount+=1
   return failedFiles
 if __name__ == "__main__":
   main()
