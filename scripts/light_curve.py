@@ -219,7 +219,7 @@ class LightCurve:
     if (self.boloCorrFile[0:2] in ["./","/"]) or (self.boloCorrFile[0] in ["./","/"]):
       boloCorrFile=self.boloCorrFile
     else:
-      boloCorrFile=paths.SPHERLSDATA+"atmospheres/"+self.boloCorrFile
+      boloCorrFile=os.path.join(paths.SPHERLSDataPath,"atmospheres/"+self.boloCorrFile)
     
     #figure out zoning, assuming first column is teff, and second collumn is logg
     f=open(boloCorrFile)

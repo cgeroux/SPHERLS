@@ -1647,7 +1647,7 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
         dS2=dV_ip1halfjk_nm1half*dV_ip1halfjk_nm1half
           /grid.dLocalGridOld[grid.nR][i][0][0];
         
-        //cal DivU_ip1jk_n
+        //Calculate DivU_ip1jk_n
         dDivU_ip1jk_n=4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][nICen+1][0][0]
           *(dRSqUmU0_ip3halfjk_n-dRSqUmU0_ip1halfjk_n)/grid.dLocalGridOld[grid.nDM][nICen+1][0][0]
           +(grid.dLocalGridOld[grid.nV][nICen+1][nJInt][k]
@@ -1657,7 +1657,7 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
           /(grid.dLocalGridOld[grid.nDTheta][0][j][0]*dR_ip1_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]);
         
-        //cal DivU_ijk_n
+        //Calculate DivU_ijk_n
         dDivU_ijk_n=4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][nICen][0][0]
           *(dRSqUmU0_ip1halfjk_n-dRSqUmU0_im1halfjk_n)/grid.dLocalGridOld[grid.nDM][nICen][0][0]
           +(grid.dLocalGridOld[grid.nV][nICen][nJInt][k]
@@ -1667,14 +1667,14 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
           /(grid.dLocalGridOld[grid.nDTheta][0][j][0]*dR_i_n
           *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]);
         
-        //cal Tau_rr_ip1jk_n
+        //Calculate Tau_rr_ip1jk_n
         dTau_rr_ip1jk_n=2.0*grid.dLocalGridOld[grid.nEddyVisc][nICen+1][j][k]*(4.0*parameters.dPi
           *dRSq_ip1_n*grid.dLocalGridOld[grid.nDenAve][nICen+1][0][0]
           *((grid.dLocalGridOld[grid.nU][i+1][j][k]-grid.dLocalGridOld[grid.nU0][i+1][0][0])
           -(grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0]))
           /grid.dLocalGridOld[grid.nDM][nICen+1][0][0]-0.3333333333333333*dDivU_ip1jk_n);
         
-        //cal Tau_rr_ijk_n
+        //Calculate Tau_rr_ijk_n
         dTau_rr_ijk_n=2.0*grid.dLocalGridOld[grid.nEddyVisc][nICen][j][k]*(4.0*parameters.dPi
           *dRSq_i_n*grid.dLocalGridOld[grid.nDenAve][nICen][0][0]
           *((grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0])
@@ -1697,10 +1697,10 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
           -grid.dLocalGridOld[grid.nU0][i][0][0]))/(grid.dLocalGridOld[grid.nR][i][0][0]
           *dDTheta_jm1half));
         
-        //cal dTA1
+        //Calculate dTA1
         dTA1=(dTau_rr_ip1jk_n-dTau_rr_ijk_n)/(dDM_ip1half*dRho_ip1halfjk_n);
         
-        //cal dTS1
+        //Calculate dTS1
         dTS1=dEddyVisc_ip1halfjk_n/dRhoR_ip1halfjk_n*(4.0
           *((dU_ip1jk_nm1half-dU0_ip1_nm1half)-(dU_ijk_nm1half-dU0_i_nm1half))/dDM_ip1half
           +grid.dLocalGridOld[grid.nR][i][0][0]*grid.dLocalGridOld[grid.nCotThetaIJK][0][j][0]
@@ -1717,7 +1717,7 @@ void calNewU_RT_LES(Grid &grid,Parameters &parameters,Time &time,ProcTop &procTo
           -grid.dLocalGridOld[grid.nU0][i][0][0])))/(grid.dLocalGridOld[grid.nR][i][0][0]
           *grid.dLocalGridOld[grid.nDTheta][0][j][0]);
         
-        //cal dTS4
+        //Calculate dTS4
         dTS4=(4.0*(grid.dLocalGridOld[grid.nU][i][j][k]-grid.dLocalGridOld[grid.nU0][i][0][0])
           +2.0*grid.dLocalGridOld[grid.nCotThetaIJK][0][j][0]*dV_ip1halfjk_nm1half)
           /grid.dLocalGridOld[grid.nR][i][0][0];

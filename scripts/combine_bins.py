@@ -8,7 +8,19 @@ import glob
 import optparse as op
 import paths
 import disect_filename
-
+def addParserOptions(parser):
+  """Adds command line options for this script to parser
+  
+  """
+  
+  parser.add_option("-k","--keep",action="store_true",dest="keep"
+    ,help="Keeps distributed binary files [default].",default=True)
+  parser.add_option("-r","--remove",action="store_false",dest="keep"
+    ,help="Removes distributed binary files")
+  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
+    ,help="Will remake combined binary files from distributed binary files even if combined "
+    +"binary file already exists. [not default].",default=False)
+  
 def main():
   #make command line parser
   parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]",version="%prog 1.0"
@@ -18,14 +30,8 @@ def main():
     +"with the command %prog run1_t[0-12300] or %prog run1_t[0-*]. The \"*\" wild character is "
     +"used to include all files upto the maximum integer starting from START.")
   
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remakeBins"
-    ,help="Will remake combined binary files from distributed binary files even if combined "
-    +"binary file already exists. [not default].",default=False)
-    
+  addParserOptions(parser)
+  
   #parse command line options
   (options,args)=parser.parse_args()
     

@@ -6,12 +6,20 @@
 datadir=${prefix}/data
 docsdir=${prefix}/docs
 
+#atmosphere models
+atmospheresdir=${datadir}/atmospheres
+atmospheres_DATA=data/atmospheres/table3.dat\
+               data/atmospheres/table2p3combined.dat\
+               data/atmospheres/table2.dat\
+               data/atmospheres/ReadMe.txt
+EXTRA_DIST=${atmospheres_DATA}
+
 #energy profiles
 energyprodir=${datadir}/energy_pro
 energypro_DATA=data/energy_pro/Epro.dat\
                data/energy_pro/Epro_mod.dat\
                data/energy_pro/Epro_points.dat
-EXTRA_DIST=${energypro_DATA}
+EXTRA_DIST+=${energypro_DATA}
 
 #OPAL/Alexander Furguson EOS and opacity files
 opaleos2005dir=${datadir}/OPAL_EOS_2005
@@ -83,24 +91,36 @@ EXTRA_DIST+=${templatexml_DATA}
 EXTRA_DIST+=scripts/*.py
 
 #python c++ extensions
-EXTRA_DIST+=src/pythonextensions/hdfwrapper/hdfmodule.cpp
+EXTRA_DIST+=src/pythonextensions/hdf/hdfmodule.cpp
+EXTRA_DIST+=src/pythonextensions/hdf/setup.py.in
+EXTRA_DIST+=src/pythonextensions/eos/eos.pyx
+EXTRA_DIST+=src/pythonextensions/eos/setup.py
 
-#supporting libraries, include if --disable-include-libs not set in
+#supporting libraries, included if --disable-include-crucial-libs not set in
 #configuration
-if INCLUDE_LIBS_IN_DIST
-EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
-EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
-EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz
+if INCLUDE_CRUCIAL_LIBS_IN_DIST
 EXTRA_DIST+=libs/openmpi-1.6.3.tar.gz
 EXTRA_DIST+=libs/petsc-3.1-p8.tar.gz
+endif
+
+#supporting libraries, included if --enable-optional-crucial-libs set in
+#configuration
+if INCLUDE_OPTIONAL_LIBS_IN_DIST
+EXTRA_DIST+=libs/evtk.tar.gz
+EXTRA_DIST+=libs/Cython-0.19.1.tar.gz
+EXTRA_DIST+=libs/fftw-3.3.3.tar.gz
+EXTRA_DIST+=libs/doxygen-1.8.3.1.src.tar.gz
+EXTRA_DIST+=libs/hdf-4.2.8.tar.gz
+EXTRA_DIST+=libs/jpegsrc.v8d.tar.gz#needed by hdf
+EXTRA_DIST+=libs/ffmpeg-1.2.tar.gz
+EXTRA_DIST+=libs/yasm-1.2.0.tar.gz #needed by ffmpeg
 endif
 
 ###############################################################################
 # DOCS ########################################################################
 ###############################################################################
 
-EXTRA_DIST+=src/userguide.txt
-EXTRA_DIST+=src/Doxyfile
+EXTRA_DIST+=src/docs/userguide.tex
 EXTRA_DIST+=scripts/Doxyfile
 EXTRA_DIST+=src/SPHERLSanal/Doxyfile
 EXTRA_DIST+=src/SPHERLSgen/Doxyfile
@@ -109,9 +129,16 @@ EXTRA_DIST+=src/SPHERLS/Doxyfile
 ###############################################################################
 # BINS + SOURCE ###############################################################
 ###############################################################################
-bin_SCRIPTS=./scripts/*.py
+bin_SCRIPTS=\
+./scripts/*.py\
+./src/pythonextensions/lib/python/hdf.so\
+./src/pythonextensions/lib/python/eos.so\
+./src/pythonextensions/lib/python/evtk/cevtk.so\
+./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/vtk.py\
+./src/pythonextensions/evtk/src/hl.py
 
-bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen
+bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen 
 #dist_pkgdata_DATA=./data/energy_pro/*	./data/eos/*	./data/ref_cals/*	./data/velocity_pro/*
 SPHERLS_SOURCES	=	\
 	src/SPHERLS/dataManipulation.cpp	\
@@ -163,8 +190,9 @@ endif
 if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
-BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so
+BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
 else
+BUILT_SOURCES=src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
 HDF_LDADDS= 
 HDF_CPPFLAGS= 
 endif
@@ -185,41 +213,93 @@ SPHERLSgen_SOURCES	=	\
 	src/xmlParser.cpp
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
-docs:\
- docs/manuals/SPHERLS_Ref_Manual.pdf\
- docs/manuals/SPHERLSgen_Ref_Manual.pdf\
- docs/manuals/SPHERLSanal_Ref_Manual.pdf\
- docs/manuals/Scripts_Ref_Manual.pdf\
- docs/manuals/SPHERLS_User_Guide.pdf
+if HDF_ENABLE
+src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp src/pythonextensions/hdf/setup.py.in
+	(cd	src/pythonextensions/hdf;	python setup.py build;python setup.py install --home=../ --prefix='')
+endif
+
+#make eos class available in python
+src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py src/eos.cpp src/eos.h src/exception2.h src/exception2.cpp
+	(cd	src/pythonextensions/eos;	cp ../../eos.cpp ./eos_tmp.cpp;	cp ../../eos.h .;	cp ../../exception2.h .;	cp ../../exception2.cpp .;)
+	(cd	src/pythonextensions/eos;	python setup.py build;python setup.py install --home=../ --prefix='')
+
+#make vtk file python module
+cevtk_SOURCE=\
+./src/pythonextensions/evtk/setup.py\
+./src/pythonextensions/evtk/README.txt\
+./src/pythonextensions/evtk/src/hl.py\
+./src/pythonextensions/evtk/src/__init__.py\
+./src/pythonextensions/evtk/src/cevtk.pyx\
+./src/pythonextensions/evtk/src/vtk.py\
+./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/examples/group.py\
+./src/pythonextensions/evtk/src/examples/image.py\
+./src/pythonextensions/evtk/src/examples/__init__.py\
+./src/pythonextensions/evtk/src/examples/lowlevel.py\
+./src/pythonextensions/evtk/src/examples/points.py\
+./src/pythonextensions/evtk/src/examples/rectilinear.py\
+./src/pythonextensions/evtk/src/examples/structured.py
+
+EXTRA_DIST+=${cevtk_SOURCE}
+
+src/pythonextensions/lib/python/cevtk.so: ${cevtk_SOURCE}
+	(cd	src/pythonextensions/evtk;	python setup.py build;python setup.py install --home=../ --prefix='')
+
+  
+CLEANFILES=\
+src/docs/userguide.pdf\
+src/docs/userguide.out\
+src/docs/userguide.log\
+src/docs/userguide.aux\
+src/pythonextensions/eos/exception2.h\
+src/pythonextensions/eos/exception2.cpp\
+src/pythonextensions/eos/eos_tmp.cpp\
+src/pythonextensions/eos/eos.h\
+src/pythonextensions/eos/eos.cpp\
+src/pythonextensions/evtk/src/cevtk.c
+
+DISTCLEANFILES=\
+src/pythonextensions/hdf/setup.py
+
+clean-local:
+	-rm -rf src/pythonextensions/eos/build
+	-rm -rf src/pythonextensions/hdf/build
+	-rm -rf src/pythonextensions/lib
+	-rm -rf src/pythonextensions/evtk/build
+
+if MAKE_DOCS
+
+#docs/manuals/SPHERLS_Ref_Manual.pdf
+#docs/manuals/SPHERLSgen_Ref_Manual.pdf
+#docs/manuals/SPHERLSanal_Ref_Manual.pdf
+#docs/manuals/Scripts_Ref_Manual.pdf
+#fuck doxygen, should just use latex
+docs: docs/manuals/SPHERLS_User_Guide.pdf
 
 .PHONY:docs
 
-if HDF_ENABLE
-src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdfwrapper/hdfmodule.cpp src/pythonextensions/hdfwrapper/setup.py.in
-	(cd	src/pythonextensions/hdfwrapper;	python setup.py build;python setup.py install --home=../ --prefix='')
+docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
+	(cd	src/docs;	pdflatex userguide.tex)
+	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
+
+#docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
+#	(cd	src/SPHERLS;echo	${PWD};	doxygen)
+#	(cd	src/SPHERLS/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
+
+#docs/manuals/SPHERLSgen_Ref_Manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
+#	(cd	src/SPHERLSgen;	doxygen)
+#	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_Ref_Manual.pdf)
+
+#docs/manuals/SPHERLSanal_Ref_Manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
+#	(cd	src/SPHERLSanal;	doxygen)
+#	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
+#	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_Ref_Manual.pdf)
+
+#docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
+#	(cd	scripts;	doxygen)
+#	(cd	scripts/docs/latex;	make	pdf;)
+#	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
+
 endif
-
-docs/manuals/SPHERLS_Ref_Manual.pdf:	${DOC_FILES}	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
-	(cd	src/SPHERLS;echo	${PWD};	doxygen)
-	(cd	src/SPHERLS/docs/latex;	make	pdf;)
-	(cd	src/SPHERLS/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLS_Ref_Manual.pdf)
-
-docs/manuals/SPHERLSgen_Ref_Manual.pdf:	${SPHERLSgen_SOURCES}	src/SPHERLSgen/Doxyfile
-	(cd	src/SPHERLSgen;	doxygen)
-	(cd	src/SPHERLSgen/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSgen/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSgen_Ref_Manual.pdf)
-
-docs/manuals/SPHERLSanal_Ref_Manual.pdf:	${SPHERLSanal_SOURCES}	src/SPHERLSanal/Doxyfile
-	(cd	src/SPHERLSanal;	doxygen)
-	(cd	src/SPHERLSanal/docs/latex;	make	pdf;)
-	(cd	src/SPHERLSanal/docs/latex;mv	refman.pdf	../../../../docs/manuals/SPHERLSanal_Ref_Manual.pdf)
-
-docs/manuals/Scripts_Ref_Manual.pdf:	scripts/Doxyfile	scripts/*.py
-	(cd	scripts;	doxygen)
-	(cd	scripts/docs/latex;	make	pdf;)
-	(cd	scripts/docs/latex;mv	refman.pdf	../../../docs/manuals/Scripts_Ref_Manual.pdf)
-
-docs/manuals/SPHERLS_User_Guide.pdf: src/Doxyfile ${DOC_FILES}
-	(cd	src;	doxygen)
-	(cd	src/docs/latex;	make	pdf;)
-	(cd	src/docs/latex;mv	refman.pdf	../../../docs/manuals/SPHERLS_User_Guide.pdf)

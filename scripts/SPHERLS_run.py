@@ -2,6 +2,8 @@
 import os
 import xml.etree.ElementTree as xml
 import paths
+import optparse as op
+
 def parseXML(fileName):
   '''Parses the SPHERLS.xml file to figure out settings for submit script and how to run SPHERLS
   returns settings, a dictionary with entries for:
@@ -211,6 +213,18 @@ def makeSubScript(settings):
   f.close()
   return scriptName
 def main():
+  
+  #make command line parser
+  parser=op.OptionParser(usage="Usage: %prog [options]"
+    ,version="%prog 1.0"
+    ,description="Starts a SPHERLS run by parsing the SPHERLS.xml configuration file")
+  parser.add_option("-d",action="store_true",dest="dryRun"
+    ,help="If set it print out the run command but not execute it[not default]."
+    ,default=False)
+  
+  #parse command line options
+  (options,args)=parser.parse_args()
+
   settings=parseXML("SPHERLS.xml")
   
   #additional hard coded settings
@@ -219,11 +233,16 @@ def main():
   
   if settings['que']==None:# if not running in que
     cmd=settings['mpirun']+" -np "+settings['numProcs']+" "+settings['target']
-    os.system(cmd)
+    if options.dryRun:
+      print cmd
+    else:
+      os.system(cmd)
   elif settings['totalview']==True:#if running with a debugger
     cmd=msettings['mpirun']+" --debug -np "+settings['numProcs']+" "+settings['target']
-    print cmd
-    os.system(cmd)
+    if options.dryRun:
+      print cmd
+    else:
+      os.system(cmd)
   else:#if submitting to a que
     
     #additional hard coded settings only needed when submitting to a que
@@ -234,7 +253,10 @@ def main():
     script=makeSubScript(settings)
     if script!=None:#sub the job in the que\n
       cmd="qsub "+script
-      os.system(cmd)
+      if options.dryRun:
+        print cmd
+      else:
+        os.system(cmd)
 if __name__ == "__main__":
   main()
   

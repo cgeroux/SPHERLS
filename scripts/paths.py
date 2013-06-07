@@ -3,6 +3,7 @@ import os
 import sys
 
 BasePath=os.path.dirname(os.path.dirname(sys.argv[0]))#remove script name, remove scripts directory
+BasePath=os.path.join(os.getcwd(),BasePath)#fix for relative paths
 SPHERLSanalPath=BasePath+"/SPHERLSanal"
 SPHERLSgenPath=BasePath+"/SPHERLSgen"
 SPHERLSPath=BasePath+"/SPHERLS"

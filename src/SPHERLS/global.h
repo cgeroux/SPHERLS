@@ -25,24 +25,24 @@
   Raise signal on calculation of negative density if set to 1. Useful when debugging, it will stop 
   the debugger at the location of the calculation of the negative density. If not 1, it will speed 
   up calculation slightly and generate more useful output upon detection of negative densities. If 1
-  and not being run in the debugger, it likely won't generate any usefull output upon negative
-  density, and wil simply abort the program.
+  and not being run in the debugger, it likely won't generate any useful output upon negative
+  density, and will simply abort the program.
   */
 #define SIGNEGENG 0/**<
-  Raise signal on calculation of negative energy if set to 1, else don't rais a signal. Otherwise it
+  Raise signal on calculation of negative energy if set to 1, else don't raise a signal. Otherwise it
   will be handled through the normal exception method. This is useful when debugging, it will stop
   the debugger at the location of the calculation of the negative energy. If not 1, it will speed up
   calculation slightly and generate more useful output upon detection of negative energy. If 1 and
-  not being run in the debugger, it likely won't generate any usefull output upon negative energies,
-  and wil simply abort the program.
+  not being run in the debugger, it likely won't generate any useful output upon negative energies,
+  and will simply abort the program.
   */
 #define SIGNEGTEMP 0/**<
-  Raise signal on calculation of negative temperature if set to 1, else don't rais a signal. 
+  Raise signal on calculation of negative temperature if set to 1, else don't raise a signal. 
   Otherwise it will be handled through the normal exception method. This is useful when debugging, 
   it will stop the debugger at the location of the calculation of the negative energy. If not 1, it 
   will speed up calculation slightly and generate more useful output upon detection of negative 
-  energy. If 1 and not being run in the debugger, it likely won't generate any usefull output upon 
-  negative energies, and wil simply abort the program.
+  energy. If 1 and not being run in the debugger, it likely won't generate any useful output upon 
+  negative energies, and will simply abort the program.
   */
 #define TRACKMAXSOLVERERROR 0/**<
   Report the error of the linear equation solver if set to 1, else don't. Not tracking the error
@@ -389,196 +389,6 @@ class Grid{
 };/**@class Grid
   This class manages information which pertains to grid data.
   
-  External variables used with Gamma Law (GL) gas equaiton of state and their array indexes:
-  <table>
-    <tr><th>1D (\ref nNumVars=7)</th><th>2D (\ref nNumVars=9)</th><th>3D (\ref nNumVars=11)</th></tr>
-    <tr><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM</td><td>0</td></tr>
-      <tr><td>\ref nDM</td><td>1</td></tr>
-      <tr><td>\ref nR</td><td>2</td></tr>
-      <tr><td>\ref nD</td><td>3</td></tr>
-      <tr><td>\ref nU</td><td>4</td></tr>
-      <tr><td>\ref nU0</td><td>5</td></tr>
-      <tr><td>\ref nE</td><td>6</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM</td><td>0</td></tr>
-      <tr><td>\ref nTheta</td><td>1</td></tr>
-      <tr><td>\ref nDM</td><td>2</td></tr>
-      <tr><td>\ref nR</td><td>3</td></tr>
-      <tr><td>\ref nD</td><td>4</td></tr>
-      <tr><td>\ref nU</td><td>5</td></tr>
-      <tr><td>\ref nU0</td><td>6</td></tr>
-      <tr><td>\ref nV</td><td>7</td></tr>
-      <tr><td>\ref nE</td><td>8</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM </td><td>0</td></tr>
-      <tr><td>\ref nTheta</td><td>1</td></tr>
-      <tr><td>\ref nPhi</td><td>2</td></tr>
-      <tr><td>\ref nDM</td><td>3</td></tr>
-      <tr><td>\ref nR</td><td>4</td></tr>
-      <tr><td>\ref nD</td><td>5</td></tr>
-      <tr><td>\ref nU</td><td>6</td></tr>
-      <tr><td>\ref nU0</td><td>7</td></tr>
-      <tr><td>\ref nV</td><td>8</td></tr>
-      <tr><td>\ref nW</td><td>9</td></tr>
-      <tr><td>\ref nE</td><td>10</td></tr>
-      </table>
-    </td>
-    </tr>
-  </table>
-  
-  External variables used with Tabulated Equation Of State (TEOS) and their array indexes:
-  <table>
-    <tr><th>1D (\ref nNumVars=7)</th><th>2D (\ref nNumVars=9)</th><th>3D (\ref nNumVars=11)</th></tr>
-    <tr><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM </td><td>0</td></tr>
-      <tr><td>\ref nDM </td><td>1</td></tr>
-      <tr><td>\ref nR </td><td>2</td></tr>
-      <tr><td>\ref nD </td><td>3</td></tr>
-      <tr><td>\ref nU </td><td>4</td></tr>
-      <tr><td>\ref nU0 </td><td>5</td></tr>
-      <tr><td>\ref nT </td><td>6</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM </td><td>0</td></tr>
-      <tr><td>\ref nTheta </td><td>1</td></tr>
-      <tr><td>\ref nDM </td><td>2</td></tr>
-      <tr><td>\ref nR </td><td>3</td></tr>
-      <tr><td>\ref nD </td><td>4</td></tr>
-      <tr><td>\ref nU </td><td>5</td></tr>
-      <tr><td>\ref nU0 </td><td>6</td></tr>
-      <tr><td>\ref nV </td><td>7</td></tr>
-      <tr><td>\ref nT </td><td>8</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nM </td><td>0</td></tr>
-      <tr><td>\ref nTheta </td><td>1</td></tr>
-      <tr><td>\ref nPhi </td><td>2</td></tr>
-      <tr><td>\ref nDM </td><td>3</td></tr>
-      <tr><td>\ref nR </td><td>4</td></tr>
-      <tr><td>\ref nD </td><td>5</td></tr>
-      <tr><td>\ref nU </td><td>6</td></tr>
-      <tr><td>\ref nU0 </td><td>7</td></tr>
-      <tr><td>\ref nV </td><td>8</td></tr>
-      <tr><td>\ref nW </td><td>9</td></tr>
-      <tr><td>\ref nT </td><td>10</td></tr>
-      </table>
-    </td>
-    </tr>
-  </table>
-  
-  Internal variables  with GL gas equation of state:
-  <table>
-    <tr><th>1D (\ref nNumIntVars=2)</th><th>2D (\ref nNumIntVars=8)</th></tr>
-    <tr><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      <tr><td>\ref nDenAve </td><td>\ref nNumVars+2</td></tr>
-      <tr><td>\ref nDCosThetaIJK </td><td>\ref nNumVars+3</td></tr>
-      <tr><td>\ref nQ1</td><td>\ref nNumVars+4</td></tr>
-      <tr><td>\ref nDTheta</td><td>\ref nNumVars+5</td></tr>
-      <tr><td>\ref nSinThetaIJK</td><td>\ref nNumVars+6</td></tr>
-      <tr><td>\ref nSinThetaIJp1halfK</td><td>\ref nNumVars+7</td></tr>
-      </table></td>
-    </tr>
-    <tr><th>3D (\ref nNumIntVars=12)</th></tr>
-    <tr>
-    <td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      <tr><td>\ref nDenAve </td><td>\ref nNumVars+2</td></tr>
-      <tr><td>\ref nDPhi </td><td>\ref nNumVars+3</td></tr>
-      <tr><td>\ref nDCosThetaIJK </td><td>\ref nNumVars+4</td></tr>
-      <tr><td>\ref nQ1</td><td>\ref nNumVars+5</td></tr>
-      <tr><td>\ref nDTheta</td><td>\ref nNumVars+6</td></tr>
-      <tr><td>\ref nSinThetaIJK</td><td>\ref nNumVars+7</td></tr>
-      <tr><td>\ref nSinThetaIJp1halfK</td><td>\ref nNumVars+8</td></tr>
-      <tr><td>\ref nCotThetaIJK</td><td>\ref nNumVars+9</td></tr>
-      <tr><td>\ref nCotThetaIJp1halfK</td><td>\ref nNumVars+10</td></tr>
-      <tr><td>\ref nQ2</td><td>\ref nNumVars+11</td></tr>
-      </table>
-    </td>
-    </tr>
-  </table>
-  
-  Internal variables  with TEOS:
-  <table celpadding="0">
-    <tr><th>1D (\ref nNumIntVars=5)</th><th>2D (\ref nNumIntVars=11)</th></tr>
-    <tr><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      <tr><td>\ref nE </td><td>\ref nNumVars+2</td></tr>
-      <tr><td>\ref nKappa </td><td>\ref nNumVars+3</td></tr>
-      <tr><td>\ref nGamma </td><td>\ref nNumVars+4</td></tr>
-      </table>
-    </td><td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      <tr><td>\ref nDenAve </td><td>\ref nNumVars+2</td></tr>
-      <tr><td>\ref nDCosThetaIJK </td><td>\ref nNumVars+3</td></tr>
-      <tr><td>\ref nE </td><td>\ref nNumVars+4</td></tr>
-      <tr><td>\ref nKappa </td><td>\ref nNumVars+5</td></tr>
-      <tr><td>\ref nGamma </td><td>\ref nNumVars+6</td></tr>
-      <tr><td>\ref nQ1</td><td>\ref nNumVars+7</td></tr>
-      <tr><td>\ref nDTheta</td><td>\ref nNumVars+8</td></tr>
-      <tr><td>\ref nSinThetaIJK</td><td>\ref nNumVars+9</td></tr>
-      <tr><td>\ref nSinThetaIJp1halfK</td><td>\ref nNumVars+10</td></tr>
-      </table></td>
-    </tr>
-    <tr><th>3D (\ref nNumIntVars=15)</th></tr>
-    <tr>
-    <td>
-      <table>
-      <tr><td>Variable</td><td>Index</td></tr>
-      <tr><td>\ref nP </td><td>\ref nNumVars+0</td></tr>
-      <tr><td>\ref nQ0 </td><td>\ref nNumVars+1</td></tr>
-      <tr><td>\ref nDenAve </td><td>\ref nNumVars+2</td></tr>
-      <tr><td>\ref nDPhi </td><td>\ref nNumVars+3</td></tr>
-      <tr><td>\ref nDCosThetaIJK </td><td>\ref nNumVars+4</td></tr>
-      <tr><td>\ref nE </td><td>\ref nNumVars+5</td></tr>
-      <tr><td>\ref nKappa </td><td>\ref nNumVars+6</td></tr>
-      <tr><td>\ref nGamma </td><td>\ref nNumVars+7</td></tr>
-      <tr><td>\ref nQ1</td><td>\ref nNumVars+8</td></tr>
-      <tr><td>\ref nDTheta</td><td>\ref nNumVars+9</td></tr>
-      <tr><td>\ref nSinThetaIJK</td><td>\ref nNumVars+10</td></tr>
-      <tr><td>\ref nSinThetaIJp1halfK</td><td>\ref nNumVars+11</td></tr>
-      <tr><td>\ref nCotThetaIJK</td><td>\ref nNumVars+12</td></tr>
-      <tr><td>\ref nCotThetaIJp1halfK</td><td>\ref nNumVars+13</td></tr>
-      <tr><td>\ref nQ2</td><td>\ref nNumVars+14</td></tr>
-      </table>
-    </td>
-    </tr>
-  </table>
-  
-  The variable indexes are set in \ref modelRead based on the input model.
   */
 class Parameters{
   public:
@@ -758,6 +568,12 @@ class Output{
       How often the status is printed to the screen in simulation time.*/
     double dTimeLastPrint;/**<
       Simulation time when last status was printed.*/
+    std::string sExeDir;/**<
+      Directory where the executable is located.
+      */
+    void setExeDir(ProcTop &procTop);/**<
+      Sets sExeDir to the directory where the current executable is located
+      */
     Output(); /**<
       Constructor for this class.
       */

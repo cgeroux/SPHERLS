@@ -18,6 +18,7 @@ eos::eos(){//empty constructor
   dLogP=NULL;
   dLogE=NULL;
   dLogKappa=NULL;
+  setExePath();
 }
 eos& eos::operator=(const eos & rhs){//assignment operator
   if (this !=&rhs){
@@ -88,7 +89,7 @@ eos::~eos(){//destructor
   delete [] dLogE;
   delete [] dLogKappa;
 }
-void eos::readAscii(std::string sFileName){
+void eos::readAscii(std::string sFileName)throw(exception2){
   
   //open file
   std::ifstream ifIn;
@@ -148,7 +149,7 @@ void eos::readAscii(std::string sFileName){
   
   ifIn.close();
 }
-void eos::readBobsAscii(std::string sFileName){
+void eos::readBobsAscii(std::string sFileName)throw(exception2){
   
   //open file
   std::ifstream ifIn;
@@ -201,7 +202,7 @@ void eos::readBobsAscii(std::string sFileName){
   }
   ifIn.close();
 }
-void eos::writeAscii(std::string sFileName){
+void eos::writeAscii(std::string sFileName)throw(exception2){
   
   //open file
   std::ofstream ofOut;
@@ -227,6 +228,19 @@ void eos::writeAscii(std::string sFileName){
   ofOut.close();
 }
 void eos::readBin(std::string sFileName)throw(exception2){
+  
+  //test to see if it is relative to the executable directory
+  std::string sTemp;
+  if (sFileName.substr(0,1)!="/" 
+    && sFileName.substr(0,2)!="./"){
+    
+    //if relative to executable directory add executable directory
+    sTemp=sExePath+"/"+sFileName;
+  }
+  else{
+    sTemp=sFileName;
+  }
+  sFileName=sTemp;
   
   //open file
   std::ifstream ifIn;
@@ -280,7 +294,7 @@ void eos::readBin(std::string sFileName)throw(exception2){
   }
   ifIn.close();
 }
-void eos::writeBin(std::string sFileName){
+void eos::writeBin(std::string sFileName)throw(exception2){
   
   //open file
   std::ofstream ofOut;
@@ -307,7 +321,7 @@ void eos::writeBin(std::string sFileName){
   }
   ofOut.close();
 }
-double eos::dGetPressure(double dT, double dRho){
+double eos::dGetPressure(double dT, double dRho)throw(exception2){
   
   //calculate logs of dT and dRho
   if(dRho<0){
@@ -392,7 +406,7 @@ double eos::dGetPressure(double dT, double dRho){
   }
   return dP;
 }
-double eos::dGetEnergy(double dT, double dRho){
+double eos::dGetEnergy(double dT, double dRho)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -471,7 +485,7 @@ double eos::dGetEnergy(double dT, double dRho){
   }
   return dE;
 }
-double eos::dGetOpacity(double dT, double dRho){
+double eos::dGetOpacity(double dT, double dRho)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -552,7 +566,7 @@ double eos::dGetOpacity(double dT, double dRho){
   }
   return dKappa;
 }
-double eos::dDRhoDP(double dT,double dRho){
+double eos::dDRhoDP(double dT,double dRho)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -629,7 +643,7 @@ double eos::dDRhoDP(double dT,double dRho){
   }
   return dDRhoDP;
 }
-double eos::dSoundSpeed(double dT,double dRho){
+double eos::dSoundSpeed(double dT,double dRho)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -736,7 +750,7 @@ double eos::dSoundSpeed(double dT,double dRho){
   }
   return dC;
 }
-void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa){
+void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -828,7 +842,7 @@ void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa){
     throw exception2(ssTemp.str(),INPUT);
   }
 }
-void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKappa){
+void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKappa)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -933,7 +947,7 @@ void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKa
   }
 }
 void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double &dKappa
-  ,double &dGamma){
+  ,double &dGamma)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1070,7 +1084,7 @@ void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double
   }
 }
 void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, double &dKappa
-  ,double &dGamma, double &dC_p){
+  ,double &dGamma, double &dC_p)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1220,7 +1234,7 @@ void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, doub
     throw exception2(ssTemp.str(),INPUT);
   }
 }
-void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma){
+void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1349,7 +1363,7 @@ void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,doub
     throw exception2(ssTemp.str(),INPUT);
   }
 }
-void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,double &dC_v){
+void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,double &dC_v)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1472,7 +1486,7 @@ void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,d
     throw exception2(ssTemp.str(),INPUT);
   }
 }
-void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP){
+void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1560,7 +1574,7 @@ void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP){
     throw exception2(ssTemp.str(),INPUT);
   }
 }
-void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE){
+void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1649,7 +1663,7 @@ void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE){
   }
 }
 void eos::getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT,
-  double &dDlnPDlnRho, double &dDEDT){
+  double &dDlnPDlnRho, double &dDEDT)throw(exception2){
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1741,4 +1755,27 @@ void eos::getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT,
   
   //calculate dE/dT at constant density, equal to C_v (specific heat at constant volume)
   dDEDT=(pow(10.0,dE_jp1)-pow(10.0,dE_j))/(pow(10.0,dLogTUpper)-pow(10.0,dLogTLower));
+}
+void eos::setExePath(){
+  /*This method might not be 100% portable, may need to look into other 
+  solutions if problems arise with this not being reliable*/
+  
+  char buff[1024];
+  ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+  if (len != -1) {
+    buff[len] = '\0';
+    sExePath=std::string(buff);
+    
+    //find the first "/" from the end
+    unsigned pos=sExePath.find_last_of("/");
+    
+    //keep from the beginning to the location of the last "/" to remove the name
+    //of the executable
+    sExePath=sExePath.substr(0,pos);
+  } else {
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": error determining executable path"<<std::endl;
+    throw exception2(ssTemp.str(),OUTPUT);
+  }
 }

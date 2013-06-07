@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-'''
+"""
   Test that restarts produce the same results as calculating straight through the restart with no
  restart.
- 
- TODO: I should probalby use the reference calculations as a starting point, that way I can test
- all the terms not just the spherically symmetric ones.
-'''
+"""
+
 useArgparse=True
 try:
   import argparse
@@ -99,7 +97,7 @@ def main():
       print "  "+failedTest+" : see \""+failedTestDirs[i]+"/log.txt\" for details on why the test failed"
       i=i+1
 def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
-  '''
+  """
   input:     path to SPHERLS and SPHERLSgen executables, number of processors to run test with
   output:    sucess of the test
   algorithm:
@@ -111,7 +109,8 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
       b) run SPHERLS for 3 timesteps with given number of processors
     4) restart code at first time step after initial model
     5) diff last models to see if they are the same
-  '''
+  """
+  
   parts=startModel.rsplit("_t",1)
   if len(parts)!=2:
     print "\""+startModel+"\" is not a valid starting model, expecting something that ends "\

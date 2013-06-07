@@ -36,6 +36,8 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     performance.dStartTimer=MPI::Wtime();
   }
   
+  output.setExeDir(procTop);
+  
   //turn on floating point exceptions
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
   
@@ -88,7 +90,10 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //get eos node
   XMLNode xEOS=getXMLNode(xData,"eos",0);
   
-  //read in file name for equation of state, to override starting model's eos file
+  //read in file name for equation of state, to override starting model's
+  //eos file, if parameters.sEOSFileName has a non-zero length modelRead
+  //will use the file specified by parameters.sEOSFileName instead of the one
+  //in the model dump file
   getXMLValueNoThrow(xEOS,"eosFile",0,parameters.sEOSFileName);
   
   //get if using the turbulance model or not
@@ -335,7 +340,20 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   
   //read in equation of state if using a tabulated equation of state
   if(!parameters.bEOSGammaLaw){
-    parameters.eosTable.readBin(parameters.sEOSFileName);
+    
+    //test to see if it is relative to the execuatable directory
+    std::string sTemp;
+    if (parameters.sEOSFileName.substr(0,1)!="/" 
+      && parameters.sEOSFileName.substr(0,2)!="./"){
+      
+      //if relative to executable directory add executable directory
+      sTemp=output.sExeDir+"/"+parameters.sEOSFileName;
+    }
+    else{
+      sTemp=parameters.sEOSFileName;
+    }
+    
+    parameters.eosTable.readBin(sTemp);
     
     //get tolerance for interated quantities
     getXMLValue(xEOS,"tolerance",0,parameters.dTolerance);
@@ -1193,22 +1211,27 @@ void modelRead(std::string sFileName,ProcTop &procTop, Grid &grid, Time &time
   if(nGammaLaw==0){//if zero use a gamma law gas
     ifIn.read((char*)(&parameters.dGamma),sizeof(double));
     parameters.bEOSGammaLaw=true;
-    if(parameters.sEOSFileName.size()!=0){//if we have an EOS file name from configuration file
+    if(parameters.sEOSFileName.size()!=0){//if we have an EOS file name from
+                                          //configuration file
       std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
       <<": WARNING the equation of state file specified in the configuration file, \""
       <<parameters.sEOSFileName<<"\" is being ignored since the model specifies a gamma law gas.\n";
     }
   }
   else{
-    char *cBuffer=new char[nGammaLaw+1];//if nGammaLaw not zero then it is the size of the string following it
+    char *cBuffer=new char[nGammaLaw+1];//if nGammaLaw not zero then it is the 
+                                        //size of the string following it
     ifIn.read(cBuffer,(nGammaLaw)*sizeof(char));
     cBuffer[nGammaLaw]='\0';
     std::string sTemp=cBuffer;
     delete [] cBuffer;
-    if(parameters.sEOSFileName.size()==0){//sEOSFileName already read form configuration file if specified
+    if(parameters.sEOSFileName.size()==0){//sEOSFileName not specified in
+                                          //configuration file use model EOS
+                                          //file name
       parameters.sEOSFileName=sTemp;
     }
-    if(sTemp!=parameters.sEOSFileName){//using a different EOS file warn about this
+    if(sTemp!=parameters.sEOSFileName){//using a different EOS file from the 
+                                       //model warn about this
       std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<procTop.nRank
       <<": WARNING the equation of state file specified in the model, \""<<sTemp
       <<"\" is not the same as that specified in the configuration file, \""

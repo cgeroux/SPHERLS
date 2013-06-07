@@ -97,7 +97,9 @@ class profileData{
     std::vector<std::string> getDoubleKeys();/**<
       returns a vector of strings containing the key names for the double array
     */
-};
+};/**@class profileData
+  Class for tracking data on a radial profile, useful for debugging
+*/
 
 
 #endif

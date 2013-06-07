@@ -236,10 +236,16 @@ class Curve:
         print "In curve formula:",self.formulaOrig
         quit()
 class Plot:
-  '''This class holds all the information for a single plot, namely the list of curves for that plot.'''
+  """This class holds all the information for a single plot
+  
+  namely the list of curves for that plot.
+  
+  """
   
   def __init__(self,element,type):
-    '''This method initlizes the plot object'''
+    """This method initlizes the plot object
+    
+    """
     
     self.ylabel=None
     self.curves=[]
@@ -247,6 +253,7 @@ class Plot:
     self.grid=None
     self.bMinorTics=False
     self.legendloc=1
+    self.autoLimits=[True,True]
     
     #check for grid setting
     if element.get("grid")!=None:
@@ -270,9 +277,11 @@ class Plot:
     yMin=None
     if element.get("ymin")!=None and element.get("ymin")!="":
       yMin=float(element.get("ymin"))
+      self.autoLimits[0]=False
     yMax=None
     if element.get("ymax")!=None and element.get("ymax")!="":
       yMax=float(element.get("ymax"))
+      self.autoLimits[1]=False
     self.limits=[yMin,yMax]
     
     #get ledgend location
@@ -286,8 +295,12 @@ class Plot:
       self.curves.append(Curve(curveElement,type,curveIndex))
       curveIndex+=1
   def load(self,fileData,options,dataSet,nFileCount):
-    '''loads the data for a plot, y-data is stored in the curves, and sets the ylabel from the first
-    file read in'''
+    """Loads the data for a plot
+    
+    y-data is stored in the curves, and sets the ylabel from the first
+    file read in
+    
+    """
     
     if self.ylabel==None:#if not already set, this should be triggered only on the first load
       
@@ -320,8 +333,11 @@ class Plot:
       for curve in self.curves:
         curve.load(fileData,options,dataSet,nFileCount)
   def setLimits(self,x,xlimits,bTimeAxis):
-    """Sets the y limits from the maximum, and minimum y values in the curves on
+    """Sets the y limits
+    
+    from the maximum, and minimum y values in the curves on
     the plot in the xrange specified, over all files.
+    
     """
     
     #if both y limits were already set in configuraiton file, don't set anything

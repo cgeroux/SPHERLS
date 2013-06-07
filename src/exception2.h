@@ -1,3 +1,8 @@
+/** @file
+  
+  Header file for \ref exceptoin2.cpp
+*/
+
 #ifndef EXCEPTION2_H
 #define EXCEPTION2_H
 
@@ -25,7 +30,11 @@ class exception2: public std::exception{
     void setMsg(std::string sMsg);
     void setCode(int nCodeIn);
     int getCode();
+    virtual const char* what()const throw();
     virtual ~exception2() throw();
-};
+    
+};/**@class exception2
+  Adds custom exception handling class
+*/
 
 #endif

@@ -2,6 +2,19 @@
 import struct
 import sys
 import numpy as np
+import math
+import paths
+import os
+
+#The blow two lines should not needed when a proper install is done
+sys.path.append(paths.srcPath+"/pythonextensions/lib/python/")
+sys.path.append(paths.srcPath+"/pythonextensions/lib/python/evtk")
+
+import evtk.hl
+import eos
+
+eosFileName=None
+eosTable=None
 
 class Dump:
   """Allows manipulation of SPHERLS binary and ascii dump files.
@@ -10,42 +23,51 @@ class Dump:
   version that SPHERLS knows how to read.
   """
   
-  def __init__(self,fileName):
-    """Initilizes the dump by reading in a binary file."""
+  def __init__(self,fileName=None):
+    """Initilizes the dump by reading in a binary file.
     
-    self.read(fileName)
+    """
+    
+    self.rectVars=[]
+    
+    #if a file name was given read in a file
+    if fileName!=None:
+      self.read(fileName)
+  def _addVarID(self,name,type):
+    """Set ID for a new variable called name
+    
+    This should be called every time a new variable is appended to vars. And 
+    should be called with the names in the same order the new variables are
+    appended
+    
+    name: name of the new variable
+    type: hybrid=uses a 1D-muti-D grid, rect=uses a rectangular grid, both
+    """
+    
+    self._varIDs[name]=len(self.varNames)
+    self.varNames.append(name)
+    self.varType[name]=type
   def _setVarIDs(self):
-    """Sets names for the interger values of the grid varibles"""
+    """Sets names for the interger values of the grid varibles
+    
+    The array indices are purely set by the order in which the dumps have
+    organized the variables, the names below refelect this order.
+    """
     
     self._varIDs={}
+    self.varType={}#hybrid, rect, both
     self.varNames=[]
     if self.gamma!=None: #using gamma law gas
       if self.numDims==1:
-        self._varIDs["M_r"]=0
-        self._varIDs["Delta_M_r"]=1
-        self._varIDs["r"]=2
-        self._varIDs["rho"]=3
-        self._varIDs["u"]=4
-        self._varIDs["u_0"]=5
-        self._varIDs["e"]=6
-        self._varIDs["theta"]=None
-        self._varIDs["phi"]=None
-        self._varIDs["T"]=None
-        self._varIDs["v"]=None
-        self._varIDs["w"]=None
+        self.varNames=["M_r","Delta_M_r","r","rho","u","u_0","e"]
+        i=0
+        for varName in self.varNames:
+          self.varIDs[varName]=i
+          i+=1
         
-        self.varNames.append("M_r")
-        self.varNames.append("Delta_M_r")
-        self.varNames.append("r")
-        self.varNames.append("rho")
-        self.varNames.append("u")
-        self.varNames.append("u_0")
-        self.varNames.append("e")
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
+        #set data type
+        self.varType=dict.fromkeys(self.varNames,"hybrid")
+        
       elif self.numDims==2:
         self._varIDs["M_r"]=0
         self._varIDs["theta"]=1
@@ -56,9 +78,17 @@ class Dump:
         self._varIDs["u_0"]=6
         self._varIDs["v"]=7
         self._varIDs["e"]=8
-        self._varIDs["phi"]=None
-        self._varIDs["T"]=None
-        self._varIDs["w"]=None
+        
+        #set data type
+        self._varIDs["M_r"]="hybrid"
+        self._varIDs["theta"]="hybrid"
+        self._varIDs["Delta_M_r"]="hybrid"
+        self._varIDs["r"]="hybrid"
+        self._varIDs["rho"]="hybrid"
+        self._varIDs["u"]="hybrid"
+        self._varIDs["u_0"]="hybrid"
+        self._varIDs["v"]="hybrid"
+        self._varIDs["e"]="hybrid"
         
         self.varNames.append("M_r")
         self.varNames.append("theta")
@@ -69,9 +99,7 @@ class Dump:
         self.varNames.append("u_0")
         self.varNames.append("v")
         self.varNames.append("e")
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
+
       elif self.numDims==3:
         self._varIDs["M_r"]=0
         self._varIDs["theta"]=1
@@ -84,7 +112,6 @@ class Dump:
         self._varIDs["v"]=8
         self._varIDs["w"]=9
         self._varIDs["e"]=10
-        self._varIDs["T"]=None
         
         self.varNames.append("M_r")
         self.varNames.append("theta")
@@ -97,8 +124,7 @@ class Dump:
         self.varNames.append("v")
         self.varNames.append("w")
         self.varNames.append("e")
-        self.varNames.append(None)
-    else: #using a tabulated equaiton of state
+    else: #using a tabulated equation of state
       if self.numDims==1:
         self._varIDs["M_r"]=0
         self._varIDs["Delta_M_r"]=1
@@ -107,11 +133,6 @@ class Dump:
         self._varIDs["u"]=4
         self._varIDs["u_0"]=5
         self._varIDs["T"]=6
-        self._varIDs["theta"]=None
-        self._varIDs["phi"]=None
-        self._varIDs["e"]=None
-        self._varIDs["v"]=None
-        self._varIDs["w"]=None
         
         self.varNames.append("M_r")
         self.varNames.append("Delta_M_r")
@@ -120,37 +141,37 @@ class Dump:
         self.varNames.append("u")
         self.varNames.append("u_0")
         self.varNames.append("T")
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
+
       elif self.numDims==2:
-        self._varIDs["M_r"]=0
-        self._varIDs["theta"]=1
-        self._varIDs["Delta_M_r"]=2
-        self._varIDs["r"]=3
-        self._varIDs["rho"]=4
-        self._varIDs["u"]=5
-        self._varIDs["u_0"]=6
-        self._varIDs["v"]=7
-        self._varIDs["T"]=8
-        self._varIDs["phi"]=None
-        self._varIDs["e"]=None
-        self._varIDs["w"]=None
+        self.varNames=["M_r","theta","Delta_M_r","r","rho","u","u_0","v","T"]
+        i=0
+        for varName in self.varNames:
+          self._varIDs[varName]=i
+          i+=1
         
-        self.varNames.append("M_r")
-        self.varNames.append("theta")
-        self.varNames.append("Delta_M_r")
-        self.varNames.append("r")
-        self.varNames.append("rho")
-        self.varNames.append("u")
-        self.varNames.append("u_0")
-        self.varNames.append("v")
-        self.varNames.append("T")
-        self.varNames.append(None)
-        self.varNames.append(None)
-        self.varNames.append(None)
+        #set data type
+        self.varType=dict.fromkeys(self.varNames,"hybrid")
+        
+        # self._varIDs["M_r"]=0
+        # self._varIDs["theta"]=1
+        # self._varIDs["Delta_M_r"]=2
+        # self._varIDs["r"]=3
+        # self._varIDs["rho"]=4
+        # self._varIDs["u"]=5
+        # self._varIDs["u_0"]=6
+        # self._varIDs["v"]=7
+        # self._varIDs["T"]=8
+        
+        # self.varNames.append("M_r")
+        # self.varNames.append("theta")
+        # self.varNames.append("Delta_M_r")
+        # self.varNames.append("r")
+        # self.varNames.append("rho")
+        # self.varNames.append("u")
+        # self.varNames.append("u_0")
+        # self.varNames.append("v")
+        # self.varNames.append("T")
+
       elif self.numDims==3:
         self._varIDs["M_r"]=0
         self._varIDs["theta"]=1
@@ -163,7 +184,6 @@ class Dump:
         self._varIDs["v"]=8
         self._varIDs["w"]=9
         self._varIDs["T"]=10
-        self._varIDs["e"]=None
         
         self.varNames.append("M_r")
         self.varNames.append("theta")
@@ -176,9 +196,12 @@ class Dump:
         self.varNames.append("v")
         self.varNames.append("w")
         self.varNames.append("T")
-        self.varNames.append(None)
-  def _readHeaderBinary(self):
-    """Reads a header from a binary file, after the type has been read in."""
+  def _readHeaderBinary(self,eosFile=None):
+    """Reads a header from a binary file, after the type has been read in.
+    
+    eosFile: allows one to override the equation of state file name given in the
+      model.
+    """
     
     #Unpack binary data
     self.version=struct.unpack('i',self.f.read(4))[0]#file version integer
@@ -196,6 +219,9 @@ class Dump:
       #read in the equation of state string character by character
       for i in range(self.eosStringLen):
         self.eosString+=struct.unpack('s',self.f.read(1))[0]
+      
+      if eosFile!=None:#allows overriding eos file name from model
+        self.eosString=eosFile
     else:
       self.eosString=None
       self.gamma=struct.unpack('d',self.f.read(8))[0]#get value of gamma
@@ -249,8 +275,12 @@ class Dump:
     
     #make a list for future variables
     self.vars=[]
-  def _readHeaderAscii(self):
-    """Reads a header from a ascii file, after the type has been read in."""
+  def _readHeaderAscii(self,eosFile=None):
+    """Reads a header from a ascii file, after the type has been read in.
+    
+    eosFile: allows one to override the equation of state file name given in the
+      model.
+    """
     
     self.version        =int(self.f.readline())#file version integer
     lineSplit=self.f.readline().split()
@@ -265,6 +295,9 @@ class Dump:
     if self.eosStringLen>0:
       self.gamma=None
       self.eosString=lineSplit[1]#get a character of the eos string
+      
+      if eosFile!=None:#allows overriding eos file name from model
+        self.eosString=eosFile
     else:
       self.eosString=None
       self.gamma=float(lineSplit[1])#get value of gamma
@@ -420,7 +453,7 @@ class Dump:
     self.vars.append(varTmp)
     self.f.readline()#toss a junk line
   def _printVarByID(self,var,out):
-    """Writes a variable to out."""
+    """Writes a non-rectangular variable to out."""
     
     #set ghost cells based on which directions the variable is defined in
     ghostCellsInX0=1
@@ -454,32 +487,59 @@ class Dump:
         for k in range(sizeX2):
           out.write("var["+str(i)+"]["+str(j)+"]["+str(k)+"]="
             +str(self.vars[var][i][j][k])+"\n")
-  def readHeader(self):
+  def readHeader(self,eosFile=None):
     """Reads header information from binary dump file.
     
     This version calls either the _readHeaderAscii or the _readHeaderBinary
-    
+    eosFile: allows one to override the equation of state file name given in the
+      model.
     """
     
     #read header
     self.type=struct.unpack('c',self.f.read(1))[0]#file type, either a or b
     if self.type=='a':
-      self._readHeaderAscii()
+      self._readHeaderAscii(eosFile=eosFile)
     else:
-      self._readHeaderBinary()
-  def read(self,fileName):
-    """Reads in a binary dump file."""
+      self._readHeaderBinary(eosFile=eosFile)
+    
+    #set shapes
+    includeGhostR=1
+    includeGhostTheta=0
+    includeGhostPhi=0
+    if self.numDims==2:#2D
+      includeGhostTheta=1
+      includeGhostPhi=0
+    elif self.numDims==3:#3D
+      includeGhostTheta=1
+      includeGhostPhi=1
+    self.cellCenteredShape=(
+      self.globalDims[0]+includeGhostR*(2*self.numGhostCells)
+      ,self.globalDims[1]+includeGhostTheta*(2*self.numGhostCells)
+      ,self.globalDims[2]+includeGhostPhi*(2*self.numGhostCells))
+    self.meshShape=(
+      self.globalDims[0]+includeGhostR*(2*self.numGhostCells+1)
+      ,self.globalDims[1]+includeGhostTheta*(2*self.numGhostCells+1)
+      ,self.globalDims[2]+includeGhostPhi*(2*self.numGhostCells)+1)
+  def read(self,fileName,eosFile=None):
+    """Reads in a combined dump file and puts the variables into the vars list
+    
+    It also converts the hybrid 1D-Multi-grid into a rectangular grid
+    eosFile: allows one to override the equation of state file name given in the
+      model.
+    """
     
     self.fileName=fileName
     self.f=open(fileName,'rb')
-    self.readHeader()
+    self.readHeader(eosFile=eosFile)
     if self.type=='b':
       for i in range(self.numVars):
         self._readBinaryVar(i)
     elif self.type=='a':
       for i in range(self.numVars):
         self._readAsciiVar(i)
-    self._setVarIDs()
+    self._setVarIDs()#set variable names/id
+    self.setRectVars()#create rectangular variables
+    self.adjustForPeriodBC()#adjust interface variables effected by periodic BC
   def printHeader(self,out):
     """Writes the header of a binary dump file to out.
     
@@ -516,17 +576,40 @@ class Dump:
     self.printHeader(sys.stdout)
     for i in range(self.numVars):
       self._printVarByID(i,sys.stdout)
-  def getVarNames(self):
+  def getAllVarNames(self):
     """Returns a list of variable names that are availble."""
+    
+    return self._varIDs.keys()
+  def getRectVarNames(self):
+    """Returns a list of variable names that are rectangular.
+    
+    That have a rectangular representation set
+    """
     
     #make a list of all variable keys that aren't None
     varNames=[]
     for key in self._varIDs.keys():
-      if self._varIDs[key]!=None:
+      if self.varType[key]=="rect" or self.varType[key]=="both":
+        varNames.append(key)
+    return varNames
+  def getHybridVarNames(self):
+    """Returns a list of variable names that are hybrid 
+    
+    i.e. they have a 1D and a multi-D grid.
+    
+    """
+    
+    #make a list of all variable keys that aren't None
+    varNames=[]
+    for key in self._varIDs.keys():
+      if self.varType[key]=="hybrid" or self.varType[key]=="both":
         varNames.append(key)
     return varNames
   def getVarID(self,var):
-    """Returns the array index (ID) of a variable given by name"""
+    """Returns the array index (ID) of a variable given by name var
+    
+    var: a string name for variable
+    """
     
     return self._varIDs[var]
   def printVarToOut(self,var,out):
@@ -534,20 +617,40 @@ class Dump:
     
     varNames=self.getVarNames()
     if var not in varNames:
-      raise Exception(str(var)+" not in avaible variable names "+str(varNames))
+      raise Exception(str(var)+" not in available variable names "+str(varNames))
     
     self._printVarByID(self._varIDs[var],out)
   def printVarToSTDOut(self,var):
     """Prints varible to standard output"""
     
     self.printVarToOut(var,sys.stdout)
-  def getRectangularVar(self,var):
+  def setRectVars(self):
+    """Creates rectangular representations of variables for later use
+    
+    """
+    
+    for i in range(len(self.vars)):
+      self.rectVars.append(self.getRectVar(i))
+      self.varType[self.varNames[i]]="both"
+  def getRectVar(self,var):
     """Returns a rectangular numpy array version of a varible.
     
     Variables are stored as a 1D part plus a 2D or 3D part. This function
     returns a variable that has the 1D part copied to match the 2D or 3D part.
+    
+    var: an index or name of a variable
     """
     
+    strType=type("")
+    if type(var)==strType:#if it is a string assume it is a variable name and
+                          #get the ID
+      var=self.getVarID(var)
+    
+    #if the length of the recVars array is larger than array index var don't
+    #need to re-rectangularize the variable
+    if len(self.rectVars)>var:
+      return self.rectVars[var]
+      
     #set ghost cells based on which directions the variable is defined in
     ghostCellsInX0=1
     if self.varInfo[var][0]==-1:
@@ -573,8 +676,6 @@ class Dump:
     
     #calculate rectangular size
     shapeRec=[sizeX02,sizeX12,sizeX22]
-    print sizeX01,sizeX02,sizeX12,sizeX22
-    print shapeRec
     
     #allocate numpy array
     rectVar=np.empty(shapeRec)
@@ -610,7 +711,7 @@ class Dump:
     """
     
     #get a rectangular version
-    variableToSlice=self.getRectangularVar(self.getVarID(var))
+    variableToSlice=self.getRecVar(self.getVarID(var))
     
     #set default shape options, if max's are Nones use full extent
     shape=variableToSlice.shape
@@ -623,7 +724,109 @@ class Dump:
     
     return variableToSlice[rIndexMin:rIndexMax,tIndexMin:tIndexMax
       ,pIndexMin:pIndexMax]
-  def printVarSliceToOutInRadialColumns(self,var,out,rIndexMin=0,rIndexMax=None
+  def getHorAveVarSlice(self,var,rIndexMin=0,rIndexMax=None
+                                    ,tIndexMin=0 ,tIndexMax=None,pIndexMin=0
+                                    ,pIndexMax=None):
+    """Returns a 1D numpy array for the horizontal average of the variable slice.
+    
+    Returns a 1D numpy array for the named variable within the given range
+    averaged in the horizontal direction so that the 1D array is a function of
+    radius only.
+    
+    Arguments:
+    var: variable name to get
+    
+    Keyword Arguements:
+    rIndexMin: minimum radial index to include
+    rIndexMax: maximum radial index-1 to include
+    tIndexMin: minimum theta index to include
+    tIndexMax: maximum theta index-1 to include
+    pIndexMin: minimum theta index to include
+    pIndexMax: maximum theta index-1 to include
+    """
+    
+    #get a variable slice
+    varSliced=self.getVarSlice(var,rIndexMin=rIndexMin,rIndexMax=rIndexMax
+                  ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
+                  ,pIndexMax=pIndexMax)
+    
+    #Perform a horizontal average
+    varHorAved=varSliced.sum(axis=1)/varSliced.shape[1]
+    
+    #make 3D numpy array to be more universally usable
+    temp=varHorAved[:,:,np.newaxis]
+    
+    return temp
+  def printVarToRadCol(self,temp,var,out,tIndexMin=0,pIndexMin=0):
+    """Writes the numpy array temp to out
+    
+    It formats the write to out in a column wise manner with the first index
+    written as the first column, and the second two as a column header seperated
+    by a comma.
+    
+    Arguments:
+    temp: 3D numpy array to print out
+    var: string varaible name
+    out: object supporting the write function
+    
+    Keyword Arguments:
+    tIndexMin: integer, mimimum theta index of slice
+    pIndexMin: integer, mimimum phi index of slice
+    """
+    
+    #write temp to out
+    out.write("varible=\""+var+"\"\n")
+    columnWidthFloat=28
+    columnWidthInt=8
+    precision=15
+    
+    #write out header
+    line=""
+    columnFormatStringFloatWidth="{0: >"+str(columnWidthFloat)+"}"
+    columnFormatStringIntWidth="{0: >"+str(columnWidthInt)+"}"
+    columnFormatFloat="{0: >"+str(columnWidthFloat)+"."+str(precision)+"e}"
+    columnFormatInt="{0: >"+str(columnWidthInt)+"d}"
+    line+=columnFormatStringIntWidth.format("zone#")
+    for j in range(temp.shape[1]):
+      for k in range(temp.shape[2]):
+        line+=columnFormatStringFloatWidth.format( (str(j+tIndexMin)+","
+          +str(k+pIndexMin)) )
+    out.write(line+"\n")
+    
+    #write out variable slice
+    for i in range(temp.shape[0]):
+      line=""
+      line+=columnFormatInt.format(i)
+      for j in range(temp.shape[1]):
+        for k in range(temp.shape[2]):
+          line+=columnFormatFloat.format(temp[i][j][k])
+      out.write(line+"\n")
+  def printHorAveVarSliceToOutInRadCol(self,var,out,rIndexMin=0,rIndexMax=None
+                                        ,tIndexMin=0,tIndexMax=None,pIndexMin=0
+                                        ,pIndexMax=None):
+    """
+    Prints a horizontally averaged variable slice to out in a radial column
+    format.
+    
+    Arguments:
+    var: variable name to write in column format
+    out: object with a write method, such as a file object or sys.stdout
+    
+    Keyword Arguements:
+    rIndexMin: minimum radial index to include
+    rIndexMax: maximum radial index-1 to include
+    tIndexMin: minimum theta index to include
+    tIndexMax: maximum theta index-1 to include
+    pIndexMin: minimum theta index to include
+    pIndexMax: maximum theta index-1 to include
+    """
+    
+    temp=self.getHorAveVarSlice(var,rIndexMin=rIndexMin,rIndexMax=rIndexMax
+                  ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
+                  ,pIndexMax=pIndexMax)
+    
+    self.printVarToRadCol(temp,var,out)
+  def printVarSliceToOutInRadCol(self,var,out,rIndexMin=0,rIndexMax=None
                                         ,tIndexMin=0,tIndexMax=None,pIndexMin=0
                                         ,pIndexMax=None):
     """
@@ -649,27 +852,775 @@ class Dump:
                   ,tIndexMin=tIndexMin,tIndexMax=tIndexMax,pIndexMin=pIndexMin
                   ,pIndexMax=pIndexMax)
     
-    #write temp to out
-    out.write("varible=\""+var+"\"\n")
-    columnWidth=28
-    precision=15
+    self.printVarToRadCol(temp,var,out,tIndexMin=tIndexMin,pIndexMin=pIndexMin)
+  def adjustForPeriodBC(self):
+    """Adjust for periodic boundary conditions in theta and phi directions
     
-    #write out header
-    line=""
-    columnFormatString="{0: >"+str(columnWidth)+"}"
-    columnFormatFloat="{0: >"+str(columnWidth)+"."+str(precision)+"e}"
-    for j in range(temp.shape[1]):
-      for k in range(temp.shape[2]):
-        line+=columnFormatString.format( (str(j+tIndexMin)+","+str(k+pIndexMin)) )
-    out.write(line+"\n")
+    In the theta and phi directions the theta and phi velocity componenets are
+    copies of those at the other boundary; thus even though they are interface
+    centered quantities they have the same number of elements as a zone centered
+    quantity in that direction. Thus function copies the boundaries values of
+    the velocities and cooridnates so this doesn't need to be worried about
+    """
     
-    #write out variable slice
-    for i in range(temp.shape[0]):
-      line=""
-      for j in range(temp.shape[1]):
-        for k in range(temp.shape[2]):
-          line+=columnFormatFloat.format(temp[i][j][k])
-      out.write(line+"\n")
+    for n in range(len(self.varInfo)):
+      if self.varInfo[n][1]==1:
+        
+        if self.varNames[n]!="theta":
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
+          shape=self.rectVars[n].shape
+          for i in range(shape[0]):
+            for k in range(shape[2]):
+              self.rectVars[n][i][shape[1]-1][k]=self.rectVars[n][i][0][k]
+        else:
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
+          shape=self.rectVars[n].shape
+          dTheta=(self.rectVars[n][0][0][0]-self.rectVars[n][0][1][0])
+          for i in range(shape[0]):
+            for k in range(shape[2]):
+              self.rectVars[n][i][shape[1]-1][k]=(
+                self.rectVars[n][i][shape[1]-2][k]+dTheta)
+      if self.varInfo[n][2]==1:
+
+        if self.varNames[n]!="phi":
+          
+          #copy k=0 to k=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1],shape[2]+1))
+          shape=self.rectVars[n].shape
+          for i in range(shape[0]):
+            for j in range(shape[1]):
+              self.rectVars[n][i][j][shape[2]-1]=self.rectVars[n][i][j][0]
+        else:
+          
+          #copy j=0 to j=N
+          shape=self.rectVars[n].shape
+          self.rectVars[n].resize((shape[0],shape[1]+1,shape[2]))
+          shape=self.rectVars[n].shape
+          dPhi=(self.rectVars[n][0][0][0]-self.rectVars[n][0][0][1])
+          for i in range(shape[0]):
+            for j in range(shape[1]):
+              self.rectVars[n][i][shape[1]-1][k]=(
+                self.rectVars[n][i][j][shape[2]-2]+dPhi)
+  def writeVTKFile(self,fileName,withGhost=True,eosFile=None,curvature=True
+    ,excludedVars=[]
+    ,vectors=None
+    ,coords=None
+    ):
+    """Writes out a vtk file from the model dump
+    
+    keywords:
+      excludedVars: a list of scalars to exclude from vtk file
+      vectors: A dictonary with a vector name as a key, and a 3 component list
+        of strings indicating the names of the components to be used for the
+        vector. Default value depends on curvature and is either 
+        {"vel":["vx_cen","vy_cen","vz_cen"]
+        ,"vel_con":["vx_con_cen","vy_con_cen","vz_con_cen"]}
+        or
+        {"vel":["vr_cen","vt_cen","vp_cen"]
+        ,"vel_con":["vr_con_cen","vt_con_cen","vp_con_cen"]}
+      coords: A dictonary with a x,y,z keys, each indicating the name of the
+        variable to be used for that component of the coordinate. Default value
+        depends on the curvature and is either
+        {"x":"x_mesh","y":"y_mesh","z":"z_mesh"}
+        or
+        {"x":"r_mesh","y":"theta_mesh","z":"phi_mesh"}
+    """
+    
+    #set vtk file vectors and coordinates to reasonable defaults if not
+    #explicitly set
+    if curvature:
+      if vectors==None:
+        vectors={"vel":["vx_cen","vy_cen","vz_cen"]
+          ,"vel_con":["vx_con_cen","vy_con_cen","vz_con_cen"]}
+      if coords==None:
+        coords={"x":"x_mesh","y":"y_mesh","z":"z_mesh"}
+    else:
+      if vectors==None:
+        vectors={"vel":["vr_cen","vt_cen","vp_cen"]
+          ,"vel_con":["vr_con_cen","vt_con_cen","vp_con_cen"]}
+      if coords==None:
+        coords={"x":"r_mesh","y":"theta_mesh","z":"phi_mesh"}
+    
+    #creates centered, r,theta, phi coordinates
+    self.calCenCoords()
+    
+    #creates mesh coordinates either x,y,z or r,theta,phi depending on curvature
+    self.calMesh(curvature=curvature)
+    
+    #create cell centered velocity
+    self.calZoneCenteredVelocity(curvature=curvature)
+    
+    #create cell centered convective velocity
+    self.calZoneCenteredConvVelocity(curvature=curvature)
+    
+    #set thermodynamic variables from equation of state/opacity table
+    self.setAdditionalVars()
+    
+    #set coordinates
+    x=self.rectVars[self.getVarID(coords["x"])]
+    y=self.rectVars[self.getVarID(coords["y"])]
+    z=self.rectVars[self.getVarID(coords["z"])]
+    
+    #get cell centered vars
+    cellCenteredVars=self.getCellCenteredRect()
+    
+    #add cell centered data
+    cellData={}
+    
+    #Add Scalars
+    for var in cellCenteredVars:
+      includeScalar=True
+      for vector in vectors:
+        if var in vectors[vector] or var in excludedVars:
+          includeScalar=False
+          break
+      
+      if includeScalar:#add it
+        cellData[var]=self.rectVars[self.getVarID(var)]
+    
+    #add vectors
+    for vector in vectors:
+      cellData[vector]=(self.rectVars[self.getVarID(vectors[vector][0])]
+        ,self.rectVars[self.getVarID(vectors[vector][1])]
+        ,self.rectVars[self.getVarID(vectors[vector][2])])
+    
+    evtk.hl.gridToVTK(fileName, x, y, z, cellData=cellData, pointData = {})
+  def getMeshCoords(self):
+    """Returns a list of rectangular variables defined at all cell corners
+    
+    """
+    
+    cellCornerRectVars=[]
+    for i in range(len(self.rectVars)):
+      if self.rectVars[i].shape==self.meshShape:
+        cellCornerRectVars.append(self.varNames[i])
+    return cellCornerRectVars
+  def getCellCenteredRect(self):
+    """Returns a list of rectangular variables defined at cell centeres
+    
+    """
+    
+    cellCenteredRectVars=[]
+    for i in range(len(self.rectVars)):
+      if self.rectVars[i].shape==self.cellCenteredShape:
+        cellCenteredRectVars.append(self.varNames[i])
+    return cellCenteredRectVars
+  def calCenCoords(self):
+    """Calculates cell centered coordinates
+    
+    """
+    
+    if self.numDims>0:
+      
+      #add r_cen
+      self._addVarID("r_cen","rect")
+      varTmp=np.empty((self.cellCenteredShape[0],1,1))
+      for i in range(self.cellCenteredShape[0]):
+        varTmp[i][0][0]=(self.rectVars[self.getVarID("r")][i][0][0]
+          +self.rectVars[self.getVarID("r")][i+1][0][0])*0.5
+      self.rectVars.append(varTmp)
+    if self.numDims>1:
+      
+      #add theta_cen
+      self._addVarID("theta_cen","rect")
+      varTmp=np.empty((1,self.cellCenteredShape[1],1))
+      for j in range(self.cellCenteredShape[1]):
+        varTmp[0][j][0]=(self.rectVars[self.getVarID("theta")][0][j][0]
+          +self.rectVars[self.getVarID("theta")][0][j+1][0])*0.5
+      self.rectVars.append(varTmp)
+    if self.numDims>2:
+      
+      #add phi_cen
+      self._addVarID("phi_cen","rect")
+      varTmp=np.empty((1,1,self.cellCenteredShape[2]))
+      for k in range(self.cellCenteredShape[2]):
+        varTmp[0][0][k]=(self.rectVars[self.getVarID("phi")][0][0][k]
+          +self.rectVars[self.getVarID("phi")][0][0][k+1])*0.5
+      self.rectVars.append(varTmp)
+  def calMesh(self,curvature=True):
+    
+    if curvature:
+      
+      #register the variables
+      self._addVarID("x_mesh","rect")
+      self._addVarID("y_mesh","rect")
+      self._addVarID("z_mesh","rect")
+      if self.numDims==1:
+        
+        #add x_cen
+        varTmpX=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              varTmpX[i][j][k]=self.rectVars[self.getVarID("r")][i][0][0]
+        self.rectVars.append(varTmpX)
+        
+        #add y_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.meshShape)
+        varTmpY=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              r=self.rectVars[self.getVarID("r")][i][0][0]
+              theta=self.rectVars[self.getVarID("theta")][0][j][0]
+              varTmpX[i][j][k]=r*math.sin(theta)
+              varTmpY[i][j][k]=r*math.cos(theta)
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.meshShape)
+        varTmpY=np.empty(self.meshShape)
+        varTmpZ=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              r=self.rectVars[self.getVarID("r")][i][0][0]
+              theta=self.rectVars[self.getVarID("theta")][0][j][0]
+              phi=self.rectVars[self.getVarID("phi")][0][0][k]
+              varTmpX[i][j][k]=r*math.sin(theta)*cos(phi)
+              varTmpY[i][j][k]=r*math.cos(theta)*sin(phi)
+              varTmpZ[i][j][k]=r*math.cos(theta)
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+    else:
+      
+      #register the variables
+      self._addVarID("r_mesh","rect")
+      self._addVarID("theta_mesh","rect")
+      self._addVarID("phi_mesh","rect")
+      if self.numDims==1:
+        
+        #add x_cen
+        varTmpX=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              varTmpX[i][j][k]=self.rectVars[self.getVarID("r")][i][0][0]
+        self.rectVars.append(varTmpX)
+        
+        #add y_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.meshShape)
+        varTmpY=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              r=self.rectVars[self.getVarID("r")][i][0][0]
+              theta=self.rectVars[self.getVarID("theta")][0][j][0]
+              varTmpX[i][j][k]=r
+              varTmpY[i][j][k]=theta
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.meshShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.meshShape)
+        varTmpY=np.empty(self.meshShape)
+        varTmpZ=np.empty(self.meshShape)
+        for i in range(self.meshShape[0]):
+          for j in range(self.meshShape[1]):
+            for k in range(self.meshShape[2]):
+              r=self.rectVars[self.getVarID("r")][i][0][0]
+              theta=self.rectVars[self.getVarID("theta")][0][j][0]
+              phi=self.rectVars[self.getVarID("phi")][0][0][k]
+              varTmpX[i][j][k]=r
+              varTmpY[i][j][k]=theta
+              varTmpZ[i][j][k]=phi
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+  def calZoneCenteredConvVelocity(self,curvature=True):
+    """Zone centered velocity minus the grid velocity
+    
+    """
+    
+    if curvature:
+      
+      #register the variables
+      self._addVarID("vx_con_cen","rect")
+      self._addVarID("vy_con_cen","rect")
+      self._addVarID("vz_con_cen","rect")
+      if self.numDims==1:
+        
+        #add vx_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              varTmpX[i][j][k]=(self.rectVars[self.getVarID("u")][i][j][k]
+                -self.rectVars[self.getVarID("u_0")][i][0][0]
+                +self.rectVars[self.getVarID("u")][i+1][j][k]
+                -self.rectVars[self.getVarID("u_0")][i+1][0][0])*0.5
+        self.rectVars.append(varTmpX)
+        
+        #add vy_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+        #add vz_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                -self.rectVars[self.getVarID("u_0")][i][0][0]
+                +self.rectVars[self.getVarID("u")][i+1][j][k]
+                -self.rectVars[self.getVarID("u_0")][i+1][0][0])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
+              varTmpX[i][j][k]=vr*math.sin(theta)+vt*math.cos(theta)
+              varTmpY[i][j][k]=vr*math.cos(theta)+vt*math.sin(theta)
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        varTmpZ=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                -self.rectVars[self.getVarID("u_0")][i][0][0]
+                +self.rectVars[self.getVarID("u")][i+1][j][k]
+                -self.rectVars[self.getVarID("u_0")][i+1][0][0])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              vp=(self.rectVars[self.getVarID("w")][i][j][k]
+                +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
+              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
+              phi=self.rectVars[self.getVarID("phi_cen")][0][0][k]
+              varTmpX[i][j][k]=(
+                vr*math.sin(theta)*cos(phi)
+                +vt*math.cos(theta)*cos(phi)
+                +vp*math.sin(phi))
+              varTmpY[i][j][k]=(
+                vr*math.sin(theta)*sin(phi)
+                +vt*math.cos(theta)*sin(phi)
+                +vp*math.cos(theta))
+              varTmpZ[i][j][k]=(
+                vr*math.cos(theta)
+                -vt*maht.sin(theta))
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+    else:
+      
+      #register the variables
+      self._addVarID("vr_con_cen","rect")
+      self._addVarID("vt_con_cen","rect")
+      self._addVarID("vp_con_cen","rect")
+      if self.numDims==1:
+        
+        #add x_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              varTmpX[i][j][k]=(self.rectVars[self.getVarID("r")][i][j][k]
+                +self.rectVars[self.getVarID("r")][i+1][j][k])*0.5
+        self.rectVars.append(varTmpX)
+        
+        #add y_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                -self.rectVars[self.getVarID("u_0")][i][0][0]
+                +self.rectVars[self.getVarID("u")][i+1][j][k]
+                -self.rectVars[self.getVarID("u_0")][i+1][0][0])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              varTmpX[i][j][k]=vr
+              varTmpY[i][j][k]=vt
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        varTmpZ=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                -self.rectVars[self.getVarID("u_0")][i][0][0]
+                +self.rectVars[self.getVarID("u")][i+1][j][k]
+                -self.rectVars[self.getVarID("u_0")][i+1][0][0])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              vp=(self.rectVars[self.getVarID("w")][i][j][k]
+                +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
+              varTmpX[i][j][k]=vr
+              varTmpY[i][j][k]=vt
+              varTmpZ[i][j][k]=vp
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+  def calZoneCenteredVelocity(self,curvature=True):
+    
+    if curvature:
+      
+      #register the variables
+      self._addVarID("vx_cen","rect")
+      self._addVarID("vy_cen","rect")
+      self._addVarID("vz_cen","rect")
+      if self.numDims==1:
+        
+        #add vx_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              varTmpX[i][j][k]=(self.rectVars[self.getVarID("u")][i][j][k]
+                +self.rectVars[self.getVarID("u")][i+1][j][k])*0.5
+        self.rectVars.append(varTmpX)
+        
+        #add vy_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+        #add vz_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                +self.rectVars[self.getVarID("u")][i+1][j][k])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
+              varTmpX[i][j][k]=vr*math.sin(theta)+vt*math.cos(theta)
+              varTmpY[i][j][k]=vr*math.cos(theta)+vt*math.sin(theta)
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        varTmpZ=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                +self.rectVars[self.getVarID("u")][i+1][j][k])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              vp=(self.rectVars[self.getVarID("w")][i][j][k]
+                +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
+              theta=self.rectVars[self.getVarID("theta_cen")][0][j][0]
+              phi=self.rectVars[self.getVarID("phi_cen")][0][0][k]
+              varTmpX[i][j][k]=(
+                vr*math.sin(theta)*cos(phi)
+                +vt*math.cos(theta)*cos(phi)
+                +vp*math.sin(phi))
+              varTmpY[i][j][k]=(
+                vr*math.sin(theta)*sin(phi)
+                +vt*math.cos(theta)*sin(phi)
+                +vp*math.cos(theta))
+              varTmpZ[i][j][k]=(
+                vr*math.cos(theta)
+                -vt*maht.sin(theta))
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+    else:
+      
+      #register the variables
+      self._addVarID("vr_cen","rect")
+      self._addVarID("vt_cen","rect")
+      self._addVarID("vp_cen","rect")
+      if self.numDims==1:
+        
+        #add x_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              varTmpX[i][j][k]=(self.rectVars[self.getVarID("r")][i][j][k]
+                +self.rectVars[self.getVarID("r")][i+1][j][k])*0.5
+        self.rectVars.append(varTmpX)
+        
+        #add y_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+        
+      elif self.numDims==2:
+        
+        #add x_cen and y_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                +self.rectVars[self.getVarID("u")][i+1][j][k])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              varTmpX[i][j][k]=vr
+              varTmpY[i][j][k]=vt
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        
+        #add z_cen
+        self.rectVars.append(np.zeros(self.cellCenteredShape))
+      elif self.numDims==3:
+        
+        #add x_cen, y_cen and z_cen
+        varTmpX=np.empty(self.cellCenteredShape)
+        varTmpY=np.empty(self.cellCenteredShape)
+        varTmpZ=np.empty(self.cellCenteredShape)
+        for i in range(self.cellCenteredShape[0]):
+          for j in range(self.cellCenteredShape[1]):
+            for k in range(self.cellCenteredShape[2]):
+              vr=(self.rectVars[self.getVarID("u")][i][j][k]
+                +self.rectVars[self.getVarID("u")][i+1][j][k])*0.5
+              vt=(self.rectVars[self.getVarID("v")][i][j][k]
+                +self.rectVars[self.getVarID("v")][i][j+1][k])*0.5
+              vp=(self.rectVars[self.getVarID("w")][i][j][k]
+                +self.rectVars[self.getVarID("w")][i][j][k+1])*0.5
+              varTmpX[i][j][k]=vr
+              varTmpY[i][j][k]=vt
+              varTmpZ[i][j][k]=vp
+        self.rectVars.append(varTmpX)
+        self.rectVars.append(varTmpY)
+        self.rectVars.append(varTmpZ)
+  def setAdditionalVars(self,varsToSet=None):
+    """Set additional variables
+    
+    At some point I would like to have the equation of state and opacity info
+    here too. I have now created a python extension which exposes the equation
+    of state object to python so that these values can be set.
+    
+    varsToSet: a list of variable names to set. Variables which can be set are
+      "dlnPdlnT","dlnPdlnD","dEdT","p","e","kappa","gamma","cp","c","gamma1"
+      ,"DelAd","cv". By default all variables are set.
+    """
+    
+    settableVars=["dlnPdlnT","dlnPdlnD","dEdT","p","e","kappa","gamma","cp","c"
+      ,"gamma1","DelAd","cv"]
+    
+    #see if specific variables are selected
+    if varsToSet!=None:
+      
+      #check that we can set all the varsToSet
+      for var in varsToSet:
+        if var not in settableVars:
+          raise Exception("variable \""+var+"\" in keyword argument varsToSet "
+            +"not in list of settable variables:"+str(settableVars))
+    else:#otherwise set all variables
+      varsToSet=settableVars
+    
+    #see if we need to load a new eos table
+    global eosTable
+    global eosFileName
+    
+    #check to see if it is a path relative to the install directory
+    if self.eosString[0]!="/" and self.eosString[0:1]!="./":
+      self.eosString=os.path.join(paths.BasePath,self.eosString)
+      
+    if eosFileName!=self.eosString:#if not the same table, load a new one
+      eosTable=eos.Eos()
+      eosTable.readBin(self.eosString)
+      eosFileName=self.eosString
+    
+    temp=self.rectVars[self.getVarID("T")]
+    rho=self.rectVars[self.getVarID("rho")]
+    
+    #variables to set
+    if "dlnPdlnT" in varsToSet:
+      dlnPdlnT=np.empty(self.cellCenteredShape)
+    if "dlnPdlnD" in varsToSet:
+      dlnPdlnD=np.empty(self.cellCenteredShape)
+    if "dEdT" in varsToSet:
+      dEdT=np.empty(self.cellCenteredShape)
+    if "p" in varsToSet:
+      p=np.empty(self.cellCenteredShape)
+    if "e" in varsToSet:
+      e=np.empty(self.cellCenteredShape)
+    if "kappa" in varsToSet:
+      kappa=np.empty(self.cellCenteredShape)
+    if "gamma" in varsToSet:
+      gamma=np.empty(self.cellCenteredShape)
+    if "cp" in varsToSet:
+      cp=np.empty(self.cellCenteredShape)
+    if "c" in varsToSet:
+      c=np.empty(self.cellCenteredShape)
+    if "gamma1" in varsToSet:
+      gamma1=np.empty(self.cellCenteredShape)
+    if "DelAd" in varsToSet:
+      DelAd=np.empty(self.cellCenteredShape)
+    if "cv" in varsToSet:
+      cv=np.empty(self.cellCenteredShape)
+    
+    for i in range(self.cellCenteredShape[0]):
+      for j in range(self.cellCenteredShape[1]):
+        for k in range(self.cellCenteredShape[2]):
+          
+          #get extra quantities from equation of state
+          if ("dlnPdlnT" in varsToSet
+            or "dlnPdlnD" in varsToSet
+            or "dEdT" in varsToSet):
+            [dlnPdlnTtmp,dlnPdlnDtmp,dEdTtmp]=eosTable.getDlnPDlnTDlnPDlnPDEDT(
+              temp[i][j][k],rho[i][j][k])
+          if ("p" in varsToSet
+            or "e" in varsToSet
+            or "kappa" in varsToSet
+            or "gamma" in varsToSet
+            or "cp" in varsToSet):
+            [ptmp,etmp,kappatmp,gammatmp,cptmp]=eosTable.getPEKappaGammaCp(
+              temp[i][j][k],rho[i][j][k])
+          if ("gamma1" in varsToSet
+            or "DelAd" in varsToSet
+            or "cv" in varsToSet):
+            [gamma1tmp,DelAdtmp,cvtmp]=eosTable.getGamma1DelAdC_v(
+              temp[i][j][k],rho[i][j][k])
+          if "c" in varsToSet:
+            ctmp=eosTable.getSoundSpeed(
+              temp[i][j][k],rho[i][j][k])
+          if "dRhodP" in varsToSet:
+            dRhodPtmp=eosTable.getDRhoDP(
+              temp[i][j][k],rho[i][j][k])
+          
+          #set values
+          if "dlnPdlnT" in varsToSet:
+            dlnPdlnT[i][j][k]=dlnPdlnTtmp
+          if "dlnPdlnD" in varsToSet:
+            dlnPdlnD[i][j][k]=dlnPdlnDtmp
+          if "dEdT" in varsToSet:
+            dEdT[i][j][k]=dEdTtmp
+          if "p" in varsToSet:
+            p[i][j][k]=ptmp
+          if "e" in varsToSet:
+            e[i][j][k]=etmp
+          if "kappa" in varsToSet:
+            kappa[i][j][k]=kappatmp
+          if "gamma" in varsToSet:
+            gamma[i][j][k]=gammatmp
+          if "cp" in varsToSet:
+            cp[i][j][k]=cptmp
+          if "c" in varsToSet:
+            c[i][j][k]=ctmp
+          if "gamma1" in varsToSet:
+            gamma1[i][j][k]=gamma1tmp
+          if "DelAd" in varsToSet:
+            DelAd[i][j][k]=DelAdtmp
+          if "cv" in varsToSet:
+            cv[i][j][k]=cvtmp
+    
+    #Add newly set variables
+    if "dlnPdlnT" in varsToSet:
+      self._addVarID("dlnPdlnT","rect")
+      self.rectVars.append(dlnPdlnT)
+    if "dlnPdlnD" in varsToSet:
+      self._addVarID("dlnPdlnD","rect")
+      self.rectVars.append(dlnPdlnD)
+    if "dEdT" in varsToSet:
+      self._addVarID("dEdT","rect")
+      self.rectVars.append(dEdT)
+    if "p" in varsToSet:
+      self._addVarID("p","rect")
+      self.rectVars.append(p)
+    if "e" in varsToSet:
+      self._addVarID("e","rect")
+      self.rectVars.append(e)
+    if "kappa" in varsToSet:
+      self._addVarID("kappa","rect")
+      self.rectVars.append(kappa)
+    if "gamma" in varsToSet:
+      self._addVarID("gamma","rect")
+      self.rectVars.append(gamma)
+    if "cp" in varsToSet:
+      self._addVarID("cp","rect")
+      self.rectVars.append(cp)
+    if "c" in varsToSet:
+      self._addVarID("c","rect")
+      self.rectVars.append(c)
+    if "gamma1" in varsToSet:
+      self._addVarID("gamma1","rect")
+      self.rectVars.append(gamma1)
+    if "DelAd" in varsToSet:
+      self._addVarID("DelAd","rect")
+      self.rectVars.append(DelAd)
+    if "cv" in varsToSet:
+      self._addVarID("cv","rect")
+      self.rectVars.append(cv)
+def testVTK(args,options):
+  """Test out making VTK files
+  
+  This isn't a proper test as it doesnt' autmatically verify that a vtk file
+  was successfully written. It is simply a means for me to verify that the
+  new vtk functions are working correctly, as a build them.
+  """
+  
+  dumpFile1=Dump(args[0])
+  dumpFile1.writeVTKFile("test.vts")
 def main():
   """Performs some basic tests of the class Dump.
   
@@ -688,12 +1639,14 @@ def main():
   #parse command line options
   (options,args)=parser.parse_args()
   
-  #test out some simple uses for this class
-  print "reading a dump file ..."
-  dumpFile1=Dump(args[0])
+  testVTK(args,options)
   
-  print "printing the header ..."
-  dumpFile1.printHeader(sys.stdout)
+  #test out some simple uses for this class
+  #print "reading a dump file ..."
+  #dumpFile1=Dump(args[0])
+  
+  #print "printing the header ..."
+  #dumpFile1.printHeader(sys.stdout)
   
   #print "printing variable 1 ..."
   #dumpFile1.printVar(1,sys.stdout)
@@ -701,11 +1654,16 @@ def main():
   #print "printing variable 2 ..."
   #dumpFile1.printVar(2,sys.stdout)
   
-  print dumpFile1.getVarNames()
-  dumpFile1.printVarToSTDOut("v")
+  #print dumpFile1.getVarNames()
+  #dumpFile1.printVarToSTDOut("v")
   
-  a=dumpFile1.getVarSlice("v",rIndexMin=100)
-  dumpFile1.printVarSliceToOutInRadialColumns("v",sys.stdout)
-  #dumpFile1.printVarSliceToOutInRadialColumns("v",sys.stdout,tIndexMin=2,tIndexMax=4)
+  #a=dumpFile1.getVarSlice("v",rIndexMin=100)
+  #TFile=open("T_0.txt",'w')
+  #dumpFile1.printVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  #TFile.close()
+  #TFile=open("T_ave_0.txt",'w')
+  #dumpFile1.printHorAveVarSliceToOutInRadCol("T",TFile,tIndexMin=2,tIndexMax=20)
+  #TFile.close()
+  #dumpFile1.printVarSliceToOutInRadCol("v",sys.stdout,tIndexMin=2,tIndexMax=4)
 if __name__ == "__main__":
   main()

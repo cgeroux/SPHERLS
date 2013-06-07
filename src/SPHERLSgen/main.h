@@ -273,6 +273,9 @@ bool bIsSedov;/**<
 bool bAutoDeltaM;/**<
   If true it will use an algorithm to choose the mass spacing.
   */
+std::string sExeDir;/**<
+  Directory of the current executable
+  */
 //functions
 void readConfig(std::string sConfigFileName,std::string sStartNode);/**<
   Reads in an xml configuration file and sets the values of many global variables. 
@@ -509,5 +512,5 @@ int main();/**<
   */
 void makeVelocityDist_SEDOV();
 void pretubeVelocityTorus(XMLNode xPerturb);
-
+void setExeDir();
 #endif
