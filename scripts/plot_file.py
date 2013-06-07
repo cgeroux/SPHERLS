@@ -603,6 +603,7 @@ def plot(dataSets,options,title):
   figBottom=options.figBottom
   figTop=options.figTop
   figLeft=options.figLeft
+  figRight=options.figRight
   
   #count number of axes in all figures, this number will be the same for all
   #figures.
@@ -636,7 +637,7 @@ def plot(dataSets,options,title):
       if options.spaceAxisEvenly:
         top=figTop-axisCount*(heightAxis+axisSpacing)
         bottom=figBottom+(nNumAxes-1.0-axisCount)*(heightAxis+axisSpacing)
-      gs[axisCount].update(left=figLeft,top=top,bottom=bottom,hspace=0.0)
+      gs[axisCount].update(left=figLeft,right=figRight,top=top,bottom=bottom,hspace=0.0)
       
       #for each plot
       nPlotCount=0
@@ -831,6 +832,11 @@ def main():
     options.figLeft=0.05
     if figureElement.get("figLeft")!=None and figureElement.get("figLeft")!="":
       options.figLeft=float(figureElement.get("figLeft"))
+    
+    #set location of left of the plot area
+    options.figRight=0.95
+    if figureElement.get("figRight")!=None and figureElement.get("figRight")!="":
+      options.figRight=float(figureElement.get("figRight"))
     
     #set figure height
     options.figHeight=11.0
