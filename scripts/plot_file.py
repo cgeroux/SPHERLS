@@ -636,6 +636,11 @@ def main():
     if figureElement.get("figLeft")!=None and figureElement.get("figLeft")!="":
       options.figLeft=float(figureElement.get("figLeft"))
     
+    #set location of left of the plot area
+    options.figLeft=0.05
+    if figureElement.get("figLeft")!=None and figureElement.get("figLeft")!="":
+      options.figLeft=float(figureElement.get("figLeft"))
+    
     #set figure height
     options.figHeight=11.0
     if figureElement.get("figHeight")!=None and figureElement.get("figHeight")!="":
