@@ -22816,7 +22816,7 @@ void initDonorFracAndMaxConVel_R_GL(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -23196,7 +23196,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donor fraction
+    //set donnor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
