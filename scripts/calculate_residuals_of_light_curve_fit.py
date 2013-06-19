@@ -148,28 +148,46 @@ def parseOptions():
   #setup command line parser
   '''This is out of date, needs to be updated to reflect new additions'''
   parser=op.OptionParser(usage="Usage: %prog [options] INPUTFILE"
-    ,version="%prog 1.0",description=r"Cacluates the risidual between cuves "
-    +"defined by a set of points.")
+    ,version="%prog 1.0",description=r"Calculates the residual between two "
+    "curves defined by a set of points in INPUTFILE.")
+  parser.add_option("--x1",dest="x1",
+    help=("Specify the column in INPUTFILE for the x-coordinate for curve 1 "
+      +"starting at 1 for the first column in the INPUTFILE. "
+      +"[default: %default]"),
+    metavar="COLUMN",type="int",default=0)
+  parser.add_option("--y1",dest="y1",
+    help=("Specify the COLUMN number in INPUTFILE for the y-coordinate for "
+      +"curve 1 starting at 0 for the first column in the INPUTFILE. "
+      +"[default: %default]"),
+    metavar="COLUMN",type="int",default=1)
+  parser.add_option("--x2",dest="x2",
+    help=("Specify the COLUMN number in INPUTFILE for the x-coordinate for "
+      +"curve 2 starting at 0 for the first column in the INPUTFILE. "
+      +"[default: %default]"),
+    metavar="COLUMN",type="int",default=2)
+  parser.add_option("--y2",dest="y2",
+    help=("Specify the COLUMN number in INPUTFILE for the y-coordinate for "
+      +"curve 2 starting at 0 for the first column in the INPUTFILE. "
+      +"[default: %default]"),
+    metavar="COLUMN",type="int",default=3)
     
   #parse command line options
   return parser.parse_args()
 def main():
-  
-  #phase_wrapped_3D  mag+DM_3D phase_wrapped_2D  mag+DM_2D phase mag
-  
-  #x,y columns of first data set, oringally model data
-  data1XColumn=4
-  data1YColumn=5
-  
-  #x,y columns of second data set, oringally observational data
-  data2XColumn=10
-  data2YColumn=11
   
   #parse command line options
   (options,args)=parseOptions()
   
   if len(args)!=1:
     raise Exception("need one argument")
+  
+  #set x/y columns for first curve
+  data1XColumn=options.x1
+  data1YColumn=options.y1
+  
+  #x,y columns of second curve
+  data2XColumn=options.x2
+  data2YColumn=options.y2
   
   #read in data
   print "reading in file \""+args[0]+"\" ..."
