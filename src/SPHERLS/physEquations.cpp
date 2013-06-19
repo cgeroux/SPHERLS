@@ -18585,7 +18585,7 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       delete [] dValues;
     }
     
-    //assemble coeffecient matrix
+    //assemble coefficient matrix
     MatAssemblyBegin(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //set values of the RHS
@@ -18726,7 +18726,7 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
   double dRelTErrorLocal;
   while(dRelTError>implicit.dTolerance
     &&nNumIterations<implicit.nMaxNumIterations){
-    //CALCULATE COEFFECIENT MATRIX AND RHS
+    //CALCULATE COEFFICIENT MATRIX AND RHS
     
     //calculate on inner grid
     for(int i=0;i<implicit.nNumRowsALocal;i++){//for each row
@@ -18936,7 +18936,7 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       delete [] dValues;
     }
     
-    //assemble coeffecient matrix
+    //assemble coefficient matrix
     MatAssemblyBegin(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //set values of the RHS
@@ -19401,7 +19401,7 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
       delete [] dValues;
     }
     
-    //assemble coeffecient matrix
+    //assemble coefficient matrix
     MatAssemblyBegin(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //set values of the RHS
@@ -21185,7 +21185,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dKappa_ijm1halfk_np1half=(dT4_ijm1k_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
     /dKappa_ijk_np1half+dT4_ijm1k_np1half/dKappa_ijm1k_np1half);
   
-  //Calcuate dA1
+  //Calculate dA1
   double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
     /grid.dLocalGridOld[grid.nDM][i][0][0];
   double dA1UpWindGrad=0.0;
@@ -21194,7 +21194,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
     dA1UpWindGrad=(dE_ip1jk_np1half-dE_ijk_np1half)/(grid.dLocalGridOld[grid.nDM][i+1][0][0]
       +grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
   }
-  else{//moving in the postive direction
+  else{//moving in the positive direction
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
@@ -21216,7 +21216,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
-  //Calcualte dA2
+  //Calculate dA2
   double dA2CenGrad=(dE_ijp1halfk_np1half-dE_ijm1halfk_np1half)
     /grid.dLocalGridOld[grid.nDTheta][0][j][0];
   double dA2UpWindGrad=0.0;
@@ -21231,7 +21231,7 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
   double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
   
-  //Calcualte dS2
+  //Calculate dS2
   double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
@@ -21529,7 +21529,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dKappa_ijm1halfk_np1half=(dT4_ijm1k_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
     /dKappa_ijk_np1half+dT4_ijm1k_np1half/dKappa_ijm1k_np1half);
   
-  //Calcuate dA1
+  //Calculate dA1
   double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
     /grid.dLocalGridOld[grid.nDM][i][0][0];
   double dA1UpWindGrad=0.0;
@@ -21560,7 +21560,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
-  //Calcualte dA2
+  //Calculate dA2
   double dA2CenGrad=(dE_ijp1halfk_np1half-dE_ijm1halfk_np1half)
     /grid.dLocalGridOld[grid.nDTheta][0][j][0];
   double dA2UpWindGrad=0.0;
@@ -21575,7 +21575,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
   double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
     
-  //Calcualte dS2
+  //Calculate dS2
   double dVSinTheta_ijp1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt][0]
     *grid.dLocalGridNew[grid.nV][i][nJInt][k];
   double dVSinTheta_ijm1halfk_np1half=grid.dLocalGridOld[grid.nSinThetaIJp1halfK][0][nJInt-1][0]
@@ -21714,7 +21714,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     
     //add E_Grad_jp1half_np1half
     ssName.str("");
-    ssName<<"E_Grad_jp1hf_np1h"<<ssEnd.str();
+    ssName<<"E_Grad_jp1h_np1h"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,dGrad_jp1half_np1half);
@@ -21956,7 +21956,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dKappa_ijkm1half_np1half=(dT4_ijkm1_np1half+dT4_ijk_np1half)/(dT4_ijk_np1half
     /dKappa_ijk_np1half+dT4_ijkm1_np1half/dKappa_ijkm1_np1half);
   
-  //Calcuate dA1
+  //Calculate dA1
   double dA1CenGrad=(dE_ip1halfjk_np1half-dE_im1halfjk_np1half)
     /grid.dLocalGridOld[grid.nDM][i][0][0];
   double dA1UpWindGrad=0.0;
@@ -21965,7 +21965,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     dA1UpWindGrad=(dE_ip1jk_np1half-dE_ijk_np1half)/(grid.dLocalGridOld[grid.nDM][i+1][0][0]
       +grid.dLocalGridOld[grid.nDM][i][0][0])*2.0;
   }
-  else{//moving in the postive direction
+  else{//moving in the positive direction
     dA1UpWindGrad=(dE_ijk_np1half-dE_im1jk_np1half)/(grid.dLocalGridOld[grid.nDM][i][0][0]
       +grid.dLocalGridOld[grid.nDM][i-1][0][0])*2.0;
   }
@@ -21987,7 +21987,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dS1=dP_ijk_np1half/grid.dLocalGridOld[grid.nD][i][j][k]
     *(dUR2_ip1halfjk_np1half-dUR2_im1halfjk_np1half)/grid.dLocalGridOld[grid.nDM][i][0][0];
   
-  //Calcualte dA2
+  //Calculate dA2
   double dA2CenGrad=(dE_ijp1halfk_np1half-dE_ijm1halfk_np1half)
     /grid.dLocalGridOld[grid.nDTheta][0][j][0];
   double dA2UpWindGrad=0.0;
@@ -22002,12 +22002,12 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
   double dA2=dV_ijk_np1half/dR_i_n*((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])
     *dA2CenGrad+grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA2UpWindGrad);
   
-  //Calcualte dS2
+  //Calculate dS2
   double dS2=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDTheta][0][j][0])
     *(dVSinTheta_ijp1halfk_np1half-dVSinTheta_ijm1halfk_np1half);
   
-  //Calcualte dA3
+  //Calculate dA3
   double dA3CenGrad=(dE_ijkp1half_np1half-dE_ijkm1half_np1half)
     /grid.dLocalGridOld[grid.nDPhi][0][0][k];
   double dA3UpWindGrad=0.0;
@@ -22023,7 +22023,7 @@ double dImplicitEnergyFunction_RTP_LES(Grid &grid,Parameters &parameters,Time &t
     ((1.0-grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0])*dA3CenGrad
     +grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]*dA3UpWindGrad);
   
-  //Calcualte dS3
+  //Calculate dS3
   double dS3=dP_ijk_np1half/(grid.dLocalGridOld[grid.nD][i][j][k]*dR_i_n
     *grid.dLocalGridOld[grid.nSinThetaIJK][0][j][0]*grid.dLocalGridOld[grid.nDPhi][0][0][k])
     *(dW_ijkp1half_np1half-dW_ijkm1half_np1half);
@@ -22878,7 +22878,7 @@ void initDonorFracAndMaxConVel_R_TEOS(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -22949,7 +22949,7 @@ void initDonorFracAndMaxConVel_RT_GL(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -23024,7 +23024,7 @@ void initDonorFracAndMaxConVel_RT_TEOS(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -23109,7 +23109,7 @@ void initDonorFracAndMaxConVel_RTP_GL(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -23196,7 +23196,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
       }
     }
     
-    //set donnor fraction
+    //set donor fraction
     double dTest_ConVelOverSoundSpeed2=parameters.dDonorCellMultiplier*dTest_ConVelOverSoundSpeed;
     if(dTest_ConVelOverSoundSpeed2>1.0){
       grid.dLocalGridOld[grid.nDonorCellFrac][i][0][0]=1.0;
@@ -23217,7 +23217,7 @@ void initDonorFracAndMaxConVel_RTP_TEOS(Grid &grid, Parameters &parameters){
 inline double dET4(Parameters &parameters,double dEddyVisc_ijk_np1half, double dRho_ijk_np1half
   ,double dLengthScale4_ijk_np1half){
   
-  //additional turbulance term to go into the energy equation
+  //additional turbulence term to go into the energy equation
   const double dC=4.420241;//includes D_t/A_t^3/3.75^4, the last factor is for 3.75*lengthScale
   double dTemp=dEddyVisc_ijk_np1half/dRho_ijk_np1half;
   return dC*pow(dTemp,3.0)/dLengthScale4_ijk_np1half;

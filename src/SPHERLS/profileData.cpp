@@ -236,11 +236,11 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
     }
   }
   
-  //post a blocking recieve from inner radial neighbour
+  //post a blocking receive from inner radial neighbour
   char cDummy;
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]>procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      If the neighbor has a radial coordinate smaller than the current processor wait to recieve
+      If the neighbour has a radial coordinate smaller than the current processor wait to receive
       a message from it*/
       MPI::COMM_WORLD.Recv(&cDummy,1,MPI::CHAR,procTop.nRadialNeighborRanks[i],2);
     }
@@ -261,7 +261,7 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
     if(procTop.nRank!=0){//and we are not the first processor append to the end
       bAppend=true;
       
-      //open for reading and writting (i.e. appending)
+      //open for reading and writing (i.e. appending)
       ofOut.open(sFileName.c_str(),std::ios::out|std::ios::in);
       if(!ofOut.good()){
         std::stringstream ssTemp;
@@ -280,10 +280,10 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
   
   if(!bAppend){//open a new file and add the headers
     
-    //close incase it is already open
+    //close in case it is already open
     ofOut.close();
     
-    //open for writting only
+    //open for writing only
     ofOut.open(sFileName.c_str(),std::ios::out);
     if(!ofOut.good()){
       std::stringstream ssTemp;
@@ -362,10 +362,10 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
   }
   ofOut.close();
   
-  //post a blocking send to outer radial neighbour to let it know writting is done
+  //post a blocking send to outer radial neighbour to let it know writing is done
   for(i=0;i<procTop.nNumRadialNeighbors;i++){
     if(procTop.nCoords[procTop.nRank][0]<procTop.nCoords[procTop.nRadialNeighborRanks[i]][0]){/*
-      if current processor has a radial neighbor at inside post a recieve*/
+      if current processor has a radial neighbour at inside post a receive*/
       MPI::COMM_WORLD.Send(&cDummy,1,MPI::CHAR,procTop.nRadialNeighborRanks[i],2);
     }
   }

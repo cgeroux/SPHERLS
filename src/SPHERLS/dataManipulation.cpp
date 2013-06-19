@@ -50,7 +50,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   
   //READ IN PROCESSOR TOPOLOGY
   
-  //setup array to hold demensions of processors
+  //setup array to hold dimensions of processors
   procTop.nProcDims=new int[3];
   
   //move into dimSize node
@@ -65,7 +65,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //get size of processor dims in x2 direction
   getXMLValue(xProcDims,"x2",0,procTop.nProcDims[2]);
   
-  //make sure we have the right number of prcessors for this setup
+  //make sure we have the right number of processors for this setup
   int nTotalProcs=(procTop.nProcDims[0]-1)*procTop.nProcDims[1]*procTop.nProcDims[2]+1;
   if(nTotalProcs!=procTop.nNumProcs){
     std::stringstream ssTemp;
@@ -96,7 +96,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //in the model dump file
   getXMLValueNoThrow(xEOS,"eosFile",0,parameters.sEOSFileName);
   
-  //get if using the turbulance model or not
+  //get if using the turbulence model or not
   XMLNode xTurbModel=getXMLNode(xData,"turbMod",0);
   if(!xTurbModel.isEmpty()){
     std::string sTemp;
@@ -133,7 +133,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //set time of last model dump equal to the current simulation time
   output.dTimeLastDump=time.dt;
   
-  //get dump fequencies
+  //get dump frequencies
   output.nDumpFrequencyStep=0;//not dumping according to number of time steps
   output.dDumpFrequencyTime=0.0;//not dumping according to simulation time
   
@@ -193,7 +193,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //set time of last model dump equal to the current simulation time
   output.dTimeLastPrint=time.dt;
   
-  //get print fequencies
+  //get print frequencies
   output.nPrintFrequencyStep=0;//not printing according to number of time steps
   output.dPrintFrequencyTime=0.0;//not printing according to simulation time
   
@@ -300,7 +300,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     bNoTimeStepFactor=true;
   }
   
-  //get percent chnage allowed per time step
+  //get percent change allowed per time step
   time.dPerChange=1.0e-1;//default is 10%, probably need something an order or two smaller
   getXMLValueNoThrow(xTime,"percentChangePerTimeStep",0,time.dPerChange);
   
@@ -324,7 +324,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     throw exception2(ssTemp.str(),INPUT);
   }
   
-  //get artificial viscosity paramter
+  //get artificial viscosity parameter
   getXMLValue(xData,"av",0,parameters.dA);
   
   //get extra alpha
@@ -407,7 +407,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //initialize internal variables
   initInternalVars(grid,procTop,parameters);
   
-  //initilize implicit calculation
+  //initialize implicit calculation
   if(implicit.nNumImplicitZones>0){
     initImplicitCalculation(implicit, grid, procTop,nNumArgs,cArgs);
   }

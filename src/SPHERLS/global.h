@@ -54,7 +54,7 @@
   boundary conditions. It also handles artificial viscosity, and timestep slightly differently.
   */
 #define VISCOUS_ENERGY_EQ 1/**<
-  If 1 will include viscosity in the energy equation. If 0 it won't. This normally should be set to 
+  If 1 will include artificial viscosity in the energy equation. If 0 it won't. This normally should be set to 
   1
   */
 #define DUMP_VERSION 1/**<
