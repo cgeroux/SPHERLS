@@ -19825,14 +19825,14 @@ double dImplicitEnergyFunction_R_SB(Grid &grid,Parameters &parameters,Time &time
     ssName<<"E_A1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add S1
     ssName.str("");
     ssName<<"E_S1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
     //add S4
     ssName.str("");
@@ -21660,7 +21660,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     ssName<<"E_A1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add A2
     ssName.str("");
@@ -21674,7 +21674,7 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
     ssName<<"E_S1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
     //add S2
     ssName.str("");
@@ -22634,7 +22634,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     ssName<<"E_A1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dA1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dA1));
     
     //add A2
     ssName.str("");
@@ -22655,7 +22655,7 @@ double dImplicitEnergyFunction_RTP_LES_SB(Grid &grid,Parameters &parameters,Time
     ssName<<"E_S1"<<ssEnd.str();
     parameters.profileDataDebug.setMaxAbs(ssName.str()
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
-      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][j][k]*(dS1));
+      ,-4.0*parameters.dPi*grid.dLocalGridOld[grid.nDenAve][i][0][0]*(dS1));
     
     //add S2
     ssName.str("");
