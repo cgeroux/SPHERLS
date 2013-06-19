@@ -18474,15 +18474,7 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       dTemps[1]=grid.dLocalGridNew[grid.nT][nI+1][nJ][nK];
       dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
       
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
@@ -18539,16 +18531,8 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
       dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
         ,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -18643,6 +18627,39 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
     VecRestoreArray(implicit.vecTCorrectionsLocal,&dValues);
     nNumIterations++;
   }
+  
+  #if DEBUG_EQUATIONS==1
+  parameters.bSetThisCall=true;
+  
+  //calculate on inner grid
+  for(int i=0;i<implicit.nNumRowsALocal;i++){//for each row
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI+1][nJ][nK];
+    dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps
+      ,nI,nJ,nK);
+  }
+  
+  //calculate at surface
+  for(int i=implicit.nNumRowsALocal;i<implicit.nNumRowsALocal
+    +implicit.nNumRowsALocalSB;i++){//for each row
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
+      ,nI,nJ,nK);
+  }
+  parameters.bSetThisCall=false;
+  #endif
   
   #if TRACKMAXSOLVERERROR==1
     
@@ -18740,15 +18757,7 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
       dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
       
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
@@ -18851,16 +18860,8 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       dTemps[2]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
       dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
         ,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -18995,6 +18996,44 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
     nNumIterations++;
   }
   
+  #if DEBUG_EQUATIONS==1
+  //re-call implicit energy function just to output debug info on converged 
+  //model
+  parameters.bSetThisCall=true;
+  
+  //calculate on inner grid
+  for(int i=0;i<implicit.nNumRowsALocal;i++){//for each row
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI+1][nJ][nK];
+    dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
+    dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
+  }
+  
+  //calculate at surface
+  for(int i=implicit.nNumRowsALocal;
+    i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){//for each row
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    dTemps[2]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
+    dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
+      ,nI,nJ,nK);
+  }
+  parameters.bSetThisCall=false;
+  #endif
+  
   #if TRACKMAXSOLVERERROR==1
     
     /* Calculate absolute error in solver*/
@@ -19095,15 +19134,7 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
       dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
       dTemps[6]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
       
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
@@ -19265,16 +19296,9 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
       dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
       dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
       
-      #if DEBUG_EQUATIONS==1
-      if(dRelTError<implicit.dTolerance*2.0e6){
-        parameters.bSetThisCall=true;
-      }
-      #endif
       dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
         ,nI,nJ,nK);
-      #if DEBUG_EQUATIONS==1
-      parameters.bSetThisCall=false;
-      #endif
+      
       dValuesRHS[i]=-1.0*dF_ijk_Tijk;
       nIndicesRHS[i]=implicit.nLocDer[i][0][0];
       dValues=new double[implicit.nNumDerPerRow[i]];
@@ -19459,6 +19483,49 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
     VecRestoreArray(implicit.vecTCorrectionsLocal,&dValues);
     nNumIterations++;
   }
+  
+  #if DEBUG_EQUATIONS==1
+  parameters.bSetThisCall=true;
+  
+  //calculate on inner grid
+  for(int i=0;i<implicit.nNumRowsALocal;i++){//for each row
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI+1][nJ][nK];
+    dTemps[2]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
+    dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+    dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
+    dTemps[6]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction(grid,parameters,time,dTemps
+      ,nI,nJ,nK);
+  }
+  
+  //calculate at surface
+  for(int i=implicit.nNumRowsALocal;i<implicit.nNumRowsALocal
+    +implicit.nNumRowsALocalSB;i++){//for each row
+    
+    nI=implicit.nLocFun[i][0];
+    nJ=implicit.nLocFun[i][1];
+    nK=implicit.nLocFun[i][2];
+    
+    dTemps[0]=grid.dLocalGridNew[grid.nT][nI][nJ][nK];
+    dTemps[1]=grid.dLocalGridNew[grid.nT][nI-1][nJ][nK];
+    dTemps[2]=grid.dLocalGridNew[grid.nT][nI][nJ+1][nK];
+    dTemps[3]=grid.dLocalGridNew[grid.nT][nI][nJ-1][nK];
+    dTemps[4]=grid.dLocalGridNew[grid.nT][nI][nJ][nK+1];
+    dTemps[5]=grid.dLocalGridNew[grid.nT][nI][nJ][nK-1];
+    
+    dF_ijk_Tijk=functions.fpImplicitEnergyFunction_SB(grid,parameters,time,dTemps
+      ,nI,nJ,nK);
+  }
+  
+  parameters.bSetThisCall=false;
+  #endif
   
   #if TRACKMAXSOLVERERROR==1
     
