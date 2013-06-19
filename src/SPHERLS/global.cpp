@@ -104,8 +104,8 @@ void Output::setExeDir(ProcTop &procTop){
       //find the first "/" from the end
       unsigned pos=sExeDir.find_last_of("/");
       
-      //keep from the begning to the locaiton of the last "/" to remove the name
-      //of the executable
+      //keep from the beginning to the location of the last "/" to remove the
+      //name of the executable
       sExeDir=sExeDir.substr(0,pos);
     } else {
       std::stringstream ssTemp;
