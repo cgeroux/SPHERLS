@@ -27,13 +27,16 @@ void profileData::set(std::string sName,unsigned int nZone,double dValue){
     
     unsigned int nCurrent=nCurrentSize;
     while(nCurrent<nZone+1){//add until we get to that zone
+      nDoubleProfileDataCount[sName].push_back(0);
       dProfileData[sName].push_back(dInitValue);
       nCurrent++;
     }
     dProfileData[sName][nZone]=dValue;
+    nDoubleProfileDataCount[sName][nZone]=0;
   }
   else{
     dProfileData[sName][nZone]=dValue;
+    nDoubleProfileDataCount[sName][nZone]=0;
   }
 }
 void profileData::set(std::string sName,unsigned int nZone,int nValue){
@@ -44,12 +47,15 @@ void profileData::set(std::string sName,unsigned int nZone,int nValue){
     unsigned int nCurrent=nCurrentSize;
     while(nCurrent<nZone+1){//add until we get to that zone
       nProfileData[sName].push_back(nInitValue);
+      nIntegerProfileDataCount[sName].push_back(0);
       nCurrent++;
     }
     nProfileData[sName][nZone]=nValue;
+    nIntegerProfileDataCount[sName][nZone]=0;
   }
   else{
     nProfileData[sName][nZone]=nValue;
+    nIntegerProfileDataCount[sName][nZone]=0;
   }
 }
 void profileData::setSum(std::string sName,unsigned int nZone,double dValue){
@@ -72,6 +78,34 @@ void profileData::setSum(std::string sName,unsigned int nZone,int nValue){
     set(sName,nZone,nValue);
   }
 }
+void profileData::setAve(std::string sName,unsigned int nZone,double dValue){
+  
+  //check to see if the value is already set
+  if(bAlreadySetDouble(sName,nZone)){//if already set just add to it
+    dProfileData[sName][nZone]=dProfileData[sName][nZone]+dValue;
+    nDoubleProfileDataCount[sName][nZone]=nDoubleProfileDataCount[sName][nZone]
+      +1;
+  }
+  else{//if not already set just set it
+    set(sName,nZone,dValue);
+    nDoubleProfileDataCount[sName][nZone]=nDoubleProfileDataCount[sName][nZone]
+      +1;//set does not increment
+  }
+}
+void profileData::setAve(std::string sName,unsigned int nZone,int nValue){
+  
+  //check to see if the value is already set
+  if(bAlreadySetInt(sName,nZone)){//if already set just add to it
+    nProfileData[sName][nZone]=nProfileData[sName][nZone]+nValue;
+    nIntegerProfileDataCount[sName][nZone]
+      =nIntegerProfileDataCount[sName][nZone]+1;
+  }
+  else{//if not already set just set it
+    set(sName,nZone,nValue);
+    nIntegerProfileDataCount[sName][nZone]
+      =nIntegerProfileDataCount[sName][nZone]+1;
+  }
+}
 void profileData::setMax(std::string sName,unsigned int nZone,double dValue){
   
   //check to see if the value is already set
@@ -89,6 +123,30 @@ void profileData::setMax(std::string sName,unsigned int nZone,int nValue){
   //check to see if the value is already set
   if(bAlreadySetInt(sName,nZone)){//if already set just add to it
     if(nValue>nProfileData[sName][nZone]){
+      nProfileData[sName][nZone]=nValue;
+    }
+  }
+  else{//if not already set just set it
+    set(sName,nZone,nValue);
+  }
+}
+void profileData::setMin(std::string sName,unsigned int nZone,double dValue){
+  
+  //check to see if the value is already set
+  if(bAlreadySetDouble(sName,nZone)){//if already set just add to it
+    if(dValue<dProfileData[sName][nZone]){
+      dProfileData[sName][nZone]=dValue;
+    }
+  }
+  else{//if not already set just set it
+    set(sName,nZone,dValue);
+  }
+}
+void profileData::setMin(std::string sName,unsigned int nZone,int nValue){
+  
+  //check to see if the value is already set
+  if(bAlreadySetInt(sName,nZone)){//if already set just add to it
+    if(nValue<nProfileData[sName][nZone]){
       nProfileData[sName][nZone]=nValue;
     }
   }
@@ -323,7 +381,14 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
       if(inKeysInt(sIntColumnNames[j])){
         if(i<nProfileData[sIntColumnNames[j]].size()){
           if(nProfileData[sIntColumnNames[j]][i]!=nInitValue){
-            ofOut<<std::setw(nWidthIntField)<<nProfileData[sIntColumnNames[j]][i];
+            ofOut<<std::setw(nWidthIntField);
+            if(nIntegerProfileDataCount[sIntColumnNames[j]][i]==0){
+              ofOut<<nProfileData[sIntColumnNames[j]][i];
+            }
+            else{//do average
+              ofOut<<(nProfileData[sIntColumnNames[j]][i]
+                /double(nIntegerProfileDataCount[sIntColumnNames[j]][i]));
+            }
           }
           else{
             ofOut<<std::setw(nWidthIntField)<<"-";
@@ -343,7 +408,14 @@ void profileData::toFile(std::string sFileName,Time time,ProcTop procTop){
       if(inKeysDouble(sDoubleColumnNames[j])){
         if(i<dProfileData[sDoubleColumnNames[j]].size()){
           if(!isnan(dProfileData[sDoubleColumnNames[j]][i])){
-            ofOut<<std::setw(nWidthDoubleField)<<dProfileData[sDoubleColumnNames[j]][i];
+            if(nDoubleProfileDataCount[sDoubleColumnNames[j]][i]==0){
+              ofOut<<std::setw(nWidthDoubleField)<<dProfileData[sDoubleColumnNames[j]][i];
+            }
+            else{//compute average
+              ofOut<<std::setw(nWidthDoubleField)
+                <<(dProfileData[sDoubleColumnNames[j]][i]
+                /double(nDoubleProfileDataCount[sDoubleColumnNames[j]][i]));
+            }
           }
           else{
             ofOut<<std::setw(nWidthDoubleField)<<"-";
@@ -659,7 +731,14 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
               //replace value
               ssTemp.str("");
               ssTemp.clear();
-              ssTemp<<std::setw(nWidthIntField)<<nProfileData[sIntColumnNames[nColumn]][nZoneNum];
+              ssTemp<<std::setw(nWidthIntField);
+              if(nIntegerProfileDataCount[sIntColumnNames[nColumn]][nZoneNum]==0){
+                ssTemp<<nProfileData[sIntColumnNames[nColumn]][nZoneNum];
+              }
+              else{//do average
+                ssTemp<<(nProfileData[sIntColumnNames[nColumn]][nZoneNum]/
+                  double(nIntegerProfileDataCount[sIntColumnNames[nColumn]][nZoneNum]));
+              }
               ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
                 switching form reading to writing.*/
               ifIn.write(ssTemp.str().c_str(),nWidthIntField);
@@ -684,8 +763,15 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
               //replace value
               ssTemp.str("");
               ssTemp.clear();
-              ssTemp<<std::setw(nWidthDoubleField)
-                <<dProfileData[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum];
+              if(nDoubleProfileDataCount[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum]==0){
+                ssTemp<<std::setw(nWidthDoubleField)
+                  <<dProfileData[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum];
+              }
+              else{//compute the average
+                ssTemp<<std::setw(nWidthDoubleField)
+                  <<(dProfileData[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum]
+                  /double(nDoubleProfileDataCount[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum]));
+              }
               ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
                 switching form reading to writing.*/
               ifIn.write(ssTemp.str().c_str(),nWidthDoubleField);

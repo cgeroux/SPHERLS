@@ -28,6 +28,14 @@ class profileData{
     void setSum(std::string sName,unsigned int nZone,int nValue);/**<
       If the value is already set it will add to it
       */
+    void setAve(std::string sName,unsigned int nZone,double dValue);/**<
+      If the value is already set it will add to it keeping track of the times
+      it was added, to later compute an average when writing to a file.
+      */
+    void setAve(std::string sName,unsigned int nZone,int nValue);/**<
+      If the value is already set it will add to it keeping track of the times
+      it was added, to later compute an average when writing to a file.
+      */
     void setMax(std::string sName,unsigned int nZone,double dValue);/**<
       If the value is already set it will set it to which ever is largest, the current value or the
       new value I am trying to set it to
@@ -35,6 +43,14 @@ class profileData{
     void setMax(std::string sName,unsigned int nZone,int nValue);/**<
       If the value is already set it will set it to which ever is largest, the current value or the
       new value.
+      */
+    void setMin(std::string sName,unsigned int nZone,double dValue);/**<
+      If the value is already set it will set it to which ever is smallest, the
+      current value or the new value.
+    */
+    void setMin(std::string sName,unsigned int nZone,int nValue);/**<
+      If the value is already set it will set it to which ever is smallest, the
+      current value or the new value.
       */
     void setMaxAbs(std::string sName,unsigned int nZone,double dValue);/**<
       If the value is already set it will set it to which ever has the largest absolute value, the
@@ -67,7 +83,9 @@ class profileData{
     int nWidthDoubleField;
     int nPrecision;
     std::map<std::string,std::vector<double> > dProfileData;
+    std::map<std::string,std::vector<int> > nDoubleProfileDataCount;
     std::map<std::string,std::vector<int> > nProfileData;
+    std::map<std::string,std::vector<int> > nIntegerProfileDataCount;
     int mergeOverLap(std::fstream& ifIn,int nFirstZone
       ,std::vector<std::string> sIntColumnNames, std::vector<std::string> sDoubleColumnNames
       ,ProcTop &procTop,Time& time);/**<
