@@ -632,7 +632,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
     if(nZoneNum>=nFirstZone-1){//they overlap
       
       ifIn.tellp();//seems to be need for some unclear reason, it seems to allow
-      //switching form reading to writting.
+      //switching form reading to writing.
       ifIn.read(cIntString,nWidthIntField);
       
       cIntString[nWidthIntField]='\0';
@@ -641,7 +641,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
       
       //read in column by column
       nColumn=1;
-      if(ifIn.eof()){//got end of file read, first read after end of line character read, shoudl test for eof
+      if(ifIn.eof()){//got end of file read, first read after end of line character read, should test for eof
         break;
       }
       
@@ -661,7 +661,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
               ssTemp.clear();
               ssTemp<<std::setw(nWidthIntField)<<nProfileData[sIntColumnNames[nColumn]][nZoneNum];
               ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
-                switching form reading to writting.*/
+                switching form reading to writing.*/
               ifIn.write(ssTemp.str().c_str(),nWidthIntField);
               bMoveToNextColumn=false;
             }
@@ -670,7 +670,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
             
             //move file points to next column
             ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
-              switching form reading to writting.*/
+              switching form reading to writing.*/
             ifIn.read(cIntString,nWidthIntField);
           }
         }
@@ -687,7 +687,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
               ssTemp<<std::setw(nWidthDoubleField)
                 <<dProfileData[sDoubleColumnNames[nColumn-nNumIntColumns]][nZoneNum];
               ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
-                switching form reading to writting.*/
+                switching form reading to writing.*/
               ifIn.write(ssTemp.str().c_str(),nWidthDoubleField);
               bMoveToNextColumn=false;
             }
@@ -696,7 +696,7 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
             
             //move to next column
             ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
-                switching form reading to writting.*/
+                switching form reading to writing.*/
             ifIn.read(cDoubleString,nWidthDoubleField);
             cDoubleString[nWidthDoubleField]='\0';
           }
@@ -704,8 +704,8 @@ int profileData::mergeOverLap(std::fstream& ifIn,int nFirstZone
         nColumn++;
       }
       ifIn.tellp();/*seems to be need for some unclear reason, it seems to allow
-        switching form reading to writting.*/
-      ifIn.read(cTemp,1);//read in end line characater
+        switching form reading to writing.*/
+      ifIn.read(cTemp,1);//read in end line character
     }
     else{//if before overlap region read lines and get zone number
       
