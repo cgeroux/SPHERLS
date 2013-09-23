@@ -1,33 +1,142 @@
-<figures>
-  <figure title="$T_{\rm eff} = 6100$ [K]" outputfile="./PKE_1D3D_T6100.png"
-    axisSpacing="0.05" figLeft="0.05" figBottom="0.05" figTop="0.95" figWidth="10" figHeight="8" dpi="300" fontSize="16">
-    <dataSet>
-      <file name="1">/share/scratch2/cgeroux/test_grid_5x5/no_EV_5x5/3D_T6100/output/averagePKE.txt</file>
-      <file name="2">/share/scratch2/cgeroux/March_12/1D_CTeos/T6100/output/averagePKE.txt</file>
+<!--
+This is an example xml configuration script for the plot_file.py script which
+generates plots from generic data files consisting of some header information
+and columns of data. It is really just a nice front end for generating plots
+with matplotlib.
 
+Many node attributes can be omitted and the script will choose reasonable 
+defaults. One exception to this is the "name" attribute on the file
+node as it is how the file is specified in the curve nodes, there are some 
+others in addition to this, but they are likely fairly obvious when they are
+required otherwise it can be safely assumed they aren't required. In either case
+the script will tell you if you need to include something you haven't once you
+run it on your configuration xml file.
+-->
+
+<!--
+figures node: holds a number of figure nodes to make, this is the root node 
+  (only one node allowed)
+-->
+<figures>
+  
+  <!--
+  figure node: Defines a figure (can have multiple nodes)
+  
+  Attributes:
+    title: Figure title, latex maths is allowed between "$" 's e.g. $<insert 
+      latex math here>$
+    outputfile: name of the output file, the type is determined from the 
+      extension, good types are .pdf, .svg, .eps, .png, and more
+    axisSpacing: spacing between different x-axes (could be a single plot or 
+      a stacked plot)
+    figLeft: left figure margin (in fractions of the figure)
+    figBottom: bottom figure margin (in fractions of the figure)
+    figTop: top figure margin (in fractions of the figure)
+    figWidth: width of the figure in inches
+    figHeight: width of the figure in inches
+    dpi: dots per inch
+    fontSize: is the font size used
+    -->
+  <figure title="$T_{\rm eff} = 6100$ [K]" outputfile="./PKE_1D3D_T6100.png"
+    axisSpacing="0.05" figLeft="0.05" figBottom="0.05" figTop="0.95" 
+    figWidth="10" figHeight="8" dpi="300" fontSize="16">
+    
+    <!--
+    dataSet node: just a container for a related set of data  (can have multiple
+      nodes)
+    -->
+    <dataSet>
+      
+      <!--
+      file node: gives a reference to a music log file may have several (can 
+        have multiple nodes)
+      
+      Attributes:
+        name: a unique identifier of the file and may be any string.
+      -->
+      <file name="1">./averagePKE.txt</file>
+      <file name="2">./averagePKE.txt</file>
+      
+      <!--
+      axis node: adds an axis to a figure, can have multiple axis (can have
+        multiple nodes)
+      
+      Attributes:
+        ticks:allows one to set major x-ticks manually with a string like 
+          "-1.0 0.0 1.0", starting with bottom tick and progressing to the top
+          tick, with tick locations separated by spaces
+        xminortics: either true of false, if true will put minor tick marks on 
+          the x-axis
+        xlabel: set the text for the x-axis label
+        xmin: lower x-axis limit
+        xmax: upper x-axis limit
+      -->
       <axis xlabel="t [s]" xminortics="True">
-        <!--
-        weightHeight="0.5" will say that this plot will be half the height
-        of a plot with weightHeight="1.0" when having multiple plots on the same
-        figure.
         
-        numlegendpoints="1", sets the number of points to include on the
-        ledgend. One might want to set to 1 if there is not line, while 2 might 
-        be more suitable to have line segment with points on either end of it
-        rather than centered.
+        <!--plot node: defines a plot on the x-axis (can have multiple nodes)
         
-        legendloc: position of the legend, 1= top right, 2=top left,
-        3=bottom right, 4=bottom left
-        
-        ticks: manaully set tick marks on y-axis, e.g. ticks="-1.0 0.0 1.0" will
-        place tick marks and labels at -1.0, 0.0, and 1.0 on the y-axis.
+        Attributes:
+          weightHeight: sets the weight to use when calculating the hight of the
+            axis. For example if there is a figure with two axis, the first with
+            a weightHeight of 0.2, and the second with a weightHeight of 0.8, 
+            the second plot will be 80% of the figure size, while the firt will 
+            be 20%
+          yminortics: either true of false, if true will put minor tick marks on 
+            the y-axis
+          numlegendpoints: sets the number of points to include in the legend, 
+            values of 1 or 2 are reasonable
+          legendloc: position of the legend, 1= top right, 2=top left,
+            3=bottom right, 4=bottom left
+          ticks: manually set tick marks on y-axis, e.g. ticks="-1.0 0.0 1.0" 
+            will place tick marks and labels at -1.0, 0.0, and 1.0 on the 
+            y-axis.
+          grid: can be any of, "major", "minor", "both" to indicate that grid 
+            lines should be drawn for major, minor or both ticks respectively
+          ylabel: set the text for the y-axis label
+          ymin: lower y-axis limit
+          ymax: upper y-axis limit
         -->
         <plot ylabel="Log(PKE) [erg]" legendloc="4" numlegendpoints="1" 
           ymin="36" ymax="41"  weightHeight="0.5" ticks="-1.0 0.0 1.0">
-          <curve file="1" xcolumn="2" ycolumn="log10($5)" errcolumn="3" line="-" color="r"
-            markersize="5" marker="x" label="3D 5x5" linewidth="2.0" ecolor="red" elinewidth="2.0" capsize="3"></curve>
-          <curve file="2" xcolumn="2" ycolumn="log10($5)" line="-" color="b" markersize="5" markeredgecolor="b" markerfacecolor="w" label="1D" linewidth="2.0"></curve>
-          <text x="50.0" y="18.0" >Text to display</text><!-- prints the given text, at x and y location in plot coordinates-->
+          
+          <!--
+          curve node: defines a curve on a plot (can have multiple nodes)
+          
+          Attributes:
+            file: name of the file you want to use the data from for the curve.
+              These can be any of the names given in the file nodes given in 
+              this dataSet
+            xcolumn: name of the column from the file to use as x values of 
+              curve points
+            ycolumn: name of the column from the file to use as y values of
+              curve points. Both xcolumn and ycolumn can contain standard 
+              mathematical functions operating on many columns to compute an 
+              x/y value.
+            errcolumn: gives the column to be used to set the size of error bars
+              can also be a mathematical combination of columns as xcolumn
+              /ycolumn
+            line: one of matplotlib line styles e.g. "-", ":", ".-", "--"
+            color: can be one of matplotlib colors "r", "g", "b", "k" etc. or a
+              hexadecimal number of rgb values
+            markersize: size of the marker set with "marker"
+            marker: what symbol to use for the marker "x", "o", "+" etc. see
+              matplotlib documentation for a full list of markers for 2D line
+              plots
+            label: label of the curve, to show up in the legend
+            linewidth: with of the curve line
+            ecolor: color of the error bars
+            elinewidth: line width of the error bars
+            capsize: how big the error bar caps should be
+          -->
+          <curve file="1" xcolumn="2" ycolumn="log10($5)" errcolumn="3" line="-"
+            color="r" markersize="5" marker="x" label="3D 5x5" linewidth="2.0"
+            ecolor="red" elinewidth="2.0" capsize="3"></curve>
+          
+          <!-- 
+          text node: add text to the plot at location x,y (can have multiple 
+            nodes)
+          -->
+          <text x="50.0" y="18.0" >Text to display</text>
         </plot>
       </axis>
     </dataSet>

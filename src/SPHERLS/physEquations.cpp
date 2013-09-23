@@ -10728,6 +10728,43 @@ void calNewE_RT_NA_LES(Grid &grid, Parameters &parameters, Time &time, ProcTop &
           ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
           ,(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
           /time.dDeltat_np1half);
+        
+        //add E_EV/DEDt
+        ssName.str("");
+        ssName<<"E_EV_DEDt_max"<<ssEnd.str();
+        parameters.profileDataDebug.setMax(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dEddyViscosityTerms/(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
+          *time.dDeltat_np1half);
+        ssName.str("");
+        ssName<<"E_EV_DEDt_min"<<ssEnd.str();
+        parameters.profileDataDebug.setMin(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dEddyViscosityTerms/(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
+          *time.dDeltat_np1half);
+        ssName.str("");
+        ssName<<"E_EV_DEDt_ave"<<ssEnd.str();
+        parameters.profileDataDebug.setAve(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,dEddyViscosityTerms/(grid.dLocalGridNew[grid.nE][i][j][k]-grid.dLocalGridOld[grid.nE][i][j][k])
+          *time.dDeltat_np1half);
+          
+        //add E_T
+        ssName.str("");
+        ssName<<"E_T_max"<<ssEnd.str();
+        parameters.profileDataDebug.setMax(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nT][i][j][k]);
+        ssName.str("");
+        ssName<<"E_T_min"<<ssEnd.str();
+        parameters.profileDataDebug.setMin(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nT][i][j][k]);
+        ssName.str("");
+        ssName<<"E_T_ave"<<ssEnd.str();
+        parameters.profileDataDebug.setAve(ssName.str()
+          ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+          ,grid.dLocalGridOld[grid.nT][i][j][k]);
         #endif
         
         if(grid.dLocalGridNew[grid.nE][i][j][k]<0.0){
@@ -14841,7 +14878,7 @@ void calNewEddyVisc_RTP_SM(Grid &grid, Parameters &parameters){
 }
 void calOldDenave_None(Grid &grid){
 }
-void calOldDenave_R(Grid &grid){//resume, moving decalerations
+void calOldDenave_R(Grid &grid){//resume, moving decelerations
   
   //explicit region
   for(int i=grid.nStartUpdateExplicit[grid.nDenAve][0];
@@ -21504,6 +21541,43 @@ double dImplicitEnergyFunction_RT_LES(Grid &grid,Parameters &parameters,Time &ti
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
       /time.dDeltat_np1half);
+    
+    //add E_EV/DEDt
+    ssName.str("");
+    ssName<<"E_EV_DEDt_max"<<ssEnd.str();
+    parameters.profileDataDebug.setMax(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+    ssName.str("");
+    ssName<<"E_EV_DEDt_min"<<ssEnd.str();
+    parameters.profileDataDebug.setMin(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+    ssName.str("");
+    ssName<<"E_EV_DEDt_ave"<<ssEnd.str();
+    parameters.profileDataDebug.setAve(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+      
+    //add E_T
+    ssName.str("");
+    ssName<<"E_T_max"<<ssEnd.str();
+    parameters.profileDataDebug.setMax(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
+    ssName.str("");
+    ssName<<"E_T_min"<<ssEnd.str();
+    parameters.profileDataDebug.setMin(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
+    ssName.str("");
+    ssName<<"E_T_ave"<<ssEnd.str();
+    parameters.profileDataDebug.setAve(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
   }
   #endif
   
@@ -21873,6 +21947,43 @@ double dImplicitEnergyFunction_RT_LES_SB(Grid &grid,Parameters &parameters,Time 
       ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
       ,(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
       /time.dDeltat_np1half);
+    
+    //add E_EV/DEDt
+    ssName.str("");
+    ssName<<"E_EV_DEDt_max"<<ssEnd.str();
+    parameters.profileDataDebug.setMax(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+    ssName.str("");
+    ssName<<"E_EV_DEDt_min"<<ssEnd.str();
+    parameters.profileDataDebug.setMin(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+    ssName.str("");
+    ssName<<"E_EV_DEDt_ave"<<ssEnd.str();
+    parameters.profileDataDebug.setAve(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,dEddyViscosityTerms/(dE_ijk_np1-grid.dLocalGridOld[grid.nE][i][j][k])
+      *time.dDeltat_np1half);
+      
+    //add E_T
+    ssName.str("");
+    ssName<<"E_T_max"<<ssEnd.str();
+    parameters.profileDataDebug.setMax(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
+    ssName.str("");
+    ssName<<"E_T_min"<<ssEnd.str();
+    parameters.profileDataDebug.setMin(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
+    ssName.str("");
+    ssName<<"E_T_ave"<<ssEnd.str();
+    parameters.profileDataDebug.setAve(ssName.str()
+      ,i+grid.nGlobalGridPositionLocalGrid[0]-grid.nNumGhostCells
+      ,grid.dLocalGridOld[grid.nT][i][j][k]);
   }
   #endif
   

@@ -841,7 +841,9 @@ void printHelp(){
     <<"       expected format is two columns, the first being time, the second being\n"
     <<"       the periodic quantity. the output file will then have a -FT appened to the file name.\n"
     <<" -l [input file type] [input file] converts a model into the formate used\n"
-    <<"       by LNA.\n";
+    <<"       by LNA.\n"
+    <<" -e [eos file] path to equation of state file to use, overrides that \n"
+    <<"       given in the model.";
 }
 void convertCollBinToAscii(std::string sFileName){//tested
   
@@ -2626,7 +2628,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGamma=-1;
     }
   }
-  else{//using a tabulated equaiton of state
+  else{//using a tabulated equation of state
     if(nNumDims==1){
       nNumIntVars=10;
       nM=0;
@@ -2757,7 +2759,6 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     nSizeX2=nSize[n][0]+nGhostCellsX*2*nNumGhostCells;
     nSizeY=nSize[n][1]+nGhostCellsY*2*nNumGhostCells;//assume y and z are always periodic
     nSizeZ=nSize[n][2]+nGhostCellsZ*2*nNumGhostCells;
-    dTempArray=new double[nSizeZ];
     for(i=nSizeX1;i<nSizeX2;i++){
       dGrid[n][i]=new double*[nSizeY];
       for(j=0;j<nSizeY;j++){
@@ -2793,7 +2794,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       nGhostCellsZ=0;
     }
     
-    //make some space to hold max,mine and average
+    //make some space to hold max,min and average
     dMax[n]=new double[nSize[n][0]+nGhostCellsX*2*nNumGhostCells];
     dMin[n]=new double[nSize[n][0]+nGhostCellsX*2*nNumGhostCells];
     dAve[n]=new double[nSize[n][0]+nGhostCellsX*2*nNumGhostCells];
@@ -2868,11 +2869,60 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     nMinKIndex[n]=new int[nSize[nD][0]+nGhostCellsX*2*nNumGhostCells];
   }
   
+  //calculate filling factor for upflow
+  nGhostCellsX=1;
+  if(nVarInfo[nU][0]==-1){
+    nGhostCellsX=0;
+  }
+  nGhostCellsY=1;
+  if(nVarInfo[nU][1]==-1){
+    nGhostCellsY=0;
+  }
+  nGhostCellsZ=1;
+  if(nVarInfo[nU][2]==-1){
+    nGhostCellsZ=0;
+  }
+  nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);
+  if (nVarInfo[nU][0]==1&&nPeriodic[0]==0){
+    nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
+  }
+  nSizeX2=nSize[nU][0]+nGhostCellsX*2*nNumGhostCells;
+  nSizeY=nSize[nU][1]+nGhostCellsY*2*nNumGhostCells;
+  nSizeZ=nSize[nU][2]+nGhostCellsZ*2*nNumGhostCells;
+  nStartY=nGhostCellsY*nNumGhostCells;
+  nEndY=nSize[nU][1]+nStartY;
+  nStartZ=nGhostCellsZ*nNumGhostCells;
+  nEndZ=nSize[nU][2]+nStartZ;
+  double *dUpFlowFillingFactor=new double[nSize[nU][0]+nGhostCellsX*2
+    *nNumGhostCells];
+  for(int i=0;i<nSizeX1;i++){
+    dUpFlowFillingFactor[i]=0.0;//no-upflow in 1D part
+  }
+  int nCountUp=0;
+  int nCountTotal=0;
+  for(int i=nSizeX1;i<nSizeX2;i++){
+    for(int j=nStartY;j<nEndY;j++){
+      for(int k=nStartZ;k<nEndZ;k++){
+        
+        //if there is an up-flow (removing flow due to pulsation)
+        if(dGrid[nU][i][j][k]-dGrid[nU0][i][0][0]>0.0){
+          nCountUp++;
+        }
+        nCountTotal++;
+      }
+    }
+    
+    //record filling factor, and reset counts
+    dUpFlowFillingFactor[i]=double(nCountUp)/double(nCountTotal);
+    nCountUp=0;
+    nCountTotal=0;
+  }
+  
   if(nGammaLaw!=0){//set P,E,kappa,gamma, Q, L_rad and L_con, KE, C, <rho>
     
     //allocate space
     nGhostCellsX=1;
-    if(nVarInfo[nD][0]==-1){/*all internal variables are cetnered quantities, will be the same as 
+    if(nVarInfo[nD][0]==-1){/*all internal variables are centered quantities, will be the same as 
       the density*/
       nGhostCellsX=0;
     }
@@ -2958,7 +3008,7 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     
     //set 1D part of the grid
     nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);/*maybe need to +1 if only one proc and 
-      variable in interface centered*/
+      variable is interface centered*/
     if (nVarInfo[nD][0]==1&&nPeriodic[0]==0){
       nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
     }
@@ -3754,11 +3804,12 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthIntOutputField)<<"C_max_k(75)"
     <<std::setw(nWidthOutputField)<<"C_min[cm/s](76)"
     <<std::setw(nWidthIntOutputField)<<"C_min_j(77)"
-    <<std::setw(nWidthIntOutputField)<<"C_min_k(78)";
+    <<std::setw(nWidthIntOutputField)<<"C_min_k(78)"
+    <<std::setw(nWidthOutputField)<<"UpFillFac(79)";
   if(bExtraInfoInProfile){
-    ofFile<<std::setw(nWidthOutputField)<<"DlnPDlnT(79)"
-      <<std::setw(nWidthOutputField)<<"DlnPDlnRho(80)"
-      <<std::setw(nWidthOutputField)<<"DEDT(81)";
+    ofFile<<std::setw(nWidthOutputField)<<"DlnPDlnT(80)"
+      <<std::setw(nWidthOutputField)<<"DlnPDlnRho(81)"
+      <<std::setw(nWidthOutputField)<<"DEDT(82)";
   }
   ofFile<<std::endl;
   
@@ -3914,11 +3965,12 @@ void makeRadialProFromColBin(std::string sFileName){//updated
       <<std::setw(nWidthIntOutputField)<<nMaxKIndex[nC][i]//75
       <<std::setw(nWidthOutputField)<<dMin[nC][i]//76
       <<std::setw(nWidthIntOutputField)<<nMinJIndex[nC][i]//77
-      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i];//78
+      <<std::setw(nWidthIntOutputField)<<nMinKIndex[nC][i]//78
+      <<std::setw(nWidthOutputField)<<dUpFlowFillingFactor[i];//79
     if(bExtraInfoInProfile){
-      ofFile<<std::setw(nWidthOutputField)<<dDlnPDlnT//79
-        <<std::setw(nWidthOutputField)<<dDlnPDlnRho//80
-        <<std::setw(nWidthOutputField)<<dDEDT;//81
+      ofFile<<std::setw(nWidthOutputField)<<dDlnPDlnT//80
+        <<std::setw(nWidthOutputField)<<dDlnPDlnRho//81
+        <<std::setw(nWidthOutputField)<<dDEDT;//82
     }
     ofFile<<std::endl;
   }
@@ -4000,16 +4052,76 @@ void makeRadialProFromColBin(std::string sFileName){//updated
     <<std::setw(nWidthIntOutputField)<<"-"//75
     <<std::setw(nWidthOutputField)<<"-"//76
     <<std::setw(nWidthIntOutputField)<<"-"//77
-    <<std::setw(nWidthIntOutputField)<<"-";//78
+    <<std::setw(nWidthIntOutputField)<<"-"//78
+    <<std::setw(nWidthOutputField)<<dUpFlowFillingFactor[nSizeGlobe[0]+2*nNumGhostCells];//79
   if(bExtraInfoInProfile){
-    ofFile<<std::setw(nWidthOutputField)<<"-"//79
-      <<std::setw(nWidthOutputField)<<"-"//80
-      <<std::setw(nWidthOutputField)<<"-";//81
+    ofFile<<std::setw(nWidthOutputField)<<"-"//80
+      <<std::setw(nWidthOutputField)<<"-"//81
+      <<std::setw(nWidthOutputField)<<"-";//82
   }
   ofFile<<std::endl;
   
   ofFile.close();
-  //also need to delete dGrid
+  
+  //delete grid
+  for(int n=0;n<nNumVars;n++){
+    nGhostCellsX=1;
+    if(nVarInfo[n][0]==-1){
+      nGhostCellsX=0;
+    }
+    nGhostCellsY=1;
+    if(nVarInfo[n][1]==-1){
+      nGhostCellsY=0;
+    }
+    nGhostCellsZ=1;
+    if(nVarInfo[n][2]==-1){
+      nGhostCellsZ=0;
+    }
+      
+    //delete 1D part of the grid
+    nSizeX1=nGhostCellsX*(nNum1DZones+nNumGhostCells);
+    if (nVarInfo[n][0]==1&&nPeriodic[0]==0){
+      nSizeX1=nGhostCellsX*(nNum1DZones+1+nNumGhostCells);
+    }
+    nSizeY=1;
+    nSizeZ=1;
+    for(i=0;i<nSizeX1;i++){
+      for(j=0;j<nSizeY;j++){
+        delete [] dGrid[n][i][j];
+      }
+      delete [] dGrid[n][i];
+    }
+    
+    //read in the rest of the grid
+    nSizeX2=nSize[n][0]+nGhostCellsX*2*nNumGhostCells;
+    nSizeY=nSize[n][1]+nGhostCellsY*2*nNumGhostCells;//assume y and z are always periodic
+    nSizeZ=nSize[n][2]+nGhostCellsZ*2*nNumGhostCells;
+    for(i=nSizeX1;i<nSizeX2;i++){
+      for(j=0;j<nSizeY;j++){
+        delete [] dGrid[n][i][j];
+      }
+      delete [] dGrid[n][i];
+    }
+    delete [] dGrid[n];
+    
+    delete [] dMax[n];
+    delete [] dMin[n];
+    delete [] dAve[n];
+    delete [] nMaxJIndex[n];
+    delete [] nMaxKIndex[n];
+    delete [] nMinJIndex[n];
+    delete [] nMinKIndex[n];
+  }
+  delete [] dMax;
+  delete [] dMin;
+  delete [] dAve;
+  delete [] nMaxJIndex;
+  delete [] nMaxKIndex;
+  delete [] nMinJIndex;
+  delete [] nMinKIndex;
+  delete [] dGrid;
+  
+  delete [] dUpFlowFillingFactor;
   for(int n=0;n<nNumVars;n++){
     delete [] nSize[n];
     delete [] nVarInfo[n];

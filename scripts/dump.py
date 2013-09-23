@@ -1500,9 +1500,8 @@ class Dump:
   def setAdditionalVars(self,varsToSet=None):
     """Set additional variables
     
-    At some point I would like to have the equation of state and opacity info
-    here too. I have now created a python extension which exposes the equation
-    of state object to python so that these values can be set.
+    Sets variuous equation of state variables specified in the keyword 
+    "varsToSet".
     
     varsToSet: a list of variable names to set. Variables which can be set are
       "dlnPdlnT","dlnPdlnD","dEdT","p","e","kappa","gamma","cp","c","gamma1"

@@ -14,6 +14,7 @@ import xml.etree.ElementTree as xml
 import parse_formula
 import mywarnings
 import warnings
+from myExceptions import *
 
 def parseOptions():
   #note: newlines are not respected in the optparse description string :(, maybe someday will use
@@ -139,7 +140,9 @@ class Curve:
     [self.formulaOrig,self.formula,self.nColumn,self.nRowShift,self.code]\
       =parse_formula.getFormula(element.text)
   def load(self,fileData,options,dataSet,nFileCount):
-    '''This method adds a y value and index to the curve for the current fileData.'''
+    """This method adds a y value and index to the curve for the current 
+    fileData."""
+    
     if self.indexOfLastFileLoad!=nFileCount:#prevents loading the same file twice
       try:
         if self.zone=="max":
@@ -298,7 +301,7 @@ class Plot:
       for curve in self.curves:
         
         #load curve data
-        curve.load(fileData,options,dataSet)
+        curve.load(fileData,options,dataSet,nFileCount)
         
         #add zone number to suffix
         suffix=''
@@ -552,7 +555,14 @@ class DataSet:
     
     #make sure that all the combined binary files within range of dataset have profiles made
     fileName=self.baseFileName+"["+str(self.start)+"-"+str(self.end)+"]"
-    failedFiles=make_profiles.make_fileSet(fileName,options)
+    try:
+      failedFiles=make_profiles.make_fileSet(fileName,options)
+    except NoFilesFound as e:
+      
+      #it is OK if their aren't any combined binary files to make profiles from
+      #so long as there are actually some profiles
+      print e.message
+      failedFiles=[]
     
     if len(failedFiles)>0:
       for failedFile in failedFiles:
@@ -563,13 +573,15 @@ class DataSet:
     filesExistProfiles=glob.glob(self.baseFileName+"*"+extension)
     filesExistProfiles.sort()
     files=[]
+    print "found "+str(len(filesExistProfiles))+" profile files"
     for i in range(0,len(filesExistProfiles),options.frequency):
       file=filesExistProfiles[i]
       intOfFile=int(file[len(self.baseFileName):len(file)-len(extension)])
       if intOfFile>=self.start and intOfFile<self.end:
         files.append(file)
     if len(files)==0:
-      raise Exception("no files found in range")
+      raise Exception("no files found in range ["+str(self.start)+"-"
+        +str(self.end)+"]")
     
     self.nNumFiles=len(files)
     
@@ -891,7 +903,7 @@ def main():
   if root.get("title")!=None and root.get("title")!="":
     title=root.get("title")
     
-  #set spacing between axies
+  #set spacing between axes
   options.axisSpacing=0.05
   if root.get("axisSpacing")!=None and root.get("axisSpacing")!="":
     options.axisSpacing=float(root.get("axisSpacing"))

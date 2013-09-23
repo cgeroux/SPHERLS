@@ -7,10 +7,8 @@ import optparse as op
 import combine_bins
 import paths
 import disect_filename
-class FileCreateFailed(Exception):
-  """Exception raised when makeFileFunction fails
-  """
-  pass
+from myExceptions import *
+
 def addParserOptions(parser):
   """Adds command line options for this script to parser
   
@@ -88,7 +86,7 @@ def make_profile(fileName,options,nCount,nNumFiles):
       +"_pro.txt\" already exists, not remaking"
   
   return None#conversion successful
-def make_fileSet(fileName,options,makeFileFunction=make_profile):
+def make_fileSet(fileName,options,makeFileFunction=make_profile,frequency=1):
   """Makes a set of files from SPHERLS output using fileMakingFunction
   
   fileName: is expected to be the name of the inputfile
@@ -123,14 +121,15 @@ def make_fileSet(fileName,options,makeFileFunction=make_profile):
   
   files.sort()
   if len(files)==0:
-    print "no files found in range"
-    quit()
+    raise NoFilesFound("no combined binary files found in range ["+str(start)
+      +"-"+str(end)+"]")
+    
   
   nNumFiles=len(files)
   nCount=1
-  for file in files:
+  for i in range(0,len(files),frequency):
     try:
-      makeFileFunction(file,options,nCount,nNumFiles)
+      makeFileFunction(files[i],options,nCount,nNumFiles)
     except FileCreateFailed as e:
       failedFiles.append(e.message)
     nCount+=1

@@ -2,7 +2,7 @@
   <job>
     <name>Test</name><!-- name of the job -->
     <duration>35:00:00</duration><!-- time for job to run in the que -->
-    <totalview>False</totalview><!-- if true will luanch without the que, with the debugg option -->
+    <totalview>False</totalview><!-- if true will launch without the que, with the debug option -->
     <que>False</que><!-- if "true" or "main" it will run the job in main que, if it is test it will 
       run in the test que if it isn't given, or is something else it will run at the command line -->
     <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
@@ -11,7 +11,7 @@
   </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
-    <x0>4</x0><!--Note frist region (processor) in this dimension will be 1D-->
+    <x0>4</x0><!--Note first region (processor) in this dimension will be 1D-->
     <x1>1</x1><!--Not currently used, only distribution in radial direction allowed at present-->
     <x2>1</x2><!--Not currently used, only distribution in radial direction allowed at present-->
   </procDims>
@@ -36,9 +36,9 @@
     radial advection term in the energy equation to the value in the static model at temperature 
     lower that specified. This helps maintain the correct energy output after the sudden onset of
     convection. It can usually be removed after convection is fully established. -->
-  <prints type="normal"><!-- aviable types are "normal" where info about the gernal progress of the 
+  <prints type="normal"><!-- available types are "normal" where info about the general progress of the 
     code is printed "timeStepInfo" where information about the timestep is printed out in column 
-    form specifically for identifying prolems with timestep selection-->
+    form specifically for identifying problems with timestep selection-->
     <frequency type="timeSteps">10</frequency><!-- how often to print 1=every time step, 2=every 
       other time step etc. -->
     <frequency type="seconds">600.00</frequency><!-- how often to print in simulation time -->
@@ -59,7 +59,7 @@
   <extraAlpha>0.0</extraAlpha><!--Add some extra mass at the top of the model, used in the surface 
     boundary condition of the radial velocity. This extra mass is not included in the hydrostatic 
     initial model.-->
-  <av>1.4</av><!-- artificual viscosity parameter, of order 1 -->
+  <av>1.4</av><!-- artificial viscosity parameter, of order 1 -->
   <av-threshold>0.01</av-threshold><!-- The amount of compression before AV is turned on.
     It is in terms of a velocity difference between zone sides and is in fractions of the local 
     sound speed. -->
@@ -71,7 +71,7 @@
   <time>
     <endTime>1e3</endTime><!-- time in seconds at which the calculation should be halted-->
     <endTimeStep>300000</endTimeStep><!-- number of time steps to be completed before halting
-      calculation. If both endTime and endTimeStep are set which ever is statisfied first will 
+      calculation. If both endTime and endTimeStep are set which ever is satisfied first will 
       halt the calculation.-->
     <timeStepFactor>0.1</timeStepFactor><!-- multiplies the Courant time step, to produce the time
       step, seems like I can get away with larger values when there aren't many 1D zones, and 
@@ -84,7 +84,7 @@
   </time>
   <adiabatic>false</adiabatic><!-- Use either the adiabatic energy equation "true" or the 
     non-adiabatic energy equation if "false" or if the node is not found. -->
-  <turbMod><!-- If this node is found a turbulance model will be used.-->
+  <turbMod><!-- If this node is found a turbulence model will be used.-->
     <type>smagorinsky</type>
     <eddyVisc>0.17</eddyVisc>
   </turbMod>
@@ -98,7 +98,7 @@
       TRACKMAXSOLVERERROR to 1 in global.h -->
     <max-iterations>100</max-iterations><!-- maximum number of iterations to try and achieve the
       tolerance given for the implicit calculation of the temperature. As well as the maximum number
-      of iterations allowed for the PETSc matrix solver. To see number of solver interations set
+      of iterations allowed for the PETSc matrix solver. To see number of solver iterations set
       TRACKMAXSOLVERERROR to 1 in global.h -->
   </implicit>
 </data>

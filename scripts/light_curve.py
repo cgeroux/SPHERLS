@@ -34,6 +34,11 @@ def parseOptions():
     +"how the light curve is to be made. see light_curve_reference.xml for a "
     +"template xml file to be used with this script. Found in the SPHERLS "
     +"directory docs/templateXML.")
+  parser.add_option("--write-diagnostics",dest="writeDiagnostics"
+    ,action="store_true"
+    ,help="If set it will write out Logg,g,accel,T_eff,BC to the output file in"
+    +" that order in addition to the time and mag in the first and second "
+    +"columns",default=False)
   
   make_profiles.addParserOptions(parser)
   
@@ -130,7 +135,7 @@ class LightCurve:
     curve=self.calculateCurve()
     
     #write out curve
-    self.write(curve)
+    self.write(curve,writeDiagnostics=options.writeDiagnostics)
   def readProfiles(self,options):
     '''Reads the needed data to create the light curve from the radial profile files'''
     
@@ -354,11 +359,28 @@ class LightCurve:
       #print self.time[n], self.luminosity[n],self.temperature[n]\
       #,self.interiorMass[n],self.gridVelocity[n],g,accel,logg,BC,self.BC[i][j]
       
-      temp=[self.time[n],mag]
+      temp=[self.time[n],mag,logg,g,accel,T,BC]
       curve.append(temp)
     return curve
-  def write(self,curve):
-    '''Writes out the light curve to the specified output file.'''
+  def write(self,curve,writeDiagnostics=False):
+    """Writes out the light curve to the specified output file.
+    
+    Parameters:
+      curve: a list containing the time, magnitude, logg, g,accel,T for a 
+      particular light curve. The logg,g,accel, T are only needed if these
+      quantities are to be written out. But the order must remain, e.g. if T is 
+      to be printed out, but the other quantities listed before T aren't present
+      it will cause problems.
+    Keywords:
+      writeDiagnostics: if true will write out the additional information of:
+        logg: log of the effective gravtity with or without pulsational
+          acceleration included
+        g: the gravintational acceleration not including the pulsational 
+          acceleration
+        accel: the acceleration due to the pulsation just d(U_r0)/dt
+        T_eff: the effective temaperature
+        BC: the calculated bolometric correction from T_eff, and logg
+    """
     
     print "writting light curve to file \""+self.outputFile+"\" ..."
     
@@ -367,7 +389,14 @@ class LightCurve:
     
     #write out light curve
     for i in range(len(curve)):
-      line=str(curve[i][0])+" "+str(curve[i][1])+"\n"
+      line=str(curve[i][0])+" "+str(curve[i][1])
+      if writeDiagnostics:
+        line+=" "+str(curve[i][2])
+        line+=" "+str(curve[i][3])
+        line+=" "+str(curve[i][4])
+        line+=" "+str(curve[i][5])
+        line+=" "+str(curve[i][6])
+      line+="\n"
       f.write(line)
     f.close()
 def main():
