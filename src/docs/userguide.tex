@@ -1,24 +1,23 @@
 \documentclass[12pt,a4paper]{book}
 \usepackage{amsfonts}
-\usepackage[bookmarks]{hyperref}
+\usepackage{hyperref}
 \hypersetup{
+  bookmarks    = true,
   colorlinks   = true, %Colours links instead of ugly boxes
   urlcolor     = blue, %Colour for external hyperlinks
   linkcolor    = blue, %Colour of internal links
-  citecolor   = red %Colour of citations
+  citecolor    = red %Colour of citations
 }
 \title{SPHERLS User Guide 1.0}
 \author{Chris Geroux}
 \begin{document}
 \maketitle
-
-\section{Introduction}
+\chapter{Introduction}
 This manual is primarily designed to be used to get a user up and running quickly. It also includes some information on how to go about modifying and developing SPHERLS. The reference manuals are useful for determining specific information about variables, functions and classes.
 
-\subsection{Overview}
-SPHERLS stands for Stellar Pulsation with a Horizontal Eulerian Radial Lagrangian Scheme. There are three components to SPHERLS: SPHERLS itself which does the hydrodynamics calculations, SPHERLSgen which creates starting models, and SPHERLSanal which is able to manipulate the output files. All three components have their own reference manuals where details of the various class, functions, and variables are described.
+\section{Overview}
+SPHERLS stands for Stellar Pulsation with a Horizontal Eulerian Radial Lagrangian Scheme. There are three components to SPHERLS: SPHERLS itself which does the hydrodynamics calculations, SPHERLSgen which creates starting models, and SPHERLSanal which is able to manipulate the output files. All three components have their own reference manuals where details of the various classes, functions, and variables are described, however the details on how to use these three components is described here. For the most part SPHERLS and SPHERLSgen are used directly, while SPHERLSanal is primarly used indirectly through the use of python scripts.
   
-\subsection{The Basics}
 SPHERLS calculates the radial pulsation motions together with the horizontal convective flow of stars. The radial pulsation can be described by a radial grid velocity, moving the grid inward and outward with the pulsation. The movement of the grid is defined by the motion required to maintaining the mass in a spherical shell through out the calculation. This motion is determined so that it will change the volume of the shell so the newly calculated density when multiplied with the new volume will produce the same shell mass for all times. The total motion of the stellar material is simply the combination of the three velocity components and the grid velocity.  The convective motion is the radial velocity minus the grid velocity, combined with the theta and phi velocities. This is because the grid velocity describes the bulk motion of the pulsation so subtracting it out leaves only the convective motions.
 
 SPHERLS solves the normal hydrodynamic equations of, mass, momentum, and energy conservation. The form of the mass equation, momentum conservation, and energy conservation are:
@@ -43,7 +42,7 @@ More info to be included here:
 \item mention very quickly how SPHERLS can be used (e.g. give very quick example of running SPHERLS)
 \end{itemize}
 
-\subsection{Program Flow}
+\section{Program Flow}
 This should give a rough idea of how SPHERLS works, but should be kept quite high level
 \begin{itemize}
 \item Describe the grids
@@ -52,17 +51,17 @@ This should give a rough idea of how SPHERLS works, but should be kept quite hig
 \item when models are dumped
 \end{itemize}
 
-\section{Installing SPHERLS}
+\chapter{Installing SPHERLS}
 
 There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include third party libraries. It is recommended to use the package including all third party libraries. This version ensures the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, (e.g. upgrading SPHERLS) or if you wish to try out newer versions of the third party libraries and do not want to download the additional data.
 
 A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
 
-I am going to assume that the user is installing on a Linux system, more over I will be assuming that the Linux distribution follows a Debian like directory structure (many distributions are based on Debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation (at least far as SPHERLS is concerned) is in {\tt ~/bin}, {\tt ~/lib}, {\tt ~/include}, and {\tt ~/share} directories respectively ({\tt ~} is just the linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard Debian locations on their own, preferring to install into the directory where they are built.
+I am going to assume that the user is installing on a Linux system, more over I will be assuming that the Linux distribution follows a Debian like directory structure (many distributions are based on Debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation (at least far as SPHERLS is concerned) is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard Debian locations on their own, preferring to install into the directory where they are built.
 
 If you have root access and want to install for all users of the current machine you will likely want to install the libraries into {\tt /usr/\-local}  which can be achieved by setting {\tt --prefix=/usr/local} instead of {\tt --prefix\-=/home/\-\$USER/} used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
-\subsection{Requirements}
+\section{Requirements}
 SPHERLS requires the below listed libraries to even compile
 \begin{description}
 \item[gcc/g++ and openMPI] must have an open MPI aware compiler
@@ -90,7 +89,7 @@ The below libraries can be optionally installed but will greatly enhance the use
 \item[Doxygen] used to create documentation from source code via ``make docs''
 \end{description}
 
-\subsection{Installing OpenMPI}
+\section{Installing OpenMPI}
 \begin{itemize}
 \item Download OpenMPI from \href{http://www.open-mpi.org/software/ompi/v1.6/}{the open mpi site}
 \item add library path to {\tt LD\_LIBRARY\_PATH}
@@ -99,7 +98,7 @@ The below libraries can be optionally installed but will greatly enhance the use
 \item install
 \end{itemize}
 
-\subsection{Installing PETSC Library}
+\section{Installing PETSC Library}
 Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt petsc-lite-3.2-p7} is known to be incompatible, which as of this writing is the current version of the PETSc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
 
 \begin{itemize}
@@ -115,7 +114,7 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item You will then need to add the following line to you {\tt .bashrc} file to assure that you will pick up the library {\tt export PETSC\_DIR=/home/\$USER/lib}
 \end{itemize}
 
-\subsection{Installing FFTW Library}
+\section{Installing FFTW Library}
 \begin{itemize}
 \item Download the FFTW Library from the FFTS \href{http://www.fftw.org/download.html}{website}. Version fftw-3.2.2 has been tested to work with SPHERLS.
 \item Then untar and unzip the downloaded with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
@@ -127,7 +126,7 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \end{enumerate}
 \end{itemize}
 
-\subsection{Installing Cython}
+\section{Installing Cython}
 \begin{itemize}
 \item {\tt tar -xzf Cython-0.19.1.tar.gz}
 \item {\tt cd Cython-0.19.1}
@@ -135,7 +134,7 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python.
 \end{itemize}
 
-\subsection{Installing evtk}
+\section{Installing evtk}
 \begin{itemize}
 \item {\tt tar -xzf evtk.tar.gz}
 \item {\tt cd evtk}
@@ -143,13 +142,13 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
 \end{itemize}
 
-\subsection{Installing ffmpeg}
+\section{Installing ffmpeg}
 useful for making movies from stills
 
-\subsection{Installing yasm}
+\section{Installing yasm}
 I think this is needed by ffmpeg
 
-\subsection{Installing HDF4 Library}
+\section{Installing HDF4 Library}
 Building these libraries requires gfortran and the jpeg library. If using the SPHERLS distribution package including third party optional libraries, version 4.2.8 of the HDF4 library is available in the {\tt libs} subdirectory. Otherwise this library can be downloaded from the hdfgroup \href{http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/}{website}. The most recent version tested to work with SPHERLS is version 4.2.8, version 4.2.7 has also been tested to work. To build the version included with the SPHERLS distribution package use the following set of commands:
 \begin{itemize}
 \item {\tt cd <SPHERLS package directory>/libs}
@@ -161,13 +160,13 @@ Building these libraries requires gfortran and the jpeg library. If using the SP
 \end{itemize}
 The above commands have only been tested with the version including with the SPHERLS distribution package other versions may require slight modifications to the above commands but should be reasonably similar.
 
-\subsection{Installing Doxygen}
+\section{Installing Doxygen}
 The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
 
-\subsection{Installing Python}
+\section{Installing Python}
 This could be pain if not simply doing apt-get install
 
-\subsection{Installing SPHERLS}
+\section{Installing SPHERLS}
 After all the third party libraries are available this should be as easy as:
 \begin{itemize}
 \item {\tt ./configure}
@@ -179,10 +178,10 @@ If you have the raw git repository do the following
 \item {\tt ./configure}
 \item {\tt make}
 \end{itemize}
-\subsection{.bashrc}
+\section{.bashrc}
 What you need to add to .bashrc after all the libraries are installed, this might be best to add on a per library basis, but perhaps a summary would be good?
 
-\section{Using SPHERLS}
+\chapter{Using SPHERLS}
 Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
 \begin{itemize}
 \item Generating a starting model
@@ -206,7 +205,21 @@ Bits to include in this section are (some of these might be better in a differen
 \item creating a new EOS file using {\tt eos\_interp.py}
 \end{itemize}
 
-\section{Modifing or Developing SPHERLS}
+\section{Generating a Starting Model}
+\section{The Configuration file}
+describe the xml configuration file
+\section{Running SPHERLS}
+describe the command, and the different ways to run SPHERLS, using mpi- the different environements and what might need to be done if you have a different sort of environment
+\section{Processing Output}
+\subsection{Profile Files}
+\subsection{2D Slices}
+\subsection{HDF Files}
+\subsection{VTK Files}
+\section{Viewing Output}
+\subsection{Plotting Profiles}
+\subsection{Plotting 2D Slices}
+
+\chapter{Modifing \& Developing SPHERLS}
 This section should include
 \begin{itemize}
 \item Basic layout/design of the code
@@ -242,9 +255,9 @@ This section should include
 \item SPHERLS debugging tips
 \end{itemize}
 
-\subsection{The Equations}
+\section{The Equations}
 I will want to give a detailed description of the equations used (probably copied from my notes wiki) so that the reader can easily see a 1-1 correspondence between the equation and the terms in SPHERLS.
 
-\subsection{Message Passing}
+\section{Message Passing}
 Explain message passing in SPHERLS
 \end{document}
