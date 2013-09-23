@@ -280,6 +280,7 @@ docs: docs/manuals/SPHERLS_User_Guide.pdf
 
 docs/manuals/SPHERLS_User_Guide.pdf: src/docs/userguide.tex
 	(cd	src/docs;	pdflatex userguide.tex)
+	(cd	src/docs;	pdflatex userguide.tex)#needs to be run twice to properly pick up bookmarks
 	(cd	src/docs;	cp userguide.pdf ../../docs/manuals/SPHERLS_User_Guide.pdf)
 
 #docs/manuals/SPHERLS_Ref_Manual.pdf:	${SPHERLS_SOURCES}	src/SPHERLS/Doxyfile
