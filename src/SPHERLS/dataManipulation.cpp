@@ -388,7 +388,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
       implicit.nNumImplicitZones=0;
     }
     
-    //get fraciton of temperature to use for step size in numerical derivatives
+    //get fraction of temperature to use for step size in numerical derivatives
     getXMLValue(xImplicit,"derivativeStepFraction",0,implicit.dDerivativeStepFraction);
     
     //get maximum number of iterations to use for the implicit calculation
@@ -396,6 +396,8 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     
     //get tolerance to use when calculating the temperature using the implicit calculation method.
     getXMLValue(xImplicit,"tolerance",0,implicit.dTolerance);
+    
+    getXMLValue(xImplicit,"relativeCorrectionLimit",0,implicit.dRelCorLimit);
   }
   else{
     implicit.nNumImplicitZones=0;
@@ -4068,7 +4070,7 @@ void updateLocalBoundaryVelocitiesNewGrid_RTP(ProcTop &procTop,MessPass &messPas
 void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, int nNumArgs
   , char* cArgs[]){
   
-  //initilize PETSc
+  //initialize PETSc
   PetscInitialize(&nNumArgs,&cArgs,PETSC_NULL,PETSC_NULL);
   
   
@@ -4172,16 +4174,16 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
     }
   }
   
-  //initilize coeffecient matrix
+  //initialize coefficient matrix
   MatCreateMPIAIJ(PETSC_COMM_WORLD
     ,nNumLocalRows[procTop.nRank]//local number of rows in the rhs vector
     ,nNumLocalRows[procTop.nRank]//local number of rows in the solution vector
-    ,nNumGlobalRows//global number of rows of the coeffecient matrix
-    ,nNumGlobalRows//global number of columns of the coeffecient matrix
-    ,0//set size of diaginal submatrix to zero
-    ,nNumNonzeroElementsPerRowD//set array of diaginal submatrix rows sizes to null
-    ,0//set size of off-diagonal submatrix to zero
-    ,nNumNonzeroElementsPerRowOD//set array of off-diaginal submatrix rows sizes to null
+    ,nNumGlobalRows//global number of rows of the coefficient matrix
+    ,nNumGlobalRows//global number of columns of the coefficient matrix
+    ,0//set size of diagonal sub-matrix to zero
+    ,nNumNonzeroElementsPerRowD//set array of diagonal sub-matrix rows sizes to null
+    ,0//set size of off-diagonal sub-matrix to zero
+    ,nNumNonzeroElementsPerRowOD//set array of off-diagonal sub-matrix rows sizes to null
     ,&implicit.matCoeff);
   
   //initialize rhs vector
@@ -4258,7 +4260,7 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
     }
   }
   
-  //count number of deriviatives per row on local processor
+  //count number of derivatives per row on local processor
   implicit.nNumDerPerRow=new int[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];
   nIndex=0;
   for(int i=0;i<implicit.nNumImplicitZones;i++){//i,j,k are row iterators
@@ -4318,11 +4320,11 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
     }
   }
     
-  //set global coeffecient matrix row and column indices, set local grid indicies and derivative type
+  //set global coefficient matrix row and column indices, set local grid indices and derivative type
   implicit.nTypeDer=new int*[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];
   implicit.nLocFun=new int*[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];
   implicit.nLocDer=new int**[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];
-  nIndex=0;//start back at frist row
+  nIndex=0;//start back at first row
   int *nFromIndex=new int[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];/*global index in the
     distributed vecTCorrections vector from which the local rows are needed.*/
   int *nToIndex=new int[implicit.nNumRowsALocal+implicit.nNumRowsALocalSB];/*local index in the

@@ -100,5 +100,8 @@
       tolerance given for the implicit calculation of the temperature. As well as the maximum number
       of iterations allowed for the PETSc matrix solver. To see number of solver iterations set
       TRACKMAXSOLVERERROR to 1 in global.h -->
+    <relativeCorrectionLimit>5.0e-2</relativeCorrectionLimit><!--Corrections to the 
+     temperature during the Newton-Raphson iterations are limited to be below
+     this limit, e.g. del T/T will be less than or equal to this value.-->
   </implicit>
 </data>

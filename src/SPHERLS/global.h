@@ -685,6 +685,11 @@ class Implicit{
       Holds the average value of the right hand side for the timestep where the error in the RHS is 
       the largest \ref dMaxErrorInRHS. Only set if \ref TRACKMAXSOLVERERROR is set to 1.
     */
+    double dRelCorLimit;/**<
+      Limits the size of the corrections applied in the Newton-Raphson 
+      iterations. If any Del T/T larger than this value, all Del T's are scaled
+      so that the largest value of Del T is less than dRelCorLimit*T.
+    */
     Implicit();/**<
       constructor the the class \ref Implicit.
       */
