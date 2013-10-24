@@ -132,7 +132,7 @@ Functions::Functions(){
 Implicit::Implicit(){
   nNumImplicitZones=0;
   nMaxNumIterations=15;
-  dTolerance=5.0e-15;
+  dTolerance=5.0e-14;
   nNumRowsALocal=0;
   nNumRowsALocalSB=0;
   nNumDerPerRow=NULL;
@@ -144,6 +144,7 @@ Implicit::Implicit(){
   nCurrentNumIterations=0;
   nMaxNumSolverIterations=0;
   dMaxErrorInRHS=0.0;
+  dRelCorLimit=5e-5;//default is 5%
 }
 Global::Global(){
 }

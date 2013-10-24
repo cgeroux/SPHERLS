@@ -18653,13 +18653,44 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
       ,implicit.vecTCorrectionsLocal,INSERT_VALUES,SCATTER_FORWARD);
     VecGetArray(implicit.vecTCorrectionsLocal,&dValues);
     
+    //calculate maximum relative correction
+    double dMaxRelCorrectionLocal=-INFINITY;
+    double dMaxRelCorrectionGlobal;
+    double dRelCorrection;
+    for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
+      nI=implicit.nLocFun[i][0];
+      nJ=implicit.nLocFun[i][1];
+      nK=implicit.nLocFun[i][2];
+      dRelCorrection=fabs(dValues[i]
+        /grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
+      if(dRelCorrection>dMaxRelCorrectionLocal){
+        dMaxRelCorrectionLocal=dRelCorrection;
+      }
+    }
+    
+    //get maximum of all processors
+    MPI::COMM_WORLD.Allreduce(&dMaxRelCorrectionLocal,&dMaxRelCorrectionGlobal
+      ,1,MPI::DOUBLE,MPI_MAX);
+    
+    //calculate a scaling for the correction to limit the relative size of the 
+    //corrections to less than or equal to implicit.dRelCorLimit
+    double dCorrectionScale=1.0;
+    if(dMaxRelCorrectionGlobal>implicit.dRelCorLimit){
+      dCorrectionScale=implicit.dRelCorLimit/dMaxRelCorrectionGlobal;
+    }
+    
     //apply corrections
+    if(dCorrectionScale<1.0){
+      std::cout<<"Corrections to temperature being scaled by "<<dCorrectionScale
+        <<"to keep relative corrections less than "
+        <<implicit.dRelCorLimit<<"."<<std::endl;
+    }
     dRelTErrorLocal=0.0;
     for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
       nI=implicit.nLocFun[i][0];
       nJ=implicit.nLocFun[i][1];
       nK=implicit.nLocFun[i][2];
-      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i];
+      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i]*dCorrectionScale;
       if(grid.dLocalGridNew[grid.nT][nI][nJ][nK]<0.0){
         
         #if SIGNEGTEMP==1
@@ -19021,13 +19052,39 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
       ,implicit.vecTCorrectionsLocal,INSERT_VALUES,SCATTER_FORWARD);
     VecGetArray(implicit.vecTCorrectionsLocal,&dValues);
     
+    //calculate maximum relative correction
+    double dMaxRelCorrectionLocal=-INFINITY;
+    double dMaxRelCorrectionGlobal;
+    double dRelCorrection;
+    for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
+      nI=implicit.nLocFun[i][0];
+      nJ=implicit.nLocFun[i][1];
+      nK=implicit.nLocFun[i][2];
+      dRelCorrection=fabs(dValues[i]
+        /grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
+      if(dRelCorrection>dMaxRelCorrectionLocal){
+        dMaxRelCorrectionLocal=dRelCorrection;
+      }
+    }
+    
+    //get maximum of all processors
+    MPI::COMM_WORLD.Allreduce(&dMaxRelCorrectionLocal,&dMaxRelCorrectionGlobal
+      ,1,MPI::DOUBLE,MPI_MAX);
+    
+    //calculate a scaling for the correction to limit the relative size of the 
+    //corrections to less than or equal to implicit.dRelCorLimit
+    double dCorrectionScale=1.0;
+    if(dMaxRelCorrectionGlobal>implicit.dRelCorLimit){
+      dCorrectionScale=implicit.dRelCorLimit/dMaxRelCorrectionGlobal;
+    }
+    
     //apply corrections
     dRelTErrorLocal=0.0;
     for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
       nI=implicit.nLocFun[i][0];
       nJ=implicit.nLocFun[i][1];
       nK=implicit.nLocFun[i][2];
-      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i];
+      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i]*dCorrectionScale;
       if(grid.dLocalGridNew[grid.nT][nI][nJ][nK]<0.0){
         
         #if SIGNEGTEMP==1
@@ -19509,13 +19566,39 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
       ,implicit.vecTCorrectionsLocal,INSERT_VALUES,SCATTER_FORWARD);
     VecGetArray(implicit.vecTCorrectionsLocal,&dValues);
     
+    //calculate maximum relative correction
+    double dMaxRelCorrectionLocal=-INFINITY;
+    double dMaxRelCorrectionGlobal;
+    double dRelCorrection;
+    for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
+      nI=implicit.nLocFun[i][0];
+      nJ=implicit.nLocFun[i][1];
+      nK=implicit.nLocFun[i][2];
+      dRelCorrection=fabs(dValues[i]
+        /grid.dLocalGridNew[grid.nT][nI][nJ][nK]);
+      if(dRelCorrection>dMaxRelCorrectionLocal){
+        dMaxRelCorrectionLocal=dRelCorrection;
+      }
+    }
+    
+    //get maximum of all processors
+    MPI::COMM_WORLD.Allreduce(&dMaxRelCorrectionLocal,&dMaxRelCorrectionGlobal
+      ,1,MPI::DOUBLE,MPI_MAX);
+    
+    //calculate a scaling for the correction to limit the relative size of the 
+    //corrections to less than or equal to implicit.dRelCorLimit
+    double dCorrectionScale=1.0;
+    if(dMaxRelCorrectionGlobal>implicit.dRelCorLimit){
+      dCorrectionScale=implicit.dRelCorLimit/dMaxRelCorrectionGlobal;
+    }
+    
     //apply corrections
     dRelTErrorLocal=0.0;
     for(int i=0;i<implicit.nNumRowsALocal+implicit.nNumRowsALocalSB;i++){
       nI=implicit.nLocFun[i][0];
       nJ=implicit.nLocFun[i][1];
       nK=implicit.nLocFun[i][2];
-      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i];
+      grid.dLocalGridNew[grid.nT][nI][nJ][nK]+=dValues[i]*dCorrectionScale;
       if(grid.dLocalGridNew[grid.nT][nI][nJ][nK]<0.0){
         
         #if SIGNEGTEMP==1
