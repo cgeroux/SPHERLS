@@ -123,6 +123,16 @@ class LightCurve:
       self.outputFile=outputFileElements[0].text
     else:
       raise Exception("Must have one \"outputFile\" node per \"lightCurve\" node")
+      
+    #get period
+    periodElements=element.findall("period")
+    if len(periodElements)>1:
+      warnings.warn("more than one \"period\" node in \"lightCurve\" node"
+        +", ignoring all but first node")
+    if len(periodElements)>0:
+      self.period=float(periodElements[0].text)
+    else:
+      self.period=None
   def create(self,options):
     
     #read in bolometric corrections
@@ -133,6 +143,10 @@ class LightCurve:
     
     #calculate light curve
     curve=self.calculateCurve()
+    
+    #if a period is given phase the light curve
+    if self.period!=None:
+      curve=self.phase(curve)
     
     #write out curve
     self.write(curve,writeDiagnostics=options.writeDiagnostics)
@@ -362,6 +376,25 @@ class LightCurve:
       temp=[self.time[n],mag,logg,g,accel,T,BC]
       curve.append(temp)
     return curve
+  def phase(self,curve):
+    """If user specified a period convert the time to a phase, and fold it
+    
+    Parameters:
+      curve: the light curve to phase
+    """
+    
+    #insure that we have a period, otherwise there is nothing to do
+    if self.period!=None:
+      time0=time=curve[0][0]
+      for i in range(len(curve)):
+        phase=(curve[i][0]-time0)/self.period
+        
+        #force phase to be between 0-1
+        phase=(phase-int(phase/self.period)*self.period)/self.period
+        
+        curve[i][0]=phase
+    else:
+      raise Exception("No period given unable to phase light curve")
   def write(self,curve,writeDiagnostics=False):
     """Writes out the light curve to the specified output file.
     

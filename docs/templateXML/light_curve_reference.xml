@@ -11,5 +11,6 @@
       is from the atmospheres directory in SPHERLS data subdirectory. -->
     <inputFiles frequency="5">../output/T6400_20x1_t[3744468-3779629]</inputFiles>
     <outputFile>light_curve.dat</outputFile>
+    <period>51840</period>
   </lightCurve>
 </lightCurves>
