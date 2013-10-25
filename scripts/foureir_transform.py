@@ -24,12 +24,10 @@ def parseOptions():
   parser.add_option("-c","--column",type="int",dest="column",default=21,help="Sets the column "\
     +"in the radial profile file from which the fourier transform in computed. The default value "\
     +"is %default, the column for the radial grid velocity.")
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
+  
+  #add make_profile options to parser
+  make_profiles.addParserOptions(parser)
+  
   #parse command line options
   return parser.parse_args()
 def main():
@@ -40,7 +38,7 @@ def main():
   [start,end,baseFileName]=disect_filename.disectFileName(args[0])
   
   #make sure that all the combined binary files have profiles made
-  failedFiles=make_profiles.make_profiles(options.keep,args[0],options.remake,False)
+  failedFiles=make_profiles.make_fileSet(args[0],options)
   
   #get and sort files
   extension="_pro"+".txt"

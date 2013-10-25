@@ -39,6 +39,10 @@ def parseOptions():
     ,help="If set it will write out Logg,g,accel,T_eff,BC to the output file in"
     +" that order in addition to the time and mag in the first and second "
     +"columns",default=False)
+  parser.add_option("-d",dest="double"
+    ,action="store_true"
+    ,help="If set it will double the data in the light curve for easier "
+    +"viewing of the light curve shape.",default=False)
   
   make_profiles.addParserOptions(parser)
   
@@ -146,7 +150,7 @@ class LightCurve:
     
     #if a period is given phase the light curve
     if self.period!=None:
-      curve=self.phase(curve)
+      curve=self.phase(curve,double=options.double)
     
     #write out curve
     self.write(curve,writeDiagnostics=options.writeDiagnostics)
@@ -376,25 +380,43 @@ class LightCurve:
       temp=[self.time[n],mag,logg,g,accel,T,BC]
       curve.append(temp)
     return curve
-  def phase(self,curve):
+  def phase(self,curve,double=False):
     """If user specified a period convert the time to a phase, and fold it
     
     Parameters:
       curve: the light curve to phase
+    Keywords:
+      double: by default it is False, but if set to true it will double the data
+        to provide two phases of the light curve to make it easier to see the
+        shape
     """
     
     #insure that we have a period, otherwise there is nothing to do
     if self.period!=None:
-      time0=time=curve[0][0]
+      
       for i in range(len(curve)):
-        phase=(curve[i][0]-time0)/self.period
         
         #force phase to be between 0-1
-        phase=(phase-int(phase/self.period)*self.period)/self.period
-        
+        phase=(curve[i][0]-int(curve[i][0]/self.period)*self.period)/self.period
         curve[i][0]=phase
+      
+      #shift max light to phase 0
+      curveTmp=np.array(curve)
+      indexOfMax=curveTmp[:,1].argmin()
+      phaseOfMax=curveTmp[indexOfMax][0]
+      for i in range(len(curve)):
+        phase=curve[i][0]-phaseOfMax
+        if phase<0.0:
+          curve[i][0]=phase+1
+        else:
+          curve[i][0]=phase
+      
+      #double the phase
+      for i in range(len(curve)):
+        curve.append( [curve[i][0]+1.0,curve[i][1]] )
     else:
       raise Exception("No period given unable to phase light curve")
+    return curve
   def write(self,curve,writeDiagnostics=False):
     """Writes out the light curve to the specified output file.
     
