@@ -173,7 +173,7 @@ class fileSet:
     for i in range(0,len(files),self.frequency):
       file=files[i]
       print "reading file \""+file+"\" "+str(i)+"/"+str(numFiles)+" ..."
-      tmp=dump.dump(file)
+      tmp=dump.Dump(file)
       times.append(tmp.time)
       self.convertDumpToHDF(tmp)
     

@@ -655,7 +655,10 @@ def parseOptions():
   parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE"
     ,version="%prog 1.0",description=r"Creates one or more HDF files. XMLFILE "
     +"gives all the settings needed. For an example of a configuration file see"
-    +" make_hdf_reference.xml under docs/templateXML.")
+    +" make_hdf_reference.xml under docs/templateXML. The make_hdf2.py is "
+    +"working, while this version make_hdf.py is not. This version is far more "
+    +"ambitious in terms of flexability and capability, but alas does not "
+    +"work. So use make_hdf2.py instead.")
   
   parser.add_option("-k","--keep",action="store_true",dest="keep"
     ,help="Keeps distributed binary files [default].",default=True)
