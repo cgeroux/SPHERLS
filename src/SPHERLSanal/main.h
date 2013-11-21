@@ -95,8 +95,11 @@ int nL_rad;/**<
 int nL_con;/**<
   Index of the Convective Luminosity.
   */
-int nKE;/**<
-  Index of the Kinetic energy.
+int nKEP;/**<
+  Index of the Kinetic energy stored in pulsation.
+  */
+int nKETot;/**<
+  Index of the total kinetic energy
   */
 int nC;/**<
   Index of the sound speed.
