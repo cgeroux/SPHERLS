@@ -46,7 +46,7 @@ def diffHeader(dumpFile0,dumpFile1,allowedRelativeDifference,threshold,out):
                              dump files. If the relative difference is less,
                              no difference is reported.
   threshold: how large the variable must be before the difference is considered.
-             Usefull when comparing velocities for example.
+             Useful when comparing velocities for example.
   out: an output object which supports the a write() allowing output of the
        comparison to be written out.
   """

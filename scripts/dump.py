@@ -20,7 +20,7 @@ eosTable=None
 class Dump:
   """Allows manipulation of SPHERLS binary and ascii dump files.
   
-  \todo should probalby add methods to write out binary/ascii dump files in the
+  \todo should probably add methods to write out binary/ascii dump files in the
   version that SPHERLS knows how to read.
   """
   
@@ -1035,7 +1035,7 @@ class Dump:
         cellCornerRectVars.append(self.varNames[i])
     return cellCornerRectVars
   def getCellCenteredRect(self):
-    """Returns a list of rectangular variables defined at cell centeres
+    """Returns a list of rectangular variables defined at cell centres
     
     """
     

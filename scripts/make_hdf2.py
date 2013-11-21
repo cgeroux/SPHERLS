@@ -184,7 +184,7 @@ class fileSet:
     hdf.closeData()
     hdf.close()
   def convertDumpToHDF(self,dump):
-    """Converts a dump ifle to an hdf file formated in the way sepcified in the 
+    """Converts a dump file to an hdf file formatted in the way specified in the 
     xml configuration file"""
     
     nRadialCutZone=self.radialCutZone
@@ -200,7 +200,7 @@ class fileSet:
     
     hdf.open(file)
     n=0
-    print "writting to hdf file \""+file+"\" ..."
+    print "writing to hdf file \""+file+"\" ..."
     for data in self.data:
       #print "  writting \""+self.dataNames[n]+"\" to file ..."
       hdf.openData(self.dataNames[n],hdf.DFNT_FLOAT64,self.dataShape[n])
