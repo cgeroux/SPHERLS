@@ -1233,7 +1233,7 @@ double dTimeStep_TEOS(){
     double dTimeStepPhi=1.0e200;
     for(unsigned int j=0;j<nNumTheta2;j++){
       double dTheta=dStartTheta+(double(j)*dDeltaTheta)*dPi/180.0;
-      double dTemp=vecdR[j+1]*sin(dTheta)*dDeltaPhi/dC;
+      double dTemp=vecdR[i+1]*sin(dTheta)*dDeltaPhi/dC;
       if(dTemp<dTimeStepPhi){
         dTimeStepPhi=dTemp;
       }
@@ -1278,7 +1278,7 @@ double dTimeStep_GL(){
     double dTimeStepPhi=1.0e200;
     for(unsigned int j=0;j<nNumTheta2;j++){
       double dTheta=dStartTheta+(double(j)*dDeltaTheta)*dPi/180.0;
-      double dTemp=vecdR[j+1]*sin(dTheta)*dDeltaPhi/dC;
+      double dTemp=vecdR[i+1]*sin(dTheta)*dDeltaPhi/dC;
       if(dTemp<dTimeStepPhi){
         dTimeStepPhi=dTemp;
       }

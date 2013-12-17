@@ -152,7 +152,7 @@ def parseOptions():
     "curves defined by a set of points in INPUTFILE.")
   parser.add_option("--x1",dest="x1",
     help=("Specify the column in INPUTFILE for the x-coordinate for curve 1 "
-      +"starting at 1 for the first column in the INPUTFILE. "
+      +"starting at 0 for the first column in the INPUTFILE. "
       +"[default: %default]"),
     metavar="COLUMN",type="int",default=0)
   parser.add_option("--y1",dest="y1",
