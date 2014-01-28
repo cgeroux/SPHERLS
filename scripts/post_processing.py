@@ -15,38 +15,49 @@ def main():
   
   parser=op.OptionParser(usage="Usage: %prog [options]"
     ,version="%prog 1.0"
-    ,description="Searches subdirectories of the current directory for \"SPHERLS.xml\" files"
-      +"when found it skips searches in any output directories listed in \"SPHERLS.xml\"+ it then "
-      +"generates submissions scripts and submits jobs to run \"average_PKE.py\" in output "
-      +"directories found in the \"SPHERLS.xml\" files. \"average_PKE.py\" will combine "
-      +"distributed binary files and create radial profiles from the combined binary files, "
-      +"finally it will sum up the Kinetic Energy in each profile, and find the peaks, and average "
-      +"the peaks over 6 peaks/3periods.")
-  parser.add_option('-n',default=10,type=int,dest="n",help="Sets the maximum number of jobs/threads "
-    +"to submit/run at one time. [default: %default]")
-  parser.add_option('-E',action="append",dest="E",default=None,help="Add extra command to end of "
-    +"submit script. The \"\cwd\" can be used to include the absolute path of the directory in "
-    +"which \"SPHERLS.xml\" configuration file was found. Also the macro \"\sp\" can be used for "
-    +"the absolute path to the SPHERLS scripts. Note: if any scripts you are running use "
-    +"configuration files they should use absolute paths.")
-  parser.add_option('-e',action="store",dest="e",type="string",help="Allows one to override the "
-    +"equation of state file in the model with the the one specified after this option."
-    ,default=None)
-  parser.add_option('-d',action="store_true",dest="d",default=False,help="Perform a dry run. "
-    +"It will search directories and let the user know what files it finds but doesn't actually "
-    +"create any submit scripts or submit any jobs. [not default]")
-  parser.add_option('-t',action="store_true",dest="t",default=False,help="If set will use "
-    +"threading instead of the sun grid engine")
-  parser.add_option('-m',action="store_true",dest="m",default=False,help="If set will re-make "
-   +"radial profiles even if the already exist.")
-  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help="Will include"
-    +"(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial profile. These are usefull for"
-    +" calculating adiabatic gradient.",default=False)
-  parser.add_option('-M',action="store_true",dest="M",default=False,help="If set will "
-   +"re-combined binary files even if already combined.")
-  parser.add_option('-r',action="store_true",dest="r",default=False,help="If set will re-sum "
-   +"the model profiles kinetic energies.")
-  parser.add_option('-l',default=None,type=str,dest="l",help="Used to set the runtime of the job, required by some que systems [default: %default]")
+    ,description="Searches subdirectories of the current directory for "
+      +"\"SPHERLS.xml\" files when found it skips searches in any output "
+      +"directories listed in \"SPHERLS.xml\"+ it then generates submissions "
+      +"scripts and submits jobs to run \"average_PKE.py\" in output "
+      +"directories found in the \"SPHERLS.xml\" files. \"average_PKE.py\" "
+      +"will combine distributed binary files and create radial profiles from "
+      +"the combined binary files, finally it will sum up the Kinetic Energy "
+      +"in each profile, and find the peaks, and average the peaks over 6 "
+      +"peaks/3periods.")
+  parser.add_option('-n',default=10,type=int,dest="n",help="Sets the maximum "
+    +"number of jobs/threads to submit/run at one time. [default: %default]")
+  parser.add_option('-E',action="append",dest="E",default=None,help="Add "
+    +"extra command to end of submit script. The \"\cwd\" can be used to "
+    +"include the absolute path of the directory in which \"SPHERLS.xml\" "
+    +"configuration file was found. Also the macro \"\sp\" can be used for "
+    +"the absolute path to the SPHERLS scripts. Note: if any scripts you are "
+    +"running use configuration files they should use absolute paths.")
+  parser.add_option('-e',action="store",dest="e",type="string",help="Allows "
+    +"one to override the equation of state file in the model with the the "
+    +"one specified after this option.",default=None)
+  parser.add_option('-d',action="store_true",dest="d",default=False,help
+    ="Perform a dry run. It will search directories and let the user know "
+    +"what files it finds but doesn't actually create any submit scripts or "
+    +"submit any jobs. [not default]")
+  parser.add_option('-t',action="store_true",dest="t",default=False,help="If "
+    +"set will use threading instead of the sun grid engine")
+  parser.add_option('-m',action="store_true",dest="m",default=False,help="If "
+    +"set will re-make radial profiles even if the already exist.")
+  parser.add_option("-v",action="store_true", dest="extraProfileInfo",help
+    ="Will include(dlnP/dlnT)_rho, (dlnP/dlnRho)_T, and (dE/dT)_rho in radial "
+    +"profile. These are useful for calculating adiabatic gradient."
+    ,default=False)
+  parser.add_option('-M',action="store_true",dest="M",default=False,help="If "
+    +"set will re-combined binary files even if already combined.")
+  parser.add_option('-r',action="store_true",dest="r",default=False,help="If "
+    +"set will re-sum the model profiles kinetic energies.")
+  parser.add_option('--remove',action="store_true",dest="removeDistBins"
+    ,default=False,help="If set will remove distributed binary files.")
+  parser.add_option('-l',default=None,type=str,dest="l",help="Used to set the "
+    +"runtime of the job, required by some que systems [default: %default]")
+  parser.add_option('-c',action="store_true",dest="combineBins"
+    ,help="Will run the combine_bins.py script instead of the average_PKE.py "
+    +"script.")
   
   #parse command line options
   (options,args)=parser.parse_args()
@@ -60,13 +71,14 @@ def main():
   cwd=os.path.abspath('./')
   for root,dirs,files in os.walk(cwd):
     if "SPHERLS.xml" in files:
-      (outputPath,outputFileName)=getConfigOutputDIR(os.path.join(root,"SPHERLS.xml"))
+      (outputPath,outputFileName)=getConfigOutputDIR(os.path.join(root
+        ,"SPHERLS.xml"))
       outputFilePaths.append(outputPath)
       outputFileNames.append(outputFileName)
       count+=1
     
-    #remove output directories from search, potentially lots of files in there that 
-    #we know we won't need to search through
+    #remove output directories from search, potentially lots of files in there 
+    #that we know we won't need to search through
     for dir in dirs:
       testDir=os.path.join(root,dir)
       if testDir in outputFilePaths:
@@ -85,17 +97,21 @@ def main():
         jobName=os.path.relpath(outputFilePaths[i])
         jobName=jobName.replace("/","_")
         jobName=jobName.replace("\\","_")
-        print "starting job "+jobName+", "+str(i+1)+"/"+str(len(outputFilePaths))
+        print "starting job "+jobName+", "+str(i+1)\
+          +"/"+str(len(outputFilePaths))
         p.append(multiprocessing.Process(target=runAverage
-          , args=(os.path.join(outputFilePaths[i],outputFileNames[i]),jobName,options)))
+          , args=(os.path.join(outputFilePaths[i],outputFileNames[i]),jobName
+            ,options)))
         jobNames.append(jobName)
         p[i].start()
         numProcs+=1
-      if numProcs>=totalNumProcs and i+1<len(outputFilePaths):#wait for a job to finish before starting a new one
-        sys.stdout.write("\nnumber of processes is "+str(numProcs)+" which is the maximum number "
-          +"of concurrent \n")
-        sys.stdout.write("processes allowed, waiting for a process to finish before starting "
-          +"more\n")
+      
+      #wait for a job to finish before starting a new one
+      if numProcs>=totalNumProcs and i+1<len(outputFilePaths):
+        sys.stdout.write("\nnumber of processes is "+str(numProcs)
+          +" which is the maximum number "+"of concurrent \n")
+        sys.stdout.write("processes allowed, waiting for a process to finish "
+          +"before starting more\n")
         sys.stdout.flush()
         while numProcs>=totalNumProcs:
           sys.stdout.write("\r"+waitChars[waitState])
@@ -118,7 +134,10 @@ def main():
     #create submit scripts, and run job
     settings={}
     settings['shell']="/bin/bash"
-    settings['exe']=os.path.join(paths.scriptPath,"average_PKE.py")
+    if options.combineBins:
+      settings['exe']=os.path.join(paths.scriptPath,"combine_bins.py")
+    else:
+      settings['exe']=os.path.join(paths.scriptPath,"average_PKE.py")
     for i in range(len(outputFilePaths)):
       
       jobName=os.path.relpath(outputFilePaths[i])
@@ -134,6 +153,7 @@ def main():
       resum=""
       eosFile=""
       extraProfileInfo=""
+      removeDistBins=""
       if options.m:#use --remake option to remake profiles even if they exist already
         remake=" --remake-profiles"
       if options.r:#use --re-sum option so that all model profiles KE will be re-summed
@@ -144,8 +164,10 @@ def main():
         eosFile=" -e "+options.e
       if options.extraProfileInfo:
         extraProfileInfo=" -v"
-      settings['arguments']=[remake,resum,eosFile,extraProfileInfo,os.path.join(outputFilePaths[i]
-        ,outputFileNames[i])+"_t[0-*]"]
+      if options.removeDistBins:
+        removeDistBins="--remove"
+      settings['arguments']=[remake,resum,eosFile,removeDistBins
+        ,extraProfileInfo,os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
       settings['runtime']=options.l
       script=makeSubScript(settings,options.E)
@@ -156,7 +178,7 @@ def main():
         os.system(cmd)
       if i+1>=options.n:# if the maximum number of jobs are exceed stop
         warnings.warn("Maximum number of jobs reached ("+str(options.n)
-          +") before all jobs submitted, use -n to increast limit")
+          +") before all jobs submitted, use -n to increase limit")
         break
 def runAverage(outputFileName,logFile,options):
   cmd=os.path.join(paths.scriptPath,"average_PKE.py")
