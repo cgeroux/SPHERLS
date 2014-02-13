@@ -38,5 +38,6 @@
     <derivativeStepFraction>5e-7</derivativeStepFraction>
     <tolerance>5.0e-14</tolerance>
     <max-iterations>100</max-iterations>
+    <relativeCorrectionLimit>5.0e-2</relativeCorrectionLimit>
   </implicit>
 </data>

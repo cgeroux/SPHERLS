@@ -109,6 +109,9 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
       b) run SPHERLS for 3 timesteps with given number of processors
     4) restart code at first time step after initial model
     5) diff last models to see if they are the same
+    
+  TODO: might be good to pull the basic xml structure from the reference file,
+    that way this script will automatically stay upto date with changes
   """
   
   parts=startModel.rsplit("_t",1)
@@ -159,6 +162,7 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
         <derivativeStepFraction>5e-7</derivativeStepFraction>
         <tolerance>5.0e-14</tolerance>
         <max-iterations>100</max-iterations>
+        <relativeCorrectionLimit>5.0e-2</relativeCorrectionLimit>
       </implicit>
     </data>
     '''
@@ -202,6 +206,7 @@ def testRestarts(tmpDir,startModel,exePath,numProcs,options,numTimeSteps):
         <derivativeStepFraction>5e-7</derivativeStepFraction>
         <tolerance>5.0e-14</tolerance>
         <max-iterations>100</max-iterations>
+        <relativeCorrectionLimit>5.0e-2</relativeCorrectionLimit>
       </implicit>
     </data>
     '''
