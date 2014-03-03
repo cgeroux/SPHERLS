@@ -263,7 +263,7 @@ def main():
   fileName=args[0][:len(args[0])-4]+"_residual.txt"
   print "writting residuals to \""+fileName+"\" ..."
   f=open(fileName,'w')
-  header="phase residual standard_deviation"
+  header="phase residual standard_deviation\n"
   f.write(header)
   for i in range(len(centersRes)):
     line=str(centersRes[i])+" "+str(meanRes[i])+" "+str(sigmaRes[i])+"\n"

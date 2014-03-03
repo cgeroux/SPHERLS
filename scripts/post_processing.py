@@ -58,6 +58,8 @@ def main():
   parser.add_option('-c',action="store_true",dest="combineBins"
     ,help="Will run the combine_bins.py script instead of the average_PKE.py "
     +"script.")
+  parser.add_option('-q',action="store_true",dest="quite"
+    ,help="If set it will not output standard output from the jobs.")
   
   #parse command line options
   (options,args)=parser.parse_args()
@@ -170,7 +172,7 @@ def main():
         ,extraProfileInfo,os.path.join(outputFilePaths[i],outputFileNames[i])+"_t[0-*]"]
       settings['outputFilePath']=outputFilePaths[i]
       settings['runtime']=options.l
-      script=makeSubScript(settings,options.E)
+      script=makeSubScript(settings,options.E,options.quite)
       
       #run job
       if not options.d:
@@ -206,7 +208,7 @@ def getConfigOutputDIR(fileName):
       os.chdir(cwd)
       return outputPath,fileName
   return None
-def makeSubScript(settings,extras):
+def makeSubScript(settings,extras,quite=False):
   '''
   Creates a submit script for the sun grid engine based on settings, and returns the name of the 
   script. If no que was specified it returns None.
@@ -227,9 +229,12 @@ def makeSubScript(settings,extras):
     +"#$ -cwd\n"\
     +"##\n"\
     +"#$ -j y\n"\
-    +"## Output file name\n"\
-    +"#$ -o "+settings['jobName']+".out\n"\
-    +"##\n"\
+    +"## Output file name\n"
+  if quite:
+    script+="#$ -o /dev/null\n"
+  else:
+    script+="#$ -o "+settings['jobName']+".out\n"
+  script+="##\n"\
     +"## Transfer all environment variables when job is submitted\n"\
     +"#$ -V\n"
   if settings['runtime']!=None:
