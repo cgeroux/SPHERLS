@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import math
 import numpy as np
-
+import scipy.interpolate as interp
 class Bin:
   def __init__(self,lowerBound,upperBound):
     """Set bounds of the bin and the center of the bin"""
@@ -80,7 +80,6 @@ class BinnedData:
     """Puts points into bins"""
     
     #bin Data
-    print data.shape
     for i in range(len(data)):
       x=data[i][0]
       y=data[i][1]
@@ -120,6 +119,9 @@ class DataFunction:
     self.y=y
     self.maxRange=max(x)
     self.minRange=min(x)
+    self.f=interp.interp1d(x,y,kind="cubic")
+  def getPointByCubicInt(self,x):
+    return self.f(x)
   def getPointByLinearInt(self,x):
     
     #find bracketing values
