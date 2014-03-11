@@ -13,10 +13,16 @@ def main():
   #create the parser
   parser=op.OptionParser(usage="Usage: %prog [options] DIRTOARCHIVE ARCHIVENAME"
     ,version="%prog 1.0"
-    ,description="Searches subdirectories of the current directory for "
-      +"\"SPHERLS.xml\" files when found it skips searches in any output "
-      +"directories listed in \"SPHERLS.xml\"+ it then generates submissions "
-      +"scripts and submits jobs to run which will ...")
+    ,description="Searches subdirectories of the directory DIRTOARCHIVE for "
+      +"\"SPHERLS.xml\" files. When one is found, it creates the same "
+      +"directory structure in the directory ARCHIVENAME and copies over a "
+      +"number of files usually associated with a run (e.g. SPHERLS.xml "
+      +"SPHERLSgen.xml etc.) which are desirable to archive. It then submits a "
+      +"job to the sun grid engine to move combined binary files form the "
+      +"output directory to a new output directory in the same directory as "
+      +"the other moved files. This process allows one to then archive the "
+      +"new directory, which contains all the basic information from a "
+      +"calculation using tar -czf ARCHIVENAME.tar.gz ARCHIVENAME.")
 
   #add parser options
   parser=addParserOptions(parser)
