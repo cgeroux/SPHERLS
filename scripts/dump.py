@@ -600,7 +600,8 @@ class Dump:
     """Writes the header of a binary dump file to out.
     
     Arguments:
-    out: an object supporting the write() function
+    out: an object supporting the write() function, pass sys.stdout to print to
+      terminal, or a file handle to print to a file.
     """
     
     #print header

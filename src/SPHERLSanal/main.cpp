@@ -843,7 +843,7 @@ void printHelp(){
     <<" -l [input file type] [input file] converts a model into the formate used\n"
     <<"       by LNA.\n"
     <<" -e [eos file] path to equation of state file to use, overrides that \n"
-    <<"       given in the model.";
+    <<"       given in the model.\n";
 }
 void convertCollBinToAscii(std::string sFileName){//tested
   
