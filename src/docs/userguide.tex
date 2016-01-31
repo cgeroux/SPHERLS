@@ -55,18 +55,14 @@ This should give a rough idea of how SPHERLS works, but should be kept quite hig
 
 There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include third party libraries. It is recommended to use the package including all third party libraries. This version ensures the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, (e.g. upgrading SPHERLS) or if you wish to try out newer versions of the third party libraries and do not want to download the additional data.
 
-A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script (needed for installing SPHERLS) to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
+A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them in. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
 
 I am going to assume that the user is installing on a Linux system, more over I will be assuming that the Linux distribution follows a Debian like directory structure (many distributions are based on Debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation (at least far as SPHERLS is concerned) is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard Debian locations on their own, preferring to install into the directory where they are built.
 
 If you have root access and want to install for all users of the current machine you will likely want to install the libraries into {\tt /usr/\-local}  which can be achieved by setting {\tt --prefix=/usr/local} instead of {\tt --prefix\-=/home/\-\$USER/} used in the below installations and SPHERLS will automatically check this location for the install libraries.
     
 \section{Requirements}
-SPHERLS requires the below listed libraries to even compile
-\begin{description}
-\item[gcc/g++ and openMPI] must have an open MPI aware compiler
-\item[PETSc] used as the core matrix solver
-\end{description}
+SPHERLS requires gcc/g++, OpenMPI, and PETSc to compile and run at all.
 
 The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended
 \begin{description}
@@ -102,21 +98,21 @@ The below libraries can be optionally installed but will greatly enhance the use
 Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt petsc-lite-3.2-p7} is known to be incompatible, which as of this writing is the current version of the PETSc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
 
 \begin{itemize}
-\item Download PETSc library, from the PETSc \href{http://www.mcs.anl.gov/petsc/download/index.html}{website}
+\item Download PETSc library, from the PETSc \href{http://www.mcs.anl.gov/petsc/download/index.html}{website} or get it from the {\tt libs/} directory in the spherls package
 \item Then untar and unzip it with {\tt tar -xzf petsc-lite-3.1-p8.tar}
 \item To install the library change into the directory made when you extracted the archive and type the following commands:
 \begin{enumerate}
-\item {\tt ./configure PETSC\_DIR=\$PWD --prefix=/home/\$USER/ --with-c++-support --with-c-support --with-shared --download-c-blas-lapack=1 --with-x11=no} where {\tt \$USER} is the environment variable corresponding to your username.  Note that the {\tt PETSC\_DIR=\$PWD} needs to come first. Also {\tt --download-f-blas-lapack=1} only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using {\tt --download-c-blas-lapack=1} seems to work in this case
-\item {\tt make all} Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above if given.
+\item {\tt ./configure PETSC\_DIR=\$PWD --prefix=/home/\$USER/ --with-c++-support --with-c-support --with-shared --download-f-blas-lapack=1 --with-x11=no} where {\tt \$USER} is the environment variable corresponding to your username.  Note that the {\tt PETSC\_DIR=\$PWD} needs to come first. Also {\tt --download-f-blas-lapack=1} only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using {\tt --download-c-blas-lapack=1} seems to work when a Fortran compiler isn't available.
+\item {\tt make all} Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above, if given.
 \item {\tt make install} as with the {\tt make all} the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
-\item {\tt make PETSC\_DIR=/home/\$USER/lib test} will test the code
+\item {\tt make PETSC\_DIR=/home/\$USER/lib test} will test the code. Again the install process will give you a more specific command that you should use over the one given here.
 \end{enumerate}
 \item You will then need to add the following line to you {\tt .bashrc} file to assure that you will pick up the library {\tt export PETSC\_DIR=/home/\$USER/lib}
 \end{itemize}
 
 \section{Installing FFTW Library}
 \begin{itemize}
-\item Download the FFTW Library from the FFTS \href{http://www.fftw.org/download.html}{website}. Version fftw-3.2.2 has been tested to work with SPHERLS.
+\item Download the FFTW Library from the FFTW \href{http://www.fftw.org/download.html}{website}. Or there is a version available in the {\tt lib/} directory. Version fftw-3.2.2, fftw-3.3.1, and fftw-3.3.3 have been tested to work with SPHERLS.
 \item Then untar and unzip the downloaded with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
 \item To install the library change into the directory made when you extracted the archive and type the following commands:
 \begin{enumerate}
@@ -127,11 +123,12 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \end{itemize}
 
 \section{Installing Cython}
+Cython allows you to build some extra python modules to use in creating visualization output such as vtk files for use in VisIt, and for making the equation of state routines avaible to the python analysis scripts.
 \begin{itemize}
 \item {\tt tar -xzf Cython-0.19.1.tar.gz}
 \item {\tt cd Cython-0.19.1}
 \item {\tt  python setup.py install --prefix=/home/\-\$USER}
-\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python.
+\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python and of course where you install Cython.
 \end{itemize}
 
 \section{Installing evtk}
@@ -169,15 +166,19 @@ This could be pain if not simply doing apt-get install
 \section{Installing SPHERLS}
 After all the third party libraries are available this should be as easy as:
 \begin{itemize}
-\item {\tt ./configure}
+\item {\tt ./configure --prefix=/home/${USER}}
 \item {\tt make}
+\item {\tt make install}
 \end{itemize}
 If you have the raw git repository do the following
 \begin{itemize}
 \item {\tt autoreconf --install} provided you have the gnu build tool auto conf installed, this makes the configuration script
-\item {\tt ./configure}
+\item {\tt ./configure --prefix=/home/${USER}}
 \item {\tt make}
+\item {\tt make install}
 \end{itemize}
+To see availble configure options type ./configure -h, this will display options for turning off various add-ons like hdf4, fftw3, and
+
 \section{.bashrc}
 What you need to add to .bashrc after all the libraries are installed, this might be best to add on a per library basis, but perhaps a summary would be good?
 

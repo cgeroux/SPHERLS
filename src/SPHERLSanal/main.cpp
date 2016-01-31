@@ -5,6 +5,7 @@
 #include "main.h"
 #include <math.h>
 #include <iomanip>
+#include <unistd.h>
 #include "eos.h"
 #ifdef HDF_ENABLE
   #include "mfhdf.h"
@@ -8126,7 +8127,7 @@ void convertBinToHDF4(std::string sFileName){
 #endif
 void setExeDir(){
     char buff[1024];
-    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
     if (len != -1) {
       buff[len] = '\0';
       sExeDir=std::string(buff);

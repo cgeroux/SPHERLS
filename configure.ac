@@ -19,11 +19,11 @@ JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
 PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
 PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
 
-#Should optional 3rd party libararies be included in the distribution
+#Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no
 AC_ARG_ENABLE([include-optional-libs],
   [AS_HELP_STRING([--enable-include-optional-libs],
-  [Optional thrid party libraries will be included in distribution package created from "make dist"])],
+  [Optional third party libraries will be included in distribution package created from "make dist"])],
   [INCLUDE_OPTIONAL_LIBS_IN_DIST="$enableval"],
   [])
 AM_CONDITIONAL([INCLUDE_OPTIONAL_LIBS_IN_DIST],[test "$INCLUDE_OPTIONAL_LIBS_IN_DIST" = "yes"])
@@ -32,7 +32,7 @@ AM_CONDITIONAL([INCLUDE_OPTIONAL_LIBS_IN_DIST],[test "$INCLUDE_OPTIONAL_LIBS_IN_
 INCLUDE_CRUCIAL_LIBS_IN_DIST=yes
 AC_ARG_ENABLE([include-crucial-libs],
   [AS_HELP_STRING([--disable-include-crucial-libs],
-  [Crucial thrid party libraries will not be included in distribution package created from "make dist"])],
+  [Crucial third party libraries will not be included in distribution package created from "make dist"])],
   [INCLUDE_CRUCIAL_LIBS_IN_DIST="$enableval"],
   [])
 AM_CONDITIONAL([INCLUDE_CRUCIAL_LIBS_IN_DIST],[test "$INCLUDE_CRUCIAL_LIBS_IN_DIST" = "yes"])
@@ -41,7 +41,7 @@ AM_CONDITIONAL([INCLUDE_CRUCIAL_LIBS_IN_DIST],[test "$INCLUDE_CRUCIAL_LIBS_IN_DI
 MAKE_DOCS=no
 AC_ARG_ENABLE([make-docs],
   [AS_HELP_STRING([--enable-make-docs],
-  [If enabled it will remake the documenation from the source files when running "make" or "make all". This requires the installation of doxygen, latex and ps2pdf and is not recomended unless you are actively making changes to the source files.])],
+  [If enabled it will remake the documentation from the source files when running "make" or "make all". This requires the installation of doxygen, latex and ps2pdf and is not recommended unless you are actively making changes to the source files.])],
   [MAKE_DOCS="$enableval"],
   [])
 AM_CONDITIONAL([MAKE_DOCS],[test "$MAKE_DOCS" = "yes"])
@@ -58,14 +58,14 @@ AC_ARG_ENABLE([fftw],
   [FFTW_ENABLE="$enableval"],
   [])
 #
-#check to see if user set an overide for include path
+#check to see if user set an override for include path
 AC_ARG_ENABLE([fftw-include-path],
  [AS_HELP_STRING([--enable-fftw-include-path],
  [set location of the fftw3 headers])],
  [FFTW_INCLUDE_PATHS="$enableval"],
  [])
 #
-#check to see if user set an overide for library path
+#check to see if user set an override for library path
 AC_ARG_ENABLE([fftw-lib-path],
   [AS_HELP_STRING([--enable-fftw-lib-path],
   [set location of the fftw3 library])],
@@ -82,7 +82,7 @@ AS_IF(
     AC_CHECK_FILE([${TEST_PATH}/fftw3.h],[FFTW_INCLUDE_PATH=${TEST_PATH};break],[])
   done
   #
-  #seach lib paths for libfftw3.so and libfftw3.a
+  #search lib paths for libfftw3.so and libfftw3.a
   FFTW_LIB_PATH=""
   for TEST_PATH in $FFTW_LIB_PATHS; do
     AC_CHECK_FILES([${TEST_PATH}/libfftw3.so ${TEST_PATH}/libfftw3.a ]\
@@ -125,21 +125,21 @@ AC_ARG_ENABLE([hdf],
   [HDF_ENABLE="$enableval"],
   [])
 
-#check to see if user set an overide for include path
+#check to see if user set an override for include path
 AC_ARG_ENABLE([hdf-include-path],
  [AS_HELP_STRING([--enable-hdf-include-path],
  [set location of the hdf headers])],
  [HDF_INCLUDE_PATHS="$enableval"],
  [])
 
-#check to see if user set an overide for library path
+#check to see if user set an override for library path
 AC_ARG_ENABLE([hdf-lib-path],
   [AS_HELP_STRING([--enable-hdf-lib-path],
   [set location of the hdf library])],
   [HDF_LIB_PATHS="$enableval"],
   [])
   
-#check to see if user set an overide for the jpeg library path
+#check to see if user set an override for the jpeg library path
 AC_ARG_ENABLE([jpeg-lib-path],
   [AS_HELP_STRING([--enable-jpeg-lib-path],
   [set location of the jpeg library, required by hdf features])],
@@ -149,7 +149,7 @@ AC_ARG_ENABLE([jpeg-lib-path],
 #check to make sure we have a library and include path, if we are using hdf
 AS_IF([test "$HDF_ENABLE" = "yes"],[
   
-  #seach lib paths for libjpeg.so and libjpeg.a
+  #search lib paths for libjpeg.so and libjpeg.a
   JPEG_LIB_PATH=""
   for TEST_PATH in $JPEG_LIB_PATHS; do
     AC_CHECK_FILES([${TEST_PATH}/libjpeg.so ${TEST_PATH}/libmfhdf.a ]
@@ -169,7 +169,7 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
     AC_CHECK_FILE([${TEST_PATH}/hdf.h],[HDF_INCLUDE_PATH=${TEST_PATH};break],[])
   done
   
-  #seach lib paths for libmfhdf.so and libmfhdf.a
+  #search lib paths for libmfhdf.so and libmfhdf.a
   HDF_LIB_PATH=""
   for TEST_PATH in $HDF_LIB_PATHS; do
     AC_CHECK_FILES([${TEST_PATH}/libmfhdf.so ${TEST_PATH}/libmfhdf.a ]
@@ -205,14 +205,14 @@ AC_ARG_ENABLE([petsc],
   [PETSC_ENABLE="$enableval"],
   [])
 #
-#check to see if user set an overide for include path
+#check to see if user set an override for include path
 AC_ARG_ENABLE([petsc-include-path],
  [AS_HELP_STRING([--enable-petsc-include-path],
  [set location of the petsc headers])],
  [PETSC_INCLUDE_PATHS="$enableval"],
  [])
 #
-#check to see if user set an overide for library path
+#check to see if user set an override for library path
 AC_ARG_ENABLE([petsc-lib-path],
   [AS_HELP_STRING([--enable-petsc-lib-path],
   [set location of the petsc library])],
@@ -228,7 +228,7 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
     AC_CHECK_FILE([${TEST_PATH}/petscksp.h],[PETSC_INCLUDE_PATH=${TEST_PATH};break],[])
   done
   #
-  #seach lib paths for libfftw3.so and libfftw3.a
+  #search lib paths for libfftw3.so and libfftw3.a
   PETSC_LIB_PATH=""
   for TEST_PATH in $PETSC_LIB_PATHS; do
     AC_CHECK_FILES([${TEST_PATH}/libpetsc.so ${TEST_PATH}/libpetsc.a ]\
@@ -254,6 +254,67 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
   #define PETSC_ENABLE in include file
   AC_DEFINE([PETSC_ENABLE],[],[Defined if PETSc is enabled])
   ])
+#################################################################
+
+
+#
+#################################################################
+## Check for CYTHON
+#################################################################
+#
+#check to see if user disabled cython
+CYTHON_ENABLE=yes
+AC_ARG_ENABLE([cython],
+  [AS_HELP_STRING([--disable-cython],
+  [Disable cython dependent features, such as making vtk files for 
+ visualization.])],
+  [CYTHON_ENABLE="$enableval"],
+  [])
+#
+#check to see if user set an override for include path
+#AC_ARG_ENABLE([fftw-include-path],
+# [AS_HELP_STRING([--enable-fftw-include-path],
+# [set location of the fftw3 headers])],
+# [FFTW_INCLUDE_PATHS="$enableval"],
+# [])
+#
+#check to see if user set an override for library path
+#AC_ARG_ENABLE([fftw-lib-path],
+#  [AS_HELP_STRING([--enable-fftw-lib-path],
+#  [set location of the fftw3 library])],
+#  [FFTW_LIB_PATHS="$enableval"],
+#  [])
+#
+#check to make sure we have a library and include path, if we are using fftw
+AS_IF(
+  [test "$CYTHON_ENABLE" = "yes"],[
+  
+  #Check if Cython.Distutils.build_ext is available, needed for building evtk
+  AC_MSG_CHECKING(for module Cython.Distutils.build_ext in python)
+  echo "import Cython.Distutils.build_ext" | python -
+  if test $? -ne 0 ; then
+  AC_MSG_RESULT(not found)
+  AC_MSG_ERROR(You need the module Cython.Distutils.build_ext available to 
+  python to include cython dependent functionality. This can be disabled with 
+  the --disable-cython option.)
+  fi
+  AC_MSG_RESULT(found)
+  
+  #Check if Cython.Build.cythonize is available, needed for building eos python
+  #module
+  AC_MSG_CHECKING(for module Cython.Build import of cythonize in python)
+  echo "from Cython.Build import cythonize" | python -
+  if test $? -ne 0 ; then
+  AC_MSG_RESULT(not found)
+  AC_MSG_ERROR(You need the module Cython.Build and the ability to import 
+  cythonize available to python to include cython dependent functionality. This 
+  can be disabled with the --disable-cython option.)
+  fi
+  AC_MSG_RESULT(found)
+  ])
+ 
+
+AM_CONDITIONAL([CYTHON_ENABLE],[test "$CYTHON_ENABLE" = "yes"])
 #################################################################
 
 AC_CONFIG_HEADERS([config.h])

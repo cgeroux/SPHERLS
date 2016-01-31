@@ -129,14 +129,18 @@ EXTRA_DIST+=src/SPHERLS/Doxyfile
 ###############################################################################
 # BINS + SOURCE ###############################################################
 ###############################################################################
-bin_SCRIPTS=\
-./scripts/*.py\
-./src/pythonextensions/lib/python/hdf.so\
-./src/pythonextensions/lib/python/eos.so\
-./src/pythonextensions/lib/python/evtk/cevtk.so\
-./src/pythonextensions/evtk/src/xml.py\
-./src/pythonextensions/evtk/src/vtk.py\
-./src/pythonextensions/evtk/src/hl.py
+bin_SCRIPTS=./scripts/*.py
+if HDF_ENABLE
+bin_SCRIPTS+=./src/pythonextensions/lib/python/hdf.so
+endif
+if CYTHON_ENABLE
+bin_SCRIPTS+=./src/pythonextensions/lib/python/eos.so
+bin_SCRIPTS+=./src/pythonextensions/lib/python/evtk/cevtk.so
+bin_SCRIPTS+=./src/pythonextensions/evtk/src/vtk.py
+bin_SCRIPTS+=./src/pythonextensions/evtk/src/hl.py
+endif
+bin_SCRIPTS+=./src/pythonextensions/evtk/src/xml.py
+
 
 bin_PROGRAMS=	SPHERLS	SPHERLSanal	SPHERLSgen 
 #dist_pkgdata_DATA=./data/energy_pro/*	./data/eos/*	./data/ref_cals/*	./data/velocity_pro/*
@@ -190,11 +194,17 @@ endif
 if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
-BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
+if CYTHON_ENABLE
+BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so
+endif
 else
-BUILT_SOURCES=src/pythonextensions/lib/python/eos.so src/pythonextensions/lib/python/cevtk.so
+BUILT_SOURCES=
 HDF_LDADDS= 
-HDF_CPPFLAGS= 
+HDF_CPPFLAGS=
+endif
+if CYTHON_ENABLE
+BUILT_SOURCES+=src/pythonextensions/lib/python/eos.so
+BUILT_SOURCES+=src/pythonextensions/lib/python/cevtk.so
 endif
 
 SPHERLSanal_LDADD=$(FFTW_LDADDS) $(HDF_LDADDS) 
@@ -219,9 +229,11 @@ src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp s
 endif
 
 #make eos class available in python
+if CYTHON_ENABLE
 src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py src/eos.cpp src/eos.h src/exception2.h src/exception2.cpp
 	(cd	src/pythonextensions/eos;	cp ../../eos.cpp ./eos_tmp.cpp;	cp ../../eos.h .;	cp ../../exception2.h .;	cp ../../exception2.cpp .;)
 	(cd	src/pythonextensions/eos;	python setup.py build;python setup.py install --home=../ --prefix='')
+endif
 
 #make vtk file python module
 cevtk_SOURCE=\
@@ -242,9 +254,10 @@ cevtk_SOURCE=\
 
 EXTRA_DIST+=${cevtk_SOURCE}
 
+if CYTHON_ENABLE
 src/pythonextensions/lib/python/cevtk.so: ${cevtk_SOURCE}
 	(cd	src/pythonextensions/evtk;	python setup.py build;python setup.py install --home=../ --prefix='')
-
+endif
   
 CLEANFILES=\
 src/docs/userguide.pdf\

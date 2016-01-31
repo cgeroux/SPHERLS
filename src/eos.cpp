@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "eos.h"
 #include "exception2.h"
@@ -1761,7 +1762,7 @@ void eos::setExePath(){
   solutions if problems arise with this not being reliable*/
   
   char buff[1024];
-  ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+  ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
   if (len != -1) {
     buff[len] = '\0';
     sExePath=std::string(buff);

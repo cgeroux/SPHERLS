@@ -7,6 +7,7 @@
 #include <sstream>
 #include "global.h"
 #include "exception2.h"
+#include <unistd.h>
 
 MessPass::MessPass(){
   typeSendNewGrid=NULL; 
@@ -96,7 +97,7 @@ Output::Output(){
 }
 void Output::setExeDir(ProcTop &procTop){
     char buff[1024];
-    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
     if (len != -1) {
       buff[len] = '\0';
       sExeDir=std::string(buff);
