@@ -6,6 +6,8 @@
 datadir=${prefix}/data
 docsdir=${prefix}/docs
 
+PYTHONLIBDIR=@PYTHONLIBDIR@
+
 #atmosphere models
 atmospheresdir=${datadir}/atmospheres
 atmospheres_DATA=data/atmospheres/table3.dat\
@@ -131,11 +133,11 @@ EXTRA_DIST+=src/SPHERLS/Doxyfile
 ###############################################################################
 bin_SCRIPTS=./scripts/*.py
 if HDF_ENABLE
-bin_SCRIPTS+=./src/pythonextensions/lib/python/hdf.so
+bin_SCRIPTS+=./src/pythonextensions/${PYTHONLIBDIR}/python/hdf.so
 endif
 if CYTHON_ENABLE
-bin_SCRIPTS+=./src/pythonextensions/lib/python/eos.so
-bin_SCRIPTS+=./src/pythonextensions/lib/python/evtk/cevtk.so
+bin_SCRIPTS+=./src/pythonextensions/${PYTHONLIBDIR}/python/eos.so
+bin_SCRIPTS+=./src/pythonextensions/${PYTHONLIBDIR}/python/evtk/cevtk.so
 bin_SCRIPTS+=./src/pythonextensions/evtk/src/vtk.py
 bin_SCRIPTS+=./src/pythonextensions/evtk/src/hl.py
 endif
@@ -172,9 +174,14 @@ SPHERLS_SOURCES	=	\
 	src/xmlFunctions.cpp	\
 	src/xmlFunctions.h	\
 	src/xmlParser.cpp	\
-	src/xmlParser.h	
+	src/xmlParser.h
+if PETSC_ENABLE
 SPHERLS_LDADD	=	-L$(PETSC_LIB_PATH)	-lpetsc
 SPHERLS_CPPFLAGS	=	-I$(PETSC_INCLUDE_PATH)	-Isrc/
+else
+SPHERLS_LDADD	=
+SPHERLS_CPPFLAGS	=	-Isrc/
+endif
 
 SPHERLSanal_SOURCES	=	\
 	src/SPHERLSanal/main.cpp	\
@@ -195,7 +202,7 @@ if HDF_ENABLE
 HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
 HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
 if CYTHON_ENABLE
-BUILT_SOURCES=src/pythonextensions/lib/python/hdf.so
+BUILT_SOURCES=src/pythonextensions/${PYTHONLIBDIR}/python/hdf.so
 endif
 else
 BUILT_SOURCES=
@@ -203,8 +210,8 @@ HDF_LDADDS=
 HDF_CPPFLAGS=
 endif
 if CYTHON_ENABLE
-BUILT_SOURCES+=src/pythonextensions/lib/python/eos.so
-BUILT_SOURCES+=src/pythonextensions/lib/python/cevtk.so
+BUILT_SOURCES+=src/pythonextensions/${PYTHONLIBDIR}/python/eos.so
+BUILT_SOURCES+=src/pythonextensions/${PYTHONLIBDIR}/python/cevtk.so
 endif
 
 SPHERLSanal_LDADD=$(FFTW_LDADDS) $(HDF_LDADDS) 
@@ -224,13 +231,13 @@ SPHERLSgen_SOURCES	=	\
 SPHERLSgen_CPPFLAGS	=	-Isrc/
 
 if HDF_ENABLE
-src/pythonextensions/lib/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp src/pythonextensions/hdf/setup.py.in
+src/pythonextensions/${PYTHONLIBDIR}/python/hdf.so: src/pythonextensions/hdf/hdfmodule.cpp src/pythonextensions/hdf/setup.py.in
 	(cd	src/pythonextensions/hdf;	python setup.py build;python setup.py install --home=../ --prefix='')
 endif
 
 #make eos class available in python
 if CYTHON_ENABLE
-src/pythonextensions/lib/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py src/eos.cpp src/eos.h src/exception2.h src/exception2.cpp
+src/pythonextensions/${PYTHONLIBDIR}/python/eos.so: src/pythonextensions/eos/eos.pyx src/pythonextensions/eos/setup.py src/eos.cpp src/eos.h src/exception2.h src/exception2.cpp
 	(cd	src/pythonextensions/eos;	cp ../../eos.cpp ./eos_tmp.cpp;	cp ../../eos.h .;	cp ../../exception2.h .;	cp ../../exception2.cpp .;)
 	(cd	src/pythonextensions/eos;	python setup.py build;python setup.py install --home=../ --prefix='')
 endif
@@ -254,10 +261,8 @@ cevtk_SOURCE=\
 
 EXTRA_DIST+=${cevtk_SOURCE}
 
-if CYTHON_ENABLE
-src/pythonextensions/lib/python/cevtk.so: ${cevtk_SOURCE}
+src/pythonextensions/${PYTHONLIBDIR}/python/cevtk.so: ${cevtk_SOURCE}
 	(cd	src/pythonextensions/evtk;	python setup.py build;python setup.py install --home=../ --prefix='')
-endif
   
 CLEANFILES=\
 src/docs/userguide.pdf\
@@ -277,7 +282,7 @@ src/pythonextensions/hdf/setup.py
 clean-local:
 	-rm -rf src/pythonextensions/eos/build
 	-rm -rf src/pythonextensions/hdf/build
-	-rm -rf src/pythonextensions/lib
+	-rm -rf src/pythonextensions/${PYTHONLIBDIR}
 	-rm -rf src/pythonextensions/evtk/build
 
 if MAKE_DOCS

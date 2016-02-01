@@ -53,7 +53,7 @@ This should give a rough idea of how SPHERLS works, but should be kept quite hig
 
 \chapter{Installing SPHERLS}
 
-There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include third party libraries. It is recommended to use the package including all third party libraries. This version ensures the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, (e.g. upgrading SPHERLS) or if you wish to try out newer versions of the third party libraries and do not want to download the additional data.
+There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include any third party libraries. It is recommended to use the package including all third party libraries. This version ensures the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, or if you wish to try out newer versions of the third party libraries and do not want to download the additional data.
 
 A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them in. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
 
@@ -82,7 +82,7 @@ The below libraries can be optionally installed but will greatly enhance the use
   \item[jpeg] needed by hdf4 library
   \item[zlib] needed by hdf4 library
 \end{description}
-\item[Doxygen] used to create documentation from source code via ``make docs''
+\item[pdflatex] used to create documentation from src/doc/ latex files. Use {\tt make docs} to build documentation.
 \end{description}
 
 \section{Installing OpenMPI}
@@ -158,31 +158,34 @@ Building these libraries requires gfortran and the jpeg library. If using the SP
 The above commands have only been tested with the version including with the SPHERLS distribution package other versions may require slight modifications to the above commands but should be reasonably similar.
 
 \section{Installing Doxygen}
-The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
+Doxygen has been used in the past but is not currently used in the build process. The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
 
 \section{Installing Python}
 This could be pain if not simply doing apt-get install
 
 \section{Installing SPHERLS}
-After all the third party libraries are available this should be as easy as:
+After all the required and option third party libraries are available and installed into places that the SPHERLS configuration scripts looks for them this should be as easy as:
 \begin{itemize}
-\item {\tt ./configure --prefix=/home/${USER}}
+\item {\tt ./configure --prefix=/home/\${USER}}
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
 If you have the raw git repository do the following
 \begin{itemize}
 \item {\tt autoreconf --install} provided you have the gnu build tool auto conf installed, this makes the configuration script
-\item {\tt ./configure --prefix=/home/${USER}}
+\item {\tt ./configure --prefix=/home/\${USER}}
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
-To see availble configure options type ./configure -h, this will display options for turning off various add-ons like hdf4, fftw3, and
+Common problems which result during the execution of the above command are: not finding the installed 3rd party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and or include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
 
 \section{.bashrc}
 What you need to add to .bashrc after all the libraries are installed, this might be best to add on a per library basis, but perhaps a summary would be good?
 
 \chapter{Using SPHERLS}
+Once you have built SPHERLS the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have build with cython support enabled to do this step, so it is highly recommended that you have installed cython and built with it enabled.
+
+
 Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
 \begin{itemize}
 \item Generating a starting model

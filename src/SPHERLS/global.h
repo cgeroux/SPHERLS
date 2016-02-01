@@ -9,6 +9,7 @@
   herein are used through out the program.
 */
 
+#include "config.h"
 #include <vector>
 #include <mpi.h>
 #include "watchzone.h"

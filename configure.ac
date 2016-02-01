@@ -41,10 +41,25 @@ AM_CONDITIONAL([INCLUDE_CRUCIAL_LIBS_IN_DIST],[test "$INCLUDE_CRUCIAL_LIBS_IN_DI
 MAKE_DOCS=no
 AC_ARG_ENABLE([make-docs],
   [AS_HELP_STRING([--enable-make-docs],
-  [If enabled it will remake the documentation from the source files when running "make" or "make all". This requires the installation of doxygen, latex and ps2pdf and is not recommended unless you are actively making changes to the source files.])],
+  [If enabled it will remake the documentation from the source files when running "make" or "make all". This requires the installation of pdflatex and is not recommended unless you are actively making changes to the source files.])],
   [MAKE_DOCS="$enableval"],
   [])
 AM_CONDITIONAL([MAKE_DOCS],[test "$MAKE_DOCS" = "yes"])
+AS_IF(
+  [test "$MAKE_DOCS" = "yes"],
+  [#
+  
+  #check for pdflatex
+  AC_CHECK_PROG(PS2PDF_EXISTS,pdflatex,"yes","no")
+  AS_IF(
+  [test "$PS2PDF_EXISTS" = "no"],
+  [
+  AC_MSG_ERROR([creating documentation requires pdflatex, remove the option --enable-make-docs or install pdflatex and put it in your path.])
+  
+  ])
+
+  ])
+
 #
 #################################################################
 ## Check for FFTW3 include and library
@@ -199,11 +214,11 @@ AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 #
 #check to see if user disabled petsc
 PETSC_ENABLE=yes
-AC_ARG_ENABLE([petsc],
-  [AS_HELP_STRING([--disable-petsc],
-  [Disable petsc features, these are required to run implicit calculations])],
-  [PETSC_ENABLE="$enableval"],
-  [])
+#AC_ARG_ENABLE([petsc],
+#  [AS_HELP_STRING([--disable-petsc],
+#  [Disable petsc features, these are required to run implicit calculations])],
+#  [PETSC_ENABLE="$enableval"],
+#  [])
 #
 #check to see if user set an override for include path
 AC_ARG_ENABLE([petsc-include-path],
@@ -228,7 +243,7 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
     AC_CHECK_FILE([${TEST_PATH}/petscksp.h],[PETSC_INCLUDE_PATH=${TEST_PATH};break],[])
   done
   #
-  #search lib paths for libfftw3.so and libfftw3.a
+  #search lib paths for libpetsc.so or libpetsc.a
   PETSC_LIB_PATH=""
   for TEST_PATH in $PETSC_LIB_PATHS; do
     AC_CHECK_FILES([${TEST_PATH}/libpetsc.so ${TEST_PATH}/libpetsc.a ]\
@@ -237,13 +252,13 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
   #
   #check that a lib path was found
   AS_IF([test "$PETSC_LIB_PATH" = ""],[
-    AC_MSG_RESULT([No petsc library found in search paths \"$PETSC_LIB_PATHS\". Either specify the path to libpetsc.a/.so with --enable-petsc-lib-path or disable petsc features with --disable-petsc .])
+    AC_MSG_RESULT([No petsc library found in search paths \"$PETSC_LIB_PATHS\". Please specify the path to libpetsc.a/.so with --enable-petsc-lib-path.])
     exit
     ])
   #
   #check that an include path was found
   AS_IF([test "$PETSC_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT([No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Either specify the path to petscksp.h with --enable-petsc-include-path or disable petsc features with --disable-petsc .])
+    AC_MSG_RESULT([No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Please specify the path to petscksp.h with --enable-petsc-include-path.])
     exit
     ])
   #
@@ -254,6 +269,8 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
   #define PETSC_ENABLE in include file
   AC_DEFINE([PETSC_ENABLE],[],[Defined if PETSc is enabled])
   ])
+#tell automake about PETSC_ENABLE variable
+AM_CONDITIONAL([PETSC_ENABLE],[test "$PETSC_ENABLE" = "yes"])
 #################################################################
 
 
@@ -267,25 +284,11 @@ CYTHON_ENABLE=yes
 AC_ARG_ENABLE([cython],
   [AS_HELP_STRING([--disable-cython],
   [Disable cython dependent features, such as making vtk files for 
- visualization.])],
+ visualization. Cython install should be added to your PYTHONPATH.])],
   [CYTHON_ENABLE="$enableval"],
   [])
-#
-#check to see if user set an override for include path
-#AC_ARG_ENABLE([fftw-include-path],
-# [AS_HELP_STRING([--enable-fftw-include-path],
-# [set location of the fftw3 headers])],
-# [FFTW_INCLUDE_PATHS="$enableval"],
-# [])
-#
-#check to see if user set an override for library path
-#AC_ARG_ENABLE([fftw-lib-path],
-#  [AS_HELP_STRING([--enable-fftw-lib-path],
-#  [set location of the fftw3 library])],
-#  [FFTW_LIB_PATHS="$enableval"],
-#  [])
-#
-#check to make sure we have a library and include path, if we are using fftw
+
+#If we want to include Cython make sure it works
 AS_IF(
   [test "$CYTHON_ENABLE" = "yes"],[
   
@@ -313,6 +316,8 @@ AS_IF(
   AC_MSG_RESULT(found)
   ])
  
+ #check to see if builds put things in lib or lib64
+ AC_SUBST(PYTHONLIBDIR,lib64)
 
 AM_CONDITIONAL([CYTHON_ENABLE],[test "$CYTHON_ENABLE" = "yes"])
 #################################################################
