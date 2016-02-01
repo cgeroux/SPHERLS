@@ -5,7 +5,7 @@ import numpy as np
 import math
 import paths
 import os
-from timeitDec import timeitDec
+#from timeitDec import timeitDec
 
 #The blow two lines should not needed when a proper install is done
 sys.path.append(paths.srcPath+"/pythonextensions/lib/python/")

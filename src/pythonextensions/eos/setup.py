@@ -10,4 +10,5 @@ setup(ext_modules = cythonize(
            "eos.pyx",                 # our Cython source
            sources=["./eos_tmp.cpp","./exception2.cpp"],  # additional source file(s)
            language="c++",             # generate C++ code
-      ))
+      )
+      )

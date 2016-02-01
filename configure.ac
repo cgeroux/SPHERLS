@@ -3,6 +3,16 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX([mpic++])
 AS_IF([test "$CXX" != "mpic++"],[AC_MSG_RESULT([mpic++ not found! Aborting, please make sure that the bin directory where OpenMPI is installed is in your path.]);exit])
 AC_LANG([C++])
+
+#check that mpirun is available
+AC_CHECK_PROG(MPIRUN_EXISTS,mpirun,"yes","no")
+AS_IF(
+[test "$MPIRUN_EXISTS" = "no"],
+[
+AC_MSG_ERROR([mpirun is used to launch parallel jobs, and SPHERLS does not run in serial mode.])
+exit
+])
+
 GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
 GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
 #
@@ -317,7 +327,7 @@ AS_IF(
   ])
  
  #check to see if builds put things in lib or lib64
- AC_SUBST(PYTHONLIBDIR,lib64)
+ AC_SUBST(PYTHONLIBDIR,lib)
 
 AM_CONDITIONAL([CYTHON_ENABLE],[test "$CYTHON_ENABLE" = "yes"])
 #################################################################
