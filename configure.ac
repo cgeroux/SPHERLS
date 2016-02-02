@@ -324,6 +324,16 @@ AS_IF(
   can be disabled with the --disable-cython option.)
   fi
   AC_MSG_RESULT(found)
+  
+  #Check that numpy is installed
+  AC_MSG_CHECKING(for module numpy in python)
+  echo "import numpy as np" | python -
+  if test $? -ne 0 ; then
+  AC_MSG_RESULT(not found)
+  AC_MSG_ERROR(You need the module numpy available to python to include cython dependent functionality. This 
+  can be disabled with the --disable-cython option, but disabling cython support is not recommended.)
+  fi
+  AC_MSG_RESULT(found)
   ])
  
  #check to see if builds put things in lib or lib64
