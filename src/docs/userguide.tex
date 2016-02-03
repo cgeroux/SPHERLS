@@ -53,62 +53,89 @@ This should give a rough idea of how SPHERLS works, but should be kept quite hig
 
 \chapter{Installing SPHERLS}
 
-There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include any third party libraries. It is recommended to use the package including all third party libraries. This version ensures the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, or if you wish to try out newer versions of the third party libraries and do not want to download the additional data.
+There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. However, as the third party libraries often contain their own installation documentation the following section should be thought of as the minimal set of options and steps required to install those 3rd party libraries for use with SPHERLS and not a complete documentation of how those third party libraries should be installed in general. One should consult the third party library's documentation for the full details of their installation.
 
-A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files they have to be installed in at least one of the directories that it looks for them in. The configuration script looks for the libraries and include files it requires in the following ``standard'' locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these ``standard'' locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
+There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include any third party libraries. It is recommended to use the package including all third party libraries. This version helps to ensure the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, or if you wish to try out newer versions of the third party libraries and do not want to download the additional data. The included third party libraries can be found under the {\tt lib/} directory under the root package directory.
 
-I am going to assume that the user is installing on a Linux system, more over I will be assuming that the Linux distribution follows a Debian like directory structure (many distributions are based on Debian). The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The standard install location for per-user level binaries, libraries, include files and documentation (at least far as SPHERLS is concerned) is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard Debian locations on their own, preferring to install into the directory where they are built.
+A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files automatically they have to be installed in at least one of the directories that it looks for them in. The configuration script looks for the libraries and include files it requires in the following locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
 
-If you have root access and want to install for all users of the current machine you will likely want to install the libraries into {\tt /usr/\-local}  which can be achieved by setting {\tt --prefix=/usr/local} instead of {\tt --prefix\-=/home/\-\$USER/} used in the below installations and SPHERLS will automatically check this location for the install libraries.
-    
+I am going to assume that the user is installing on a Linux like system in a bash shell. Other shells will work but you will likely work, but you will need to look up some shell specific things such as how do you set environment variables in your specific shell. The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The install location for per-user level binaries, libraries, include files and documentation that SPHERLS automatically checks is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the Linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard locations on their own, preferring to install into the directory where they are built.
+
+In this section I will often mention setting environment variables, or tell you to add a line starting with {\tt export} to you {\tt .bashrc} file. These just set the necessary environment variables for SPHERLS to build and install and run. These settings can also be easily adapted to form the basis of a module file if one wishes to use GNU environment modules to manage loading and unloading environment settings.
+
 \section{Requirements}
-SPHERLS requires gcc/g++, OpenMPI, and PETSc to compile and run at all. It also makes heavy use of python, and there are some dependencies on Cython there also. So while you technically can run the basic binaries without Python and Cython in practic you really won't want to use SPHERLS without these.
+SPHERLS requires gcc/g++, OpenMPI, and PETSc to compile and run at all. It also makes heavy use of Python scripts some of which depend on Cython. So while you technically can run the basic binaries without Python and Cython in practise you really won't want to use SPHERLS without these.
 
-The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended
+The below set of instructions do not explain how to install the GCC (GNU Compiler Collection) but assume that your system already has this installed. If you are on a large HPC cluster you likely also have OpenMPI already available to you. Feel free to use the site OpenMPI installation, but if you find later tests produce unexpected results or you have difficulty building SPHERLS you may wish to try using a local install of OpenMPI of a version known to work with SPHERLS and building with that, provided the site install of OpenMPI doesn't have versions tested to work with SPHERLS avaible.
+
+The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended. The full list of dependencies of these third party libraries is not included, but some library dependencies have been noted when I have specifically had to install these dependencies on various machines.
 \begin{description}
 \item[python] python scripts are supplied for various analysis and convenience operations. Having python is highly recommended and will make using SPHERLS far more enjoyable. Many SPHERLS python scripts use the following python libraries:
 \begin{description}
   \item[numpy] numerical python, fast array operations
   \item[matplotlib] for creating plots
   \item[scipy] for interpolating in equation of state and opacity tables when making new files
+  \item[evtk] a python library to make writing vtk files easier, the SPHERLS build process actually makes this for you if Cython support is enabled.
+  \item[Cython] needed to build evtk, and also to allow Python scripts access to the equation of state and opacity C++ classes used in SPHERLS.
 \end{description}
-\item[evtk] a python library to make writing vtk files easier, the build process actually makes this for you if Cython support is enabled.
-\begin{description}
-\item[Cython] needed to build evtk
-\end{description}
-\item[fftw3] used for frequency analysis
-\item[hdf4] for converting model dumps to hdf4 file format for visualizing
+\item[fftw3] used for frequency analysis by SPHERLSanal.
+\item[hdf4] for converting model dumps to hdf4 file format for visualizing, used by SPHERLSanal and some Python scripts.
 \begin{description}
   \item[jpeg] needed by hdf4 library
   \item[zlib] needed by hdf4 library
 \end{description}
-\item[pdflatex] used to create documentation from src/doc/ latex files. Use {\tt make docs} to build documentation.
+\item[pdflatex] used to create documentation from src/doc/ latex files. Use {\tt make docs} to build documentation. Note that the {\tt make docs} command requires an additional option to be set during the configuration process {\tt --enable-make-docs}.
 \end{description}
 
 \section{Installing OpenMPI}
 \begin{itemize}
-\item Download OpenMPI from \href{http://www.open-mpi.org/software/ompi/v1.6/}{the open mpi site}
+\item Download OpenMPI from \href{http://www.open-mpi.org/software/ompi/v1.6/}{the open mpi site} or use the version in {\tt libs/} directory. Versions 1.6.3 and 1.6.5 have been tested and known to work with SPHERLS. That is not to say that other versions of OpenMPI will not work with SPHERLS, only that those versions are the only one which have been explicitly tested.
+
 \item add library path to {\tt LD\_LIBRARY\_PATH}
-\item ./configure --prefix=<path-to-final-location-of-install>
-\item make
-\item install
+\item {\tt ./configure --prefix=\- <path-to-final-location-of-install>}
+\item {\tt make}
+\item {\tt install}
+\item finally the bin, man, and lib paths will need environment variables set for them:\\
+ \\
+
+{\tt export OPENMPI\-=<path-to-final-location-of-install>}\\
+{\tt export PATH\-=<path-to-final-location-of-install>/bin:\-\$\{PATH\}}\\
+{\tt export MANPATH\-=<path-to-final-location-of-install>/man:\-\$\{MANPATH\}}\\
+{\tt export LD\_LIBRARY\_PATH\-=<path-to-final-location-of-install>/lib\-:\$\{LD\_LIBRARY\_PATH\}}\\
+
 \end{itemize}
 
 \section{Installing PETSC Library}
-Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt petsc-lite-3.2-p7} is known to be incompatible, which as of this writing is the current version of the PETSc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory. ASIDE: I have also had difficulties installing PETSc on Fundy, and Placentia ACENet machines.
+Version {\tt petsc\--lite-3.1-p8}, has been tested to work with SPHERLS. {\tt petsc\--lite\--3.2\--p7} is known to be incompatible, which as of this writing is the current version of the PETSc library. At some point in the future support for the newer version of the library maybe added. The below commands will install PETSc into your home directory.
 
 \begin{itemize}
 \item Download PETSc library, from the PETSc \href{http://www.mcs.anl.gov/petsc/download/index.html}{website} or get it from the {\tt libs/} directory in the spherls package
 \item Then untar and unzip it with {\tt tar -xzf petsc-lite-3.1-p8.tar}
 \item To install the library change into the directory made when you extracted the archive and type the following commands:
 \begin{enumerate}
-\item {\tt ./configure PETSC\_DIR=\$PWD --prefix=/home/\$USER/ --with-c++-support --with-c-support --with-shared --download-f-blas-lapack=1 --with-x11=no} where {\tt \$USER} is the environment variable corresponding to your username.  Note that the {\tt PETSC\_DIR=\$PWD} needs to come first. Also {\tt --download-f-blas-lapack=1} only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using {\tt --download-c-blas-lapack=1} seems to work when a Fortran compiler isn't available.
+\item {\tt ./configure PETSC\_DIR=\$PWD --prefix=/home/\$USER/ }\\{\tt --with-c++-support --with-c-support --with-shared}\\{\tt --download-f-blas-lapack=1 --with-x11=no}\\ \\ where {\tt \$USER} is the environment variable corresponding to your username.  Note that the {\tt PETSC\_DIR=\$PWD} needs to come first. Also {\tt --download-f-blas-lapack=1} only works if there is a fortran compiler present, which isn't strictly needed otherwise. Using {\tt --download-c-blas-lapack=1} seems to work when a Fortran compiler isn't available.
 \item {\tt make all} Often at the end of the configuration stage the configuration script will give the command to make the library. One should use this over the above, if given.
 \item {\tt make install} as with the {\tt make all} the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
 \item {\tt make PETSC\_DIR=/home/\$USER/lib test} will test the code. Again the install process will give you a more specific command that you should use over the one given here.
 \end{enumerate}
-\item You will then need to add the following line to you {\tt .bashrc} file to assure that you will pick up the library {\tt export PETSC\_DIR=/home/\$USER/lib}
+%\item You will then need to add the following line to your {\tt .bashrc} file to assure that you will pick up the library {\tt export PETSC\_DIR\-=/home/\-\$USER\-/lib}
 \end{itemize}
+
+\section{Installing Cython}
+Cython allows you to build some extra python modules to use in creating visualization output such as vtk files for use in VisIt, and for making the equation of state routines available to the python analysis scripts. Finally there are dependencies on cython in scripts which run some simple tests such as checking that results are reproduced and that restarting a calculation works correctly. Therefore it is highly recommended that cython is installed. There is a version tested to work under the {\tt libs/} directory.
+\begin{itemize}
+\item {\tt tar -xzf Cython-0.19.1.tar.gz}
+\item {\tt cd Cython-0.19.1}
+\item {\tt  python setup.py install --prefix=/home/\-\$USER}
+\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python and of course where you install Cython.
+\end{itemize}
+
+\section{Installing Python Modules}
+In this section I will just briefly give some suggests about how to install some of the additional python modules I mention. One can often install python modules into home directory locations with the {\tt pip} tool. For example \\
+ \\
+{\tt pip install --install-option="--prefix=<path-to-install-directory>" numpy}
+ \\
+If the specified module, in this case {\tt numpy} is already present on the current machine, an upgraded version can be installed in the users home directory if desired with the {\tt --upgrade} option. Another helpful option is the {\tt --user} option which was required when installing the {\tt matplotlib} module. In order to have python pick up these home directory installs one must add to the {\tt PYTHONPATH} environment variable with something like {\tt export PYTHONPATH=<path-to-install-directory>/lib/python2.7/site-packages:\$\{PYTHONPATH\}}. The exact details of this path to add will depend on the version of python you have available to you on your system.
 
 \section{Installing FFTW Library}
 \begin{itemize}
@@ -116,28 +143,10 @@ Version {\tt petsc-lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pets
 \item Then untar and unzip the downloaded with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
 \item To install the library change into the directory made when you extracted the archive and type the following commands:
 \begin{enumerate}
-\item {\tt ./configure --prefix=<path-to-final-location-of-library>}
+\item {\tt ./configure --prefix\-=<path-to-final-location-of-library>}
 \item {\tt make}
 \item {\tt make install}
 \end{enumerate}
-\end{itemize}
-
-\section{Installing Cython}
-Cython allows you to build some extra python modules to use in creating visualization output such as vtk files for use in VisIt, and for making the equation of state routines available to the python analysis scripts. Finally there are dependencies on cython in scripts which run some simple tests such as checking that results are reproduced and that restarting a calculation works correctly. Therefore it is highly recommended that cython is installed.
-\begin{itemize}
-\item {\tt tar -xzf Cython-0.19.1.tar.gz}
-\item {\tt cd Cython-0.19.1}
-\item {\tt  python setup.py install --prefix=/home/\-\$USER}
-\item This will require you adding the  line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of Cython, the exact path may depend on your version of python and of course where you install Cython.
-\end{itemize}
-
-\section{Installing evtk}
-The build process actually builds evtk for you, so you probably do not need to do these steps unless for some reason you wish to install evtk yourself. As mentioned previously, evtk is a python module which allows one to create vtk files.
-\begin{itemize}
-\item {\tt tar -xzf evtk.tar.gz}
-\item {\tt cd evtk}
-\item {\tt  python setup.py install --prefix=/home/\$USER}
-\item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
 \end{itemize}
 
 \section{Installing HDF4 Library}
@@ -146,14 +155,26 @@ Building these libraries requires gfortran and the jpeg library. If using the SP
 \item {\tt cd <SPHERLS package directory>/libs}
 \item {\tt tar -xzf hdf-4.2.8.tar.gz}
 \item {\tt cd hdf-4.2.8}
-\item Run {\tt ./configure --prefix=<path-to-final-location-of-library> CFLAGS="-fPIC" CXXFLAGS="-fPIC"}.\\ If the jpeg libray isn't found, see section in this user guide about installing the jpeg library. Note that for the hdf library the {\tt <path-to-final-location-of-library>} should be set if doing a global install as well as doing a per user install as the default install directory is inside the build directory, which is not what is usually wanted. So if doing a global install it will probably want to be set to {\tt /usr/local} or for a per-user install {\tt /home/\$USER}.
+\item Run {\tt ./configure --prefix=<path-to-final-location-of-library> CFLAGS="-fPIC" CXXFLAGS="-fPIC"}.\\
+ \\
+Note that for the hdf library the {\tt <path-to-final-}{\tt location-of-library>} should be set if doing a global install as well as doing a per user install as the default install directory is inside the build directory, which is not what is usually wanted. So if doing a global install it will probably want to be set to {\tt /usr/local} or for a per-user install {\tt /home/\$USER}.
+ \\
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
 The above commands have only been tested with the version including with the SPHERLS distribution package other versions may require slight modifications to the above commands but should be reasonably similar.
 
-\section{Installing Doxygen}
-Doxygen has been used in the past but is not currently used in the build process. The latest version seems to hang while creating documents. doxygen-1.5.6 is known to work.
+\section{Installing evtk}
+The SPHERLS build process actually builds evtk for you, so you probably do not need to do these steps unless for some reason you wish to install evtk yourself. As mentioned previously, evtk is a python module which allows one to create vtk files.
+\begin{itemize}
+\item {\tt tar -xzf evtk.tar.gz}
+\item {\tt cd evtk}
+\item {\tt  python setup.py install --prefix=/home/\$USER}
+\item This will require you adding the line {\tt export PYTHONPATH\-=/home/\-\$USER/\-lib/\-python2.7/\-site-packages/\-:\$PYTHONPATH} to {\tt .bashrc} so that python can find your installation of evtk, the exact path may depend on your version of python also you only need to have this line in your {\tt .bashrc} file once
+\end{itemize}
+
+%\section{Installing Doxygen}
+%Doxygen has been used in the past but is not currently used in the build process. The latest %version seems to hang while creating documents. doxygen-1.5.6 is known to work.
 
 \section{Installing SPHERLS}
 After all the required and optional third party libraries are available and installed into places that the SPHERLS configuration scripts looks for them building and installing SPHERLS should be as easy as:
@@ -164,14 +185,13 @@ After all the required and optional third party libraries are available and inst
 \end{itemize}
 If you have the raw git repository do the following
 \begin{itemize}
-\item {\tt autoreconf --install} provided you have the gnu build tool auto conf installed, this makes the configuration script
+\item {\tt autoreconf --install} \\provided you have the gnu build tools installed, this makes the configuration script
 \item {\tt ./configure --prefix=/home/\${USER}}
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
-Common problems which result during the execution of the above command are: not finding the installed 3rd party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and or include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
+Common problems which result during the execution of the above command are: not finding the installed third party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and or include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
 
-\section{.bashrc}
 After you have built SPHERLS and installed it to a location of your choosing, you will need to setup a number of environment variables. First you will need to add the path to the petsc library location to the {\tt LD\_LIBRARY\_PATH} variable. This can be done with adding the line\\
  \\
 {\tt export LD\_LIBRARY\_PATH=<path\_to\_petsc\_lib\_dir>:\$\{LD\_LIBRARY\_PATH\}}\\
@@ -185,11 +205,11 @@ Finally python will need to know where to load the SPHERLS python modules from, 
 {\tt export PYTHONPYTH=<path\_to\_spherls\_bin\_dir>:\$\{PYTHONPATH\}}.
 
 \chapter{Using SPHERLS}
-Once you have built SPHERLS and setup the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have built with cython support enabled to do this step, so it is highly recommended that you have installed cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Lets examine the {\tt test\_restart.py} script first.
+Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Lets examine the {\tt test\_restart.py} script first.
 
 \textbf{TODO:} actually this script only runs SPHERLS it doesn't create the initial model, so instead I will explain things in a different way with regards to initial model create and running SPHERLS. Though I think it is still useful to have a look at the process at a high level (e.g. creating a SPHERLS config file to run SPHERLS, running a number of time steps, combining the distributed output into one file, and computing the difference between files).
 
-This script and many other scripts have many optional and required arguments which can be specified. All scripts (or nearly all scripts) can be executed with the {\tt -h} option to display a brief description of the script and how to use it, as well as listing available options. I would suggest running the {\tt test\_restart.py} script with the {\tt -h} option to see these available options. It says that this script tests restarts of the application to ensure that it produces the same output as if there had not been a restart. Also the {\tt -k} option allows us to keep all the temporary output this script creates while running the tests. This script actually runs SPHERLS several times and compares output of the different runs. We will examine the steps this script takes in order to illustrate how to run SPHERLS. By running with the {\tt -k} option we will be able to see what configuration files are created by the script to create our initial model as well as configuration scripts to run SPHERLS and finally what the output of SPHERLS looks like.
+This script and many other scripts have many optional and required arguments which can be specified.  Nearly all scripts can be executed with the {\tt -h} option to display a brief description of the script and how to use it, as well as listing available options. I would suggest running the {\tt test\_restart.py} script with the {\tt -h} option to see these available options. It says that this script tests restarts of the application to ensure that it produces the same output as if there had not been a restart. Also the {\tt -k} option allows us to keep all the temporary output this script creates while running the tests. This script actually runs SPHERLS several times and compares output of the different runs. We will examine the steps this script takes in order to illustrate some aspects of working with SPHERLS. By running with the {\tt -k} option we will be able to see what files are created by the script and have a look at some of the output from running SPHERLS.
 
 
 Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
