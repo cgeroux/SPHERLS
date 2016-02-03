@@ -53,20 +53,20 @@ This should give a rough idea of how SPHERLS works, but should be kept quite hig
 
 \chapter{Installing SPHERLS}
 
-There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. However, as the third party libraries often contain their own installation documentation the following section should be thought of as the minimal set of options and steps required to install those 3rd party libraries for use with SPHERLS and not a complete documentation of how those third party libraries should be installed in general. One should consult the third party library's documentation for the full details of their installation.
+There are a number of optional and required third party libraries used by SPHERLS. This section will describe how to install these third party libraries as well as SPHERLS. However, as the third party libraries often contain their own installation documentation the following section should be thought of as the minimal set of options and steps required to install those third party libraries for use with SPHERLS and not a complete documentation of how those third party libraries should be installed in general. One should consult the third party library's documentation for the full details of their installation.
 
 There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include any third party libraries. It is recommended to use the package including all third party libraries. This version helps to ensure the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, or if you wish to try out newer versions of the third party libraries and do not want to download the additional data. The included third party libraries can be found under the {\tt lib/} directory under the root package directory.
 
 A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files automatically they have to be installed in at least one of the directories that it looks for them in. The configuration script looks for the libraries and include files it requires in the following locations: {\tt /lib}, {\tt /include}, {\tt /usr/\-lib} {\tt /usr/\-include}, {\tt /usr/local/lib}, {\tt /usr/\-local/\-include}, {\tt /home/\-\$USER/\-lib}, and {\tt /home/\-\$USER/\-include}. If you install the required libraries in places other than these locations you will have to manually tell the SPHERLS configuration script where to find them. Running {\tt configure -h} will list the available options to tell the script where to find these include files and libraries.
 
-I am going to assume that the user is installing on a Linux like system in a bash shell. Other shells will work but you will likely work, but you will need to look up some shell specific things such as how do you set environment variables in your specific shell. The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The install location for per-user level binaries, libraries, include files and documentation that SPHERLS automatically checks is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the Linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard locations on their own, preferring to install into the directory where they are built.
+I am going to assume that the user is installing on a Linux like system in a bash shell. Other shells will likely work, but you will need to look up some shell specific things such as how you set environment variables in your specific shell. The install instructions below assume you do not have root access and must do an install to your home directory (a per-user install). The install location for per-user level binaries, libraries, include files and documentation that SPHERLS automatically checks is in {\tt \textasciitilde/bin}, {\tt \textasciitilde/lib}, {\tt \textasciitilde/include}, and {\tt \textasciitilde/share} directories respectively ({\tt \textasciitilde} is just the Linux short hand for {\tt /home/\-\$USER}). Be aware that if you have these directories in your home directory already and are not using them as a standard place to install per-user packages you will likely want to rename your pre-existing directories or a bunch of additional files will be added to them from the installations of various packages below. Alternatively, you can install the libraries and binaries to any directory on your machine just by changing {\tt --prefix\-=/home/\-\$USER/}, mentioned below, to point to where you want to install it. But as mentioned if you install to a non-standard location you will have to tell the SPHERLS configure script where you put things. Also {\tt --prefix} should always be specified as some of these libraries don't install to standard locations on their own, preferring to install into the directory where they are built.
 
-In this section I will often mention setting environment variables, or tell you to add a line starting with {\tt export} to you {\tt .bashrc} file. These just set the necessary environment variables for SPHERLS to build and install and run. These settings can also be easily adapted to form the basis of a module file if one wishes to use GNU environment modules to manage loading and unloading environment settings.
+In this section I will often mention setting environment variables, or tell you to add a line starting with {\tt export} to your {\tt .bashrc} file. These just set the necessary environment variables for SPHERLS to build, install, and run. These settings can also be easily adapted to form the basis of a module file if one wishes to use GNU environment modules to manage loading and unloading environment settings.
 
 \section{Requirements}
 SPHERLS requires gcc/g++, OpenMPI, and PETSc to compile and run at all. It also makes heavy use of Python scripts some of which depend on Cython. So while you technically can run the basic binaries without Python and Cython in practise you really won't want to use SPHERLS without these.
 
-The below set of instructions do not explain how to install the GCC (GNU Compiler Collection) but assume that your system already has this installed. If you are on a large HPC cluster you likely also have OpenMPI already available to you. Feel free to use the site OpenMPI installation, but if you find later tests produce unexpected results or you have difficulty building SPHERLS you may wish to try using a local install of OpenMPI of a version known to work with SPHERLS and building with that, provided the site install of OpenMPI doesn't have versions tested to work with SPHERLS avaible.
+The below set of instructions do not explain how to install the GCC (GNU Compiler Collection) but assume that your system already has this installed. If you are on a large HPC cluster you likely also have OpenMPI already available to you. Feel free to use the site OpenMPI installation, but if you find later tests produce unexpected results or you have difficulty building SPHERLS you may wish to try using a per-user install of an OpenMPI version known to work with SPHERLS and building with that.
 
 The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended. The full list of dependencies of these third party libraries is not included, but some library dependencies have been noted when I have specifically had to install these dependencies on various machines.
 \begin{description}
@@ -95,7 +95,7 @@ The below libraries can be optionally installed but will greatly enhance the use
 \item {\tt ./configure --prefix=\- <path-to-final-location-of-install>}
 \item {\tt make}
 \item {\tt install}
-\item finally the bin, man, and lib paths will need environment variables set for them:\\
+\item finally the bin, man, and lib paths will need environment variables set:\\
  \\
 
 {\tt export OPENMPI\-=<path-to-final-location-of-install>}\\
@@ -133,9 +133,15 @@ Cython allows you to build some extra python modules to use in creating visualiz
 \section{Installing Python Modules}
 In this section I will just briefly give some suggests about how to install some of the additional python modules I mention. One can often install python modules into home directory locations with the {\tt pip} tool. For example \\
  \\
-{\tt pip install --install-option="--prefix=<path-to-install-directory>" numpy}
+{\tt pip install --install-option="--prefix}\\
+{\tt=<path-to-install-directory>" numpy}\\
  \\
-If the specified module, in this case {\tt numpy} is already present on the current machine, an upgraded version can be installed in the users home directory if desired with the {\tt --upgrade} option. Another helpful option is the {\tt --user} option which was required when installing the {\tt matplotlib} module. In order to have python pick up these home directory installs one must add to the {\tt PYTHONPATH} environment variable with something like {\tt export PYTHONPATH=<path-to-install-directory>/lib/python2.7/site-packages:\$\{PYTHONPATH\}}. The exact details of this path to add will depend on the version of python you have available to you on your system.
+If the specified module, in this case {\tt numpy} is already present on the current machine, an upgraded version can be installed in the users home directory if desired with the {\tt --upgrade} option. Another helpful option is the {\tt --user} option which was required when installing the {\tt matplotlib} module. In order to have python pick up these home directory installs one must add to the {\tt PYTHONPATH} environment variable with something like \\
+ \\
+{\tt export PYTHONPATH=<path-to-install-directory>}\\
+{\tt /lib/python2.7/site-packages:\$\{PYTHONPATH\}}.\\
+ \\
+The exact details of this path to add will depend on the version of python you have available to you on your system.
 
 \section{Installing FFTW Library}
 \begin{itemize}
@@ -205,11 +211,60 @@ Finally python will need to know where to load the SPHERLS python modules from, 
 {\tt export PYTHONPYTH=<path\_to\_spherls\_bin\_dir>:\$\{PYTHONPATH\}}.
 
 \chapter{Using SPHERLS}
-Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Lets examine the {\tt test\_restart.py} script first.
+Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Python scripts are distinguished from compiled executables with their {\tt .py} extension. Lets examine what the {\tt test\_restart.py} script does in detail first.
 
-\textbf{TODO:} actually this script only runs SPHERLS it doesn't create the initial model, so instead I will explain things in a different way with regards to initial model create and running SPHERLS. Though I think it is still useful to have a look at the process at a high level (e.g. creating a SPHERLS config file to run SPHERLS, running a number of time steps, combining the distributed output into one file, and computing the difference between files).
+This script and many other scripts have many optional and required arguments which can be specified. Nearly all scripts can be executed with the {\tt -h} option to display a brief description of the script and how to use it, as well as listing available options. I would suggest running the {\tt test\_restart.py} script with the {\tt -h} option to see these available options. The script help says that it tests restarts of the application to ensure that it produces the same output as if there had not been a restart. Also the {\tt -k} option allows us to keep all the temporary output this script creates while running the tests. This script actually runs SPHERLS several times and compares output of the different runs. We will examine the steps this script takes in order to illustrate some aspects of working with SPHERLS. The output that is generated when you run {\tt test\_restart.py -k} should look something like that below, but with different paths reflecting where SPHERLS was installed on your system.
 
-This script and many other scripts have many optional and required arguments which can be specified.  Nearly all scripts can be executed with the {\tt -h} option to display a brief description of the script and how to use it, as well as listing available options. I would suggest running the {\tt test\_restart.py} script with the {\tt -h} option to see these available options. It says that this script tests restarts of the application to ensure that it produces the same output as if there had not been a restart. Also the {\tt -k} option allows us to keep all the temporary output this script creates while running the tests. This script actually runs SPHERLS several times and compares output of the different runs. We will examine the steps this script takes in order to illustrate some aspects of working with SPHERLS. By running with the {\tt -k} option we will be able to see what files are created by the script and have a look at some of the output from running SPHERLS.
+{\tiny
+\begin{verbatim}
+ 1:making a temporary directory, "./test3DNARestarts" to store test data ... SUCCESS
+ 2:changing into directory "./test3DNARestarts" ...
+ 3:making "SPHERLS.xml" ...
+ 4:running "/home/cgeroux/apps/spherls/bin/SPHERLS" for 2 time steps ... SUCCESS
+ 5:remaking "SPHERLS.xml" ...
+ 6:combining binary dump "./RestartTest2_t[0-*]" for restart ... SUCCESS
+ 7:restarting "/home/cgeroux/apps/spherls/bin/SPHERLS" for 1 time step from dump "RestartTest1_t00172487" ... SUCCESS
+ 8:combining binary files for dump "./RestartTest2_t[0-*]" ... SUCCESS
+ 9:diffing last dumps ... SUCCESS
+10:making a temporary directory, "./test2DNARestarts" to store test data ... SUCCESS
+11:changing into directory "./test2DNARestarts" ...
+12:making "SPHERLS.xml" ...
+13:running "/home/cgeroux/apps/spherls/bin/SPHERLS" for 2 time steps ... SUCCESS
+14:remaking "SPHERLS.xml" ...
+15:combining binary dump "./RestartTest2_t[0-*]" for restart ... SUCCESS
+16:restarting "/home/cgeroux/apps/spherls/bin/SPHERLS" for 1 time step from dump "RestartTest1_t00137887" ... SUCCESS
+17:combining binary files for dump "./RestartTest2_t[0-*]" ... SUCCESS
+18:diffing last dumps ... SUCCESS
+19:making a temporary directory, "./test1DNARestarts" to store test data ... SUCCESS
+20:changing into directory "./test1DNARestarts" ...
+21:making "SPHERLS.xml" ...
+22:running "/home/cgeroux/apps/spherls/bin/SPHERLS" for 2 time steps ... SUCCESS
+23:remaking "SPHERLS.xml" ...
+24:combining binary dump "./RestartTest2_t[0-*]" for restart ... SUCCESS
+25:restarting "/home/cgeroux/apps/spherls/bin/SPHERLS" for 1 time step from dump "RestartTest1_t00000001" ... SUCCESS
+26:combining binary files for dump "./RestartTest2_t[0-*]" ... SUCCESS
+27:diffing last dumps ... SUCCESS
+\end{verbatim}
+}
+
+Lets go through the steps the script executed. After the script creates a new directory to run a test in and changing into it (lines 1-2), it creates a {\tt SPHERLS.xml} file (line 3). This file contains all the settings to perform a calculation with SPHERLS. This file has settings such as where the input file is located, where the output should go, and how many time-steps SPHERLS should take. There are also many more settings contained in this file and it will be discussed in more detail in section~\ref{sec:conf-file}. The script then runs SPHERLS for 2 time-steps, and then remakes the configuration file (line 5) so that the calculation will resume at the second time step and run for one time step. This then allows the output from these two runs to be compared, as they should be at the same time, the output should be identical. 
+
+Before SPHERLS is run the second time, the output from the first run is combined into one file (line 6). SPHERLS uses domain decomposition to split up the computational work across multiple separate cpus, this means the physical grid representing the star is split into local grids on each cpu. Each cpu is responsible for computations only on that local grid. As a result the simplest and most efficient way to write out the grid state is to have each cpu write out its local portion of the grid to a file. To have a single file containing the whole grid then requires these separate files to be combined. This combing step is required before a restart occurs and SPHERLS only reads these combined files as input and only generates the distributed files as output. If you look at the directory {\tt test3DNARestarts} created by the script you will see the files {\tt SPHERLS.xml} and {\tt SPHERLS\_first\_run.xml} configuration files, which correspond the first and second run of SPHERLS. You will also see a {\tt log.txt} file which contains output from the {\tt test\_restart.py} script as well as output actually generated from the SPHERLS executable. Blocks (or even single lines) of output from SPHERLS are preceded by the file and line number in the source code where that output was generated (e.g. {\tt src/SPHERLS/main.cpp:main:144:0:}) this helps to distinguish it form the output generated by the test script. It is also handy to locate the code which generated a given output. You can also see output from python scripts which combine the output files, which have lines starting with {\tt \_\_main\_\_:combine\_bin\_files:}. Note that this output is actually generated from the function {\tt combine\_bin\_files} in Python script {\tt combine\_bins.py}. The {\tt test\_restart.py} script executes the {\tt combine\_bins.py} script through the command line to combine the files. 
+
+Once the output files from the first run are combined a second run of one time step is initiated (line 7). Finally the output from the second run is combined (line 8) and compared to the output from the first run (line 9). This whole process is repeated to test restarts for runs of 1D, 2D, and 3D models.
+
+For the most part, the {\tt test\_restart.py} script is simply issuing commands on the command line to perform these tests. These commands are combination of usual linux commands such as {\tt mkdir} and {\tt cd}, and SPHERLS specific commands. The command it uses to actually run the SPHERLS executable is {\tt mpirun -np <number-of-cores> SPHERLS}. This is just the usual {\tt mpirun} command with the {\tt SPHERLS} executable as the argument. The SPHERLS executable expects to read settings from the {\tt SPHERLS.xml} configuration file, and will fail with an error message such as 
+
+{\tiny
+\begin{verbatim}
+XML Parsing error inside file 'SPHERLS.xml'.
+Error: File not found
+At line 0, column 0.
+src/SPHERLS/main.cpp:main:275:0:src/xmlFunctions.cpp:openXMLFile:268: error parsing the file "SPHERLS.xml" possibly no global "data" node
+\end{verbatim}
+}
+
+if it doesn't find that file in the current working directory.
 
 
 Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
@@ -237,8 +292,10 @@ Bits to include in this section are (some of these might be better in a differen
 
 \section{Generating a Starting Model}
 \section{The Configuration file}
+\label{sec:conf-file}
 describe the xml configuration file
 \section{Running SPHERLS}
+
 describe the command, and the different ways to run SPHERLS, using mpi- the different environements and what might need to be done if you have a different sort of environment
 \section{Processing Output}
 \subsection{Profile Files}
