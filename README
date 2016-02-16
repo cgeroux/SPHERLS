@@ -6,17 +6,6 @@ to use the SPHERLS packages see user manuals in the docs/manuals
 directory, especially SPHERLS_manual.pdf in which the installation of
 prerequisite libraries is described.
 
-==========================================
-IF RAW SOURCE (will have gotten it from the git repository):
-
-  autoreconf --install
-  ./configure
-  make
-  make install (optional)
-
-===========================================
-IF PACKAGE (will be a tar.gz file):
-
 To build and install:
 
   ./configure
@@ -26,8 +15,15 @@ To build and install:
 To find out more on how to use the SPHERLS packages see user manuals in
 ./docs/manuals
 
+If not a distribution package (will have gotten it from the git repository):
+one can run:
+
+  autoreconf --install
+
+to create the ./configure file if the GNU build tools are installed
+
 ============================================
-COMMON OPTIONS
+Common configuration options 
 
 useful options for debugging add 'CXXFLAGS="-g -O0"' to ./configure to
 compile unoptimized version for debugging.
