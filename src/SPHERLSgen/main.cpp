@@ -4948,9 +4948,21 @@ void setExeDir(){
       //find the first "/" from the end
       unsigned pos=sExeDir.find_last_of("/");
       
-      //keep from the begning to the locaiton of the last "/" to remove the name
+      //keep from the begging to the location of the last "/" to remove the name
       //of the executable
       sExeDir=sExeDir.substr(0,pos);
+      
+      //check to see if the last directory is "bin" if so remove that also
+      //as installed versions put the exe's into the bin directory and sExeDir
+      //should point the top level directory.
+      pos=sExeDir.find_last_of("/");
+      std::string sBin=sExeDir.substr(pos+1,3);
+      
+      //if installed remove bin directory
+      if(sBin.compare("bin")==0){
+        sExeDir=sExeDir.substr(0,pos);
+      }
+      
     } else {
       std::stringstream ssTemp;
       ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
