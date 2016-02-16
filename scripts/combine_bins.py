@@ -27,7 +27,7 @@ def main():
     ,description="Combines a range of binary files starting with BASEFILENAME with time step "
     +"indices including START upto but not including END. Ex. there are a number of files in the "
     +"current directory from run1_t00000000, to run1_t00012300, one could combine all these files "
-    +"with the command %prog run1_t[0-12300] or %prog run1_t[0-*]. The \"*\" wild character is "
+    +"with the command %prog run1_t[0-12301] or %prog run1_t[0-*]. The \"*\" wild character is "
     +"used to include all files upto the maximum integer starting from START.")
   
   addParserOptions(parser)
@@ -46,12 +46,12 @@ def combine_bin_files(keep,fileName,remakeBins):
   
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
   
-  #if only doning one file we can make this faster
+  #if only doing one file we can make this faster
   filesExist=[]
   if end-start==1:
     filesExist.append(baseFileName+str(start).zfill(8)+"-0")
   else:
-    #check for distributed binary files in interation range starting with baseFileName
+    #check for distributed binary files in iteration range starting with baseFileName
     filesExist=glob.glob(baseFileName+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-0")
   
   files=[]
