@@ -1,6 +1,6 @@
 <data>
   <!-- The first node of a given type that is encountered in the file is the one which is used to
-    set paramters. -->
+    set parameters. -->
   
   <!-- constants -->
   <G>6.67259e-08</G><!-- gravitational constant [cm^3 g^-1 s^-2]-->
@@ -72,20 +72,20 @@
     <EOS type="gammaLaw"><!-- second equation of state is ignored -->
       <R-surf>5.5916293248E+00</R-surf><!-- surface radius of model [solar radii]-->
       <gamma>1.6666666666</gamma>
-      <E-pro>/home/cgeroux/SPHERLSgen/trunk/energy_pro/Epro_mod.dat</E-pro><!-- file with E [erg] 
+      <E-pro>data/energy_pro/Epro_mod.dat</E-pro><!-- file with E [erg] 
         versus log10(1-M_r/Mtotal), used to find E [erg]-->
     </EOS>
     <EOS type="table">
       <T-eff>6.8e3</T-eff><!-- Effective temperature [K] -->
       <L>30.0</L><!-- Luminosity [L_sun] -->
-      <eosTable>/home/cgeroux/Documents/WORK/SPHERLS/data/eos/eosNewY240Z0005_wider_finer</eosTable><!-- Equation of state table -->
+      <eosTable>data/eos/eosNewY240Z0005_wider_finer</eosTable><!-- Equation of state table -->
       <tolerance>5e-15</tolerance><!-- Error allowed when calculating -->
       <maxIterations>1000</maxIterations><!-- how many iterations to before stop trying to converage
         temperature to within tolerance -->
     </EOS>
     
-    <!-- Periodicity, optional, most times it isn't needed and can be ommitted since the code is 
-    smart enough to pick resonable values in nearly all cases. -->
+    <!-- Periodicity, optional, most times it isn't needed and can be omitted since the code is 
+    smart enough to pick reasonable values in nearly all cases. -->
     <periodic>
       <x0>0</x0><!--periodicity in x0 direction not yet supported -->
       <x1>1</x1><!--periodicity in x1 direction, only has an effect if 2D or 3D -->
@@ -96,9 +96,9 @@
     <dimensions>
       <radIndepVar>
         <M-total>5.75E-01</M-total><!-- total mass of the star [solar masses] -->
-        <M-delta-init>4.5E-9</M-delta-init><!-- delta M at sufrace [solar masses]-->
+        <M-delta-init>4.5E-9</M-delta-init><!-- delta M at surface [solar masses]-->
         <!--There can be many M-delta-delta nodes and they can have stopType="T" or ="R" indicating 
-          that the stop value is either a temperature or a radius. It is best not ot mix "R" stop 
+          that the stop value is either a temperature or a radius. It is best not to mix "R" stop 
           values with "T" stop values. The "R" stop values are mostly intended for the adiabatic 
           models which lack temperatures. Using stopType="T" requires increasing stopVaules from 
           top to bottom, while using stopType="R" requires decreasing values from top to bottom.-->
@@ -123,15 +123,15 @@
     <velocityDist type="PRO">
       <fileName>/home/cgeroux/SPHERLSgen/trunk/velocity_pro/fu_upro2.dat</fileName>
       <uSurf>-1.0e5</uSurf>
-      <perturb type="torus"><!-- Can have multiple preturbations, only the torus type of preturbation is currently defined-->
-        <r_cen_off>2e11</r_cen_off><!-- radius in the star at which to place the toriodial pretubation-->
+      <perturb type="torus"><!-- Can have multiple perturbations, only the torus type of perturbation is currently defined-->
+        <r_cen_off>2e11</r_cen_off><!-- radius in the star at which to place the toriodial perturbation-->
         <theta_cen_off>0.0</theta_cen_off><!-- off set in center of the torus from the center of the theta coordinate -->
         <phi_cen_off>0.0</phi_cen_off><!-- off set in center of the torus from the center of the phi coordinate -->
         <radius_cen>1e9</radius_cen><!-- radius of the torus. This can be thought of as the spacing between the convective cells -->
         <radius_outter>5e8</radius_outter><!-- radius of the ring of the torus, this can be thought as the size of the convective cell-->
-        <width_guassian>2.5e8</width_guassian><!-- width of the guassian distribution, Used to smoothely
+        <width_guassian>2.5e8</width_guassian><!-- width of the Gaussian distribution, Used to smoothly
           decrease the velocity as we move away from the surface of the torus. -->
-        <amplitude>1.0e20</amplitude><!-- amplitude of the velocity preterubation [cm/s]-->
+        <amplitude>1.0e20</amplitude><!-- amplitude of the velocity perturbation [cm/s]-->
       </perturb>
     </velocityDist>
     <velocityDist type="POLY"><!-- second velocity profile is ignored -->
