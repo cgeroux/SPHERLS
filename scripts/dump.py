@@ -8,8 +8,8 @@ import os
 #from timeitDec import timeitDec
 
 #The blow two lines should not needed when a proper install is done
-sys.path.append(paths.srcPath+"/pythonextensions/lib/python/")
-sys.path.append(paths.srcPath+"/pythonextensions/lib/python/evtk")
+sys.path.append(paths.srcPath+"/pythonextensions/lib/")
+sys.path.append(paths.srcPath+"/pythonextensions/lib/evtk")
 
 import evtk.hl
 import eos
@@ -627,6 +627,8 @@ class Dump:
     out.write("varInfo="+str(self.varInfo)+"\n")
     out.write("varSize="+str(self.varSize)+"\n")
     out.write("numDims="+str(self.numDims)+"\n")
+  def printHeaderToSTDOut(self):
+    self.printHeader(sys.stdout)
   def printDumpToSTDOut(self):
     """Prints dump to standard output"""
     

@@ -1,10 +1,10 @@
 <data>
   <job>
     <name>Test</name><!-- name of the job -->
-    <duration>35:00:00</duration><!-- time for job to run in the que -->
-    <totalview>False</totalview><!-- if true will launch without the que, with the debug option -->
-    <que>False</que><!-- if "true" or "main" it will run the job in main que, if it is test it will 
-      run in the test que if it isn't given, or is something else it will run at the command line -->
+    <duration>35:00:00</duration><!-- time for job to run in the queue -->
+    <totalview>False</totalview><!-- if true will launch without the queue, with the debug option -->
+    <queue>False</queue><!-- if "true" or "main" it will run the job in main queue, if it is test it will 
+      run in the test queue if it isn't given, or is something else it will run at the command line -->
     <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
       using mpirun, check with your system admin for ideas about what this should be. ompi* works on
       ace-net machines, while openmpi works on lachesis-->

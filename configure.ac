@@ -341,7 +341,8 @@ AS_IF(
 
 AM_CONDITIONAL([CYTHON_ENABLE],[test "$CYTHON_ENABLE" = "yes"])
 #################################################################
-
+#AC_SUBST([prefix])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/pythonextensions/hdf/setup.py])
+#scripts/basePath.py
 AC_OUTPUT

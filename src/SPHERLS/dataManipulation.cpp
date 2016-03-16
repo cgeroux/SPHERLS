@@ -341,7 +341,7 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
   //read in equation of state if using a tabulated equation of state
   if(!parameters.bEOSGammaLaw){
     
-    //test to see if it is relative to the execuatable directory
+    //test to see if it is relative to the executable directory
     std::string sTemp;
     if (parameters.sEOSFileName.substr(0,1)!="/" 
       && parameters.sEOSFileName.substr(0,2)!="./"){
@@ -355,10 +355,10 @@ void init(ProcTop &procTop,Grid &grid,Output &output,Time &time,Parameters &para
     
     parameters.eosTable.readBin(sTemp);
     
-    //get tolerance for interated quantities
+    //get tolerance for iterated quantities
     getXMLValue(xEOS,"tolerance",0,parameters.dTolerance);
     
-    //get maximum number of iternations for achieving allowed tolerance
+    //get maximum number of iterations for achieving allowed tolerance
     getXMLValue(xEOS,"max-iterations",0,parameters.nMaxIterations);
   }
   

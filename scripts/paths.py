@@ -2,8 +2,18 @@
 import os
 import sys
 
-BasePath=os.path.dirname(os.path.dirname(sys.argv[0]))#remove script name, remove scripts directory
-BasePath=os.path.join(os.getcwd(),BasePath)#fix for relative paths
+#this fails when not running a python script on the command line from either
+#the build directory or the install directory with all the other scripts
+#print sys.argv[0]
+#print os.path.dirname(sys.argv[0])
+#BasePath=os.path.dirname(os.path.dirname(sys.argv[0]))#remove script name, remove scripts directory
+#print os.getcwd()
+#print BasePath
+#BasePath=os.path.join(os.getcwd(),BasePath)#fix for relative paths
+
+BasePath=os.path.dirname(os.path.realpath(__file__))
+BasePath=os.path.dirname(BasePath)
+
 SPHERLSanalPath=BasePath+"/SPHERLSanal"
 SPHERLSgenPath=BasePath+"/SPHERLSgen"
 SPHERLSPath=BasePath+"/SPHERLS"

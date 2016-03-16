@@ -232,6 +232,7 @@ void eos::readBin(std::string sFileName)throw(exception2){
   
   //test to see if it is relative to the executable directory
   std::string sTemp;
+  std::stringstream ssTemp;
   if (sFileName.substr(0,1)!="/" 
     && sFileName.substr(0,2)!="./"){
     
@@ -1770,9 +1771,22 @@ void eos::setExePath(){
     //find the first "/" from the end
     unsigned pos=sExePath.find_last_of("/");
     
-    //keep from the beginning to the location of the last "/" to remove the name
+    //keep from the begging to the location of the last "/" to remove the name
     //of the executable
     sExePath=sExePath.substr(0,pos);
+    
+    //check to see if the last directory is "bin" if so remove that also
+    //as installed versions put the exe's into the bin directory and sExePath
+    //should point the top level directory.
+    pos=sExePath.find_last_of("/");
+    std::string sBin=sExePath.substr(pos+1,3);
+    
+    //if installed remove bin directory
+    if(sBin.compare("bin")==0){
+      sExePath=sExePath.substr(0,pos);
+    }
+    
+    
   } else {
     std::stringstream ssTemp;
     ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__

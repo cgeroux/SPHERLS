@@ -79,9 +79,8 @@
       <T-eff>6.8e3</T-eff><!-- Effective temperature [K] -->
       <L>30.0</L><!-- Luminosity [L_sun] -->
       <eosTable>data/eos/eosNewY240Z0005_wider_finer</eosTable><!-- Equation of state table -->
+      <maxIterations>1000</maxIterations><!-- how many iterations to do before  trying to converge the temperature to within tolerance -->
       <tolerance>5e-15</tolerance><!-- Error allowed when calculating -->
-      <maxIterations>1000</maxIterations><!-- how many iterations to before stop trying to converage
-        temperature to within tolerance -->
     </EOS>
     
     <!-- Periodicity, optional, most times it isn't needed and can be omitted since the code is 

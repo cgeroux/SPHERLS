@@ -231,14 +231,14 @@ def main():
   settings['mpirun']="mpirun"
   settings['target']=paths.SPHERLSPath
   
-  if settings['que']==None:# if not running in que
+  if settings['que']==None and not settings['totalview']==True:# if not running in que
     cmd=settings['mpirun']+" -np "+settings['numProcs']+" "+settings['target']
     if options.dryRun:
       print cmd
     else:
       os.system(cmd)
   elif settings['totalview']==True:#if running with a debugger
-    cmd=msettings['mpirun']+" --debug -np "+settings['numProcs']+" "+settings['target']
+    cmd=settings['mpirun']+" --debug -np "+settings['numProcs']+" "+settings['target']
     if options.dryRun:
       print cmd
     else:

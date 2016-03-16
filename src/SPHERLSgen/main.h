@@ -274,7 +274,9 @@ bool bAutoDeltaM;/**<
   If true it will use an algorithm to choose the mass spacing.
   */
 std::string sExeDir;/**<
-  Directory of the current executable
+  SPHELS base install directory, which may be the same as the directory where 
+  the SPHERLS and SPHERLSgen directory are, or they will be in the bin directory 
+  under this directory if they are installed.
   */
 //functions
 void readConfig(std::string sConfigFileName,std::string sStartNode);/**<

@@ -327,7 +327,7 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
         std::string sEProFileName;
         getXMLValue(xEOS,"E-pro",0,sEProFileName);
         
-        //test to see if it is relative to the execuatable directory
+        //test to see if it is relative to the executable directory
         std::string sTemp;
         if (sEProFileName.substr(0,1)!="/" 
           && sEProFileName.substr(0,2)!="./"){
@@ -350,7 +350,7 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
         //get file name for eos table
         getXMLValue(xEOS,"eosTable",0,sEOSFile);
         
-        //test to see if it is relative to the execuatable directory
+        //test to see if it is relative to the executable directory
         std::string sTemp;
         if (sEOSFile.substr(0,1)!="/" && sEOSFile.substr(0,2)!="./"){
           
@@ -420,7 +420,9 @@ void readConfig(std::string sConfigFileName,std::string sStartNode){
       getXMLValue(xDims,"delta-phi",0,dDeltaPhi);
       
       //get number of ghost cells
-      getXMLValue(xDims,"num-ghost-cells",0,nNumGhostCells);
+      if(getXMLValueNoThrow(xDims,"num-ghost-cells",0,nNumGhostCells)==0){
+        nNumGhostCells=2;//if no xml node is found
+      }
       
       //set number of dimensions
       if(nNumTheta==1&&nNumPhi==1){
@@ -900,11 +902,11 @@ void calculateFirstShell_TEOS(){
   //mass (-1/2)
   vecdM.push_back(dMTotal*dMSun);
   
-  //temeperature (0)
+  //temperature (0)
   double dTSurf=pow(2.0,-0.25)*dTeff;
   vecdT.push_back(dTSurf);
   
-  //radius (-1/2), slight inconsistancey here with where the temperature and radius are defined
+  //radius (-1/2), slight inconsistency here with where the temperature and radius are defined
   double dRSurf=sqrt(dL*dLSun/(4.0*dPi*dSigma*pow(dTeff,4.0)));
   vecdR.push_back(dRSurf);
   
@@ -948,7 +950,7 @@ void calculateFirstShell_TEOS(){
   //get energy at (0)
   vecdE.push_back(dE);
   
-  //get opcacity at (0)
+  //get opacity at (0)
   vecdKappa.push_back(dKappa);
   
   //get Mass at (1/2)
@@ -4939,34 +4941,34 @@ double interpolateE_GL(double dIntVar){
   return (dEPro[i]-dEPro[i-1])/(dEProM[i]-dEProM[i-1])*(dIntVar-dEProM[i-1])+dEPro[i-1];
 }
 void setExeDir(){
-    char buff[1024];
-    ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
-    if (len != -1) {
-      buff[len] = '\0';
-      sExeDir=std::string(buff);
-      
-      //find the first "/" from the end
-      unsigned pos=sExeDir.find_last_of("/");
-      
-      //keep from the begging to the location of the last "/" to remove the name
-      //of the executable
+  char buff[1024];
+  ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
+  if (len != -1) {
+    buff[len] = '\0';
+    sExeDir=std::string(buff);
+    
+    //find the first "/" from the end
+    unsigned pos=sExeDir.find_last_of("/");
+    
+    //keep from the begging to the location of the last "/" to remove the name
+    //of the executable
+    sExeDir=sExeDir.substr(0,pos);
+    
+    //check to see if the last directory is "bin" if so remove that also
+    //as installed versions put the exe's into the bin directory and sExeDir
+    //should point the top level directory.
+    pos=sExeDir.find_last_of("/");
+    std::string sBin=sExeDir.substr(pos+1,3);
+    
+    //if installed remove bin directory
+    if(sBin.compare("bin")==0){
       sExeDir=sExeDir.substr(0,pos);
-      
-      //check to see if the last directory is "bin" if so remove that also
-      //as installed versions put the exe's into the bin directory and sExeDir
-      //should point the top level directory.
-      pos=sExeDir.find_last_of("/");
-      std::string sBin=sExeDir.substr(pos+1,3);
-      
-      //if installed remove bin directory
-      if(sBin.compare("bin")==0){
-        sExeDir=sExeDir.substr(0,pos);
-      }
-      
-    } else {
-      std::stringstream ssTemp;
-      ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-        <<": error determining executable path"<<std::endl;
-      throw exception2(ssTemp.str(),OUTPUT);
     }
+    
+  } else {
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
+      <<": error determining executable path"<<std::endl;
+    throw exception2(ssTemp.str(),OUTPUT);
+  }
 }

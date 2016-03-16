@@ -8,14 +8,17 @@
   linkcolor    = blue, %Colour of internal links
   citecolor    = red %Colour of citations
 }
+\renewcommand{\sectionautorefname}{\S}
 \title{SPHERLS User Guide 1.0}
 \author{Chris Geroux}
 \begin{document}
 \maketitle
 \chapter{Introduction}
+\label{chap:introduction}
 This manual is primarily designed to be used to get a user up and running quickly. It also includes some information on how to go about modifying and developing SPHERLS. The reference manuals are useful for determining specific information about variables, functions and classes.
 
 \section{Overview}
+\label{sec:overview}
 SPHERLS stands for Stellar Pulsation with a Horizontal Eulerian Radial Lagrangian Scheme. There are three components to SPHERLS: SPHERLS itself which does the hydrodynamics calculations, SPHERLSgen which creates starting models, and SPHERLSanal which is able to manipulate the output files. All three components have their own reference manuals where details of the various classes, functions, and variables are described, however the details on how to use these three components is described here. For the most part SPHERLS and SPHERLSgen are used directly, while SPHERLSanal is primarly used indirectly through the use of python scripts.
   
 SPHERLS calculates the radial pulsation motions together with the horizontal convective flow of stars. The radial pulsation can be described by a radial grid velocity, moving the grid inward and outward with the pulsation. The movement of the grid is defined by the motion required to maintaining the mass in a spherical shell through out the calculation. This motion is determined so that it will change the volume of the shell so the newly calculated density when multiplied with the new volume will produce the same shell mass for all times. The total motion of the stellar material is simply the combination of the three velocity components and the grid velocity.  The convective motion is the radial velocity minus the grid velocity, combined with the theta and phi velocities. This is because the grid velocity describes the bulk motion of the pulsation so subtracting it out leaves only the convective motions.
@@ -70,21 +73,21 @@ The below set of instructions do not explain how to install the GCC (GNU Compile
 
 The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended. The full list of dependencies of these third party libraries is not included, but some library dependencies have been noted when I have specifically had to install these dependencies on various machines.
 \begin{description}
-\item[python] python scripts are supplied for various analysis and convenience operations. Having python is highly recommended and will make using SPHERLS far more enjoyable. Many SPHERLS python scripts use the following python libraries:
+\item[python] python scripts are supplied for various analysis and convenience operations.  The included python scripts were used and written for Python 2.X series so will likely not work with Python 3.X series, though with a little effort these scripts could likely be updated to work with both, however this has not yet been done so it is best to stick with the Python 2.X series. Having python is highly recommended and will make using SPHERLS far more enjoyable. Many SPHERLS Python scripts use the following Python libraries:
 \begin{description}
   \item[numpy] numerical python, fast array operations
   \item[matplotlib] for creating plots
-  \item[scipy] for interpolating in equation of state and opacity tables when making new files
-  \item[evtk] a python library to make writing vtk files easier, the SPHERLS build process actually makes this for you if Cython support is enabled.
   \item[Cython] needed to build evtk, and also to allow Python scripts access to the equation of state and opacity C++ classes used in SPHERLS.
+  \item[evtk] a python library to make writing vtk files easier, the SPHERLS build process actually makes this for you if Cython support is enabled.
+  \item[scipy] for interpolating in equation of state and opacity tables when making new rectangular equation of state and opacity files. This is not something that is often required so skipping installing {\tt scipy} might not be a problem. In my experience it often turns out to be one of the more difficult libraries to install as it has many dependencies due to the large amount of available functionality from this module.
 \end{description}
-\item[fftw3] used for frequency analysis by SPHERLSanal.
-\item[hdf4] for converting model dumps to hdf4 file format for visualizing, used by SPHERLSanal and some Python scripts.
+\item[fftw3] used for frequency analysis by SPHERLSanal. Not strictly required.
+\item[hdf4] for converting model dumps to hdf4 file format for visualizing, used by SPHERLSanal and some Python scripts. Not required unless you want to make hdf4 files.
 \begin{description}
-  \item[jpeg] needed by hdf4 library
-  \item[zlib] needed by hdf4 library
+  \item[jpeg] needed by hdf4 library.
+  \item[zlib] needed by hdf4 library.
 \end{description}
-\item[pdflatex] used to create documentation from src/doc/ latex files. Use {\tt make docs} to build documentation. Note that the {\tt make docs} command requires an additional option to be set during the configuration process {\tt --enable-make-docs}.
+\item[pdflatex] used to create documentation from src/doc/ latex files. Use {\tt make docs} to build documentation. Note that the {\tt make docs} command requires an additional option to be set during the configuration process {\tt --enable-make-docs}. Also, the documentation does not need to be made unless it has been modified as all the documentation has already been made and included in the repository and distribution packages.
 \end{description}
 
 \section{Installing OpenMPI}
@@ -131,22 +134,22 @@ Cython allows you to build some extra python modules to use in creating visualiz
 \end{itemize}
 
 \section{Installing Python Modules}
-In this section I will just briefly give some suggests about how to install some of the additional python modules I mention. One can often install python modules into home directory locations with the {\tt pip} tool. For example \\
+In this section I will just briefly give some suggests about how to install some of the additional python modules I mentioned above. One can often install python modules into home directory locations with the {\tt pip} tool. For example \\
  \\
 {\tt pip install --install-option="--prefix}\\
 {\tt=<path-to-install-directory>" numpy}\\
  \\
-If the specified module, in this case {\tt numpy} is already present on the current machine, an upgraded version can be installed in the users home directory if desired with the {\tt --upgrade} option. Another helpful option is the {\tt --user} option which was required when installing the {\tt matplotlib} module. In order to have python pick up these home directory installs one must add to the {\tt PYTHONPATH} environment variable with something like \\
+If the specified module, in this case {\tt numpy} is already present on the current machine, an upgraded version can be installed in the users home directory if desired with the {\tt --upgrade} option. Another helpful option is the {\tt --user} option which was required when installing the {\tt matplotlib} module, which appears to make {\tt pip} aware that you do not have root access. In order to have python pick up these home directory installs one must add to the {\tt PYTHONPATH} environment variable with something like \\
  \\
 {\tt export PYTHONPATH=<path-to-install-directory>}\\
 {\tt /lib/python2.7/site-packages:\$\{PYTHONPATH\}}.\\
  \\
-The exact details of this path to add will depend on the version of python you have available to you on your system.
+The exact details of this path to add will depend on the version of python you have available to you on your system, so check the actual paths were things have been installed.
 
 \section{Installing FFTW Library}
 \begin{itemize}
 \item Download the FFTW Library from the FFTW \href{http://www.fftw.org/download.html}{website}. Or there is a version available in the {\tt lib/} directory. Version fftw-3.2.2, fftw-3.3.1, and fftw-3.3.3 have been tested to work with SPHERLS.
-\item Then untar and unzip the downloaded with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
+\item Then untar and unzip the FFTW tar ball with something like {\tt tar -xzf fftw-3.2.2.tar.gz}
 \item To install the library change into the directory made when you extracted the archive and type the following commands:
 \begin{enumerate}
 \item {\tt ./configure --prefix\-=<path-to-final-location-of-library>}
@@ -189,16 +192,16 @@ After all the required and optional third party libraries are available and inst
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
-If you have the raw git repository do the following
+If you have the raw git repository you may do the following to recreate the {\tt configure} file. However there is a version of this file included in the repository, so the above steps should also work.
 \begin{itemize}
 \item {\tt autoreconf --install} \\provided you have the gnu build tools installed, this makes the configuration script
 \item {\tt ./configure --prefix=/home/\${USER}}
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
-Common problems which result during the execution of the above command are: not finding the installed third party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and or include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
+Common problems which result during the execution of the above command are: not finding the installed third party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
 
-After you have built SPHERLS and installed it to a location of your choosing, you will need to setup a number of environment variables. First you will need to add the path to the petsc library location to the {\tt LD\_LIBRARY\_PATH} variable. This can be done with adding the line\\
+After you have built SPHERLS and installed it to a location of your choosing, you will need to setup a number of environment variables. First you will need to add the path to the petsc library location to the {\tt LD\_LIBRARY\_PATH} variable so that it can dynamically link to the shared library at run time. This can be done with adding the line\\
  \\
 {\tt export LD\_LIBRARY\_PATH=<path\_to\_petsc\_lib\_dir>:\$\{LD\_LIBRARY\_PATH\}}\\
  \\
@@ -210,8 +213,10 @@ Finally python will need to know where to load the SPHERLS python modules from, 
  \\
 {\tt export PYTHONPYTH=<path\_to\_spherls\_bin\_dir>:\$\{PYTHONPATH\}}.
 
+{\tt <path\_to\_spherls\_bin\_dir>} will be the location you set SPHERLS to install to (e.g. the path set with the {\tt --prefix} option to the configuration script) with {\tt bin/} appended.
+
 \chapter{Using SPHERLS}
-Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the bin directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Python scripts are distinguished from compiled executables with their {\tt .py} extension. Lets examine what the {\tt test\_restart.py} script does in detail first.
+Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the {\tt bin} directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. If you have not built with Cython support you will likely get the error {\tt No module named evtk.hl} when running either of the test scripts. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Python scripts are distinguished from compiled executables with their {\tt .py} extension. Lets examine what the {\tt test\_restart.py} script does in detail first.
 
 This script and many other scripts have many optional and required arguments which can be specified. Nearly all scripts can be executed with the {\tt -h} option to display a brief description of the script and how to use it, as well as listing available options. I would suggest running the {\tt test\_restart.py} script with the {\tt -h} option to see these available options. The script help says that it tests restarts of the application to ensure that it produces the same output as if there had not been a restart. Also the {\tt -k} option allows us to keep all the temporary output this script creates while running the tests. This script actually runs SPHERLS several times and compares output of the different runs. We will examine the steps this script takes in order to illustrate some aspects of working with SPHERLS. The output that is generated when you run {\tt test\_restart.py -k} should look something like that below, but with different paths reflecting where SPHERLS was installed on your system.
 
@@ -247,11 +252,11 @@ This script and many other scripts have many optional and required arguments whi
 \end{verbatim}
 }
 
-Lets go through the steps the script executed. After the script creates a new directory to run a test in and changing into it (lines 1-2), it creates a {\tt SPHERLS.xml} file (line 3). This file contains all the settings to perform a calculation with SPHERLS. This file has settings such as where the input file is located, where the output should go, and how many time-steps SPHERLS should take. There are also many more settings contained in this file and it will be discussed in more detail in section~\ref{sec:conf-file}. The script then runs SPHERLS for 2 time-steps, and then remakes the configuration file (line 5) so that the calculation will resume at the second time step and run for one time step. This then allows the output from these two runs to be compared, as they should be at the same time, the output should be identical. 
+Lets go through the steps the script executed. After the script creates a new directory to run a test in and changing into it (lines 1-2), it creates a {\tt SPHERLS.xml} file (line 3). This file contains all the settings to perform a calculation with SPHERLS. This file has settings such as where the input file is located, where the output should go, and how many time-steps SPHERLS should take. There are also many more settings contained in this file and it will be discussed in more detail in section~\ref{sec:conf-file}. The script then runs SPHERLS for 2 time-steps (line 4), and then remakes the configuration file (line 5) so that the calculation will resume at the second time step and run for one time step. This then allows the output from these two runs to be compared, as they should be at the same time, the output should be identical. 
 
-Before SPHERLS is run the second time, the output from the first run is combined into one file (line 6). SPHERLS uses domain decomposition to split up the computational work across multiple separate cpus, this means the physical grid representing the star is split into local grids on each cpu. Each cpu is responsible for computations only on that local grid. As a result the simplest and most efficient way to write out the grid state is to have each cpu write out its local portion of the grid to a file. To have a single file containing the whole grid then requires these separate files to be combined. This combing step is required before a restart occurs and SPHERLS only reads these combined files as input and only generates the distributed files as output. If you look at the directory {\tt test3DNARestarts} created by the script you will see the files {\tt SPHERLS.xml} and {\tt SPHERLS\_first\_run.xml} configuration files, which correspond the first and second run of SPHERLS. You will also see a {\tt log.txt} file which contains output from the {\tt test\_restart.py} script as well as standard output actually generated from the SPHERLS executable. Blocks (or even single lines) of output from SPHERLS are preceded by the file and line number in the source code where that output was generated (e.g. {\tt src/SPHERLS/main.cpp:main:144:0:}) this helps to distinguish it form the output generated by the test script. It is also handy to locate the code which generated a given output. You can also see output from python scripts which combine the output files, which have lines starting with {\tt \_\_main\_\_:combine\_bin\_files:}. Note that this output is actually generated from the function {\tt combine\_bin\_files} in the Python script {\tt combine\_bins.py}. The {\tt test\_restart.py} script executes the {\tt combine\_bins.py} script through the command line to combine the files. 
+Before SPHERLS is run the second time, the output from the first run is combined into one file (line 6). SPHERLS uses domain decomposition to split up the computational work across multiple separate cpus, this means the physical grid representing the star is split into local grids on each cpu. Each cpu is responsible for computations only on that local grid. As a result the simplest and most efficient way to write out the grid state is to have each cpu write out its local portion of the grid to a file. To have a single file containing the whole grid then requires these separate files to be combined. This combing step is required before a restart occurs. SPHERLS only reads these combined files as input and only generates the distributed files as output. If you look at the directory {\tt test3DNARestarts} created by the script you will see the configuration files {\tt SPHERLS.xml} and {\tt SPHERLS\_first\_run.xml}, which correspond the first and second run of SPHERLS. You will also see a {\tt log.txt} file which contains output from the {\tt test\_restart.py} script as well as standard output actually generated from the SPHERLS executable. Blocks (or even single lines) of output from SPHERLS are preceded by the file and line number in the source code where that output was generated (e.g. {\tt src/SPHERLS/main.cpp:main:144:0:}) this helps to distinguish it form the output generated by the test script. It is also handy to locate the code which generated a given output. You can also see output from python scripts which combine the output files, which have lines starting with {\tt \_\_main\_\_:combine\_bin\_files:}. Note that this output is actually generated from the function {\tt combine\_bin\_files} in the Python script {\tt combine\_bins.py}. The {\tt test\_restart.py} script executes the {\tt combine\_bins.py} script through the command line to combine the files. 
 
-Once the output files from the first run are combined a second run of one time step is initiated (line 7). Finally the output from the second run is combined (line 8) and compared to the output from the first run (line 9). This whole process is repeated to test restarts for runs of 1D, 2D, and 3D models.
+Once the output files from the first run are combined a second run of one time step is initiated (line 7). Finally the output from the second run is combined (line 8) and compared to the output from the first run (line 9). This whole process is repeated to test restarts for runs of 2D and 1D models, since the test for 3D models has just been done.
 
 For the most part, the {\tt test\_restart.py} script is simply issuing commands on the command line to perform these tests. These commands are a combination of usual linux commands such as {\tt mkdir} and {\tt cd}, and SPHERLS specific commands. The command it uses to actually run the SPHERLS executable is {\tt mpirun -np <number-of-cores> SPHERLS}. This is just the usual {\tt mpirun} command with the {\tt SPHERLS} executable as the argument. The SPHERLS executable expects to read settings from the {\tt SPHERLS.xml} configuration file, and will fail with an error message such as 
 
@@ -263,57 +268,202 @@ At line 0, column 0.
 src/SPHERLS/main.cpp:main:275:0:src/xmlFunctions.cpp:openXMLFile:268: error parsing the file "SPHERLS.xml" possibly no global "data" node
 \end{verbatim}
 }
+\noindent if it doesn't find that file in the current working directory.
 
-if it doesn't find that file in the current working directory.
+The {\tt test\_restart.py} script also runs a command {\tt combine\_bins.py ./RestartTest1\_t[0-*]} in the test directory to combine the distributed files into combined files. The distributed files have a {\tt -\#} appended where {\tt \#} is the processor rank. In the case of this script SPHERLS has been run with 4 processors and thus you see files with {\tt -0}, {\tt -1}, {\tt -2}, and {\tt -3} suffixes. The files without this suffix are the combined files. If you look at the file sizes you will see that these combined files are actually slightly smaller than the combined size of distributed files. This is because the distributed files contain some extra information to describe which portions of the grid that processor worked on and some duplicated meta data. The number to the left of the suffix (of eight digits preceded by a {\tt \_t}) is the number of time steps from some zero initial time. These tests actually run from models which have been run for a significant time. In the case of 2D and 3D calculations this ensures that the tests include well developed convection, which will exercise all the terms in the conservation equations in the tests. The file name argument specified for {\tt combine\_bins.py} script given above does not match a specific file name, that is because it matches all the files names. The {\tt [0-*]} specifies that the script should run over all distributed files with time step count between 0 and ``*''. ``*'' is a special case indicating that it should loop until no more files are found with the same matching path. This way of specifying input files can be used to run a command on a subset of output files in an output directory and can be useful if you only want to process some part of the output.
 
-The {\tt test\_restart.py} script also runs a command {\tt combine\_bins.py ./RestartTest1_t[0-*]} in the test directory to combine the distributed files into combined files. The distributed files have a {\tt -\#} appended where {\tt \#} is the processor rank. In the case of this script it has been run with 4 processors and thus you see files with {\tt -0}, {\tt -1}, {\tt -2}, {\tt -3} suffixes. The files without this suffix are the combined files. If you look at the file sizes you will see that these combined files are actually slightly smaller than the combined size of distributed files. This is because the distributed files contains some extra information to describe which portions of the grid that processor worked on and how to combine these files.
-
-Finally to make the comparison the {\tt test\_restart.py} script calls the {\tt diffDumps} function from the {\tt diffDumps.py} script. The same result can be obtianed by manually running this function on the command line with something like\\
+Finally to make the comparison the {\tt test\_restart.py} script calls the {\tt diffDumps} function from the {\tt diffDumps.py} script. The same result can be obtained by manually running this function on the command line with something like\\
  \\
-{\tt diffDumps.py RestartTest2_t00172488 RestartTest1_t00172488}.\\
+{\tt diffDumps.py RestartTest2\_t00172488 RestartTest1\_t00172488}.\\
  \\
+This script compares cell-by-cell each variable in the dump file to check for differences. If the relative difference of the variable is larger than is allowed (the default is $5\times10^{-14}$) it will declare the two files as different and report the difference. It also uses a threshold value that variables must be larger than in order to be compared (the default is $10^{-17}$). This avoids division by zero in the case of the velocities, as other variables are typically several orders of magnitude larger than the $10^{-17}$ threshold.
 
+The {\tt test\_calculation.py} script can be run in a similar way to the {\tt test\_restart.py} script. This time instead of checking that restarts work as expected it compares the results of the calculation to a set of reference calculations. This is useful for ensuring a new installation produces the same results as a previous installation. It is also useful when making changes to the code to verify that changes not expected to affect the results do not. If changes are made to the code that one expects to change the results of the calculation these reference calculations can be re-created by passing this script the {\tt -r} option.
 
-Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
-\begin{itemize}
-\item Generating a starting model
-\item The XML configuration file
-\item Starting a calculation
-\item getting data
-\item watchzones
-\item model dumps
-\item debug information
-\item post calculation analysis
-\item python scripts and plotting
-\item Adiabatic Calculations
-\item 1D, 2D, and 3D
-\item $\gamma$-law gas
-\item Sedov Blast wave test
-\item Non-Adiabatic Calculations
-\item 1D, 2D, and 3D
-\item Tabulate EOS
-\item Different versions of the energy equation
-\item LES models
-\item creating a new EOS file using {\tt eos\_interp.py}
-\end{itemize}
+By examining these test scripts you have been introduced to the basic work flow of SPHERLS including how SPHERLS reads settings from a configuration file, how it outputs distributed files and only reads combined files, how to combine distributed files, and how to compare combined output files. You have also been introduced to how to get more information about specific Python scripts, and how to tell Python scripts output file ranges to process. In the next section the generation of the initial starting model will be described.
+
+%Bits to include in this section are (some of these might be better in a different section, perhaps Developing SPHERLS):
+%\begin{itemize}
+%\item Generating a starting model
+%\item The XML configuration file
+%\item Starting a calculation
+%\item getting data
+%\item watchzones
+%\item model dumps
+%\item debug information
+%\item post calculation analysis
+%\item python scripts and plotting
+%\item Adiabatic Calculations
+%\item 1D, 2D, and 3D
+%\item $\gamma$-law gas
+%\item Sedov Blast wave test
+%\item Non-Adiabatic Calculations
+%\item 1D, 2D, and 3D
+%\item Tabulate EOS
+%\item Different versions of the energy equation
+%\item LES models
+%\item creating a new EOS file using {\tt eos\_interp.py}
+%\end{itemize}
 
 \section{Generating a Starting Model}
-\section{The Configuration file}
-\label{sec:conf-file}
-describe the xml configuration file
+As was mentioned in the Overview (\autoref{sec:overview}) the executable {\tt SPHERLSgen} generates an initial model to be used as input for SPHERLS. It is used in a similar way to SPHERLS in that it requires an input XML file describing the starting models to create. As a starting point to creating a configuration file for {\tt SPHERLSgen} look in the {\tt templateXML} folder under the {\tt docs} folder. The {\tt templateXML} folder contains various XML settings files used by different scripts and executables. Note that there is a {\tt SPHERLS\_reference.xml} file, which is the reference file for the settings required to run the {\tt SPHERLS} hydrodynamics executable. We will describe the settings to run {\tt SPHERLS} later in more detail in \autoref{sec:running}. For now let us focus on the {\tt SPHERLSgen\_reference.xml} file.
+
+If you are not familiar with XML files we will give a very brief overview of their basic structure. An XML file is composed of various elements also sometimes referred to as nodes. An element is defined with a construct like {\tt <exampleTag> </exampleTag>} where {\tt <exampleTag>} and {\tt </exampleTag>} are each separately referred to as tags and together define the start and end of the {\tt exampleTag} element respectively. In general the XML format allows you to call the elements what ever you like, however the names of the elements have meaning to the programs which parses them telling the program what information contained within that element. Between the element tags there can be text (e.g. {\tt <exampleTag>Some text</exampleTag>}) which can be interpreted as text, numbers, or logical flags. Elements can also contain other nested elements (e.g. {\tt <exampleTag><innerTag></innerTag></exampleTag>}. Elements can also have attributes for example {\tt <tag name="Bob">}, where {\tt name} is an attribute of this element and has the value ``Bob''. XML files can also contain comments with the format {\tt <!-- This is a comment -->} with {\tt <!--} starting the comment and {\tt -->} ending the comment. These comments can span multiple lines. Finally XML files must have a single element at the top level, often refereed to as the root element or element.
+
+The basic structure of a SPHERLSgen XML file is as follows:
+\begin{verbatim}
+<data>
+  
+  <!-- constants -->
+  <G>6.67259e-08</G><!-- gravitational constant [cm^3 g^-1 s^-2]-->
+  <R-sun>6.958e+10</R-sun><!--[cm]-->
+  <M-sun>1.9891e+33</M-sun><!--[g]-->
+  <L-sun>3.839e33</L-sun><!--[ergs s^-1]-->
+  <sigma>5.6704e-5</sigma><!--Stefan-Boltzman constant 
+    [ergs s^-1 cm^-2 K-4]-->
+  
+  <model type="stellar">
+    <output>... </output>
+    <EOS>... </EOS>
+    <periodic>... </periodic>
+    <dimensions>... </dimensions>
+    <velocityDist>... </velocityDist>
+  </model>
+  
+  <model>... </model>
+</data>
+\end{verbatim}
+Above only the highest level elements have been included from a {\tt SPHERLSgen.xml} file in order to briefly describe the overall structure of the file. The root element is the {\tt data} element. Inside this element can be one or more {\tt model} elements. There are also elements inside the {\tt data} element to set the values of various physical constants. Each {\tt model} element requires a {\tt type} attribute describing what type of model should be created. The elements inside the model give more specific details about the model and we will briefly go over the information contained in them. The {\tt output} element contains information about how the model should be output, for example its file name and whether it should be binary or ascii. The {\tt EOS} element contains information about the equation of state to use. The {\tt periodic} element indicates which directions of the grid should have periodic boundaries, in nearly all cases models are periodic in the two angular directions and not periodic in the radial direction. SPHERLSgen is smart enough to know about these defaults and does not require the user to specify periodicity of the grid so this element can be omitted without issue. The {\tt dimensions} element describes the grid, by specifying how the radial independent variable $M_r$ should vary, as well as number of angular cells and their spacing. Finally the {\tt velocityDist} element describes what the initial velocity distribution should be. This element allows one to set what the radial velocity profile should be, for example the linear fundamental mode or the linear first overtone mode (note that the linear modes are not exactly the same as the non-linear modes but are often reasonable starting points). This element also allows one to add perturbations on top of the radial velocity profile in the angular directions with the basic idea being to speed up the onset of convection.
+
+The {\tt SPHERLSgen\_reference.xml} template file contains all available settings and options, even ones which are not required. Many of which have some brief comments giving some rough idea of what the settings are for. Lets walk through the steps to create a new stellar model, most of which just deals with creating the {\tt SPHERLSgen.xml} file and the settings which are required. We will also discuss what values and settings make the most sense and try to give an idea of the sort of settings that one might like to use.
+
+Start by copy the {\tt SPHERLSgen\_reference.xml} template file to a working directory and rename it to {\tt SPHERLSgen.xml}. As mentioned previously, the {\tt SPHERLSgen} executable will look for a configuration file named {\tt SPHERLSgen.xml} in the current working directory for settings to create new models. There are two models in the newly created {\tt SPHERLSgen.xml} file, delete the {\tt sedov} type model. This  model type creates a Sedov blast wave initial model, used for testing the results of the code, to run such a model certain pre-processor directives in the code must be defined. Running a Sedov test problem is beyond the scope of this section, instead we will focus on the {\tt stellar} model type. The first setting element is the {\tt output} element. The first element within the {\tt output} element is the {\tt timeStepFactor} element. It is a simple multiplier used on the Courant time step. A value of 0.25 is a good default since SPHERLS handles some terms in the conservation equations explicitly and others implicitly, the more stringent constraint on the explicit conservation equations of the Courant condition should be obeyed, requiring a Courant number, or {\tt timeStepFactor} less than 1.0. From trial and error testing a value of 0.25 has been found to work well. The next element is the {\tt fileName} element, as you might have guessed, it contains the name of the output file. This element can also include paths, both relative (starting with {\tt ./}) and absolute (starting with {\tt /}), as well as the output file name. The format of the output file name is unconstrained, meaning there is no special meaning associated with the output file name. However, as the hydrodynamics program SPHERLS appends a {\tt \_t\#\#\#\#\#\#\#\#} to the end of each output file name where the {\tt \#} indicate the 8 digits representing the number of time steps taken from the starting model, it may be preferred to follow this convention here also. Next the {\tt binary} element can be either {\tt true} or {\tt fales} and indicates that the output should be binary ({\tt true}) or ascii ({\tt false}). For the most part one will wish to output in binary format as it is more compact, however in some cases (e.g. debugging) it may be helpful to output the data in a human readable format. The {\tt writeToScreen} element is another {\tt true}/{\tt false} option which indicates whether the model should be written to the screen. If {\tt true} SPHERLSgen will output the 1D zoning as the other dimensions, when present, are just copies and thus all the same, except if there are velocity perturbations. This can be handy for quickly checking that a model has been created with the necessary number of zones in the hydrogen ionization region ($T=10^4$~K). The final element inside the {\tt output} element is the {\tt precision} element, which indicates the amount of precision written out in the ascii file. The {\tt precision} setting has no impact on binary output.
+
+The next main element is the {\tt EOS} element which describes the equation-of-state and the opacity input as well as the luminosity, effective temperature and thus radius of the star. There are two types of equation of state that can be used {\tt gammaLaw} and {\tt table}. The {\tt gammaLaw} eos uses a simple gamma-law gas equation of state and was used primarily during testing with the adiabatic version of the code. In the adiabatic version of the code the temperature is not tracked instead the energy is used as the radiative terms in the energy equation are omitted and also with it the dependent on temperature, thus there is also no need for an opacity as again it only turns up in the radiative terms in the energy equation. The energy in this case comes from a 1D energy profile in mass from the stellar evolution code ROTORC. Lets use the {\tt table} eos type so remove the {\tt gammaLaw} {\tt EOS} element. The first element in the {\tt table} {\tt EOS} element type is {\tt T-eff} which indicates what the effective temperature of the new model should be, for RR Lyrae stars reasonable values between about 5700--6900~K. For this walk through lets pick 6800~K. RR Lyrae variable stars are a good starting point to try and simulate and have already been explored with this code and it is very likely you should have success simulating those types of stars. Other stars should be possible to some extent though one has to think carefully about potential issues which could arise, such as resolving the necessary phenomena well enough with the grid. Then {\tt L} element indicates the luminosity of the star for an RR Lyrae star 50.0~$L_\odot$ is a good value to start with. The next element is {\tt eosTable} this is a path to a combined eos and opacity table. These tables are derived from the OPAL eos and opacity tables combined with the Alexander \& Ferguson low temperature opacity tables. The file name already present is a good place to start. The number after the characters {\tt Y} and {\tt Z} indicate the helium and metal mass fractions of the table respectively. These tables are finely and smoothly interpolations of the original tables onto a rectangular grid to allow for fast linear interpolation. 
+
+The next two elements {\tt tolerance} and {\tt maxIterations} indicate how accurately and how many iterations are allowed to solve for the temperature and density of a shell, using the Newton-Raphson method to solve the two couple partial differential equations resulting from the momentum and energy equations when imposing hydrostatic equilibrium. In the case of the gamma-law gas no such iterative method is needed as there is only a single momentum equation to solve, thus these variables are dependent on which equation of state is chosen.
+
+The {\tt periodic} element tells the code which directions are periodic, however, in almost every case one wants to have periodic boundaries in the two angular directions, and non-periodic boundaries in the radial direction. Here ({\tt x0}, {\tt x1}, {\tt x2}) correspond to the ($\hat{r},\hat{\theta},\hat{\phi}$) directions and {\tt 0} indicates non-periodic boundary conditions, and {\tt 1} indicates periodic boundary conditions. As a single setting for the periodic boundary conditions is so common, the code will actually set the values you want automatically, so the {\tt periodic} element can be deleted.
+
+The {\tt dimensions} element contains all the information needed to define the grid. The {\tt radIndepVar} includes information about how to zone the radial independent variable $M_r$. {\tt M-total} gives the total mass of the star in solar masses. {\tt M-delta-init} indicates the step in mass of the first zone at the surface in solar masses. The node {\tt M-delta-picking} describes how the zoning should change moving inward from the surface. It was allowed to have different methods for picking the zoning to perhaps allow for the code to choose the zoning based on the steepness of the temperature gradient for example. However, only a {\tt manual} method has actually been implemented, thus the {\tt type} should always be set to {\tt manual}. With this method one can set the rate of change of the mass spacing. For example adding an {\tt M-delta-delta} element with a value of 0.1 indicates that the mass spacing of the next zone in should be 10\% larger than the previous zone. {\tt M-delta-delta} have two attributes {\tt stopType} and {\tt stopValue}. The {\tt stopType} attribute indicates if the value to stop at, indicated by {\tt stopValue}, should be either a radius value or a temperature value respectively. The stop values are in units of K and cm for temperature and radius stop types respectively. Once a stop value is reached the rate of increase of the mass zones is changed to the next deeper stop value. The ordering of the {\tt M-delta-delta} elements is important as later lines should correspond to deeper parts of the star. Once the last {\tt stopValue} is reached the model is completed. Choosing the zoning in this way allows one to adjust the zoning to resolve the ionization zones while not using too many zones deeper in the star where it is not necessary.
+
+The {\tt alpha} parameter indicates the amount of extra mass to include above the outer boundary as a boundary condition. The density at the surface of the star is some non-zero value and actuality the star should extend out until the density is zero however simulating extremely low density regions is difficult, for one reason because the equation of state and opacity tables do not go down to such extreme low densities, and it is also numerically difficult to ensure that such small values (on the order of $10^{-15}$) never go below zero. Thus to simulate this extra mass we add a bit of mass at the surface as a boundary condition.
+
+The final element describing the radial independent variable is {\tt num-1D}. This indicates the number of zones at the center of the star which should be treated in 1D. RR Lyrae stars have no convection in their cores, simulating well below the convective region is only important for obtaining the correct periods. In addition, simulating to greater depths in 2D and 3D means that the angular zoning will shrink considerably at smaller radii as the sound speed increases giving rise to increasingly strict Courant condition leading to very small time steps. The number of 1D zones near the centre should be as large as possible while ensuring it is deep enough to not interfere with the convective motions in and below the ionization regions. The multi-D and 1D regions are split onto different processors. The boundary condition for the 1D processors grid is the averaged values from the adjacent multi-D region, and the boundary condition for the multi-D region is a copy of the 1D regions values. 
+
+The {\tt num-ghost-cells} element should always be 2, unless one changes conservation equations and a wider ghost region is needed. Again as this is a common setting the code has a reasonable default set and this element can be deleted. The elements {\tt num-theta} and {\tt delta-theta} indicate the number and width of zones in the $\hat{\theta}$-direction, while {\tt num-phi} and {\tt delta-phi} indicate the number and width of zones in the $\hat{\phi}$-direction. To create a 1D, simply set the number of zones in the ${\phi}$ and ${\theta}$ zones to zero, likewise for a 2D model set the number of ${\phi}$ zones to zero.
+
+The final top level element to describe the model is the {\tt velocityDist} element which describes the initial velocity values. There are two main types of {\tt velocityDist} elements {\tt POLY} and {\tt PRO}. The {\tt POLY} type allows one to define the radial velocities by using a polynomial function with multiple terms using a {\tt term} element. Each {\tt term} element has a constant {\tt c} and a power {\tt p} which can be used to create quite general radial velocity profiles. The resultant radial velocity profile will be the value of the polynomial function resulting from the sum of the given terms with the independent variable being the fractional radius (e.g. $r/R_{\rm surf.}$). The {\tt PRO} type on the other hand, creates the radial velocity profile from interpolating in data from a file given by the {\tt fileName} element. The velocity profile should be as a function of fractional radius and the velocity values should be normalized relative to the surface velocity. The element {\tt uSurf} will multiply the interpolated velocity values from the normalized radial profile. There are various velocity profiles available from 1D linear calculations of various models of both first and fundamental modes located in the {\tt data/velocity\_pro} directory under the SPHERLS root installation directory. The file name gives the parameters of the model for which the profile was created. For example a file with the name {\tt T6900\_Y24\_Z002\_M575\_L50\_fu.dat} was created for a model with an effective temperature of 6900~K, a Helium and metals mass fraction of 0.24 and 0.002 respectively, with a mass of 0.575 M$_\odot$, a luminosity of 50~L$_\odot$ and for the fundamental model.
+
+Below are some reasonably good settings to create a 6300~K RR Lyrae model:
+\begin{verbatim}
+<data>
+  <G>6.67259e-08</G>
+  <R-sun>6.958e+10</R-sun>
+  <M-sun>1.9891e+33</M-sun>
+  <L-sun>3.839e33</L-sun>
+  <sigma>5.6704e-5</sigma>
+  <model type="stellar">
+    <output>
+      <timeStepFactor>0.25</timeStepFactor>
+      <fileName>T6300_20x1_t00000000</fileName>
+      <binary>true</binary>
+      <writeToScreen>false</writeToScreen>
+      <precision>16</precision>
+    </output>
+    <EOS type="table">
+      <T-eff>6.3e3</T-eff>
+      <L>50.0</L>
+      <eosTable>data/eos/eosNewY240Z0005_wider_finer</eosTable>
+      <tolerance>5e-15</tolerance>
+    </EOS>
+    <dimensions>
+      <radIndepVar>
+        <M-total>0.7</M-total>
+        <M-delta-init>1E-9</M-delta-init>
+        <M-delta-picking type="manual">
+        <M-delta-delta stopType="T" stopValue="1e4">1e-01</M-delta-delta>
+        <M-delta-delta stopType="T" stopValue="3e6">1.1e-01</M-delta-delta>
+        </M-delta-picking>
+        <alpha>0.2</alpha>
+        <num-1D>50</num-1D>
+      </radIndepVar>
+      <num-ghost-cells>2</num-ghost-cells>
+      <num-theta>20</num-theta>
+      <delta-theta>0.3</delta-theta>
+      <num-phi>1</num-phi>
+      <delta-phi>0.3</delta-phi>
+    </dimensions>
+    <velocityDist type="PRO">
+      <fileName>data/velocity_pro/T6300_Y24_Z002_M575_L50_fu.dat</fileName>
+      <uSurf>1.0e5</uSurf>
+    </velocityDist>
+  </model>
+</data>
+\end{verbatim}
+
 \section{Running SPHERLS}
+\label{sec:running}
+When the tests were executed at the beginning of this chapter, the test scripts executed SPHERLS for you. Running SPHERLS manually isn't much more work, except for the fact that one must choose what settings to use via the {\tt SPHERLS.xml} file. This works in a very similar way to the {\tt SPHERLSgen.xml} settings file we just described but the settings will be different. Lets proceed in a similar way by copying the reference file under the {\tt docs/templateXML} directory named {\tt SPHERLS\_reference.xml} to the same directory where you ran SPHERLSgen to create your initial model renaming it to {\tt SPHERLS.xml}. As with SPHERLSgen, SPHERLS looks for a specific settings file named {\tt SPHERLS.xml}.
 
-describe the command, and the different ways to run SPHERLS, using mpi- the different environements and what might need to be done if you have a different sort of environment
-\section{Processing Output}
-\subsection{Profile Files}
-\subsection{2D Slices}
-\subsection{HDF Files}
-\subsection{VTK Files}
-\section{Viewing Output}
+The basic structure of the {\tt SPHERLS.xml} is:
+
+\begin{verbatim}
+<data>
+  <job>... </job>
+  <procDims>... </procDims>
+  <startModel>... </startModel>
+  <outputName>... </outputName>
+  <debugProfileOutput>... </debugProfileOutput>
+  <watchZones>... </watchZones>
+  <dedm temperature="2.35e4"></dedm>
+  <prints type="normal">... </prints>
+  <dumps>... </dumps>
+  <eos>... </eos>
+  <extraAlpha>0.0</extraAlpha>
+  <av>1.4</av>
+  <av-threshold>0.01</av-threshold>
+  <donorMult>1.0</donorMult>
+  <time>... </time>
+  <adiabatic>false</adiabatic>
+  <turbMod>... </turbMod>
+  <implicit>... </implicit>
+</data>
+\end{verbatim}
+
+The {\tt job} element contains information used by the {\tt SPHERLS\_run.py} script, in the scripts directory, which will create grid engine submission scripts from these settings and submit the jobs to the queue. This script will crawl all sub directories looking for {\tt SPHERLS.xml} files and create job submission scripts and submit the jobs to the scheduler. As these settings are specific to the particular job scheduler, sun grid engine, I will not go into detail about these settings. However, if one is interested in such an automation script, much insight can be gained by looking at the {\tt SPHERLS\_run.py} script, it should be a reasonably straight forward task to modify it to work with the job scheduler for your particular cluster. If you are not using and automated submission method, these can be ignored as the SPHERLS program its self does not use them.
+
+The {\tt procDims} element describes the 3D distribution of processors. It was intended to allow domain decomposition in the three directions and much of the code has been developed with this in mind, however there were some short cuts taken with the moving grid algorithm which require only a decomposition in the radial direction. For many of the calculations performed with the code to date the radial direction has had many more cells than the angular directions. However, if greater angular resolutions are desired allowing for proper domain decomposition in all three directions my help with parallel efficiency somewhat. If one is interested in this they should contact the author of SPHERLS with regard to how one might go about adding full 3D domain decomposition. As it stands, only the {\tt x0} element should be set to a value other than 1, and should be equal to the number of processors used when submitting the job. It should also be pointed out that SPHERLS requires there to be at least two processors, one to handle the inner 1D region and one or more to handle the outer muli-dimensional region.
+
+The {\tt startModel} is a path to the start model, and {\tt outputName} is the base name for the output model. To the base name for the output model is appended with the time step count suffix, e.g {\tt \_t00000000}.
+
+The {\tt debugProfileOutput} element is used for setting an output base file name when writing out extra debug output. This debugging output is turned off in the production version but can be enabled in the {\tt src/SPHERLS/global.h} file by setting {\tt DEBUG\_EQUATIONS} to 1. One can see how the output to this debugging file is generated by searching in {\tt physEquations.cpp} which adds various equation terms to the file for use when debugging the various terms of the physics equations. The class {\tt profileData} is defined in {\tt profileData.h} and implemented in {\tt profileData.cpp}. This is the class which is used to gather and output this debugging information, and by examining these files one can see the available methods for {\tt profileData} objects such as the {\tt profileDataDebug} object defined as a member of the {\tt parameters} object.
+
+The {\tt watchZones} element allows one to add multiple zones which should have extra data printed out by specifying the cell numbers by adding sub-elements like the following
+\begin{verbatim}
+<watchZone x0="121" x1="0" x2="0"></watchZone>
+\end{verbatim}
+which instructs SPHERLS to output extra information about zone (121,0,0). The watch zones add extra functionality beyond simply inspecting the dump files at that zone in that the output from a watch zone is performed every time step, so it will often be of much higher temporal resolution than the dump files. The file {\tt watchzone.h} and {\tt watchzone.cpp} define the data structure for watchzones which is used simply to keep track of zone numbers, but most of the work of managing the watchzones is taken care of in the various functions defined in {\tt dataMonitoring.h} and {\tt dataMonitoring.cpp} which dictate the information that is output and its format.
+
+The {\tt dedm} element should not be used, it is a legacy setting from some exploration of limiting energy gradients, specificly in the ionization region. In the end it was not used in any publications.
+
+The {\tt prints} element defines how SPHERLS should report information about the run to standard output.
+
+I should really just describe the configuration file here.
+
+I have already given the basics of how to run SPHERLS. However, at some point I should deal with the fact that it might be run in different environments and the various helper scripts designed to work the the Sun grid engine might not work if you are using a different queueing system, and certainly wont do what you want if you are running without any sort of job scheduler. This however might not be quite the right place or title to discuss that topic.
+
+\section{Working with Output}
+\subsection{Creating Profile Files}
 \subsection{Plotting Profiles}
+\subsection{Creating 2D Slices}
 \subsection{Plotting 2D Slices}
+\subsection{VTK Files}
+Useful for VisIt
+\subsection{HDF Files}
+Useful for various visualization software, specifically vGeo.
 
-\chapter{Modifing \& Developing SPHERLS}
+\chapter{Modifying \& Developing SPHERLS}
 This section should include
 \begin{itemize}
 \item Basic layout/design of the code

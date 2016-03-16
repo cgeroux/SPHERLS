@@ -2,7 +2,7 @@
   <eos>
     <files>
       <!--equation of state files for the 2D grid defined by the above Xs ant Zs, they don't have
-      to be in any particular order, but they do have to form a ractangular grid in X and Z.
+      to be in any particular order, but they do have to form a rectangular grid in X and Z.
       
       if either / or ./ is in front of file name it will be considered an absolute or relative path
       respectively. If neither / nor ./ are present at the front of the path it will be assumed that
