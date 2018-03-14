@@ -14,7 +14,15 @@ exit
 ])
 
 GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
+for i in `echo $CPATH | tr ':' '\n'`
+do
+  GENERIC_INCLUDE_PATHS="$GENERIC_INCLUDE_PATHS $i"
+done
 GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
+for i in `echo $LIBRARY_PATH | tr ':' '\n'`
+do
+  GENERIC_LIB_PATHS="$GENERIC_LIB_PATHS $i"
+done
 #
 #common places for fftw libraries and includes
 FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
