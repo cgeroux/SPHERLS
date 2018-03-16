@@ -17,7 +17,7 @@
     <frequency type="timeSteps">1</frequency>
   </dumps>
   <eos>
-    <eosFile>../../eos/eosY240Z002</eosFile>
+    <eosFile>data/eos/eosY240Z002</eosFile>
     <tolerance>5e-14</tolerance>
     <max-iterations>50</max-iterations>
   </eos>
