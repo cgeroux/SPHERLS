@@ -444,7 +444,7 @@ def createRefCalcNA(subDir,numProcs,options):
   modelPath=getSPHERLSStartModel(tmpDir+"/SPHERLS.xml")
   fileName=os.path.basename(modelPath)
   fileNameParts=fileName.split('_t')
-  cmd=[paths.scriptPath+"/combine_bins.py","-r","-m","./"+fileNameParts[0]+"_t["\
+  cmd=[paths.scriptPath+"/combine_bins.py","-r","--remake-bins","./"+fileNameParts[0]+"_t["\
     +str(int(fileNameParts[1]))+"-*]"]
   result=subprocess.call(cmd,stdout=log,stderr=log)
   if result!=0:
