@@ -197,7 +197,8 @@ test -x / || exit 1"
   as_suggested="  as_lineno_1=";as_suggested=$as_suggested$LINENO;as_suggested=$as_suggested" as_lineno_1a=\$LINENO
   as_lineno_2=";as_suggested=$as_suggested$LINENO;as_suggested=$as_suggested" as_lineno_2a=\$LINENO
   eval 'test \"x\$as_lineno_1'\$as_run'\" != \"x\$as_lineno_2'\$as_run'\" &&
-  test \"x\`expr \$as_lineno_1'\$as_run' + 1\`\" = \"x\$as_lineno_2'\$as_run'\"' || exit 1"
+  test \"x\`expr \$as_lineno_1'\$as_run' + 1\`\" = \"x\$as_lineno_2'\$as_run'\"' || exit 1
+test \$(( 1 + 1 )) = 2 || exit 1"
   if (eval "$as_required") 2>/dev/null; then :
   as_have_required=yes
 else
@@ -584,6 +585,42 @@ PACKAGE_STRING='SPHERLS 1.0'
 PACKAGE_BUGREPORT='chris.m.geroux@gmail.com'
 PACKAGE_URL=''
 
+# Factoring default headers for most tests.
+ac_includes_default="\
+#include <stdio.h>
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
+#ifdef HAVE_STRING_H
+# if !defined STDC_HEADERS && defined HAVE_MEMORY_H
+#  include <memory.h>
+# endif
+# include <string.h>
+#endif
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif"
+
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
@@ -593,17 +630,13 @@ CYTHON_ENABLE_TRUE
 PYTHONLIBDIR
 PETSC_ENABLE_FALSE
 PETSC_ENABLE_TRUE
-PETSC_INCLUDE_PATH
-PETSC_LIB_PATH
 HDF_ENABLE_FALSE
 HDF_ENABLE_TRUE
-JPEG_LIB_PATH
-HDF_LIB_PATH
-HDF_INCLUDE_PATH
 FFTW_ENABLE_FALSE
 FFTW_ENABLE_TRUE
-FFTW_INCLUDE_PATH
-FFTW_LIB_PATH
+EGREP
+GREP
+CXXCPP
 PS2PDF_EXISTS
 MAKE_DOCS_FALSE
 MAKE_DOCS_TRUE
@@ -611,7 +644,6 @@ INCLUDE_CRUCIAL_LIBS_IN_DIST_FALSE
 INCLUDE_CRUCIAL_LIBS_IN_DIST_TRUE
 INCLUDE_OPTIONAL_LIBS_IN_DIST_FALSE
 INCLUDE_OPTIONAL_LIBS_IN_DIST_TRUE
-MPIRUN_EXISTS
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
@@ -703,14 +735,7 @@ enable_include_optional_libs
 enable_include_crucial_libs
 enable_make_docs
 enable_fftw
-enable_fftw_include_path
-enable_fftw_lib_path
 enable_hdf
-enable_hdf_include_path
-enable_hdf_lib_path
-enable_jpeg_lib_path
-enable_petsc_include_path
-enable_petsc_lib_path
 enable_cython
 '
       ac_precious_vars='build_alias
@@ -721,7 +746,8 @@ CXXFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
-CCC'
+CCC
+CXXCPP'
 
 
 # Initialize some variables set by options.
@@ -1354,18 +1380,7 @@ Optional Features:
                           recommended unless you are actively making changes
                           to the source files.
   --disable-fftw          Disable fftw features
-  --enable-fftw-include-path
-                          set location of the fftw3 headers
-  --enable-fftw-lib-path  set location of the fftw3 library
   --disable-hdf           Disable hdf features
-  --enable-hdf-include-path
-                          set location of the hdf headers
-  --enable-hdf-lib-path   set location of the hdf library
-  --enable-jpeg-lib-path  set location of the jpeg library, required by hdf
-                          features
-  --enable-petsc-include-path
-                          set location of the petsc headers
-  --enable-petsc-lib-path set location of the petsc library
   --disable-cython        Disable cython dependent features, such as making
                           vtk files for visualization. Cython install should
                           be added to your PYTHONPATH.
@@ -1378,6 +1393,7 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l<library>
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
+  CXXCPP      C++ preprocessor
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -1496,6 +1512,253 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_cxx_try_compile
+
+# ac_fn_cxx_try_cpp LINENO
+# ------------------------
+# Try to preprocess conftest.$ac_ext, and return whether this succeeded.
+ac_fn_cxx_try_cpp ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } > conftest.i && {
+	 test -z "$ac_cxx_preproc_warn_flag$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+    ac_retval=1
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_cxx_try_cpp
+
+# ac_fn_cxx_check_header_mongrel LINENO HEADER VAR INCLUDES
+# ---------------------------------------------------------
+# Tests whether HEADER exists, giving a warning if it cannot be compiled using
+# the include files in INCLUDES and setting the cache variable VAR
+# accordingly.
+ac_fn_cxx_check_header_mongrel ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if eval \${$3+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
+$as_echo_n "checking $2 usability... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ac_header_compiler=yes
+else
+  ac_header_compiler=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
+$as_echo_n "checking $2 presence... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <$2>
+_ACEOF
+if ac_fn_cxx_try_cpp "$LINENO"; then :
+  ac_header_preproc=yes
+else
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in #((
+  yes:no: )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+( $as_echo "## --------------------------------------- ##
+## Report this to chris.m.geroux@gmail.com ##
+## --------------------------------------- ##"
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  eval "$3=\$ac_header_compiler"
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_cxx_check_header_mongrel
+
+# ac_fn_cxx_try_run LINENO
+# ------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
+# that executables *can* be run.
+ac_fn_cxx_try_run ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
+  { { case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: program exited with status $ac_status" >&5
+       $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       ac_retval=$ac_status
+fi
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_cxx_try_run
+
+# ac_fn_cxx_check_header_compile LINENO HEADER VAR INCLUDES
+# ---------------------------------------------------------
+# Tests whether HEADER exists and can be compiled using the include files in
+# INCLUDES, setting the cache variable VAR accordingly.
+ac_fn_cxx_check_header_compile ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_cxx_check_header_compile
+
+# ac_fn_cxx_try_link LINENO
+# -------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_cxx_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_cxx_try_link
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3165,76 +3428,6 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-#check that mpirun is available
-# Extract the first word of "mpirun", so it can be a program name with args.
-set dummy mpirun; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_MPIRUN_EXISTS+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$MPIRUN_EXISTS"; then
-  ac_cv_prog_MPIRUN_EXISTS="$MPIRUN_EXISTS" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_MPIRUN_EXISTS=""yes""
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_MPIRUN_EXISTS" && ac_cv_prog_MPIRUN_EXISTS=""no""
-fi
-fi
-MPIRUN_EXISTS=$ac_cv_prog_MPIRUN_EXISTS
-if test -n "$MPIRUN_EXISTS"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIRUN_EXISTS" >&5
-$as_echo "$MPIRUN_EXISTS" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-if test "$MPIRUN_EXISTS" = "no"; then :
-
-as_fn_error $? "mpirun is used to launch parallel jobs, and SPHERLS does not run in serial mode." "$LINENO" 5
-exit
-
-fi
-
-GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
-for i in `echo $CPATH | tr ':' '\n'`
-do
-  GENERIC_INCLUDE_PATHS="$GENERIC_INCLUDE_PATHS $i"
-done
-GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
-for i in `echo $LIBRARY_PATH | tr ':' '\n'`
-do
-  GENERIC_LIB_PATHS="$GENERIC_LIB_PATHS $i"
-done
-#
-#common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
-FFTW_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/fftw/lib /usr/local/FFTW3/lib /share/apps/fftw/lib"
-#
-#common places for jpeg libraries and includes
-HDF_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/hdf4/include"
-HDF_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/hdf4/lib"
-JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
-#
-#common places for PETSc libraries and includes
-PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
-PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
-
 #Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no
 # Check whether --enable-include-optional-libs was given.
@@ -3331,10 +3524,9 @@ fi
 
 fi
 
-
 fi
 
-#
+
 #################################################################
 ## Check for FFTW3 include and library
 #################################################################
@@ -3346,126 +3538,503 @@ if test "${enable_fftw+set}" = set; then :
   enableval=$enable_fftw; FFTW_ENABLE="$enableval"
 fi
 
-#
-#check to see if user set an override for include path
-# Check whether --enable-fftw-include-path was given.
-if test "${enable_fftw_include_path+set}" = set; then :
-  enableval=$enable_fftw_include_path; FFTW_INCLUDE_PATHS="$enableval"
-fi
-
-#
-#check to see if user set an override for library path
-# Check whether --enable-fftw-lib-path was given.
-if test "${enable_fftw_lib_path+set}" = set; then :
-  enableval=$enable_fftw_lib_path; FFTW_LIB_PATHS="$enableval"
-fi
 
 #
 #check to make sure we have a library and include path, if we are using fftw
+
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to run the C++ preprocessor" >&5
+$as_echo_n "checking how to run the C++ preprocessor... " >&6; }
+if test -z "$CXXCPP"; then
+  if ${ac_cv_prog_CXXCPP+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+      # Double quotes because CXXCPP needs to be expanded
+    for CXXCPP in "$CXX -E" "/lib/cpp"
+    do
+      ac_preproc_ok=false
+for ac_cxx_preproc_warn_flag in '' yes
+do
+  # Use a header file that comes with gcc, so configuring glibc
+  # with a fresh cross-compiler works.
+  # Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+  # <limits.h> exists even on freestanding compilers.
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp. "Syntax error" is here to catch this case.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+		     Syntax error
+_ACEOF
+if ac_fn_cxx_try_cpp "$LINENO"; then :
+
+else
+  # Broken: fails on valid input.
+continue
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+  # OK, works on sane cases.  Now check whether nonexistent headers
+  # can be detected and how.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ac_nonexistent.h>
+_ACEOF
+if ac_fn_cxx_try_cpp "$LINENO"; then :
+  # Broken: success on invalid input.
+continue
+else
+  # Passes both tests.
+ac_preproc_ok=:
+break
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+done
+# Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+rm -f conftest.i conftest.err conftest.$ac_ext
+if $ac_preproc_ok; then :
+  break
+fi
+
+    done
+    ac_cv_prog_CXXCPP=$CXXCPP
+
+fi
+  CXXCPP=$ac_cv_prog_CXXCPP
+else
+  ac_cv_prog_CXXCPP=$CXXCPP
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXXCPP" >&5
+$as_echo "$CXXCPP" >&6; }
+ac_preproc_ok=false
+for ac_cxx_preproc_warn_flag in '' yes
+do
+  # Use a header file that comes with gcc, so configuring glibc
+  # with a fresh cross-compiler works.
+  # Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+  # <limits.h> exists even on freestanding compilers.
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp. "Syntax error" is here to catch this case.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+		     Syntax error
+_ACEOF
+if ac_fn_cxx_try_cpp "$LINENO"; then :
+
+else
+  # Broken: fails on valid input.
+continue
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+  # OK, works on sane cases.  Now check whether nonexistent headers
+  # can be detected and how.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ac_nonexistent.h>
+_ACEOF
+if ac_fn_cxx_try_cpp "$LINENO"; then :
+  # Broken: success on invalid input.
+continue
+else
+  # Passes both tests.
+ac_preproc_ok=:
+break
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+done
+# Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+rm -f conftest.i conftest.err conftest.$ac_ext
+if $ac_preproc_ok; then :
+
+else
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "C++ preprocessor \"$CXXCPP\" fails sanity check
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
+$as_echo_n "checking for grep that handles long lines and -e... " >&6; }
+if ${ac_cv_path_GREP+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -z "$GREP"; then
+  ac_path_GREP_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in grep ggrep; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_GREP="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_GREP" || continue
+# Check for GNU ac_path_GREP and select it if it is found.
+  # Check for GNU $ac_path_GREP
+case `"$ac_path_GREP" --version 2>&1` in
+*GNU*)
+  ac_cv_path_GREP="$ac_path_GREP" ac_path_GREP_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo 'GREP' >> "conftest.nl"
+    "$ac_path_GREP" -e 'GREP$' -e '-(cannot match)-' < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_GREP_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_GREP="$ac_path_GREP"
+      ac_path_GREP_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_GREP_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_GREP"; then
+    as_fn_error $? "no acceptable grep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+  fi
+else
+  ac_cv_path_GREP=$GREP
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_GREP" >&5
+$as_echo "$ac_cv_path_GREP" >&6; }
+ GREP="$ac_cv_path_GREP"
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
+$as_echo_n "checking for egrep... " >&6; }
+if ${ac_cv_path_EGREP+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
+   then ac_cv_path_EGREP="$GREP -E"
+   else
+     if test -z "$EGREP"; then
+  ac_path_EGREP_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in egrep; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_EGREP="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_EGREP" || continue
+# Check for GNU ac_path_EGREP and select it if it is found.
+  # Check for GNU $ac_path_EGREP
+case `"$ac_path_EGREP" --version 2>&1` in
+*GNU*)
+  ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo 'EGREP' >> "conftest.nl"
+    "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_EGREP_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_EGREP="$ac_path_EGREP"
+      ac_path_EGREP_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_EGREP_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_EGREP"; then
+    as_fn_error $? "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+  fi
+else
+  ac_cv_path_EGREP=$EGREP
+fi
+
+   fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_EGREP" >&5
+$as_echo "$ac_cv_path_EGREP" >&6; }
+ EGREP="$ac_cv_path_EGREP"
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
+$as_echo_n "checking for ANSI C header files... " >&6; }
+if ${ac_cv_header_stdc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ac_cv_header_stdc=yes
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <string.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "memchr" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "free" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+  if test "$cross_compiling" = yes; then :
+  :
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ctype.h>
+#include <stdlib.h>
+#if ((' ' & 0x0FF) == 0x020)
+# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#else
+# define ISLOWER(c) \
+		   (('a' <= (c) && (c) <= 'i') \
+		     || ('j' <= (c) && (c) <= 'r') \
+		     || ('s' <= (c) && (c) <= 'z'))
+# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
+#endif
+
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int
+main ()
+{
+  int i;
+  for (i = 0; i < 256; i++)
+    if (XOR (islower (i), ISLOWER (i))
+	|| toupper (i) != TOUPPER (i))
+      return 2;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_run "$LINENO"; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_header_stdc" >&5
+$as_echo "$ac_cv_header_stdc" >&6; }
+if test $ac_cv_header_stdc = yes; then
+
+$as_echo "#define STDC_HEADERS 1" >>confdefs.h
+
+fi
+
+# On IRIX 5.3, sys/types and inttypes.h are conflicting.
+for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
+		  inttypes.h stdint.h unistd.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_cxx_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
 if test "$FFTW_ENABLE" = "yes"; then :
   #
-  #search include paths for fftw3.h
-  FFTW_INCLUDE_PATH=""
-  for TEST_PATH in $FFTW_INCLUDE_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/fftw3.h" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/fftw3.h" >&5
-$as_echo_n "checking for ${TEST_PATH}/fftw3.h... " >&6; }
-if eval \${$as_ac_File+:} false; then :
+  for ac_header in fftw3.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "fftw3.h" "ac_cv_header_fftw3_h" "$ac_includes_default"
+if test "x$ac_cv_header_fftw3_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FFTW3_H 1
+_ACEOF
+
+else
+
+    as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find the fftw3.h header file.
+
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS=\"-I<include dir> \${CPPFLAGS}\", or
+  using the --disable-fftw option to disable FFTW functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+    " "$LINENO" 5
+
+fi
+
+done
+
+  for func in fftw_execute fftw_plan_dft_1d fftw_destroy_plan fftw_free; do
+    as_ac_Search=`$as_echo "ac_cv_search_${func}" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing ${func}" >&5
+$as_echo_n "checking for library containing ${func}... " >&6; }
+if eval \${$as_ac_Search+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/fftw3.h"; then
-  eval "$as_ac_File=yes"
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ${func} ();
+int
+main ()
+{
+return ${func} ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' fftw3; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Search=\$ac_res"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if eval \${$as_ac_Search+:} false; then :
+  break
+fi
+done
+if eval \${$as_ac_Search+:} false; then :
+
 else
-  eval "$as_ac_File=no"
+  eval "$as_ac_Search=no"
 fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
 fi
-eval ac_res=\$$as_ac_File
+eval ac_res=\$$as_ac_Search
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  FFTW_INCLUDE_PATH=${TEST_PATH};break
+eval ac_res=\$$as_ac_Search
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+
+      as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find an FFTW library containing the ${func} function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS=\"-L<lib dir> \${LDFLAGS}\"
+  or use the --disable-fftw option to disable FFTW functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      " "$LINENO" 5
+
 fi
 
   done
-  #
-  #search lib paths for libfftw3.so and libfftw3.a
-  FFTW_LIB_PATH=""
-  for TEST_PATH in $FFTW_LIB_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libfftw3.so" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libfftw3.so" >&5
-$as_echo_n "checking for ${TEST_PATH}/libfftw3.so... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libfftw3.so"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libfftw3.so" | $as_tr_cpp` 1
-_ACEOF
-FFTW_LIB_PATH=${TEST_PATH};break
-fi
-as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libfftw3.a" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libfftw3.a" >&5
-$as_echo_n "checking for ${TEST_PATH}/libfftw3.a... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libfftw3.a"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libfftw3.a" | $as_tr_cpp` 1
-_ACEOF
-FFTW_LIB_PATH=${TEST_PATH};break
-fi
-
-  done
-  #
-  #check that a lib path was found
-  if test "$FFTW_LIB_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No fftw3 library found in search paths \"$FFTW_LIB_PATHS\". Either specify the path to libfftw3.a/.so with --enable-fftw-lib-path or disable fftw features with --disable-fftw ." >&5
-$as_echo "No fftw3 library found in search paths \"$FFTW_LIB_PATHS\". Either specify the path to libfftw3.a/.so with --enable-fftw-lib-path or disable fftw features with --disable-fftw ." >&6; }
-    exit
-
-fi
-  #
-  #check that an include path was found
-  if test "$FFTW_INCLUDE_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No fftw3 include file found in search paths \"$FFTW_INCLUDE_PATHS\". Either specify the path to fftw3.h with --enable-fftw-include-path or disable fftw features with --disable-fftw ." >&5
-$as_echo "No fftw3 include file found in search paths \"$FFTW_INCLUDE_PATHS\". Either specify the path to fftw3.h with --enable-fftw-include-path or disable fftw features with --disable-fftw ." >&6; }
-    exit
-
-fi
-  #
-  #sub strings for lib and include paths
-
-
-  #
   #define FFTW_ENABLE in include file
 
 $as_echo "#define FFTW_ENABLE /**/" >>confdefs.h
@@ -3480,12 +4049,10 @@ else
   FFTW_ENABLE_FALSE=
 fi
 
-#################################################################
-
 
 
 #################################################################
-## Check for HDF4 include and library and dependent libraries
+## Check for HDF4 include and library
 #################################################################
 
 #check to see if user disabled hdf
@@ -3496,195 +4063,180 @@ if test "${enable_hdf+set}" = set; then :
 fi
 
 
-#check to see if user set an override for include path
-# Check whether --enable-hdf-include-path was given.
-if test "${enable_hdf_include_path+set}" = set; then :
-  enableval=$enable_hdf_include_path; HDF_INCLUDE_PATHS="$enableval"
-fi
-
-
-#check to see if user set an override for library path
-# Check whether --enable-hdf-lib-path was given.
-if test "${enable_hdf_lib_path+set}" = set; then :
-  enableval=$enable_hdf_lib_path; HDF_LIB_PATHS="$enableval"
-fi
-
-
-#check to see if user set an override for the jpeg library path
-# Check whether --enable-jpeg-lib-path was given.
-if test "${enable_jpeg_lib_path+set}" = set; then :
-  enableval=$enable_jpeg_lib_path; JPEG_LIB_PATHS="$enableval"
-fi
-
-
 #check to make sure we have a library and include path, if we are using hdf
 if test "$HDF_ENABLE" = "yes"; then :
 
+  for ac_header in hdf.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "hdf.h" "ac_cv_header_hdf_h" "$ac_includes_default"
+if test "x$ac_cv_header_hdf_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_HDF_H 1
+_ACEOF
 
-  #search lib paths for libjpeg.so and libjpeg.a
-  JPEG_LIB_PATH=""
-  for TEST_PATH in $JPEG_LIB_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libjpeg.so" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libjpeg.so" >&5
-$as_echo_n "checking for ${TEST_PATH}/libjpeg.so... " >&6; }
-if eval \${$as_ac_File+:} false; then :
+else
+
+    as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find the hdf.h header file.
+
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS=\"-I<include dir> \${CPPFLAGS}\", or
+  using the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+    " "$LINENO" 5
+
+fi
+
+done
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cos" >&5
+$as_echo_n "checking for library containing cos... " >&6; }
+if ${ac_cv_search_cos+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libjpeg.so"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libjpeg.so" | $as_tr_cpp` 1
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char cos ();
+int
+main ()
+{
+return cos ();
+  ;
+  return 0;
+}
 _ACEOF
-JPEG_LIB_PATH=${TEST_PATH};break
+for ac_lib in '' m; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_cos=$ac_res
 fi
-as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libmfhdf.a" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libmfhdf.a" >&5
-$as_echo_n "checking for ${TEST_PATH}/libmfhdf.a... " >&6; }
-if eval \${$as_ac_File+:} false; then :
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_cos+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_cos+:} false; then :
+
+else
+  ac_cv_search_cos=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_cos" >&5
+$as_echo "$ac_cv_search_cos" >&6; }
+ac_res=$ac_cv_search_cos
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+
+      as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find an m library containing the cos function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS=\"-L<lib dir> \${LDFLAGS}\"
+  or use the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      " "$LINENO" 5
+
+fi
+
+
+  LIBS="$LIBS -ldf -ljpeg -lz -lsz"
+  for func in SDstart SDend SDcreate SDendaccess SDwritedata; do
+    as_ac_Search=`$as_echo "ac_cv_search_$func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing $func" >&5
+$as_echo_n "checking for library containing $func... " >&6; }
+if eval \${$as_ac_Search+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libmfhdf.a"; then
-  eval "$as_ac_File=yes"
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $func ();
+int
+main ()
+{
+return $func ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' mfhdf; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Search=\$ac_res"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if eval \${$as_ac_Search+:} false; then :
+  break
+fi
+done
+if eval \${$as_ac_Search+:} false; then :
+
 else
-  eval "$as_ac_File=no"
+  eval "$as_ac_Search=no"
 fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
 fi
-eval ac_res=\$$as_ac_File
+eval ac_res=\$$as_ac_Search
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+eval ac_res=\$$as_ac_Search
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libmfhdf.a" | $as_tr_cpp` 1
-_ACEOF
-JPEG_LIB_PATH=${TEST_PATH};break
+else
+
+      as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find an HDF library containing the $func function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS=\"-L<lib dir> \${LDFLAGS}\"
+  or use the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      " "$LINENO" 5
+
 fi
 
   done
-
-  if test "$JPEG_LIB_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No jpeg library found in search paths \"$JPEG_LIB_PATHS\" required by the hdf library. Either specify the path to libjpeg.a/.so with --enable-jpeg-lib-path or disable hdf features with --disable-hdf ." >&5
-$as_echo "No jpeg library found in search paths \"$JPEG_LIB_PATHS\" required by the hdf library. Either specify the path to libjpeg.a/.so with --enable-jpeg-lib-path or disable hdf features with --disable-hdf ." >&6; }
-    exit
-
-fi
-
-  # Get HDF library and include locations
-
-  # #search include paths for hdf.h
-  HDF_INCLUDE_PATH=""
-  for TEST_PATH in $HDF_INCLUDE_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/hdf.h" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/hdf.h" >&5
-$as_echo_n "checking for ${TEST_PATH}/hdf.h... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/hdf.h"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  HDF_INCLUDE_PATH=${TEST_PATH};break
-fi
-
-  done
-
-  #search lib paths for libmfhdf.so and libmfhdf.a
-  HDF_LIB_PATH=""
-  for TEST_PATH in $HDF_LIB_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libmfhdf.so" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libmfhdf.so" >&5
-$as_echo_n "checking for ${TEST_PATH}/libmfhdf.so... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libmfhdf.so"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libmfhdf.so" | $as_tr_cpp` 1
-_ACEOF
-HDF_LIB_PATH=${TEST_PATH};break
-fi
-as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libmfhdf.a" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libmfhdf.a" >&5
-$as_echo_n "checking for ${TEST_PATH}/libmfhdf.a... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libmfhdf.a"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libmfhdf.a" | $as_tr_cpp` 1
-_ACEOF
-HDF_LIB_PATH=${TEST_PATH};break
-fi
-
-  done
-
-  if test "$HDF_LIB_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No hdf library found in search paths \"$HDF_LIB_PATHS\". Either specify the path to libmfhdf.a/.so with --enable-hdf-lib-path or disable hdf features with --disable-hdf ." >&5
-$as_echo "No hdf library found in search paths \"$HDF_LIB_PATHS\". Either specify the path to libmfhdf.a/.so with --enable-hdf-lib-path or disable hdf features with --disable-hdf ." >&6; }
-    exit
-
-fi
-  if test "$HDF_INCLUDE_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No hdf include file found in search paths \"$HDF_INCLUDE_PATHS\". Either specify the path to hdf.h with --enable-hdf-include-path or disable hdf features with --disable-hdf ." >&5
-$as_echo "No hdf include file found in search paths \"$HDF_INCLUDE_PATHS\". Either specify the path to hdf.h with --enable-hdf-include-path or disable hdf features with --disable-hdf ." >&6; }
-    exit
-
-fi
 
 $as_echo "#define HDF_ENABLE /**/" >>confdefs.h
-
-
-
-
 
 
 fi
@@ -3696,6 +4248,7 @@ else
   HDF_ENABLE_FALSE=
 fi
 
+
 #################################################################
 #
 #################################################################
@@ -3704,131 +4257,110 @@ fi
 #
 #check to see if user disabled petsc
 PETSC_ENABLE=yes
-#AC_ARG_ENABLE([petsc],
-#  [AS_HELP_STRING([--disable-petsc],
-#  [Disable petsc features, these are required to run implicit calculations])],
-#  [PETSC_ENABLE="$enableval"],
-#  [])
-#
-#check to see if user set an override for include path
-# Check whether --enable-petsc-include-path was given.
-if test "${enable_petsc_include_path+set}" = set; then :
-  enableval=$enable_petsc_include_path; PETSC_INCLUDE_PATHS="$enableval"
-fi
-
-#
-#check to see if user set an override for library path
-# Check whether --enable-petsc-lib-path was given.
-if test "${enable_petsc_lib_path+set}" = set; then :
-  enableval=$enable_petsc_lib_path; PETSC_LIB_PATHS="$enableval"
-fi
 
 #
 #check to make sure we have a library and include path, if we are using petsc
 if test "$PETSC_ENABLE" = "yes"; then :
 
-  #
-  #search include paths for petscksp.h
-  PETSC_INCLUDE_PATH=""
-  for TEST_PATH in $PETSC_INCLUDE_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/petscksp.h" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/petscksp.h" >&5
-$as_echo_n "checking for ${TEST_PATH}/petscksp.h... " >&6; }
-if eval \${$as_ac_File+:} false; then :
+  for ac_header in petscksp.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "petscksp.h" "ac_cv_header_petscksp_h" "$ac_includes_default"
+if test "x$ac_cv_header_petscksp_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PETSCKSP_H 1
+_ACEOF
+
+else
+
+    as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find the petscksp.h header file.
+
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS=\"-I<include dir> \${CPPFLAGS}\".
+---------------------------------------------------------------------
+    " "$LINENO" 5
+
+fi
+
+done
+
+  PETSCFUNCS="KSPSolve MatSetValues MatAssemblyBegin VecSetValues
+    VecAssemblyBegin VecAssemblyEnd MatAssemblyEnd KSPSetOperators
+    VecScatterBegin VecScatterEnd"
+  #VecGetArray is also used, but for some reason the tests fail, however when
+  #building/linking with the main code that uses it there is no problem
+  for func in $PETSCFUNCS; do
+    as_ac_Search=`$as_echo "ac_cv_search_$func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing $func" >&5
+$as_echo_n "checking for library containing $func... " >&6; }
+if eval \${$as_ac_Search+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/petscksp.h"; then
-  eval "$as_ac_File=yes"
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $func ();
+int
+main ()
+{
+return $func ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' petsc; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib -ldf -ljpeg -lz -lsz $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Search=\$ac_res"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if eval \${$as_ac_Search+:} false; then :
+  break
+fi
+done
+if eval \${$as_ac_Search+:} false; then :
+
 else
-  eval "$as_ac_File=no"
+  eval "$as_ac_Search=no"
 fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
 fi
-eval ac_res=\$$as_ac_File
+eval ac_res=\$$as_ac_Search
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  PETSC_INCLUDE_PATH=${TEST_PATH};break
+eval ac_res=\$$as_ac_Search
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+
+      as_fn_error $? "
+---------------------------------------------------------------------
+  Unable to find an PETSc library containing the $func function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS=\"-L<lib dir> \${LDFLAGS}\".
+---------------------------------------------------------------------
+      " "$LINENO" 5
+
 fi
 
   done
-  #
-  #search lib paths for libpetsc.so or libpetsc.a
-  PETSC_LIB_PATH=""
-  for TEST_PATH in $PETSC_LIB_PATHS; do
-    as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libpetsc.so" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libpetsc.so" >&5
-$as_echo_n "checking for ${TEST_PATH}/libpetsc.so... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libpetsc.so"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libpetsc.so" | $as_tr_cpp` 1
-_ACEOF
-PETSC_LIB_PATH=${TEST_PATH};break
-fi
-as_ac_File=`$as_echo "ac_cv_file_${TEST_PATH}/libpetsc.a" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${TEST_PATH}/libpetsc.a" >&5
-$as_echo_n "checking for ${TEST_PATH}/libpetsc.a... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${TEST_PATH}/libpetsc.a"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_${TEST_PATH}/libpetsc.a" | $as_tr_cpp` 1
-_ACEOF
-PETSC_LIB_PATH=${TEST_PATH};break
-fi
-
-  done
-  #
-  #check that a lib path was found
-  if test "$PETSC_LIB_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No petsc library found in search paths \"$PETSC_LIB_PATHS\". Please specify the path to libpetsc.a/.so with --enable-petsc-lib-path." >&5
-$as_echo "No petsc library found in search paths \"$PETSC_LIB_PATHS\". Please specify the path to libpetsc.a/.so with --enable-petsc-lib-path." >&6; }
-    exit
-
-fi
-  #
-  #check that an include path was found
-  if test "$PETSC_INCLUDE_PATH" = ""; then :
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Please specify the path to petscksp.h with --enable-petsc-include-path." >&5
-$as_echo "No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Please specify the path to petscksp.h with --enable-petsc-include-path." >&6; }
-    exit
-
-fi
-  #
-  #sub strings for lib and include paths
-
-
   #
   #define PETSC_ENABLE in include file
 
@@ -3836,6 +4368,7 @@ $as_echo "#define PETSC_ENABLE /**/" >>confdefs.h
 
 
 fi
+
 #tell automake about PETSC_ENABLE variable
  if test "$PETSC_ENABLE" = "yes"; then
   PETSC_ENABLE_TRUE=

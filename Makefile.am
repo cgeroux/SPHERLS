@@ -172,13 +172,9 @@ SPHERLS_SOURCES	=	\
 	src/xmlFunctions.h	\
 	src/xmlParser.cpp	\
 	src/xmlParser.h
-if PETSC_ENABLE
-SPHERLS_LDADD	=	-L$(PETSC_LIB_PATH)	-lpetsc
-SPHERLS_CPPFLAGS	=	-I$(PETSC_INCLUDE_PATH)	-Isrc/
-else
-SPHERLS_LDADD	=
-SPHERLS_CPPFLAGS	=	-Isrc/
-endif
+
+SPHERLS_LDADD	=	$(LDFLAGS) $(LIBS)
+SPHERLS_CPPFLAGS	=	$(CPPFLAGS)	-Isrc/
 
 SPHERLSanal_SOURCES	=	\
 	src/SPHERLSanal/main.cpp	\
@@ -189,15 +185,17 @@ SPHERLSanal_SOURCES	=	\
 	src/exception2.h	
 
 if FFTW_ENABLE
-FFTW_LDADDS=-L$(FFTW_LIB_PATH) -lfftw3
-FFTW_CPPFLAGS=-I$(FFTW_INCLUDE_PATH)
+FFTW_LDADDS=	$(LDFLAGS) $(LIBS)
+FFTW_CPPFLAGS=	$(CPPFLAGS)	-Isrc/
 else
 FFTW_LDADDS= 
 FFTW_CPPFLAGS= 
 endif
+
 if HDF_ENABLE
-HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
-HDF_CPPFLAGS=-I$(HDF_INCLUDE_PATH)
+#HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
+HDF_LDADDS=$(LDFLAGS) $(LIBS)
+HDF_CPPFLAGS=	$(CPPFLAGS)	-Isrc/
 if CYTHON_ENABLE
 BUILT_SOURCES=src/pythonextensions/lib/hdf.so
 endif
@@ -211,8 +209,8 @@ BUILT_SOURCES+=src/pythonextensions/lib/eos.so
 BUILT_SOURCES+=src/pythonextensions/lib/cevtk.so
 endif
 
-SPHERLSanal_LDADD=$(FFTW_LDADDS) $(HDF_LDADDS) 
-SPHERLSanal_CPPFLAGS=$(FFTW_CPPFLAGS) $(HDF_CPPFLAGS) -Isrc/ 
+SPHERLSanal_LDADD=$(LDFLAGS) $(LIBS)
+SPHERLSanal_CPPFLAGS=$(CPPFLAGS) -Isrc/ 
 
 SPHERLSgen_SOURCES	=	\
 	src/SPHERLSgen/main.cpp	\

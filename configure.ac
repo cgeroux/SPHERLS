@@ -4,39 +4,6 @@ AC_PROG_CXX([mpic++])
 AS_IF([test "$CXX" != "mpic++"],[AC_MSG_RESULT([mpic++ not found! Aborting, please make sure that the bin directory where OpenMPI is installed is in your path.]);exit])
 AC_LANG([C++])
 
-#check that mpirun is available
-AC_CHECK_PROG(MPIRUN_EXISTS,mpirun,"yes","no")
-AS_IF(
-[test "$MPIRUN_EXISTS" = "no"],
-[
-AC_MSG_ERROR([mpirun is used to launch parallel jobs, and SPHERLS does not run in serial mode.])
-exit
-])
-
-GENERIC_INCLUDE_PATHS="/home/$USER/include  /include /usr/include /usr/local/include"
-for i in `echo $CPATH | tr ':' '\n'`
-do
-  GENERIC_INCLUDE_PATHS="$GENERIC_INCLUDE_PATHS $i"
-done
-GENERIC_LIB_PATHS="/home/$USER/lib /lib /usr/lib /usr/local/lib"
-for i in `echo $LIBRARY_PATH | tr ':' '\n'`
-do
-  GENERIC_LIB_PATHS="$GENERIC_LIB_PATHS $i"
-done
-#
-#common places for fftw libraries and includes
-FFTW_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/fftw/include"
-FFTW_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/fftw/lib /usr/local/FFTW3/lib /share/apps/fftw/lib"
-#
-#common places for jpeg libraries and includes
-HDF_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}" /share/apps/hdf4/include"
-HDF_LIB_PATHS=${GENERIC_LIB_PATHS}" /share/apps/hdf4/lib"
-JPEG_LIB_PATHS=${GENERIC_LIB_PATHS}
-#
-#common places for PETSc libraries and includes
-PETSC_INCLUDE_PATHS=${GENERIC_INCLUDE_PATHS}
-PETSC_LIB_PATHS=${GENERIC_LIB_PATHS}
-
 #Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no
 AC_ARG_ENABLE([include-optional-libs],
@@ -75,10 +42,9 @@ AS_IF(
   AC_MSG_ERROR([creating documentation requires pdflatex, remove the option --enable-make-docs or install pdflatex and put it in your path.])
   
   ])
-
   ])
 
-#
+
 #################################################################
 ## Check for FFTW3 include and library
 #################################################################
@@ -90,64 +56,46 @@ AC_ARG_ENABLE([fftw],
   [Disable fftw features])],
   [FFTW_ENABLE="$enableval"],
   [])
-#
-#check to see if user set an override for include path
-AC_ARG_ENABLE([fftw-include-path],
- [AS_HELP_STRING([--enable-fftw-include-path],
- [set location of the fftw3 headers])],
- [FFTW_INCLUDE_PATHS="$enableval"],
- [])
-#
-#check to see if user set an override for library path
-AC_ARG_ENABLE([fftw-lib-path],
-  [AS_HELP_STRING([--enable-fftw-lib-path],
-  [set location of the fftw3 library])],
-  [FFTW_LIB_PATHS="$enableval"],
-  [])
+
 #
 #check to make sure we have a library and include path, if we are using fftw
 AS_IF(
   [test "$FFTW_ENABLE" = "yes"],
   [#
-  #search include paths for fftw3.h
-  FFTW_INCLUDE_PATH=""
-  for TEST_PATH in $FFTW_INCLUDE_PATHS; do
-    AC_CHECK_FILE([${TEST_PATH}/fftw3.h],[FFTW_INCLUDE_PATH=${TEST_PATH};break],[])
-  done
-  #
-  #search lib paths for libfftw3.so and libfftw3.a
-  FFTW_LIB_PATH=""
-  for TEST_PATH in $FFTW_LIB_PATHS; do
-    AC_CHECK_FILES([${TEST_PATH}/libfftw3.so ${TEST_PATH}/libfftw3.a ]\
-      ,[FFTW_LIB_PATH=${TEST_PATH};break],[])
-  done
-  #
-  #check that a lib path was found
-  AS_IF([test "$FFTW_LIB_PATH" = ""],[
-    AC_MSG_RESULT([No fftw3 library found in search paths \"$FFTW_LIB_PATHS\". Either specify the path to libfftw3.a/.so with --enable-fftw-lib-path or disable fftw features with --disable-fftw .])
-    exit
+  AC_CHECK_HEADERS(fftw3.h,[],[
+    AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find the fftw3.h header file.
+ 
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS="-I<include dir> \${CPPFLAGS}", or 
+  using the --disable-fftw option to disable FFTW functionality if
+  it isn't needed.
+---------------------------------------------------------------------
     ])
-  #
-  #check that an include path was found
-  AS_IF([test "$FFTW_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT([No fftw3 include file found in search paths \"$FFTW_INCLUDE_PATHS\". Either specify the path to fftw3.h with --enable-fftw-include-path or disable fftw features with --disable-fftw .])
-    exit
+  ])
+  for func in fftw_execute fftw_plan_dft_1d fftw_destroy_plan fftw_free; do
+    AC_SEARCH_LIBS([${func}], fftw3,[],[
+      AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find an FFTW library containing the ${func} function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}"
+  or use the --disable-fftw option to disable FFTW functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      ])
     ])
-  #
-  #sub strings for lib and include paths
-  AC_SUBST(FFTW_LIB_PATH)
-  AC_SUBST(FFTW_INCLUDE_PATH)
-  #
+  done
   #define FFTW_ENABLE in include file
   AC_DEFINE([FFTW_ENABLE],[],[Defined if fftw is enabled])
   ])
 AM_CONDITIONAL([FFTW_ENABLE],[test "$FFTW_ENABLE" = "yes"])
-#################################################################
-
 
 
 #################################################################
-## Check for HDF4 include and library and dependent libraries
+## Check for HDF4 include and library
 #################################################################
 
 #check to see if user disabled hdf
@@ -158,72 +106,52 @@ AC_ARG_ENABLE([hdf],
   [HDF_ENABLE="$enableval"],
   [])
 
-#check to see if user set an override for include path
-AC_ARG_ENABLE([hdf-include-path],
- [AS_HELP_STRING([--enable-hdf-include-path],
- [set location of the hdf headers])],
- [HDF_INCLUDE_PATHS="$enableval"],
- [])
-
-#check to see if user set an override for library path
-AC_ARG_ENABLE([hdf-lib-path],
-  [AS_HELP_STRING([--enable-hdf-lib-path],
-  [set location of the hdf library])],
-  [HDF_LIB_PATHS="$enableval"],
-  [])
-  
-#check to see if user set an override for the jpeg library path
-AC_ARG_ENABLE([jpeg-lib-path],
-  [AS_HELP_STRING([--enable-jpeg-lib-path],
-  [set location of the jpeg library, required by hdf features])],
-  [JPEG_LIB_PATHS="$enableval"],
-  [])
-
 #check to make sure we have a library and include path, if we are using hdf
 AS_IF([test "$HDF_ENABLE" = "yes"],[
-  
-  #search lib paths for libjpeg.so and libjpeg.a
-  JPEG_LIB_PATH=""
-  for TEST_PATH in $JPEG_LIB_PATHS; do
-    AC_CHECK_FILES([${TEST_PATH}/libjpeg.so ${TEST_PATH}/libmfhdf.a ]
-      ,[JPEG_LIB_PATH=${TEST_PATH};break],[])
-  done
-
-  AS_IF([test "$JPEG_LIB_PATH" = ""],[
-    AC_MSG_RESULT([No jpeg library found in search paths \"$JPEG_LIB_PATHS\" required by the hdf library. Either specify the path to libjpeg.a/.so with --enable-jpeg-lib-path or disable hdf features with --disable-hdf .])
-    exit
+  AC_CHECK_HEADERS(hdf.h,[],[
+    AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find the hdf.h header file.
+ 
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS="-I<include dir> \${CPPFLAGS}", or 
+  using the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
     ])
-
-  # Get HDF library and include locations
-  
-  # #search include paths for hdf.h
-  HDF_INCLUDE_PATH=""
-  for TEST_PATH in $HDF_INCLUDE_PATHS; do
-    AC_CHECK_FILE([${TEST_PATH}/hdf.h],[HDF_INCLUDE_PATH=${TEST_PATH};break],[])
-  done
-  
-  #search lib paths for libmfhdf.so and libmfhdf.a
-  HDF_LIB_PATH=""
-  for TEST_PATH in $HDF_LIB_PATHS; do
-    AC_CHECK_FILES([${TEST_PATH}/libmfhdf.so ${TEST_PATH}/libmfhdf.a ]
-      ,[HDF_LIB_PATH=${TEST_PATH};break],[])
-  done
-
-  AS_IF([test "$HDF_LIB_PATH" = ""],[
-    AC_MSG_RESULT([No hdf library found in search paths \"$HDF_LIB_PATHS\". Either specify the path to libmfhdf.a/.so with --enable-hdf-lib-path or disable hdf features with --disable-hdf .])
-    exit
-    ])
-  AS_IF([test "$HDF_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT([No hdf include file found in search paths \"$HDF_INCLUDE_PATHS\". Either specify the path to hdf.h with --enable-hdf-include-path or disable hdf features with --disable-hdf .])
-    exit
-    ])
-  AC_DEFINE([HDF_ENABLE],[],[Defined if hdf is enabled])
-  AC_SUBST([HDF_INCLUDE_PATH])
-  AC_SUBST([HDF_LIB_PATH])
-  AC_SUBST([JPEG_LIB_PATH])
-  
   ])
+  AC_SEARCH_LIBS([cos],[m],[],[
+      AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find an m library containing the cos function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}"
+  or use the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      ])
+  ])
+  
+  LIBS="$LIBS -ldf -ljpeg -lz -lsz"
+  for func in SDstart SDend SDcreate SDendaccess SDwritedata; do
+    AC_SEARCH_LIBS([$func],[mfhdf],[],[
+      AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find an HDF library containing the $func function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}"
+  or use the --disable-hdf option to disable HDF functionality if
+  it isn't needed.
+---------------------------------------------------------------------
+      ])
+    ],[])
+  done
+  AC_DEFINE([HDF_ENABLE],[],[Defined if hdf is enabled])
+])
 AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
+
 #################################################################
 #
 #################################################################
@@ -232,61 +160,42 @@ AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 #
 #check to see if user disabled petsc
 PETSC_ENABLE=yes
-#AC_ARG_ENABLE([petsc],
-#  [AS_HELP_STRING([--disable-petsc],
-#  [Disable petsc features, these are required to run implicit calculations])],
-#  [PETSC_ENABLE="$enableval"],
-#  [])
-#
-#check to see if user set an override for include path
-AC_ARG_ENABLE([petsc-include-path],
- [AS_HELP_STRING([--enable-petsc-include-path],
- [set location of the petsc headers])],
- [PETSC_INCLUDE_PATHS="$enableval"],
- [])
-#
-#check to see if user set an override for library path
-AC_ARG_ENABLE([petsc-lib-path],
-  [AS_HELP_STRING([--enable-petsc-lib-path],
-  [set location of the petsc library])],
-  [PETSC_LIB_PATHS="$enableval"],
-  [])
+
 #
 #check to make sure we have a library and include path, if we are using petsc
 AS_IF([test "$PETSC_ENABLE" = "yes"],[
-  #
-  #search include paths for petscksp.h
-  PETSC_INCLUDE_PATH=""
-  for TEST_PATH in $PETSC_INCLUDE_PATHS; do
-    AC_CHECK_FILE([${TEST_PATH}/petscksp.h],[PETSC_INCLUDE_PATH=${TEST_PATH};break],[])
-  done
-  #
-  #search lib paths for libpetsc.so or libpetsc.a
-  PETSC_LIB_PATH=""
-  for TEST_PATH in $PETSC_LIB_PATHS; do
-    AC_CHECK_FILES([${TEST_PATH}/libpetsc.so ${TEST_PATH}/libpetsc.a ]\
-      ,[PETSC_LIB_PATH=${TEST_PATH};break],[])
-  done
-  #
-  #check that a lib path was found
-  AS_IF([test "$PETSC_LIB_PATH" = ""],[
-    AC_MSG_RESULT([No petsc library found in search paths \"$PETSC_LIB_PATHS\". Please specify the path to libpetsc.a/.so with --enable-petsc-lib-path.])
-    exit
+  AC_CHECK_HEADERS(petscksp.h,[],[
+    AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find the petscksp.h header file.
+ 
+  Try adding a path to the header file to the CPPFLAGS environment
+  variable e.g. export CPPFLAGS="-I<include dir> \${CPPFLAGS}".
+---------------------------------------------------------------------
     ])
-  #
-  #check that an include path was found
-  AS_IF([test "$PETSC_INCLUDE_PATH" = ""],[
-    AC_MSG_RESULT([No petsc include file found in search paths \"$PETSC_INCLUDE_PATHS\". Please specify the path to petscksp.h with --enable-petsc-include-path.])
-    exit
-    ])
-  #
-  #sub strings for lib and include paths
-  AC_SUBST(PETSC_LIB_PATH)
-  AC_SUBST(PETSC_INCLUDE_PATH)
+  ])
+  PETSCFUNCS="KSPSolve MatSetValues MatAssemblyBegin VecSetValues
+    VecAssemblyBegin VecAssemblyEnd MatAssemblyEnd KSPSetOperators
+    VecScatterBegin VecScatterEnd"
+  #VecGetArray is also used, but for some reason the tests fail, however when 
+  #building/linking with the main code that uses it there is no problem
+  for func in $PETSCFUNCS; do
+    AC_SEARCH_LIBS([$func], petsc,[],[
+      AC_MSG_ERROR([
+---------------------------------------------------------------------
+  Unable to find an PETSc library containing the $func function.
+
+  If you know the path to the library try adding it to the LDFLAGS
+  environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}".
+---------------------------------------------------------------------
+      ])
+    ],[-ldf -ljpeg -lz -lsz])
+  done
   #
   #define PETSC_ENABLE in include file
   AC_DEFINE([PETSC_ENABLE],[],[Defined if PETSc is enabled])
   ])
+
 #tell automake about PETSC_ENABLE variable
 AM_CONDITIONAL([PETSC_ENABLE],[test "$PETSC_ENABLE" = "yes"])
 #################################################################
