@@ -644,6 +644,7 @@ INCLUDE_CRUCIAL_LIBS_IN_DIST_FALSE
 INCLUDE_CRUCIAL_LIBS_IN_DIST_TRUE
 INCLUDE_OPTIONAL_LIBS_IN_DIST_FALSE
 INCLUDE_OPTIONAL_LIBS_IN_DIST_TRUE
+MPICPP_CHECK
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
@@ -3417,16 +3418,53 @@ else
 fi
 
 
-if test "$CXX" != "mpic++"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: mpic++ not found! Aborting, please make sure that the bin directory where OpenMPI is installed is in your path." >&5
-$as_echo "mpic++ not found! Aborting, please make sure that the bin directory where OpenMPI is installed is in your path." >&6; };exit
-fi
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+
+# Extract the first word of "mpic++", so it can be a program name with args.
+set dummy mpic++; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MPICPP_CHECK+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MPICPP_CHECK"; then
+  ac_cv_prog_MPICPP_CHECK="$MPICPP_CHECK" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MPICPP_CHECK="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+MPICPP_CHECK=$ac_cv_prog_MPICPP_CHECK
+if test -n "$MPICPP_CHECK"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPICPP_CHECK" >&5
+$as_echo "$MPICPP_CHECK" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test x"$MPICPP_CHECK" != x"yes" ; then
+    as_fn_error $? "mpic++ not found, aborting! Please make sure that the bin directory where OpenMPI is installed is in your path." "$LINENO" 5
+fi
 
 #Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no

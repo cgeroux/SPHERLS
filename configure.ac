@@ -1,8 +1,12 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX([mpic++])
-AS_IF([test "$CXX" != "mpic++"],[AC_MSG_RESULT([mpic++ not found! Aborting, please make sure that the bin directory where OpenMPI is installed is in your path.]);exit])
 AC_LANG([C++])
+
+AC_CHECK_PROG(MPICPP_CHECK,mpic++,yes)
+if test x"$MPICPP_CHECK" != x"yes" ; then
+    AC_MSG_ERROR([mpic++ not found, aborting! Please make sure that the bin directory where OpenMPI is installed is in your path.])
+fi
 
 #Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no
