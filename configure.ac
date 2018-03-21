@@ -76,7 +76,7 @@ AS_IF(
 FFTW_ENABLE=yes
 AC_ARG_ENABLE([fftw],
   [AS_HELP_STRING([--disable-fftw],
-  [Disable fftw features])],
+  [Disable fftw features, such as performing frequency analysis of time varying quantities.])],
   [FFTW_ENABLE="$enableval"],
   [])
 
@@ -125,7 +125,7 @@ AM_CONDITIONAL([FFTW_ENABLE],[test "$FFTW_ENABLE" = "yes"])
 HDF_ENABLE=yes
 AC_ARG_ENABLE([hdf],
   [AS_HELP_STRING([--disable-hdf],
-  [Disable hdf features])],
+  [Disable hdf features. This includes not being able to create HDF4 files from model dumps.])],
   [HDF_ENABLE="$enableval"],
   [])
 

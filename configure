@@ -1390,8 +1390,10 @@ Optional Features:
                           requires the installation of pdflatex and is not
                           recommended unless you are actively making changes
                           to the source files.
-  --disable-fftw          Disable fftw features
-  --disable-hdf           Disable hdf features
+  --disable-fftw          Disable fftw features, such as performing frequency
+                          analysis of time varying quantities.
+  --disable-hdf           Disable hdf features. This includes not being able
+                          to create HDF4 files from model dumps.
   --disable-cython        Disable cython dependent features, such as making
                           vtk files for visualization. Cython install should
                           be added to your PYTHONPATH.
