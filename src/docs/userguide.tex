@@ -60,7 +60,7 @@ There are a number of optional and required third party libraries used by SPHERL
 
 There are three flavours of the SPHERLS distribution package available: one which includes all third party libraries, one which includes only required third party libraries, and one which does not include any third party libraries. It is recommended to use the package including all third party libraries. This version helps to ensure the greatest functionality of SPHERLS and also that these libraries are compatible both with SPHERLS and the below installation instructions. Other version of the distribution package can be desirable to reduce download size, if the third party libraries are already installed, or if you wish to try out newer versions of the third party libraries and do not want to download the additional data. The included third party libraries can be found under the {\tt lib/} directory under the root package directory.
 
-A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files they need to be installed in standard locations or have their location added to standard environment variables. Generally nonstandard include paths should be added the the {\tt CPATH} environment variable and library paths should be added to the {\tt LIBRARY\_PATH} variable. Multiple paths in these variables should be separated by a "{\tt :}". In the bash shell this can be done with a command like {\tt export CPATH="<path to package include director>:\$CPATH"} or similarly for the {\tt LIBRARY\_PATH} variable.
+A few words on installation before we get into the details of the specific third party package installations. In order for the SPHERLS configuration script to find the required libraries and include files they need to be installed in standard locations or have their location added to standard environment variables. Generally nonstandard include paths should be added to the {\tt CPATH} environment variable and library paths should be added to the {\tt LIBRARY\_PATH} variable. Multiple paths in these variables should be separated by a "{\tt :}". In the bash shell this can be done with a command like {\tt export CPATH="<path to package include director>:\$CPATH"} or similarly for the {\tt LIBRARY\_PATH} variable.
 
 \section{Requirements}
 SPHERLS requires gcc/g++, OpenMPI, and PETSc to compile and run at all. It also makes heavy use of Python scripts some of which depend on Cython. So while you technically can run the basic binaries without Python and Cython in practise you really won't want to use SPHERLS without these.
@@ -69,7 +69,7 @@ The below set of instructions do not explain how to install the GCC (GNU Compile
 
 The below libraries can be optionally installed but will greatly enhance the usefulness of SPHERLS and are greatly recommended. The full list of dependencies of these third party libraries is not included, but some library dependencies have been noted when I have specifically had to install these dependencies on various machines.
 \begin{description}
-\item[python] python scripts are supplied for various analysis and convenience operations.  The included python scripts were used and written for Python 2.X series so will likely not work with Python 3.X series, though with a little effort these scripts could likely be updated to work with both, however this has not yet been done so it is best to stick with the Python 2.X series. Having python is highly recommended and will make using SPHERLS far more enjoyable. Many SPHERLS Python scripts use the following Python libraries:
+\item[python] python scripts are supplied for various analysis and convenience operations.  The included python scripts were used and written for Python 2.X series so will not work with Python 3.X series, though with a little effort these scripts could be updated to work with both, however this has not yet been done so it is best to stick with the Python 2.X series. Having python is highly recommended and will make using SPHERLS far more enjoyable. Many SPHERLS Python scripts use the following Python libraries:
 \begin{description}
   \item[numpy] numerical python, fast array operations
   \item[matplotlib] for creating plots
@@ -117,7 +117,8 @@ Version {\tt petsc\--lite-3.1-p8}, has been tested to work with SPHERLS. {\tt pe
 \item {\tt make install} as with the {\tt make all} the makeFile will also likely tell you the command needed for the installation, which should be used over the one provided here.
 \item {\tt make PETSC\_DIR=<path-to-final-location-of-install>/lib test} will test the code. Again the install process will give you a more specific command that you should use over the one given here.
 \item {\tt export CPATH=<path-to-final-location-of-install>/include:\$CPATH} to add the PETSc include path to your CPATH environment variable.
-\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to add the PETSc lib path to your LIBRARY\_PATH environment variable.
+\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to allow compilers to find the PETSc libraries during compilation.
+\item {\tt export LD\_LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LD\_LIBRARY\_PATH} so that runtime executables can find the PETSc shared libraries.
 \end{enumerate}
 \end{itemize}
 
@@ -153,7 +154,8 @@ The exact details of this path to add will depend on the version of python you h
 \item {\tt make}
 \item {\tt make install}
 \item {\tt export CPATH=<path-to-final-location-of-install>/include:\$CPATH} to add the FFTW include path to your CPATH environment variable.
-\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to add the FFTW lib path to your LIBRARY\_PATH environment variable.
+\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to allow compilers to find the FFTW library while linking.
+\item {\tt export LD\_LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LD\_LIBRARY\_PATH} to allow executables to find the FFTW libraries at run time.
 \end{enumerate}
 \end{itemize}
 
@@ -170,7 +172,8 @@ Note that for the hdf library the {\tt <path-to-final-}{\tt location-of-library>
 \item {\tt make}
 \item {\tt make install}
 \item {\tt export CPATH=<path-to-final-location-of-install>/include:\$CPATH} to add the HDF include path to your CPATH environment variable.
-\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to add the HDF lib path to your LIBRARY\_PATH environment variable.
+\item {\tt export LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to allow compilers to find the HDF libraries when linking.
+\item {\tt export LD\_LIBRARY\_PATH=<path-to-final-location-of-install>/lib:\$LIBRARY\_PATH} to allow executables to find the HDF shared libraries at run time.
 \end{itemize}
 The above commands have only been tested with the version including with the SPHERLS distribution package other versions may require slight modifications to the above commands but should be reasonably similar.
 
@@ -187,12 +190,13 @@ The SPHERLS build process actually builds evtk for you, so you probably do not n
 %Doxygen has been used in the past but is not currently used in the build process. The latest %version seems to hang while creating documents. doxygen-1.5.6 is known to work.
 
 \section{Installing SPHERLS}
-After all the required and optional third party libraries are available and installed into places that the SPHERLS configuration scripts looks for them building and installing SPHERLS should be as easy as:
+After all the required and optional third party libraries are installed and the appropriate environment variables have been set building and installing SPHERLS should involve running these commands:
 \begin{itemize}
 \item {\tt ./configure --prefix=<path-to-final-location-of-install>}
 \item {\tt make}
 \item {\tt make install}
 \end{itemize}
+
 If you have the raw git repository you may do the following to recreate the {\tt configure} file. However there is a version of this file included in the repository, so the above steps should also work.
 \begin{itemize}
 \item {\tt autoreconf --install} \\provided you have the gnu build tools installed, this makes the configuration script
@@ -201,9 +205,9 @@ If you have the raw git repository you may do the following to recreate the {\tt
 \item {\tt make install}
 \item {\tt export PATH=<path-to-final-location-of-install>/bin:\$PATH} to add the SPHERLS bin path to your {\tt PATH} environment variable.
 \item {\tt export PYTHONPYTH=<path-to-final-location-of-install>/bin:\$PATH} to add the SPHERLS bin path to your {\tt PYTHONPYTH} environment variable so that the python scripts can find needed python modules.
-\item {\tt export LD\_LIBRARY\_PATH=<path-to-petsc-dir>/lib:\$LD\_LIBRARY\_PATH} to add the PETSc lib path to your {\tt LD\_LIBRARY\_PATH} environment variable so that SPHERLS can find the libpetsc.sa library.
 \end{itemize}
-Common problems which result during the execution of the above command are: not finding the installed third party libraries as they were installed in different locations. There are numerous options available in the configuration script for manually specifying these installation locations of various library and include files. Run {\tt ./configure -h} to get a list of the options and specify the location of the missing libraries and include files. In addition to not finding various libraries, the various optional components may also be turned off during the configuration step. For example if you don't have hdf4 libraries and don't want to use that functionality including the option --disable-hdf will build without hdf4 capabilities.
+
+Common problems which result during the execution of the above commands are: not finding the installed third party libraries. This often results from not having the correct settings for things like {\tt LIBRARY\_PATH}, {\tt CPATH}, and {\tt LD\_LIBRARY\_PATH}. It is also possible to specify more options to the linker by setting the {\tt LDFLAGS} environment variable by including the location of library search paths and or names. There are also options for turning on/off features. Run the command {\tt ./configure -h} to get a list of the options. For example if you don't have hdf4 libraries and don't want to use that functionality including the option {\tt --disable-hdf} will build without hdf4 capabilities.
 
 \chapter{Using SPHERLS}
 Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the {\tt bin} directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. If you have not built with Cython support you will likely get the error {\tt No module named evtk.hl} when running either of the test scripts. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Python scripts are distinguished from compiled executables with their {\tt .py} extension. Lets examine what the {\tt test\_restart.py} script does in detail first.
