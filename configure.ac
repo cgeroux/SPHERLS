@@ -1,12 +1,31 @@
 AC_INIT([SPHERLS], [1.0], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-AC_PROG_CXX([mpic++])
+AC_CONFIG_SRCDIR([src/SPHERLS/physEquations.cpp])#safty check to make sure src directory is what it should be
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
 AC_LANG([C++])
 
 AC_CHECK_PROG(MPICPP_CHECK,mpic++,yes)
 if test x"$MPICPP_CHECK" != x"yes" ; then
     AC_MSG_ERROR([mpic++ not found, aborting! Please make sure that the bin directory where OpenMPI is installed is in your path.])
 fi
+
+# Checks for header files.
+AC_CHECK_HEADERS([fenv.h memory.h stddef.h stdlib.h string.h unistd.h wchar.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([memmove memset pow sqrt strcasecmp strncasecmp strstr])
 
 #Should optional 3rd party libraries be included in the distribution
 INCLUDE_OPTIONAL_LIBS_IN_DIST=no
@@ -193,7 +212,7 @@ AS_IF([test "$PETSC_ENABLE" = "yes"],[
   environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}".
 ---------------------------------------------------------------------
       ])
-    ],[-ldf -ljpeg -lz -lsz])
+    ],[])
   done
   #
   #define PETSC_ENABLE in include file

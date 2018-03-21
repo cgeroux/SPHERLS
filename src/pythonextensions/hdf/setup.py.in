@@ -1,7 +1,6 @@
 from distutils.core import setup, Extension
 
-module1 = Extension('hdf', sources = ['hdfmodule.cpp'], include_dirs=['@HDF_INCLUDE_PATH@']
-  , libraries=['m','mfhdf','df','jpeg','z'], library_dirs=['@HDF_LIB_PATH@'])
+module1 = Extension('hdf', sources = ['hdfmodule.cpp'],libraries=['m','mfhdf','df','jpeg','z','sz'])
  
 setup (name = 'PackageName',
         version = '1.0',

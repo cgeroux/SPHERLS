@@ -151,13 +151,12 @@ am_SPHERLS_OBJECTS = src/SPHERLS/SPHERLS-dataManipulation.$(OBJEXT) \
 	src/SPHERLS-xmlFunctions.$(OBJEXT) \
 	src/SPHERLS-xmlParser.$(OBJEXT)
 SPHERLS_OBJECTS = $(am_SPHERLS_OBJECTS)
-am__DEPENDENCIES_1 =
-SPHERLS_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+SPHERLS_LDADD = $(LDADD)
 am_SPHERLSanal_OBJECTS = src/SPHERLSanal/SPHERLSanal-main.$(OBJEXT) \
 	src/SPHERLSanal-eos.$(OBJEXT) \
 	src/SPHERLSanal-exception2.$(OBJEXT)
 SPHERLSanal_OBJECTS = $(am_SPHERLSanal_OBJECTS)
-SPHERLSanal_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+SPHERLSanal_LDADD = $(LDADD)
 am_SPHERLSgen_OBJECTS = src/SPHERLSgen/SPHERLSgen-main.$(OBJEXT) \
 	src/SPHERLSgen-exception2.$(OBJEXT) \
 	src/SPHERLSgen-xmlFunctions.$(OBJEXT) \
@@ -276,7 +275,8 @@ CSCOPE = cscope
 AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/src/pythonextensions/hdf/setup.py.in README \
-	depcomp install-sh missing
+	compile config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -301,6 +301,9 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+CC = @CC@
+CCDEPMODE = @CCDEPMODE@
+CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -336,6 +339,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+POW_LIB = @POW_LIB@
 PS2PDF_EXISTS = @PS2PDF_EXISTS@
 PYTHONLIBDIR = @PYTHONLIBDIR@
 SET_MAKE = @SET_MAKE@
@@ -346,6 +350,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -520,8 +525,7 @@ SPHERLS_SOURCES = \
 	src/xmlParser.cpp	\
 	src/xmlParser.h
 
-SPHERLS_LDADD = $(LDFLAGS) $(LIBS)
-SPHERLS_CPPFLAGS = $(CPPFLAGS)	-Isrc/
+SPHERLS_CPPFLAGS = -Isrc/
 SPHERLSanal_SOURCES = \
 	src/SPHERLSanal/main.cpp	\
 	src/SPHERLSanal/main.h	\
@@ -530,21 +534,10 @@ SPHERLSanal_SOURCES = \
 	src/exception2.cpp	\
 	src/exception2.h	
 
-@FFTW_ENABLE_FALSE@FFTW_LDADDS = 
-@FFTW_ENABLE_TRUE@FFTW_LDADDS = $(LDFLAGS) $(LIBS)
-@FFTW_ENABLE_FALSE@FFTW_CPPFLAGS = 
-@FFTW_ENABLE_TRUE@FFTW_CPPFLAGS = $(CPPFLAGS)	-Isrc/
-@HDF_ENABLE_FALSE@HDF_LDADDS = 
-
-#HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
-@HDF_ENABLE_TRUE@HDF_LDADDS = $(LDFLAGS) $(LIBS)
-@HDF_ENABLE_FALSE@HDF_CPPFLAGS = 
-@HDF_ENABLE_TRUE@HDF_CPPFLAGS = $(CPPFLAGS)	-Isrc/
 @CYTHON_ENABLE_TRUE@@HDF_ENABLE_TRUE@BUILT_SOURCES = src/pythonextensions/lib/hdf.so \
 @CYTHON_ENABLE_TRUE@@HDF_ENABLE_TRUE@	$(am__append_5)
 @HDF_ENABLE_FALSE@BUILT_SOURCES = $(am__append_5)
-SPHERLSanal_LDADD = $(LDFLAGS) $(LIBS)
-SPHERLSanal_CPPFLAGS = $(CPPFLAGS) -Isrc/ 
+SPHERLSanal_CPPFLAGS = -Isrc/ 
 SPHERLSgen_SOURCES = \
 	src/SPHERLSgen/main.cpp	\
 	src/SPHERLSgen/main.h	\
@@ -568,6 +561,7 @@ cevtk_SOURCE = \
 ./src/pythonextensions/evtk/src/cevtk.pyx\
 ./src/pythonextensions/evtk/src/vtk.py\
 ./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/LICENSE\
 ./src/pythonextensions/evtk/src/examples/group.py\
 ./src/pythonextensions/evtk/src/examples/image.py\
 ./src/pythonextensions/evtk/src/examples/__init__.py\

@@ -173,8 +173,7 @@ SPHERLS_SOURCES	=	\
 	src/xmlParser.cpp	\
 	src/xmlParser.h
 
-SPHERLS_LDADD	=	$(LDFLAGS) $(LIBS)
-SPHERLS_CPPFLAGS	=	$(CPPFLAGS)	-Isrc/
+SPHERLS_CPPFLAGS	=-Isrc/
 
 SPHERLSanal_SOURCES	=	\
 	src/SPHERLSanal/main.cpp	\
@@ -184,33 +183,19 @@ SPHERLSanal_SOURCES	=	\
 	src/exception2.cpp	\
 	src/exception2.h	
 
-if FFTW_ENABLE
-FFTW_LDADDS=	$(LDFLAGS) $(LIBS)
-FFTW_CPPFLAGS=	$(CPPFLAGS)	-Isrc/
-else
-FFTW_LDADDS= 
-FFTW_CPPFLAGS= 
-endif
-
 if HDF_ENABLE
-#HDF_LDADDS=-L$(HDF_LIB_PATH) -L${JPEG_LIB_PATH} -lm -lmfhdf -ldf -ljpeg -lz
-HDF_LDADDS=$(LDFLAGS) $(LIBS)
-HDF_CPPFLAGS=	$(CPPFLAGS)	-Isrc/
 if CYTHON_ENABLE
 BUILT_SOURCES=src/pythonextensions/lib/hdf.so
 endif
 else
 BUILT_SOURCES=
-HDF_LDADDS= 
-HDF_CPPFLAGS=
 endif
 if CYTHON_ENABLE
 BUILT_SOURCES+=src/pythonextensions/lib/eos.so
 BUILT_SOURCES+=src/pythonextensions/lib/cevtk.so
 endif
 
-SPHERLSanal_LDADD=$(LDFLAGS) $(LIBS)
-SPHERLSanal_CPPFLAGS=$(CPPFLAGS) -Isrc/ 
+SPHERLSanal_CPPFLAGS=-Isrc/ 
 
 SPHERLSgen_SOURCES	=	\
 	src/SPHERLSgen/main.cpp	\
@@ -246,6 +231,7 @@ cevtk_SOURCE=\
 ./src/pythonextensions/evtk/src/cevtk.pyx\
 ./src/pythonextensions/evtk/src/vtk.py\
 ./src/pythonextensions/evtk/src/xml.py\
+./src/pythonextensions/evtk/src/LICENSE\
 ./src/pythonextensions/evtk/src/examples/group.py\
 ./src/pythonextensions/evtk/src/examples/image.py\
 ./src/pythonextensions/evtk/src/examples/__init__.py\
