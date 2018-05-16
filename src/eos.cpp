@@ -325,13 +325,22 @@ void eos::writeBin(std::string sFileName)throw(exception2){
 }
 double eos::dGetPressure(double dT, double dRho)throw(exception2){
   
-  //calculate logs of dT and dRho
-  if(dRho<0){
+  //check for negative density
+  if(dRho<0.0){
     std::stringstream ssTemp;
-    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-      <<": density ("<<dRho<<") is negative.\n";
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
     throw exception2(ssTemp.str(),INPUT);
   }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
   
@@ -409,6 +418,22 @@ double eos::dGetPressure(double dT, double dRho)throw(exception2){
   return dP;
 }
 double eos::dGetEnergy(double dT, double dRho)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -488,6 +513,22 @@ double eos::dGetEnergy(double dT, double dRho)throw(exception2){
   return dE;
 }
 double eos::dGetOpacity(double dT, double dRho)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -570,6 +611,22 @@ double eos::dGetOpacity(double dT, double dRho)throw(exception2){
 }
 double eos::dDRhoDP(double dT,double dRho)throw(exception2){
   
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
@@ -646,6 +703,22 @@ double eos::dDRhoDP(double dT,double dRho)throw(exception2){
   return dDRhoDP;
 }
 double eos::dSoundSpeed(double dT,double dRho)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -754,6 +827,22 @@ double eos::dSoundSpeed(double dT,double dRho)throw(exception2){
 }
 void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa)throw(exception2){
   
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
@@ -845,6 +934,22 @@ void eos::getEKappa(double dT, double dRho, double &dE, double &dKappa)throw(exc
   }
 }
 void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKappa)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -950,6 +1055,22 @@ void eos::getPEKappa(double dT, double dRho, double &dP, double &dE, double &dKa
 }
 void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double &dKappa
   ,double &dGamma)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1087,6 +1208,22 @@ void eos::getPEKappaGamma(double dT, double dRho, double &dP, double &dE, double
 }
 void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, double &dKappa
   ,double &dGamma, double &dC_p)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1238,6 +1375,22 @@ void eos::getPEKappaGammaCp(double dT, double dRho, double &dP, double &dE, doub
 }
 void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,double &dGamma)throw(exception2){
   
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
@@ -1367,6 +1520,22 @@ void eos::getPKappaGamma(double dT, double dRho, double &dP, double &dKappa,doub
 }
 void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,double &dC_v)throw(exception2){
   
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
@@ -1490,6 +1659,38 @@ void eos::gamma1DelAdC_v(double dT,double dRho,double &dGamma1, double &dDelAd,d
 }
 void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP)throw(exception2){
   
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
   double dLogT=log10(dT);
@@ -1577,6 +1778,22 @@ void eos::getPAndDRhoDP(double dT,double dRho,double &dP, double &dDRhoDP)throw(
   }
 }
 void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
@@ -1666,6 +1883,22 @@ void eos::getEAndDTDE(double dT,double dRho,double &dE, double &dDTDE)throw(exce
 }
 void eos::getDlnPDlnTDlnPDlnPDEDT(double dT, double dRho, double &dDlnPDlnT,
   double &dDlnPDlnRho, double &dDEDT)throw(exception2){
+  
+  //check for negative density
+  if(dRho<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dRho=\""<<dRho
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
+  
+  //check for negative temperature
+  if(dT<0.0){
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<": dT=\""<<dT
+      <<"\" is less than zero.\n";
+    throw exception2(ssTemp.str(),INPUT);
+  }
   
   //calculate logs of dT and dRho
   double dLogRho=log10(dRho);
