@@ -3,8 +3,8 @@ stars.
 
 Below are the basic instructions for building. To find out more on how
 to use the SPHERLS packages see user manuals in the docs/manuals
-directory, especially SPHERLS_manual.pdf in which the installation of
-prerequisite libraries is described.
+directory, especially SPHERLS_User_Guide.pdf in which the installations of
+prerequisite libraries are described.
 
 To build and install:
 
@@ -14,13 +14,6 @@ To build and install:
 
 To find out more on how to use the SPHERLS packages see user manuals in
 ./docs/manuals
-
-If not a distribution package (will have gotten it from the git repository):
-one can run:
-
-  autoreconf --install
-
-to create the ./configure file if the GNU build tools are installed
 
 ============================================
 Common configuration options 
