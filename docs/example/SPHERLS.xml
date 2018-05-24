@@ -1,4 +1,23 @@
 <data>
+  <job>
+    <cmd>sbatch</cmd>
+    <template-file>./job_script_template.sh</template-file>
+    <generated-file>job_script.sh</generated-file>
+    <replacements>
+      <replacement>
+        <search-str>MEMPERCPU</search-str>
+        <substitution>2GB</substitution>
+      </replacement>
+      <replacement>
+        <search-str>RUNTIME</search-str>
+        <substitution>00:10:00</substitution>
+      </replacement>
+      <replacement>
+        <search-str>ACCOUNT</search-str>
+        <substitution>def-cgeroux</substitution>
+      </replacement>
+    </replacements>
+  </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
     <x0>4</x0><!--Note first region (processor) in this dimension will be 1D-->

@@ -69,149 +69,60 @@ def parseXML(fileName):
     quit()
   settings['numProcs']=str(x0*x1*x2)
   
-  #get job que element
-  jobQueElement=jobElement.find("que")
-  settings['que']=None
-  if jobQueElement==None:
-    settings['que']=None
-  elif jobQueElement.text.lower() in ("test","te","tq"):
-    settings['que']="test"
-  elif jobQueElement.text.lower() in ("m","main","","yes","true","tr"):
-    settings['que']="main"
+  #get cmd
+  cmdElement=jobElement.find("cmd")
+  if cmdElement==None:
+    settings['cmd']=None
+  else:
+    settings['cmd']=cmdElement.text
   
-  #if we have a que, get job details for the que
-  if settings['que'] in ("test","main"):
-  
-    #get job name element
-    jobNameElement=jobElement.find("name")
-    if jobNameElement==None:
-      print "No \"name\" element found under \"job\" node in file \""+fileName+"\", stopping!"
+  #get template-file
+  templateFileElement=jobElement.find("template-file")
+  if templateFileElement==None:
+    settings['templateFile']=None
+  else:
+    if templateFileElement.text=="":
+      print "\"template-file\" element is empty. Must provide a file name and path to use as a template job script file."
       quit()
-    settings['jobName']=jobNameElement.text
-    
-    #get job duration element
-    jobDurationElement=jobElement.find("duration")
-    if jobDurationElement==None:
-      print "No \"duration\" element found under \"job\" node in file \""+fileName+"\", quiting!"
+    settings['templateFile']=templateFileElement.text
+  
+  #get generated-file
+  generatedFileElement=jobElement.find("generated-file")
+  if generatedFileElement==None:
+    settings['generatedFile']=None
+  else:
+    if generatedFileElement.text=="" or generatedFileElement.text==None:
+      print "\"generated-file\" element is empty. Must provide a file name and path to use as a template job script file."
       quit()
-    settings['jobDuration']=jobDurationElement.text
-    
-    #get job email
-    jobEmailElement=jobElement.find("email")
-    settings['email']=None
-    if jobEmailElement==None:
-      settings['email']=None
-    elif jobEmailElement.text.lower() in ("false","no","f",""):
-      settings['email']=None
-    else :
-      settings['email']=jobEmailElement.text
-    
-    #get job memory
-    jobMemoryElement=jobElement.find("memory")
-    settings['virtualMemory']=None
-    settings['stackMemory']=None
-    if jobMemoryElement==None:
-      settings['virtualMemory']=None
-      settings['stackMemory']=None
-    else :
-      settings['email']=jobMemoryElement.text
-      settings['virtualMemory']=jobMemoryElement.text
-      settings['stackMemory']=jobMemoryElement.text
-    
-    #get parallel environment
-    jobPEElement=jobElement.find("parallel-environment")
-    settings['parrallelEnvironment']="openmpi"#this is for lachesis
-    if not jobPEElement==None:
-      settings['parrallelEnvironment']=jobPEElement.text
+    settings['generatedFile']=generatedFileElement.text
   
-  #check if wanting to run in totalview
-  jobTotalviewElement=jobElement.find("totalview")
-  settings['totalview']=False
-  if jobTotalviewElement==None:
-    settings['totalview']=False
-  elif jobTotalviewElement.text.lower() in ("t","true","y","yes","tr","tru","ye","on"):
-    settings['totalview']=True
-  
-  if settings['totalview']==True and settings['que'] in ("test","main"):#cannot run in a que with totalview
-    print "WARNING: Cannont run in a que with totalview, que settings ignored!"
-    settings['que']=None
+  #get string replacements
+  replacementsElement=jobElement.find("replacements")
+  settings['replacements']=[('NUMPROCS',str(settings['numProcs']))]
+  if replacementsElement!=None:
+    replacementElements=replacementsElement.findall("replacement")
+    for replacementElement in replacementElements:
+      searchStr=replacementElement.find("search-str").text
+      if searchStr=="" or searchStr==None:
+        print "found empty \"search-str\" element but this element may not be empty"
+        quit()
+      sub=replacementElement.find("substitution").text
+      settings['replacements'].append((searchStr,sub))
   
   return settings
 def makeSubScript(settings):
-  '''
-  Creates a submit script for the sun grid engine based on settings, and returns the name of the 
-  script. If no que was specified it returns None.
-  '''
-  #additional hard coded settings
-  scriptName=""
-  if settings['que']==None or settings['totalview']==True:
-    return None
-  elif settings['que']=="test":
-    scriptName=settings['jobName']+"_testque.sh"
-  elif settings['que']=="main":
-    scriptName=settings['jobName']+"_que.sh"
-  f=open(scriptName,'wb')
-  script="#!"+settings['shell']+"\n"\
-    +"##\n"\
-    +"##Shell to run job in\n"\
-    +"#$ -S "+settings['shell']+"\n"\
-    +"##\n"\
-    +"## Set job name\n"\
-    +"#$ -N "+settings['jobName']+"\n"\
-    +"##\n"\
-    +"## Run job from current working directory\n"\
-    +"#$ -cwd\n"\
-    +"##\n"\
-    +"## Output file name\n"\
-    +"#$ -o "+settings['outputFile']+"\n"\
-    +"##\n"\
-    +"## Error file name\n"\
-    +"#$ -e "+settings['errorFile']+"\n"\
-    +"##\n"\
-    +"## Error is not merged with standard out\n"\
-    +"#$ -j n\n"\
-    +"##\n"\
-    +"## Number of processors\n"\
-    +"#$ -pe "+settings['parrallelEnvironment']+" "+settings['numProcs']+"\n"\
-    +"##\n"\
-    +"## Run time\n"\
-    +"#$ -l h_rt="+settings['jobDuration']+"\n"\
-    +"##\n"\
-    +"## Amount of virtual memory\n"
-  if settings['virtualMemory']!=None:
-    script=script+"#$ -l h_vmem="+settings['virtualMemory']+"\n"
-  script=script+"##\n"\
-    +"## Amount of stack memory\n"
-  if settings['stackMemory']!=None:
-    script=script+"#$ -l h_stack="+settings['stackMemory']+"\n"
-  script=script+"##\n"\
-    +"## Transfer all environment variables when job is submitted\n"\
-    +"#$ -V\n"
-  if settings['que']=="test":
-    script=script\
-      +"##\n"\
-      +"## run in test que\n"\
-      +"#$ -l test=true\n"
-  if settings['email']!=None:
-    script=script\
-      +"##\n"\
-      +"## Email on end, abort or suspend\n"\
-      +"#$ -m eas\n"\
-      +"##\n"\
-      +"## Who to email\n"\
-      +"#$ -M "+settings['email']+"\n"
-  if settings['checkPointing']:
-    script=script\
-      +"##\n"\
-      +"## Checkpointing via grid engine\n"\
-      +"#$ -ckpt transparent\n"\
-      +"#$ -c xs\n"\
-      +"#$ -notify\n"\
-      +"trap '' usr2\n"
-  script=script+settings['mpirun']+" "+settings['target']
-  f.write(script)
-  f.close()
-  return scriptName
+  '''Make submission script using the specified template file and string 
+    replacements
+    '''
+  
+  file=open(settings['templateFile'],'r')
+  fileText=file.read()
+  file.close()
+  for replacement in settings['replacements']:
+    fileText=fileText.replace(replacement[0],replacement[1])
+  file=open(settings['generatedFile'],'w')
+  file.write(fileText)
+  file.close()
 def main():
   
   #make command line parser
@@ -219,44 +130,21 @@ def main():
     ,version="%prog 1.0"
     ,description="Starts a SPHERLS run by parsing the SPHERLS.xml configuration file")
   parser.add_option("-d",action="store_true",dest="dryRun"
-    ,help="If set it print out the run command but not execute it[not default]."
+    ,help="If set it print out the run command but not execute it [not default]."
     ,default=False)
   
   #parse command line options
   (options,args)=parser.parse_args()
-
+  
   settings=parseXML("SPHERLS.xml")
+  makeSubScript(settings)
   
   #additional hard coded settings
-  settings['mpirun']="mpirun"
-  settings['target']=paths.SPHERLSPath
-  
-  if settings['que']==None and not settings['totalview']==True:# if not running in que
-    cmd=settings['mpirun']+" -np "+settings['numProcs']+" "+settings['target']
-    if options.dryRun:
-      print cmd
-    else:
-      os.system(cmd)
-  elif settings['totalview']==True:#if running with a debugger
-    cmd=settings['mpirun']+" --debug -np "+settings['numProcs']+" "+settings['target']
-    if options.dryRun:
-      print cmd
-    else:
-      os.system(cmd)
-  else:#if submitting to a que
-    
-    #additional hard coded settings only needed when submitting to a que
-    settings['shell']="/bin/bash"
-    settings['outputFile']=settings['jobName']+".out"
-    settings['errorFile']=settings['jobName']+".err"
-    settings['checkPointing']=False
-    script=makeSubScript(settings)
-    if script!=None:#sub the job in the que\n
-      cmd="qsub "+script
-      if options.dryRun:
-        print cmd
-      else:
-        os.system(cmd)
+  cmd=settings["cmd"]+" "+settings["generatedFile"]
+  if options.dryRun:
+    print cmd
+  else:
+    os.system(cmd)
 if __name__ == "__main__":
   main()
   
