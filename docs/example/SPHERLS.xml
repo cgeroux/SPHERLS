@@ -1,7 +1,7 @@
 <data>
   <job>
     <cmd>sbatch</cmd>
-    <template-file>./job_script_template.sh</template-file>
+    <template-file>./slurm_job_script_template.sh</template-file>
     <generated-file>job_script.sh</generated-file>
     <replacements>
       <replacement>
