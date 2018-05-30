@@ -1,0 +1,80 @@
+<!-- Coordinates:
+Allowed radial coordinates: im1half(0), M_r_im1half[g](1), R_im1half[cm](2)
+Allowed theta coordinates : jm1half(3), theta_jm1half[rad](4)
+Allowed phi coordinates   : km1half(5), phi_km1half[rad](6)
+Allowed radial vectors (scalors in tp planes): U_im1halfjk[cm/s](7) , U0_im1half[cm/s](8)
+Allowed theta vectors (scalors in rp planes) : V_ijm1halfk[cm/s](9)
+Allowed phi vectors (scalors in rt planes)   : W_ijkm1half[cm/s](10)
+Allowed Scalors :
+D_ijk[g/cm^3](11)     , D_rel_dif_hor_ave(12)   , E_ijk[erg/g](13)      , E_rel_dif_hor_ave(14)  ,
+T_ijk[K](15)          , T_rel_dif_hor_ave(16)   , P_ijk[dynes/cm^2](17) , P_rel_dif_hor_ave(18)  ,
+Q_ijk[dynes/cm^2](19) , Q_rel_dif_hor_ave(20)   , Kap_ij[cm^2/g](21)    , Kap_rel_dif_hor_ave(22),
+Gam_ijk[na](23)       , Gam_rel_dif_hor_ave(24)
+
+z
+^
+|
++-> x
+
+y into page for R.H. system
+
+r from (x,y,z)=(0,0,0)
+t measured from +z axis down toward x-y plane
+p in xy plane
+
+Usefull geometric transforms for:
+
+positions:
+x =r*sin(t)*cos(p)
+y =r*sin(t)*sin(p)
+z =r*cos(t)
+
+unit vectors:
+r^= sin(t)*cos(p)*x^+sin(t)*sin(p)*y^+cos(t)*z^
+t^= cos(t)*cos(p)*x^+cos(t)*sin(p)*y^-sin(t)*z^
+p^=-       sin(p)*x^+       cos(p)*y^
+-->
+<!-- <figure></figure>
+  title     : sets the title of the figure, \time will be replaced with the time \index will be 
+              replaced with the time step index (number of time steps since the initial model).
+  width     : width of the figure in inches
+  height    : height of the figure in inches
+  dpi       : dots per inches
+  outputFile: Name of the output file(s). The suffix specifies the file type, supported file 
+              types are .png, .pdf, .jpg, .gif
+  startIndex: index to start plots with, by default startIndex is 0, so that plot indices go 0,1 
+              etc. This allows plot indices to be startIndex, startIndex+1, etc.
+              -->
+<figure title="$r-\theta$ slice at $k=0$, $t=$\time[s], time step=\index" width="11.0" height="8.0"
+  dpi="150" outputFile="./2D_slices/slices_rt.png" figLeft="0.08" figBottom="0.08" startIndex="0">
+  
+  <!-- <inputFileName></inputFileName>
+    Name of the input file names including path. A single file can be choosen or, a range selected
+    by providing [start index-end index], where "start index" is the first model dump to include
+    and "end index" is 1 larger than the last model dump to include. "end index" may also be a "*"
+    which indicates that all model dumps from "start index" to the last model dump found is 
+    included. The frequency option allows one to skip plots. If set to 2 will plot every other file,
+    if 3 every third file etc.-->
+  <inputFileName  frequency="1">./output/T6500_20x1_t[0-*]</inputFileName>
+  
+  <!-- RT-plane with combined u-u_0 and v vectors, transform: p=0, x->x, z->y-->
+  <!-- <plane></plane>
+    sets the type and location of plane to use for the slice
+    type : can be either "rt", "rp", and "tp" for radial-theta slice, radial-phi, and theta-phi
+           slices
+    index: sets what index in the direction perpendicular to the slice that the slices is from.
+    grid : can be either both, major, or false to set grid lines at both major and minor tic marks, 
+           just major tic marks, or no grid at all.-->
+  <plane type="rt" index="0" grid="both">
+    <xaxis min="2.0e1" max="3.1e1" label="[$10^4$ km]" minortics="True">$2*sin($4)/1e10</xaxis>
+    <yaxis min="-3.0" max="3.0" label="[$10^4$ km]" minortics="True">$2*cos($4)/1e10</yaxis>
+    <scalor min="4e3" max="1e5" pallet="stellar" palletFocus="1e4" label="$T$ [K]">$15</scalor>
+    <vector color="k" xfrequency="5" yfrequency="1" scale="3" thickness="1.0">
+      <label xpos="0.15" ypos="0.9">$(\mathbf{u}-\mathbf{u}_0+\mathbf{v}$) \scale [km/s]</label>
+      <xposition>#2*sin(#4)/1e10</xposition>
+      <yposition>#2*cos(#4)/1e10</yposition>
+      <xcomponent>((#7-#8)*sin(#4)+#9*cos(#4))/1e5</xcomponent>
+      <ycomponent>((#7-#8)*cos(#4)-#9*sin(#4))/1e5</ycomponent>
+    </vector>
+  </plane>
+</figure>

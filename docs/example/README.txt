@@ -33,4 +33,11 @@ $ plot_profile.py plot_profile_output.xml
 This creates a number of plots of the structure similar to the one we made for 
 the starting model for all the model dumps of the simulation. We only calculate 
 10 minutes of simulation time so not much happens over the course of multiple 
-plots.
+plots. The output files are in the profiles_plots sub directory.
+
+$ plot_2DSlices.py plot_2DSlices.xml
+
+This creates a number of 2D plots showing the temperature of the model as well 
+as the convective velocity vectors. These plots can be combined into a nice 
+animation if desired using something like FFMPEG. The plots are created in the 
+2D_slices folder.

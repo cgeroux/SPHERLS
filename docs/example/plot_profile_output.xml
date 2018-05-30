@@ -23,7 +23,7 @@ OPTIONAL if created with SPHERLSanal with the -v option
              DlnPDlnT(76)           DlnPDlnRho(77)                 DEDT(78)
 -->
 <figure title="Radial Structure \time0 \index0"
-  outputfile="./output/profile_plots/model_structure.png" axisSpacing="0.05" figBottom="0.1" figTop="0.95" figWidth="10"
+  outputfile="./profile_plots/model_structure.png" axisSpacing="0.05" figBottom="0.1" figTop="0.95" figWidth="10"
   figHeight="8" dpi="300" outputFileStartIndex="0" inputFileFrequency="1">
   <!--attributes for figure
   
