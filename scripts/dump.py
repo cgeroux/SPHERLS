@@ -770,7 +770,7 @@ class Dump:
     """
     
     #get a rectangular version
-    variableToSlice=self.getRecVar(self.getVarID(var))
+    variableToSlice=self.getRectVar(self.getVarID(var))
     
     #set default shape options, if max's are Nones use full extent
     shape=variableToSlice.shape
