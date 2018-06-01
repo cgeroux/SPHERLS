@@ -60,6 +60,11 @@ OPTIONAL if created with SPHERLSanal with the -v option
       <plot ylabel="$\log_{10}(T)$ [K]" ymin="3.0" ymax="7.0" grid="both" legendloc="2">
         <curve style="-o" color="b">log10($50)</curve>
       </plot>
+      <plot ylabel="$\log_{10}(P)$ [dynes cm$^{-2}$]" grid="both" legendloc="2">
+        <curve style="-o" label="ave" color="b">log10($67)</curve>
+        <curve style="-o" label="max" color="r">log10($69)</curve>
+        <curve style="-o" label="min" color="g">log10($68)</curve>
+      </plot>
     </axis>
   </dataSet>
 </figure>

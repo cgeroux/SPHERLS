@@ -15,7 +15,8 @@ def parseOptions():
   #setup command line parser
   parser=op.OptionParser(usage="Usage: %prog [options] XMLFILE\n"
     +"       %prog [options] EOSFILE1 EOSFILE2"
-    ,version="%prog 1.0",description=r"Interpolates in a set of equation of state files. XMLFILE "
+    ,version="%prog 1.0",description=r"In the first form of invocation it "
+    +"interpolates in a set of equation of state files. XMLFILE "
     +"gives all the settings needed to create multiple eos files used in SPHERLS. For an example of"
     +" a configuration file see eos_interp_reference.xml under docs/templateXML. In the second"
     +" usage case it can be used to compare two equation of state files.")
@@ -1157,7 +1158,7 @@ class opacityTableManager:
         
         #if not absolute or relative add path assume it is in SPHERLS data path
         if fileName[0:2]!="./" and fileName[0:1]!="/":
-          fileName=paths.SPHERLSDATA+fileName
+          fileName=os.path.join(paths.SPHERLSDataPath,fileName)
         
         self.opacityFileNames[id]=fileName
       
@@ -1866,7 +1867,7 @@ class eosTableManager:
       
       #if not absolute or relative add path assume it is in SPHERLS data path
       if fileName[0:2]!="./" and fileName[0:1]!="/":
-        fileName=paths.SPHERLSDATA+fileName
+        fileName=os.path.join(paths.SPHERLSDataPath,fileName)
       self.eosTables.append(eosTable(fileName))
   def __cubicSplineInX(self,eosManagerInterpZ,X):
     """Interpolates a set of equations of state which are at the same Z to a particular X using
@@ -2121,7 +2122,7 @@ class interpTable:
       #plot final table for inspection
       if self.plot:
       
-        print "plotting final tables, logP, logE, and logK in that order ..."
+        print "plotting final tables, logE, logP, and logK in that order ..."
         self.eosTable.plotLogE()
         self.eosTable.plotLogP()
         self.opacityTable.plotLogK()
