@@ -7,10 +7,10 @@ In the above ".xml" file there are a number of equation of state and opacity
 files listed under the <eos> and <opacity> nodes. This don't often need to be 
 changed. More often what is changed are the elements under the 
 <interpolatedTables> element near the bottom of the file. Hear you can specify
-one ore more <table> elements which define new eos table files. These new
-tables contain equaiton-of-state at regular intervals in log_10 density and
+one or more <table> elements which define new eos table files. These new
+tables contain equation-of-state and opacity at regular intervals in log_10 density and
 log_10 temperature. You can specify the lower values for the temperature and
-density as well as the spacing and the number of entries in each varaiable.
+density as well as the spacing and the number of entries in each variable.
 You can also specify the composition in hydrogen and metal mass fractions, X and
 Z respectively. And also indicate if plots should be made to inspect the table
 after it is made. If the <plot> element is set to "True" it will present plots 
@@ -21,4 +21,4 @@ element is set to False it will fill in missing data in the tables represented b
 interpolated equation of state and opacity data rather than extrapolated data 
 set this to "True", which is the default value, and the "NaNs" will remain in
 the final tables and if a NaN is encountered during the calculation it will stop
-with a error saying a NaN was encountered.
+with an error saying a NaN was encountered.

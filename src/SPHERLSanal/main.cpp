@@ -683,7 +683,7 @@ int main(int argc, char *argv[]){
         #else
           std::stringstream ssTemp;
           ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-            <<": FFTW was disable during configuration, this option is not avaible "<<nOperation<<"\n";
+            <<": FFTW was disable during configuration, this option is not available "<<nOperation<<"\n";
           throw exception2(ssTemp.str(),SYNTAX);
         #endif
         break;
@@ -731,7 +731,7 @@ int main(int argc, char *argv[]){
         #else
           std::stringstream ssTemp;
           ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__
-            <<": FFTW was disable during configuration, this option is not avaible "<<nOperation<<"\n";
+            <<": FFTW was disable during configuration, this option is not available "<<nOperation<<"\n";
           throw exception2(ssTemp.str(),SYNTAX);
         #endif
         break;
