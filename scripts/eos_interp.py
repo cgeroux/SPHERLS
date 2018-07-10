@@ -235,6 +235,8 @@ class eosTable:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logE,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_xlabel("log10(E)")
       l=logDIndexList[0]
       h=logDIndexList[0]+1
       print self.logD[l:h,0]
@@ -275,6 +277,8 @@ class eosTable:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logP,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_xlabel("log10(P)")
       l=logDIndexList[0]
       h=logDIndexList[0]+1
       print self.logD[l:h,0]
@@ -676,13 +680,14 @@ class opacityTable:
           ax.plot_wireframe(otherTable.logR,otherTable.logT,otherTable.logK,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_xlabel("log10(K)")
       l=logRIndex[0]
       h=logRIndex[0]+1
       print self.logR[0][0]
       print self.logR[0,l:h]
       ax.plot(self.logT[:,l:h][0],self.logK[:,l:h][0], "bo-")
       counter=1
-      ax.set_xlabel("log10(T)")
       if otherTables:
         for otherTable in otherTables:
           l=logRIndex[counter]
@@ -2243,9 +2248,11 @@ class interpTable:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logE,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_ylabel("log10(E)")
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print self.sFileName," logD=",self.logD[l:h,0]
+      print self.sFileName,":blue, logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
         temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logE[l:h,:]), "b-")
       else:
@@ -2257,7 +2264,7 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName,":green, logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
             temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logE[l:h,:]), "g-")
           else:
@@ -2310,9 +2317,11 @@ class interpTable:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logP,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_ylabel("log10(P)")
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print self.sFileName," logD=",self.logD[l:h,0]
+      print self.sFileName,":blue, logD=",self.logD[l:h,0]
       if logDRangeList[0]>1:
         temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logP[l:h,:]), "b-")
       else:
@@ -2324,7 +2333,7 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print otherTable.sFileName," logD=",otherTable.logD[l:h,0]
+          print otherTable.sFileName,":green, logD=",otherTable.logD[l:h,0]
           if logDRangeList[counter]>1:
             temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logP[l:h,:]), "g-")
           else:
@@ -2373,9 +2382,11 @@ class interpTable:
           ax.plot_wireframe(otherTable.logD,otherTable.logT,otherTable.logK,color="green")
     else:
       ax=fig.add_subplot(111)
+      ax.set_xlabel("log10(T)")
+      ax.set_ylabel("log10(K)")
       l=logDIndexList[0]
       h=logDIndexList[0]+logDRangeList[0]
-      print self.sFileName," logD=",self.logD[l:h,0],logDRangeList[0],l,h
+      print self.sFileName,":blue, logD=",self.logD[l:h,0],logDRangeList[0],l,h
       if logDRangeList[0]>1:
         #fig.suptitle("logD=",str(self.logD[l:h,0]))
         temp=ax.plot(np.transpose(self.logT[l:h,:]),np.transpose(self.logK[l:h,:]), "b-")
@@ -2388,7 +2399,7 @@ class interpTable:
         for otherTable in otherTables:
           l=logDIndexList[counter]
           h=logDIndexList[counter]+logDRangeList[counter]
-          print otherTable.sFileName," logD=",otherTable.logD[l:h,0],logDRangeList[counter],l,h
+          print otherTable.sFileName,":green, logD=",otherTable.logD[l:h,0],logDRangeList[counter],l,h
           if logDRangeList[counter]>1:
             temp=ax.plot(np.transpose(otherTable.logT[l:h,:]),np.transpose(otherTable.logK[l:h,:]), "g-",)
           else:
