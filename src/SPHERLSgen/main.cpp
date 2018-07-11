@@ -1122,7 +1122,7 @@ void calculateShell_TEOS(unsigned int nShell){
   vecdRho.push_back(dRho);
   
   //Check that dT and dRho are OK
-  if(isnan(dT) || dT<0.0){
+  if(isnan(dT) || dT<=0.0){
     std::cout<<"temperature became nan or less than zero in shell "<<nShell<<std::endl;
     vecdR.push_back(std::numeric_limits<float>::quiet_NaN());
     vecdP.push_back(std::numeric_limits<float>::quiet_NaN());
@@ -1133,7 +1133,7 @@ void calculateShell_TEOS(unsigned int nShell){
     writeModelToScreen_TEOS();
     exit(EXIT_FAILURE);
   }
-  if(isnan(dRho)||dRho<0.0){
+  if(isnan(dRho)||dRho<=0.0){
     std::cout<<"density became nan or less than zero in shell "<<nShell<<std::endl;
     vecdR.push_back(std::numeric_limits<float>::quiet_NaN());
     vecdP.push_back(std::numeric_limits<float>::quiet_NaN());
@@ -1185,8 +1185,26 @@ void calculateShell_TEOS(unsigned int nShell){
   }
   
   //radius at (nShell+1/2)
-  vecdR.push_back(pow(3.0/(4.0*dPi)*vecdMDel[nShell]/vecdRho[nShell]+pow(vecdR[nShell],3.0)
-    ,0.33333333333333333333333333333333));
+  double dTemp=3.0/(4.0*dPi)*vecdMDel[nShell]/vecdRho[nShell]+pow(vecdR[nShell],3.0);
+  if(dTemp<0.0){
+    vecdR.push_back(std::numeric_limits<float>::quiet_NaN());//set radius to a nan
+    makeVelocityDist();//since writes velocity also to screen
+    writeModelToScreen_TEOS();
+    
+    //throw exception
+    std::stringstream ssTemp;
+    ssTemp<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl
+      <<"  vecdMDel["<<nShell<<"]="<<vecdMDel[nShell]<<std::endl
+      <<"  vecdRho["<<nShell<<"]="<<vecdRho[nShell]<<std::endl
+      <<"  vecdR["<<nShell<<"]="<<vecdR[nShell]<<std::endl
+      <<"  combine to create an inner radius of the shell <0.0, e.g. past the center of the star"<<std::endl
+      <<"  using equation r_im1=(3/4/pi*vecdMDel/vecdRho+vecR^3)^(1/3)"<<std::endl
+      <<"  take steps to decrease the magnitude of vecdMDel (e.g. use finner radial zoning)."<<std::endl;
+    throw exception2(ssTemp.str(),CALCULATION);
+  }
+  vecdR.push_back(pow(dTemp,0.33333333333333333333333333333333));
+  
+  
 }
 void calculateShell_GL(unsigned int nShell){
   
