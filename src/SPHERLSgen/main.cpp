@@ -939,7 +939,7 @@ void calculateFirstShell_TEOS(){
   }
   if (nIteration>nNumIters){
     std::cout<<"maximum number of iterations("<<nNumIters<<") exceeded with error of ="
-      <<dError<<std::endl;
+      <<dError<<" in shell 0"<<std::endl;
   }
   vecdRho.push_back(dRho);
   
@@ -1112,7 +1112,7 @@ void calculateShell_TEOS(unsigned int nShell){
   }
   if (nIteration>nNumIters){
     std::cout<<"maximum number of iterations("<<nNumIters<<") exceeded with density error ="
-      <<dRhoError<<" and temperature error ="<<dTError<<std::endl;
+      <<dRhoError<<" and temperature error ="<<dTError<<" in shell "<<nShell<<std::endl;
   }
   
   //temperature at (nShell)
@@ -1120,6 +1120,30 @@ void calculateShell_TEOS(unsigned int nShell){
   
   //density at (nShell)
   vecdRho.push_back(dRho);
+  
+  //Check that dT and dRho are OK
+  if(isnan(dT) || dT<0.0){
+    std::cout<<"temperature became nan or less than zero in shell "<<nShell<<std::endl;
+    vecdR.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdP.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdE.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdKappa.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdM.push_back(std::numeric_limits<float>::quiet_NaN());
+    makeVelocityDist();//since writes velocity also to screen
+    writeModelToScreen_TEOS();
+    exit(EXIT_FAILURE);
+  }
+  if(isnan(dRho)||dRho<0.0){
+    std::cout<<"density became nan or less than zero in shell "<<nShell<<std::endl;
+    vecdR.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdP.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdE.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdKappa.push_back(std::numeric_limits<float>::quiet_NaN());
+    vecdM.push_back(std::numeric_limits<float>::quiet_NaN());
+    makeVelocityDist();//since writes velocity also to screen
+    writeModelToScreen_TEOS();
+    exit(EXIT_FAILURE);
+  }
   
   //get P, E, and Kappa
   double dP;
@@ -4218,7 +4242,7 @@ void writeModelToScreen_TEOS(){
     <<std::setw(nWidth)<<"u"<<std::endl;
   std::cout.setf(std::ios::scientific);
   std::cout.precision(nPrecision);
-  for(unsigned int i=0;i<vecdP.size();i++){
+  for(unsigned int i=0;i<vecdRho.size();i++){
     std::cout<<std::setw(3)<<i
       <<std::setw(nWidth)<<vecdM[i]
       <<std::setw(nWidth)<<vecdMDel[i]
