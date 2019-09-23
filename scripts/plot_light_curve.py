@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import disect_filename
 def addParserOptions(parser):
+  
   parser.add_option("-o","--outputFile",dest="outputFile",default="out"
     ,help="Specifies the OUTPUTFILE. [default: %default]"
     ,metavar="OUTPUTFILE", type="string")
@@ -27,18 +28,22 @@ def addParserOptions(parser):
     +"to be plotted. [default: %default]")
   parser.add_option("--no-grid",action="store_true",dest="noGrid"
     ,help="Turns off grid [default].",default=False)
-  parser.add_option("-k","--keep",action="store_true",dest="keep"
-    ,help="Keeps distributed binary files [default].",default=True)
-  parser.add_option("-r","--remove",action="store_false",dest="keep"
-    ,help="Removes distributed binary files")
-  parser.add_option("-m","--remake",action="store_true",dest="remake"
-    ,help="Will remake profiles if they already exist. [not default].",default=False)
-  parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
-    ,help="Will remake binaries even if they already exist. [not default].",default=False)
   parser.add_option("--points",action="store_true",dest="points",help="If set, will use points when"
     +" plotting in addition to lines [default: %default]",default=False)
   parser.add_option("--no-lines",action="store_true",dest="noLines",help="If set, will not use "
     +"lines when plotting, and only points [default: %default]",default=False)
+  
+  make_profiles.addParserOptions(parser)
+  
+  #parser.add_option("-k","--keep",action="store_true",dest="keep"
+  #  ,help="Keeps distributed binary files [default].",default=True)
+  #parser.add_option("-r","--remove",action="store_false",dest="keep"
+  #  ,help="Removes distributed binary files")
+  #parser.add_option("-m","--remake",action="store_true",dest="remake"
+  #  ,help="Will remake profiles if they already exist. [not default].",default=False)
+  #parser.add_option("--remake-bins",action="store_true",dest="remakeBins"
+  #  ,help="Will remake binaries even if they already exist. [not default].",default=False)
+
 def parseOptions():
   #setup command line parser
   parser=op.OptionParser(usage="Usage: %prog [options] BASEFILENAME[START-END]"
@@ -64,7 +69,14 @@ def main():
   [start,end,baseFileName]=disect_filename.disectFileName(fileName)
   
   #make sure that all the combined binary files have profiles made
-  make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins)
+  #make_profiles.make_profiles(options.keep,fileName,options.remake,options.remakeBins)
+  #create profile files, and save list of files
+  failedFiles=make_profiles.make_fileSet(args[0],options)
+  
+  if __name__=="__main__":#keeps from redundantly reporting errors
+    #report profiles failed files
+    for file in failedFiles:
+      print file
   
   #get and sort files
   extension="_pro"+".txt"
