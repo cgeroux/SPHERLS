@@ -276,6 +276,38 @@ class Dump:
     
     #make a list for future variables
     self.vars=[]
+  def _writeHeaderBinary(self):
+    """Writes a header to a binary file, after the type has been written out
+    """
+    
+    self.f.write(struct.pack('i',self.version))#file version integer
+    self.f.write(struct.pack('d',self.time))#time
+    self.f.write(struct.pack('i',self.timeStepIndex))#time step index
+    self.f.write(struct.pack('d',self.delta_t_nm1half))#time step nm1half
+    self.f.write(struct.pack('d',self.delta_t_np1half))#time step np1half
+    self.f.write(struct.pack('d',self.alpha))#alpha
+    self.f.write(struct.pack('i',self.eosStringLen))#size of equation of state string
+    if self.eosStringLen>0:
+      for i in range(self.eosStringLen):
+        self.f.write(struct.pack('c',self.eosString[i]))
+    else:
+      self.f.write(struct.pack('d',self.gamma))
+    self.f.write(struct.pack('d',self.av))
+    self.f.write(struct.pack('d',self.avthreshold))
+    self.f.write(struct.pack('i',self.globalDims[0]))
+    self.f.write(struct.pack('i',self.globalDims[1]))
+    self.f.write(struct.pack('i',self.globalDims[2]))
+    self.f.write(struct.pack('i',self.boundaryConditions[0]))
+    self.f.write(struct.pack('i',self.boundaryConditions[1]))
+    self.f.write(struct.pack('i',self.boundaryConditions[2]))
+    self.f.write(struct.pack('i',self.num1DZones))
+    self.f.write(struct.pack('i',self.numGhostCells))
+    self.f.write(struct.pack('i',self.numVars))
+    for i in range(self.numVars):
+       self.f.write(struct.pack('i',self.varInfo[i][0]))
+       self.f.write(struct.pack('i',self.varInfo[i][1]))
+       self.f.write(struct.pack('i',self.varInfo[i][2]))
+       self.f.write(struct.pack('i',self.varInfo[i][3]))
   def _readHeaderAscii(self,eosFile=None):
     """Reads a header from a ascii file, after the type has been read in.
     
@@ -398,6 +430,46 @@ class Dump:
         tmpj.append(tmpk)
       varTmp.append(tmpj)
     self.vars.append(varTmp)
+  def _writeBinaryVar(self,var):
+    """Write a variable to a binary dump file.
+    
+    Must be called in order with var increasing from 0 to self.numVars.
+    
+    Arguments:
+    var: variable to write, it is an integer index ranging from 0 to self.numVars
+    """
+    
+    #write out 1D part
+    #set ghost cells based on which directions the variable is defined in
+    ghostCellsInX0=1
+    if self.varInfo[var][0]==-1:
+      ghostCellsInX0=0
+    ghostCellsInX1=1
+    if self.varInfo[var][1]==-1:
+      ghostCellsInX1=0
+    ghostCellsInX2=1
+    if self.varInfo[var][2]==-1:
+      ghostCellsInX2=0
+    
+    #write 1D part
+    sizeX01=ghostCellsInX0*(self.num1DZones+self.numGhostCells)
+    if self.varInfo[var][0]==1 and self.boundaryConditions[0]==0:
+      sizeX01=ghostCellsInX0*(self.num1DZones+self.numGhostCells+1)
+    sizeX1=1
+    sizeX2=1
+    for i in range(sizeX01):
+      for j in range(sizeX1):
+        for k in range(sizeX2):
+          self.f.write(struct.pack('d',self.vars[var][i][j][k]))
+    
+    #write multi-D part
+    sizeX02=self.varSize[var][0]+ghostCellsInX0*2*self.numGhostCells
+    sizeX1=self.varSize[var][1]+ghostCellsInX1*2*self.numGhostCells
+    sizeX2=self.varSize[var][2]+ghostCellsInX2*2*self.numGhostCells
+    for i in range(sizeX01,sizeX02):
+      for j in range(sizeX1):
+        for k in range(sizeX2):
+          self.f.write(struct.pack('d',self.vars[var][i][j][k]))
   def _readAsciiVar(self,var):
     """Read in a variable from an ascii dump file.
     
@@ -576,6 +648,13 @@ class Dump:
       self.globalDims[0]+includeGhostR*(2*self.numGhostCells+1)
       ,self.globalDims[1]+includeGhostTheta*(2*self.numGhostCells+1)
       ,self.globalDims[2]+includeGhostPhi*(2*self.numGhostCells)+1)
+  def writeHeader(self):
+    
+    self.f.write(struct.pack('c',self.type))#file type, either a or b
+    if self.type=='b':
+      self._writeHeaderBinary()
+    else:
+      self._writeHeaderAscii()
   def read(self,fileName,eosFile=None):
     """Reads in a combined dump file and puts the variables into the vars list
     
@@ -596,6 +675,17 @@ class Dump:
     self._setVarIDs()#set variable names/id
     self.setRectVars()#create rectangular variables
     self._adjustForPeriodBC()#adjust interface variables effected by periodic BC
+  def write(self,fileName):
+    self.fileName=fileName
+    self.f=open(fileName,'wb')
+    self.writeHeader()
+    if self.type=='b':
+      for i in range(self.numVars):
+        self._writeBinaryVar(i)
+    elif self.type=='a':
+      for i in range(self.numVars):
+        self._writeAsciiVar(i)
+    
   def printHeader(self,out):
     """Writes the header of a binary dump file to out.
     
@@ -1681,8 +1771,9 @@ def main():
   
   
   #test out some simple uses for this class
-  #print "reading a dump file ..."
-  #dumpFile1=Dump(args[0])
+  print "reading a dump file ..."
+  dumpFile1=Dump(args[0])
+  dumpFile1.write("./3DNARef_out_t00172497")
   
   #print "printing the header ..."
   #dumpFile1.printHeader(sys.stdout)

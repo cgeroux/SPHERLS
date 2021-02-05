@@ -1,4 +1,4 @@
-AC_INIT([SPHERLS], [1.0.0], [chris.m.geroux@gmail.com])
+AC_INIT([SPHERLS], [1.0.1], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/SPHERLS/physEquations.cpp])#safty check to make sure src directory is what it should be
 AC_PROG_CXX
