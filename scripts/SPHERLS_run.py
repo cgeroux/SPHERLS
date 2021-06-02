@@ -25,88 +25,91 @@ def parseXML(fileName):
   
   #get job element
   jobElement=root.find("job")
+  settings["runInQueue"]=True
   if jobElement==None:
-    print "No \"job\" element found under \"data\" node in file \""+fileName+"\", quiting!"
-    quit()
+    print "WARNING: No \"job\" element found under \"data\" node in file \""+fileName+"\", running directly and not submitting to the queue!"
+    settings["runInQueue"]=False
   
   #get procDims element
   procDimsElement=root.find("procDims")
   if procDimsElement==None:
-    print "No \"procDims\" element found under \"data\" node in file \""+fileName+"\", quiting!"
+    print "No \"procDims\" element found under \"data\" node in file \""+fileName+"\", quitting!"
     quit()
   
   #get x0 element
   x0Element=procDimsElement.find("x0")
   if x0Element==None:
-    print "No \"x0\" element found under \"procDims\" node in file \""+fileName+"\", quiting!"
+    print "No \"x0\" element found under \"procDims\" node in file \""+fileName+"\", quitting!"
     quit()
   try:
     x0=int(x0Element.text)
   except ValueERror:
-    print "\"x0\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quiting!"
+    print "\"x0\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quitting!"
     quit()
   
   #get x1 element
   x1Element=procDimsElement.find("x1")
   if x1Element==None:
-    print "No \"x1\" element found under \"procDims\" node in file \""+fileName+"\", quiting!"
+    print "No \"x1\" element found under \"procDims\" node in file \""+fileName+"\", quitting!"
     quit()
   try:
     x1=int(x1Element.text)
   except ValueERror:
-    print "\"x1\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quiting!"
+    print "\"x1\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quitting!"
     quit()
   
   #get x2 element
   x2Element=procDimsElement.find("x2")
   if x2Element==None:
-    print "No \"x2\" element found under \"procDims\" node in file \""+fileName+"\", quiting!"
+    print "No \"x2\" element found under \"procDims\" node in file \""+fileName+"\", quitting!"
     quit()
   try:
     x2=int(x2Element.text)
   except ValueERror:
-    print "\"x2\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quiting!"
+    print "\"x2\" element found under \"procDims\" node in file \""+fileName+"\" is not an integer, quitting!"
     quit()
-  settings['numProcs']=str(x0*x1*x2)
+  settings['numProcs']=str((x0-1)*x1*x2+1)
   
-  #get cmd
-  cmdElement=jobElement.find("cmd")
-  if cmdElement==None:
-    settings['cmd']=None
-  else:
-    settings['cmd']=cmdElement.text
-  
-  #get template-file
-  templateFileElement=jobElement.find("template-file")
-  if templateFileElement==None:
-    settings['templateFile']=None
-  else:
-    if templateFileElement.text=="":
-      print "\"template-file\" element is empty. Must provide a file name and path to use as a template job script file."
-      quit()
-    settings['templateFile']=templateFileElement.text
-  
-  #get generated-file
-  generatedFileElement=jobElement.find("generated-file")
-  if generatedFileElement==None:
-    settings['generatedFile']=None
-  else:
-    if generatedFileElement.text=="" or generatedFileElement.text==None:
-      print "\"generated-file\" element is empty. Must provide a file name and path to use as a template job script file."
-      quit()
-    settings['generatedFile']=generatedFileElement.text
-  
-  #get string replacements
-  replacementsElement=jobElement.find("replacements")
-  settings['replacements']=[('NUMPROCS',str(settings['numProcs']))]
-  if replacementsElement!=None:
-    replacementElements=replacementsElement.findall("replacement")
-    for replacementElement in replacementElements:
-      searchStr=replacementElement.find("search-str").text
-      if searchStr=="" or searchStr==None:
-        print "found empty \"search-str\" element but this element may not be empty"
+  if jobElement!=None:
+    
+    #get cmd
+    cmdElement=jobElement.find("cmd")
+    if cmdElement==None:
+      settings['cmd']=None
+    else:
+      settings['cmd']=cmdElement.text
+    
+    #get template-file
+    templateFileElement=jobElement.find("template-file")
+    if templateFileElement==None:
+      settings['templateFile']=None
+    else:
+      if templateFileElement.text=="":
+        print "\"template-file\" element is empty. Must provide a file name and path to use as a template job script file."
         quit()
-      sub=replacementElement.find("substitution").text
+      settings['templateFile']=templateFileElement.text
+    
+    #get generated-file
+    generatedFileElement=jobElement.find("generated-file")
+    if generatedFileElement==None:
+      settings['generatedFile']=None
+    else:
+      if generatedFileElement.text=="" or generatedFileElement.text==None:
+        print "\"generated-file\" element is empty. Must provide a file name and path to use as a template job script file."
+        quit()
+      settings['generatedFile']=generatedFileElement.text
+    
+    #get string replacements
+    replacementsElement=jobElement.find("replacements")
+    settings['replacements']=[('NUMPROCS',str(settings['numProcs']))]
+    if replacementsElement!=None:
+      replacementElements=replacementsElement.findall("replacement")
+      for replacementElement in replacementElements:
+        searchStr=replacementElement.find("search-str").text
+        if searchStr=="" or searchStr==None:
+          print "found empty \"search-str\" element but this element may not be empty"
+          quit()
+        sub=replacementElement.find("substitution").text
       settings['replacements'].append((searchStr,sub))
   
   return settings
@@ -137,13 +140,20 @@ def main():
   (options,args)=parser.parse_args()
   
   settings=parseXML("SPHERLS.xml")
-  makeSubScript(settings)
   
-  #additional hard coded settings
-  cmd=settings["cmd"]+" "+settings["generatedFile"]
-  if options.dryRun:
-    print cmd
+  if settings["runInQueue"]:
+    
+    makeSubScript(settings)
+    
+    #additional hard coded settings
+    cmd=settings["cmd"]+" "+settings["generatedFile"]
+    if options.dryRun:
+      print cmd
+    else:
+      os.system(cmd)
   else:
+    cmd="mpirun -np "+str(settings['numProcs'])+" SPHERLS"
+    print(cmd)
     os.system(cmd)
 if __name__ == "__main__":
   main()

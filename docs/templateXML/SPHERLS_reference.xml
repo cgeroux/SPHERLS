@@ -1,13 +1,22 @@
 <data>
   <job>
-    <name>Test</name><!-- name of the job -->
-    <duration>35:00:00</duration><!-- time for job to run in the queue -->
-    <totalview>False</totalview><!-- if true will launch without the queue, with the debug option -->
-    <queue>False</queue><!-- if "true" or "main" it will run the job in main queue, if it is test it will 
-      run in the test queue if it isn't given, or is something else it will run at the command line -->
-    <parallel-environment>ompi*</parallel-environment><!--what environment should the job be run in
-      using mpirun, check with your system admin for ideas about what this should be. ompi* works on
-      ace-net machines, while openmpi works on lachesis-->
+    <cmd>sbatch</cmd><!-- command to use to submit the job to the cluster job schedular -->
+    <template-file>./slurm_job_script_template.sh</template-file><!--path to a file to use a template for creating a job script-->
+    <generated-file>job_script.sh</generated-file><!--name for the generated job script-->
+    <replacements><!--a set of string replacements to do on the template job script to generate the final job script-->
+      <replacement>
+        <search-str>MEMPERCPU</search-str>
+        <substitution>2GB</substitution>
+      </replacement>
+      <replacement>
+        <search-str>RUNTIME</search-str>
+        <substitution>00:10:00</substitution>
+      </replacement>
+      <replacement>
+        <search-str>ACCOUNT</search-str>
+        <substitution>def-cgeroux</substitution>
+      </replacement>
+    </replacements>
   </job>
   <procDims><!-- product of these should be the number of processors specified in submit script
     + 1 -->
