@@ -81,11 +81,33 @@ manuals_DATA=\
   docs/manuals/SPHERLS_User_Guide.pdf
 EXTRA_DIST+=${manuals_DATA}
 
-
 #template xml files
 templatexmldir=${docsdir}/templateXML
 templatexml_DATA=docs/templateXML/*.xml
 EXTRA_DIST+=${templatexml_DATA}
+
+#examples
+examplesdir=${docsdir}/examples
+createaneosdir=${examplesdir}/create_an_eos
+createaneos_DATA=\
+  eosNewY25Z01.xml\
+  README.txt
+EXTRA_DIST+=${createaneos_DATA}
+
+runningdir=${examplesdir}/running
+running2dslicesdir=${examplerunningdir}/2D_slices
+runningoutputdir=${examplerunningdir}/output
+runningprofileplotsdir=${examplerunningdir}/profile_plots
+running_DATA=\
+  README.txt\
+  SPHERLS.xml\
+  SPHERLSgen.xml\
+  SPHERLSgen_first_try.xml\
+  plot_2DSlices.xml\
+  plot_profile_output.xml\
+  slurm_job_script_template.sh\
+  starting_model_structure_first_try.pdf
+EXTRA_DIST+=${running_DATA}
 
 #scripts
 EXTRA_DIST+=scripts/*.py

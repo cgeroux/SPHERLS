@@ -129,11 +129,12 @@ CONFIG_CLEAN_FILES = src/pythonextensions/hdf/setup.py
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(AFOPACITYGN93dir)" "$(DESTDIR)$(GN93hzdir)" \
-	"$(DESTDIR)$(atmospheresdir)" "$(DESTDIR)$(energyprodir)" \
-	"$(DESTDIR)$(eosdir)" "$(DESTDIR)$(evtkdir)" \
-	"$(DESTDIR)$(evtkexampledir)" "$(DESTDIR)$(manualsdir)" \
-	"$(DESTDIR)$(opaleos2005dir)" "$(DESTDIR)$(refcalcs1DNAdir)" \
-	"$(DESTDIR)$(refcalcs2DNAdir)" "$(DESTDIR)$(refcalcs3DNAdir)" \
+	"$(DESTDIR)$(atmospheresdir)" "$(DESTDIR)$(createaneosdir)" \
+	"$(DESTDIR)$(energyprodir)" "$(DESTDIR)$(eosdir)" \
+	"$(DESTDIR)$(evtkdir)" "$(DESTDIR)$(evtkexampledir)" \
+	"$(DESTDIR)$(manualsdir)" "$(DESTDIR)$(opaleos2005dir)" \
+	"$(DESTDIR)$(refcalcs1DNAdir)" "$(DESTDIR)$(refcalcs2DNAdir)" \
+	"$(DESTDIR)$(refcalcs3DNAdir)" "$(DESTDIR)$(runningdir)" \
 	"$(DESTDIR)$(templatexmldir)" "$(DESTDIR)$(velocityprodir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -269,10 +270,10 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 DATA = $(AFOPACITYGN93_DATA) $(GN93hz_DATA) $(atmospheres_DATA) \
-	$(energypro_DATA) $(eos_DATA) $(evtk_DATA) $(evtkexample_DATA) \
-	$(manuals_DATA) $(opaleos2005_DATA) $(refcalcs1DNA_DATA) \
-	$(refcalcs2DNA_DATA) $(refcalcs3DNA_DATA) $(templatexml_DATA) \
-	$(velocitypro_DATA)
+	$(createaneos_DATA) $(energypro_DATA) $(eos_DATA) $(evtk_DATA) \
+	$(evtkexample_DATA) $(manuals_DATA) $(opaleos2005_DATA) \
+	$(refcalcs1DNA_DATA) $(refcalcs2DNA_DATA) $(refcalcs3DNA_DATA) \
+	$(running_DATA) $(templatexml_DATA) $(velocitypro_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
@@ -436,7 +437,8 @@ EXTRA_DIST = ${atmospheres_DATA} ${energypro_DATA} ${opaleos2005_DATA} \
 	${GN93hz_DATA} ${AFOPACITYGN93_DATA} ${eos_DATA} \
 	${refcalcs1DNA_DATA} ${refcalcs2DNA_DATA} ${refcalcs3DNA_DATA} \
 	${velocitypro_DATA} ${manuals_DATA} ${templatexml_DATA} \
-	scripts/*.py src/pythonextensions/hdf/hdfmodule.cpp \
+	${createaneos_DATA} ${running_DATA} scripts/*.py \
+	src/pythonextensions/hdf/hdfmodule.cpp \
 	src/pythonextensions/hdf/setup.py.in \
 	src/pythonextensions/eos/eos.pyx \
 	src/pythonextensions/eos/setup.py $(am__append_1) \
@@ -507,6 +509,28 @@ manuals_DATA = \
 #template xml files
 templatexmldir = ${docsdir}/templateXML
 templatexml_DATA = docs/templateXML/*.xml
+
+#examples
+examplesdir = ${docsdir}/examples
+createaneosdir = ${examplesdir}/create_an_eos
+createaneos_DATA = \
+  eosNewY25Z01.xml\
+  README.txt
+
+runningdir = ${examplesdir}/running
+running2dslicesdir = ${examplerunningdir}/2D_slices
+runningoutputdir = ${examplerunningdir}/output
+runningprofileplotsdir = ${examplerunningdir}/profile_plots
+running_DATA = \
+  README.txt\
+  SPHERLS.xml\
+  SPHERLSgen.xml\
+  SPHERLSgen_first_try.xml\
+  plot_2DSlices.xml\
+  plot_profile_output.xml\
+  slurm_job_script_template.sh\
+  starting_model_structure_first_try.pdf
+
 
 ###############################################################################
 # BINS + SOURCE ###############################################################
@@ -1251,6 +1275,27 @@ uninstall-atmospheresDATA:
 	@list='$(atmospheres_DATA)'; test -n "$(atmospheresdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(atmospheresdir)'; $(am__uninstall_files_from_dir)
+install-createaneosDATA: $(createaneos_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(createaneos_DATA)'; test -n "$(createaneosdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(createaneosdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(createaneosdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(createaneosdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(createaneosdir)" || exit $$?; \
+	done
+
+uninstall-createaneosDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(createaneos_DATA)'; test -n "$(createaneosdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(createaneosdir)'; $(am__uninstall_files_from_dir)
 install-energyproDATA: $(energypro_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(energypro_DATA)'; test -n "$(energyprodir)" || list=; \
@@ -1440,6 +1485,27 @@ uninstall-refcalcs3DNADATA:
 	@list='$(refcalcs3DNA_DATA)'; test -n "$(refcalcs3DNAdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(refcalcs3DNAdir)'; $(am__uninstall_files_from_dir)
+install-runningDATA: $(running_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(running_DATA)'; test -n "$(runningdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(runningdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(runningdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(runningdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(runningdir)" || exit $$?; \
+	done
+
+uninstall-runningDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(running_DATA)'; test -n "$(runningdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(runningdir)'; $(am__uninstall_files_from_dir)
 install-templatexmlDATA: $(templatexml_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(templatexml_DATA)'; test -n "$(templatexmldir)" || list=; \
@@ -1713,7 +1779,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(AFOPACITYGN93dir)" "$(DESTDIR)$(GN93hzdir)" "$(DESTDIR)$(atmospheresdir)" "$(DESTDIR)$(energyprodir)" "$(DESTDIR)$(eosdir)" "$(DESTDIR)$(evtkdir)" "$(DESTDIR)$(evtkexampledir)" "$(DESTDIR)$(manualsdir)" "$(DESTDIR)$(opaleos2005dir)" "$(DESTDIR)$(refcalcs1DNAdir)" "$(DESTDIR)$(refcalcs2DNAdir)" "$(DESTDIR)$(refcalcs3DNAdir)" "$(DESTDIR)$(templatexmldir)" "$(DESTDIR)$(velocityprodir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(AFOPACITYGN93dir)" "$(DESTDIR)$(GN93hzdir)" "$(DESTDIR)$(atmospheresdir)" "$(DESTDIR)$(createaneosdir)" "$(DESTDIR)$(energyprodir)" "$(DESTDIR)$(eosdir)" "$(DESTDIR)$(evtkdir)" "$(DESTDIR)$(evtkexampledir)" "$(DESTDIR)$(manualsdir)" "$(DESTDIR)$(opaleos2005dir)" "$(DESTDIR)$(refcalcs1DNAdir)" "$(DESTDIR)$(refcalcs2DNAdir)" "$(DESTDIR)$(refcalcs3DNAdir)" "$(DESTDIR)$(runningdir)" "$(DESTDIR)$(templatexmldir)" "$(DESTDIR)$(velocityprodir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -1803,11 +1869,13 @@ info: info-am
 info-am:
 
 install-data-am: install-AFOPACITYGN93DATA install-GN93hzDATA \
-	install-atmospheresDATA install-energyproDATA install-eosDATA \
-	install-evtkDATA install-evtkexampleDATA install-manualsDATA \
+	install-atmospheresDATA install-createaneosDATA \
+	install-energyproDATA install-eosDATA install-evtkDATA \
+	install-evtkexampleDATA install-manualsDATA \
 	install-opaleos2005DATA install-refcalcs1DNADATA \
 	install-refcalcs2DNADATA install-refcalcs3DNADATA \
-	install-templatexmlDATA install-velocityproDATA
+	install-runningDATA install-templatexmlDATA \
+	install-velocityproDATA
 
 install-dvi: install-dvi-am
 
@@ -1877,11 +1945,12 @@ ps-am:
 
 uninstall-am: uninstall-AFOPACITYGN93DATA uninstall-GN93hzDATA \
 	uninstall-atmospheresDATA uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-energyproDATA uninstall-eosDATA \
-	uninstall-evtkDATA uninstall-evtkexampleDATA \
-	uninstall-manualsDATA uninstall-opaleos2005DATA \
-	uninstall-refcalcs1DNADATA uninstall-refcalcs2DNADATA \
-	uninstall-refcalcs3DNADATA uninstall-templatexmlDATA \
+	uninstall-binSCRIPTS uninstall-createaneosDATA \
+	uninstall-energyproDATA uninstall-eosDATA uninstall-evtkDATA \
+	uninstall-evtkexampleDATA uninstall-manualsDATA \
+	uninstall-opaleos2005DATA uninstall-refcalcs1DNADATA \
+	uninstall-refcalcs2DNADATA uninstall-refcalcs3DNADATA \
+	uninstall-runningDATA uninstall-templatexmlDATA \
 	uninstall-velocityproDATA
 
 .MAKE: all check install install-am install-strip
@@ -1895,25 +1964,27 @@ uninstall-am: uninstall-AFOPACITYGN93DATA uninstall-GN93hzDATA \
 	distdir distuninstallcheck dvi dvi-am html html-am info \
 	info-am install install-AFOPACITYGN93DATA install-GN93hzDATA \
 	install-am install-atmospheresDATA install-binPROGRAMS \
-	install-binSCRIPTS install-data install-data-am install-dvi \
-	install-dvi-am install-energyproDATA install-eosDATA \
-	install-evtkDATA install-evtkexampleDATA install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-manualsDATA \
-	install-opaleos2005DATA install-pdf install-pdf-am install-ps \
-	install-ps-am install-refcalcs1DNADATA \
-	install-refcalcs2DNADATA install-refcalcs3DNADATA \
-	install-strip install-templatexmlDATA install-velocityproDATA \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install-binSCRIPTS install-createaneosDATA install-data \
+	install-data-am install-dvi install-dvi-am \
+	install-energyproDATA install-eosDATA install-evtkDATA \
+	install-evtkexampleDATA install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-manualsDATA install-opaleos2005DATA \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-refcalcs1DNADATA install-refcalcs2DNADATA \
+	install-refcalcs3DNADATA install-runningDATA install-strip \
+	install-templatexmlDATA install-velocityproDATA installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-AFOPACITYGN93DATA uninstall-GN93hzDATA uninstall-am \
 	uninstall-atmospheresDATA uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-energyproDATA uninstall-eosDATA \
-	uninstall-evtkDATA uninstall-evtkexampleDATA \
-	uninstall-manualsDATA uninstall-opaleos2005DATA \
-	uninstall-refcalcs1DNADATA uninstall-refcalcs2DNADATA \
-	uninstall-refcalcs3DNADATA uninstall-templatexmlDATA \
+	uninstall-binSCRIPTS uninstall-createaneosDATA \
+	uninstall-energyproDATA uninstall-eosDATA uninstall-evtkDATA \
+	uninstall-evtkexampleDATA uninstall-manualsDATA \
+	uninstall-opaleos2005DATA uninstall-refcalcs1DNADATA \
+	uninstall-refcalcs2DNADATA uninstall-refcalcs3DNADATA \
+	uninstall-runningDATA uninstall-templatexmlDATA \
 	uninstall-velocityproDATA
 
 .PRECIOUS: Makefile
