@@ -514,22 +514,22 @@ templatexml_DATA = docs/templateXML/*.xml
 examplesdir = ${docsdir}/examples
 createaneosdir = ${examplesdir}/create_an_eos
 createaneos_DATA = \
-  eosNewY25Z01.xml\
-  README.txt
+  docs/examples/create_an_eos/eosNewY25Z01.xml\
+  docs/examples/create_an_eos/README.txt
 
 runningdir = ${examplesdir}/running
 running2dslicesdir = ${examplerunningdir}/2D_slices
 runningoutputdir = ${examplerunningdir}/output
 runningprofileplotsdir = ${examplerunningdir}/profile_plots
 running_DATA = \
-  README.txt\
-  SPHERLS.xml\
-  SPHERLSgen.xml\
-  SPHERLSgen_first_try.xml\
-  plot_2DSlices.xml\
-  plot_profile_output.xml\
-  slurm_job_script_template.sh\
-  starting_model_structure_first_try.pdf
+  docs/examples/running/README.txt\
+  docs/examples/running/SPHERLS.xml\
+  docs/examples/running/SPHERLSgen.xml\
+  docs/examples/running/SPHERLSgen_first_try.xml\
+  docs/examples/running/plot_2DSlices.xml\
+  docs/examples/running/plot_profile_output.xml\
+  docs/examples/running/slurm_job_script_template.sh\
+  docs/examples/running/starting_model_structure_first_try.pdf
 
 
 ###############################################################################
