@@ -106,11 +106,13 @@ def parseXML(fileName):
       replacementElements=replacementsElement.findall("replacement")
       for replacementElement in replacementElements:
         searchStr=replacementElement.find("search-str").text
+        
         if searchStr=="" or searchStr==None:
           print "found empty \"search-str\" element but this element may not be empty"
           quit()
+        
         sub=replacementElement.find("substitution").text
-      settings['replacements'].append((searchStr,sub))
+        settings['replacements'].append((searchStr,sub))
   
   return settings
 def makeSubScript(settings):
@@ -121,8 +123,11 @@ def makeSubScript(settings):
   file=open(settings['templateFile'],'r')
   fileText=file.read()
   file.close()
+  print(str(settings['replacements']))
   for replacement in settings['replacements']:
-    fileText=fileText.replace(replacement[0],replacement[1])
+    print(replacement[0]+"->"+replacement[1])
+    tmp=fileText.replace(replacement[0],replacement[1])
+    fileText=tmp
   file=open(settings['generatedFile'],'w')
   file.write(fileText)
   file.close()
