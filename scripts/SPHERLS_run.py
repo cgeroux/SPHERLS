@@ -123,11 +123,8 @@ def makeSubScript(settings):
   file=open(settings['templateFile'],'r')
   fileText=file.read()
   file.close()
-  print(str(settings['replacements']))
   for replacement in settings['replacements']:
-    print(replacement[0]+"->"+replacement[1])
-    tmp=fileText.replace(replacement[0],replacement[1])
-    fileText=tmp
+    fileText=fileText.replace(replacement[0],replacement[1])
   file=open(settings['generatedFile'],'w')
   file.write(fileText)
   file.close()
