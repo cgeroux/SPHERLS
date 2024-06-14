@@ -9,7 +9,7 @@
   citecolor    = red %Colour of citations
 }
 \renewcommand{\sectionautorefname}{\S}
-\title{SPHERLS User Guide 1.0}
+\title{SPHERLS User Guide 1.0.3}
 \author{Chris Geroux}
 \begin{document}
 \maketitle
@@ -207,7 +207,7 @@ If you have the raw git repository you may do the following to recreate the {\tt
 \item {\tt export PYTHONPYTH=<path-to-final-location-of-install>/bin:\$PATH} to add the SPHERLS bin path to your {\tt PYTHONPYTH} environment variable so that the python scripts can find needed python modules.
 \end{itemize}
 
-Common problems which result during the execution of the above commands are: not finding the installed third party libraries. This often results from not having the correct settings for things like {\tt LIBRARY\_PATH}, {\tt CPATH}, and {\tt LD\_LIBRARY\_PATH}. It is also possible to specify more options to the linker by setting the {\tt LDFLAGS} environment variable by including the location of library search paths and or names. There are also options for turning on/off features. Run the command {\tt ./configure -h} to get a list of the options. For example if you don't have hdf4 libraries and don't want to use that functionality including the option {\tt --disable-hdf} will build without hdf4 capabilities.
+Common problems which result during the execution of the above commands are: not finding the installed third party libraries. This often results from not having the correct settings for things like {\tt LIBRARY\_PATH}, {\tt CPATH}, and {\tt LD\_LIBRARY\_PATH}. It is also possible to specify more options to the linker by setting the {\tt LDFLAGS} environment variable by including the location of library search paths and or names. There are also options for turning on/off features. Run the command {\tt ./configure -h} to get a list of the options. For example if you don't have hdf4 libraries and don't want to use that functionality removing the option {\tt --enable-hdf} will build without hdf4 capabilities.
 
 \chapter{Using SPHERLS}
 Once you have built SPHERLS and set up the necessary environment variables the first thing to do is run some simple tests to make sure it will run as expected. There are python scripts which you can use to run these tests and are found in the {\tt bin} directory where SPHERLS was installed. Note that you will need to have built with Cython support enabled to do this step, so it is highly recommended that you have installed Cython and built SPHERLS with it enabled. There are two test scripts which can be run {\tt test\_restart.py} and {\tt test\_calculation.py}. If you have not built with Cython support you will likely get the error {\tt No module named evtk.hl} when running either of the test scripts. These will be found under your SPHERLS install directory in the {\tt bin} directory. They should also be findable from your path as they are executable and we have added the {\tt bin} directory to your {\tt PATH} environment variable. Python scripts are distinguished from compiled executables with their {\tt .py} extension. Lets examine what the {\tt test\_restart.py} script does in detail first.

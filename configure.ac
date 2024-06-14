@@ -1,7 +1,7 @@
-AC_INIT([SPHERLS], [1.0.2], [chris.m.geroux@gmail.com])
+AC_INIT([SPHERLS], [1.0.3], [chris.m.geroux@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/SPHERLS/physEquations.cpp])#safty check to make sure src directory is what it should be
-AC_PROG_CXX
+AC_PROG_CXX([mpic++])
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
@@ -122,11 +122,11 @@ AM_CONDITIONAL([FFTW_ENABLE],[test "$FFTW_ENABLE" = "yes"])
 #################################################################
 
 #check to see if user disabled hdf
-HDF_ENABLE=yes
+HDF_ENABLE=no
 AC_ARG_ENABLE([hdf],
-  [AS_HELP_STRING([--disable-hdf],
-  [Disable hdf features. This includes not being able to create HDF4 files from model dumps.])],
-  [HDF_ENABLE="$enableval"],
+  [AS_HELP_STRING([--enable-hdf],
+  [Enable hdf features. This includes being able to create HDF4 files from model dumps.])],
+  [HDF_ENABLE=yes],
   [])
 
 #check to make sure we have a library and include path, if we are using hdf
@@ -138,7 +138,7 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
  
   Try adding a path to the header file to the CPPFLAGS environment
   variable e.g. export CPPFLAGS="-I<include dir> \${CPPFLAGS}", or 
-  using the --disable-hdf option to disable HDF functionality if
+  removing the --enable-hdf option to disable HDF functionality if
   it isn't needed.
 ---------------------------------------------------------------------
     ])
@@ -150,7 +150,7 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
 
   If you know the path to the library try adding it to the LDFLAGS
   environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}"
-  or use the --disable-hdf option to disable HDF functionality if
+  or removing the --enable-hdf option to disable HDF functionality if
   it isn't needed.
 ---------------------------------------------------------------------
       ])
@@ -165,7 +165,7 @@ AS_IF([test "$HDF_ENABLE" = "yes"],[
 
   If you know the path to the library try adding it to the LDFLAGS
   environment variable. e.g. export LDFLAGS="-L<lib dir> \${LDFLAGS}"
-  or use the --disable-hdf option to disable HDF functionality if
+  or removing the --enable-hdf option to disable HDF functionality if
   it isn't needed.
 ---------------------------------------------------------------------
       ])
@@ -183,6 +183,15 @@ AM_CONDITIONAL([HDF_ENABLE],[test "$HDF_ENABLE" = "yes"])
 #
 #check to see if user disabled petsc
 PETSC_ENABLE=yes
+OLD_PETSC_ENABLED=no
+AC_ARG_ENABLE([petsc-3.1-p8],
+  [AS_HELP_STRING([--enable-petsc-3.1-p8],
+  [Enable support of old PETSc library, 3.1-p8])],
+  [OLD_PETSC_ENABLED=yes],
+  [])
+
+#set PETSC_3_1_p8 define if we have enabled old petsc
+AS_IF([test "$OLD_PETSC_ENABLED" = "yes"],[AC_DEFINE([PETSC_3_1_p8],[],[Defined if using old PETSc])])
 
 #
 #check to make sure we have a library and include path, if we are using petsc

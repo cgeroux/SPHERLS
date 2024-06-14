@@ -18643,7 +18643,11 @@ void implicitSolve_R(Grid &grid,Implicit &implicit,Parameters &parameters,Time &
     MatAssemblyEnd(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //solve system
+    #ifdef PETSC_3_1_p8
     KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff,SAME_NONZERO_PATTERN);
+    #else
+    KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff);
+    #endif
     KSPSolve(implicit.kspContext,implicit.vecRHS,implicit.vecTCorrections);
     
     //get distributed corrections
@@ -19042,7 +19046,11 @@ void implicitSolve_RT(Grid &grid,Implicit &implicit,Parameters &parameters,Time 
     MatAssemblyEnd(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //solve system
+    #ifdef PETSC_3_1_p8
     KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff,SAME_NONZERO_PATTERN);
+    #else
+    KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff);
+    #endif
     KSPSolve(implicit.kspContext,implicit.vecRHS,implicit.vecTCorrections);
     
     //get distributed corrections
@@ -19556,7 +19564,11 @@ void implicitSolve_RTP(Grid &grid,Implicit &implicit,Parameters &parameters,Time
     MatAssemblyEnd(implicit.matCoeff,MAT_FINAL_ASSEMBLY);
     
     //solve system
+    #ifdef PETSC_3_1_p8
     KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff,SAME_NONZERO_PATTERN);
+    #else
+    KSPSetOperators(implicit.kspContext,implicit.matCoeff,implicit.matCoeff);
+    #endif
     KSPSolve(implicit.kspContext,implicit.vecRHS,implicit.vecTCorrections);
     
     //get distributed corrections

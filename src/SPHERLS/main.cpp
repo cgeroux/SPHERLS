@@ -288,8 +288,9 @@ int main(int argc, char* argv[]){
   }
   
   //finalize mpi
+  //MPI::Finalize();//NOTE: issues with calling MPI functions after MPI:FINALIZe
+  PetscFinalize();//NOTE: seems like some issue with not all process calling MPI::Finalize
   MPI::Finalize();
-
   return 0;
 }
 void signalHandler(int nSig){

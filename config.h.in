@@ -104,6 +104,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Defined if using old PETSc */
+#undef PETSC_3_1_p8
+
 /* Defined if PETSc is enabled */
 #undef PETSC_ENABLE
 

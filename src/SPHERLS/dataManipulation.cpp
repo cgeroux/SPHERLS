@@ -4175,6 +4175,7 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
   }
   
   //initialize coefficient matrix
+  #ifdef PETSC_3_1_p8
   MatCreateMPIAIJ(PETSC_COMM_WORLD
     ,nNumLocalRows[procTop.nRank]//local number of rows in the rhs vector
     ,nNumLocalRows[procTop.nRank]//local number of rows in the solution vector
@@ -4185,6 +4186,18 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
     ,0//set size of off-diagonal sub-matrix to zero
     ,nNumNonzeroElementsPerRowOD//set array of off-diagonal sub-matrix rows sizes to null
     ,&implicit.matCoeff);
+  #else
+  MatCreateAIJ(PETSC_COMM_WORLD
+    ,nNumLocalRows[procTop.nRank]//local number of rows in the rhs vector
+    ,nNumLocalRows[procTop.nRank]//local number of rows in the solution vector
+    ,nNumGlobalRows//global number of rows of the coefficient matrix
+    ,nNumGlobalRows//global number of columns of the coefficient matrix
+    ,0//set size of diagonal sub-matrix to zero
+    ,nNumNonzeroElementsPerRowD//set array of diagonal sub-matrix rows sizes to null
+    ,0//set size of off-diagonal sub-matrix to zero
+    ,nNumNonzeroElementsPerRowOD//set array of off-diagonal sub-matrix rows sizes to null
+    ,&implicit.matCoeff);
+  #endif
   
   //initialize rhs vector
   VecCreateMPI(PETSC_COMM_WORLD,nNumLocalRows[procTop.nRank],nNumGlobalRows,&implicit.vecRHS);
@@ -4478,10 +4491,15 @@ void initImplicitCalculation(Implicit &implicit, Grid &grid, ProcTop &procTop, i
   IS isTo;/*not sure if these need to be declared in a larger scope or not, it might cause problems
     if they go out of scope. If it doesn't cause problems, maybe I can just destroy them here in 
     this scope when I am done with them.*/
-
+    
+  #ifdef PETSC_3_1_p8
   ISCreateGeneral(PETSC_COMM_SELF,implicit.nNumRowsALocal+implicit.nNumRowsALocalSB,nFromIndex
     ,&isFrom);
   ISCreateGeneral(PETSC_COMM_SELF,implicit.nNumRowsALocal+implicit.nNumRowsALocalSB,nToIndex,&isTo);
+  #else
+  ISCreateGeneral(PETSC_COMM_SELF,implicit.nNumRowsALocal+implicit.nNumRowsALocalSB,nFromIndex,PETSC_USE_POINTER,&isFrom);
+  ISCreateGeneral(PETSC_COMM_SELF,implicit.nNumRowsALocal+implicit.nNumRowsALocalSB,nToIndex,PETSC_USE_POINTER,&isTo);
+  #endif
   VecScatterCreate(implicit.vecTCorrections,isFrom,implicit.vecTCorrectionsLocal,isTo
     ,&implicit.vecscatTCorrections);
   
